@@ -1,0 +1,16 @@
+# Chỉ theo dõi folder edu
+/*
+!/.gitignore
+!/edu/
+!/edu/**
+
+# secrets
+**/.env
+**/.env.*
+!**/.env.example
+edu/tools/nguon-bo-de/license-keys.local.json
+
+# dependencies and OS
+node_modules/
+.DS_Store
+Thumbs.db
