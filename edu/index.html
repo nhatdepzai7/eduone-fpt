@@ -3141,17 +3141,16 @@
                         </div>
                         {nav.mode === 'self' && (
                             <div className="max-w-7xl mx-auto px-4 pb-2">
-                                {focusMode ? (
-                                    <p className="text-sm text-ink2 flex items-center gap-2 min-h-[40px]"><span className="w-2 h-2 rounded-full bg-danger pulse-rec" /> Đang trong {session.title} — bảng quản lý tạm ẩn để bạn tập trung.</p>
-                                ) : (
-                                    <nav role="tablist" aria-label="Mục Sổ tay & Lịch học" className="flex flex-wrap gap-1">
-                                        {tabs.map(([k, ic, l]) => (
-                                            <button key={k} type="button" role="tab" aria-selected={nav.tab === k} className="tab" onClick={() => { if (k === 'library') setSession(s => (s && s.slotId ? s : null)); dispatch({ type: 'TAB', tab: k }); }}>
-                                                <Icon name={ic} size={16} /> {l}
-                                            </button>
-                                        ))}
-                                    </nav>
+                                {focusMode && (
+                                    <p className="text-sm text-ink2 flex items-center gap-2 min-h-[32px] mb-1"><span className="w-2 h-2 rounded-full bg-danger pulse-rec" /> Đang trong {session.title}</p>
                                 )}
+                                <nav role="tablist" aria-label="Mục Sổ tay & Lịch học" className="flex flex-wrap gap-1">
+                                    {tabs.map(([k, ic, l]) => (
+                                        <button key={k} type="button" role="tab" aria-selected={nav.tab === k} className="tab" onClick={() => { if (k === 'library') setSession(s => (s && s.slotId ? s : null)); dispatch({ type: 'TAB', tab: k }); }}>
+                                            <Icon name={ic} size={16} /> {l}
+                                        </button>
+                                    ))}
+                                </nav>
                             </div>
                         )}
                     </header>
