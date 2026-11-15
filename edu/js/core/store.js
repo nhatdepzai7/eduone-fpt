@@ -40,6 +40,7 @@
         try {
             localStorage.removeItem('openaiKey');
             localStorage.removeItem(PREFIX + 'ai');
+            localStorage.removeItem(PREFIX + 'device');
             const doomed = [];
             const redact = [];
             for (let i = 0; i < localStorage.length; i++) {

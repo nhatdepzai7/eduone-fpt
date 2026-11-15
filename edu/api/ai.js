@@ -82,11 +82,6 @@ function clientIp(req) {
     return '0';
 }
 
-function deviceId(req) {
-    const id = req.header('x-edu-device');
-    return /^[A-Za-z0-9-]{16,64}$/.test(id) ? id : 'anon';
-}
-
 function normalizeKey(value) {
     return String(value || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
 }
@@ -255,7 +250,7 @@ async function handleRequest(incoming, env) {
     if (userText(task, body).length > MAX_CHARS) return json(400, { error: 'Nội dung vượt 3000 ký tự.' }, extra);
 
     const limit = hasLicense(body.licenseKey, env) ? LICENSED_PER_DAY : FREE_PER_DAY;
-    const bucket = dayStamp() + ':' + clientIp(req) + ':' + deviceId(req);
+    const bucket = dayStamp() + ':' + clientIp(req);
     if (!(await takeSlot(bucket, limit))) {
         return json(429, { error: 'Đã hết ' + limit + ' lượt AI hôm nay. Mai dùng tiếp.' }, extra);
     }

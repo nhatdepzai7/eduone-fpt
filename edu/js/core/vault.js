@@ -2,7 +2,7 @@
     'use strict';
 
     /*
-     * Định dạng khối khóa của một bộ đề (sinh bởi tools/build_packs.py):
+     * Định dạng khối khóa của một bộ đề (sinh bởi tools/build_packs.py ở gốc repo, ngoài edu/):
      * locked = {
      *   v: 1, kdf: 'PBKDF2-SHA256', iter, aad,
      *   iv, ct,                        // payload Chặng 2–3, mã hóa AES-256-GCM bằng khóa nội dung (CEK)

@@ -20,19 +20,6 @@
         }
     };
 
-    const deviceId = () => {
-        let id = String(Store.prefs.get('device', '') || '');
-        if (!/^[A-Za-z0-9-]{16,64}$/.test(id)) {
-            const rnd = (window.crypto && crypto.randomUUID)
-                ? crypto.randomUUID()
-                : (Date.now().toString(36) + Math.random().toString(36).slice(2) + Math.random().toString(36).slice(2));
-            id = String(rnd).replace(/[^A-Za-z0-9-]/g, '').slice(0, 64);
-            if (id.length < 16) id = (id + 'eduonedeviceid0000').slice(0, 32);
-            Store.prefs.set('device', id);
-        }
-        return id;
-    };
-
     const licenseKey = () => {
         const all = Store.prefs.get('licenses', {}) || {};
         const ids = Object.keys(all);
@@ -83,7 +70,7 @@
         if (!ready()) throw new Error('AI chỉ chạy khi mở trang qua web, không mở file trực tiếp.');
         const res = await withTimeout('/api/ai', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'X-Edu-Device': deviceId() },
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(Object.assign({ licenseKey: licenseKey() }, payload))
         });
         if (!res.ok) throw await readError(res);

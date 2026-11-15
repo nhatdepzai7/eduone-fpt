@@ -8,7 +8,9 @@
 **/.env
 **/.env.*
 !**/.env.example
-edu/tools/nguon-bo-de/license-keys.local.json
+edu/tools/
+/tools/nguon-bo-de/*.json
+/tools/**/license-keys.local.json
 
 # dependencies and OS
 node_modules/

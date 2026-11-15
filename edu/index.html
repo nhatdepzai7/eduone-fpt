@@ -39,7 +39,7 @@
     </script>
     <style>
         :root {
-            --bg: #F5F6F8; --surface: #FFFFFF; --surface-2: #EEF0F4; --border: #DCE0E8;
+            --bg: #E2E8F0; --surface: #FFFFFF; --surface-2: #F1F5F9; --border: #DCE0E8;
             --ink: #111827; --ink-2: #374151; --muted: #5B6474;
             --primary: #4338CA; --primary-hover: #3730A3; --primary-soft: #EEF0FF;
             --success: #047857; --success-soft: #ECFDF5;
@@ -48,7 +48,7 @@
             --mark: #FDE68A; --eos-head: #1E3A8A;
         }
         html { -webkit-text-size-adjust: 100%; }
-        body { font-family: 'Be Vietnam Pro', system-ui, 'Segoe UI', sans-serif; background: var(--bg); color: var(--ink); }
+        body { font-family: 'Be Vietnam Pro', system-ui, 'Segoe UI', sans-serif; color: var(--ink); background: radial-gradient(1100px 520px at 50% -8%, #F8FAFC 0%, rgba(248, 250, 252, 0) 58%), #E2E8F0; }
         .tnum { font-family: 'JetBrains Mono', ui-monospace, Consolas, monospace; font-variant-numeric: tabular-nums; }
         :focus { outline: none; }
         :focus-visible { outline: 3px solid var(--primary); outline-offset: 2px; border-radius: 8px; }
@@ -66,6 +66,41 @@
         .bar-run { transform-origin: left center; animation-name: bar-run; animation-timing-function: linear; animation-fill-mode: forwards; }
         @keyframes pulse-rec { 0%, 100% { opacity: 1; } 50% { opacity: .55; } }
         .pulse-rec { animation: pulse-rec 1s ease-in-out infinite; }
+        .drill-stage { max-width: 820px; margin: 0 auto; padding: 14px; border-radius: 28px; background: rgba(255, 255, 255, .42); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .72), 0 1px 2px rgba(15, 23, 42, .04); }
+        .drill-head { display: flex; flex-direction: column; align-items: stretch; gap: 12px; background: #fff; border-radius: 16px; padding: 12px 14px; margin-bottom: 14px; box-shadow: 0 10px 18px -12px rgba(15, 23, 42, .28), 0 0 0 1px rgba(15, 23, 42, .05); }
+        .drill-head-row { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px 16px; }
+        .drill-progress { display: flex; flex-direction: column; gap: 6px; width: 100%; }
+        .segs { display: flex; gap: 6px; width: 100%; }
+        .seg { flex: 1 1 0; height: 10px; min-width: 0; border-radius: 999px; background: #CBD5E1; transition: background .18s ease, box-shadow .18s ease; }
+        .seg.on { background: #4F46E5; box-shadow: 0 0 10px rgba(79, 70, 229, .45); }
+        .seg.hit { background: #10B981; box-shadow: 0 0 12px rgba(16, 185, 129, .55); }
+        .seg.miss { background: #EF4444; }
+        .seg.redo { background: #F97316; box-shadow: 0 0 10px rgba(249, 115, 22, .45); }
+        .q-card { position: relative; background: #fff; border-radius: 20px; overflow: hidden; box-shadow: 0 20px 25px -5px rgba(15, 23, 42, .08), 0 8px 10px -6px rgba(15, 23, 42, .04), 0 0 0 1px rgba(15, 23, 42, .06); }
+        .q-card::before { content: ""; display: block; height: 4px; background: #4F46E5; }
+        .q-card.ok::before { background: #10B981; }
+        .q-card.bad::before { background: #EF4444; }
+        .q-spring { animation: q-spring 180ms cubic-bezier(.2, 1.4, .4, 1); }
+        @keyframes q-spring { from { transform: scale(.98); opacity: .72; } to { transform: scale(1); opacity: 1; } }
+        .callout { display: flex; gap: 12px; align-items: flex-start; margin-top: 12px; padding: 14px 16px; border-radius: 16px; border-left: 4px solid; }
+        .callout.ok { background: #ECFDF5; border-left-color: #10B981; color: #065F46; }
+        .callout.bad { background: #FEF2F2; border-left-color: #EF4444; color: #991B1B; }
+        .callout-ico { width: 28px; height: 28px; border-radius: 999px; display: flex; align-items: center; justify-content: center; flex: none; font-weight: 800; }
+        .callout.ok .callout-ico { background: #10B981; color: #fff; }
+        .callout.bad .callout-ico { background: #EF4444; color: #fff; }
+        .choices { display: grid; gap: 10px; margin-top: 14px; }
+        @media (min-width: 640px) { .choices { grid-template-columns: 1fr 1fr; } }
+        .choice { min-height: 60px; width: 100%; text-align: left; display: flex; align-items: center; gap: 12px; background: #fff; color: #0F172A; border: 2px solid #CBD5E1; border-bottom-width: 4px; border-bottom-color: #94A3B8; border-radius: 14px; padding: 12px 14px; box-shadow: 0 1px 2px rgba(15, 23, 42, .05); transition: transform .12s ease, border-color .12s ease, background .12s ease, box-shadow .12s ease; }
+        .choice:hover:not(:disabled) { background: #F8FAFF; border-color: #6366F1; border-bottom-color: #4F46E5; transform: translateY(-2px); }
+        .choice:active:not(:disabled) { transform: translateY(2px); border-bottom-width: 2px; }
+        .choice:disabled { cursor: default; }
+        .choice.right { background: #ECFDF5; border-color: #10B981; border-bottom: 4px solid #059669; color: #065F46; }
+        .choice.wrong { background: #FEF2F2; border-color: #EF4444; border-bottom: 4px solid #DC2626; color: #991B1B; animation: shake .32s ease-in-out; }
+        .choice.dim { opacity: .55; }
+        .keycap { flex: none; align-self: center; min-width: 30px; height: 30px; display: inline-flex; align-items: center; justify-content: center; padding: 0 6px; border-radius: 8px; background: #F1F5F9; border: 1px solid #CBD5E1; border-bottom-width: 2px; font-weight: 800; font-size: 13px; line-height: 1; color: #334155; }
+        .choice.right .keycap { background: #10B981; border-color: #059669; color: #fff; }
+        .choice.wrong .keycap { background: #EF4444; border-color: #DC2626; color: #fff; }
+        .site-note { text-align: center; font-size: 11px; line-height: 1.4; color: #94A3B8; padding: 10px 16px 16px; }
         .scene { perspective: 1400px; }
         .card3d { display: grid; transform-style: preserve-3d; transition: transform .5s cubic-bezier(.2, .75, .2, 1); cursor: pointer; }
         .card3d.flipped { transform: rotateY(180deg); }
@@ -136,6 +171,7 @@
     <script src="js/core/security.js"></script>
     <script src="js/core/schema.js"></script>
     <script src="js/core/store.js"></script>
+    <script src="js/core/quota.js"></script>
     <script src="js/core/audio-keys.js"></script>
     <script src="js/core/engine.js"></script>
     <script src="js/core/vault.js"></script>
@@ -382,6 +418,134 @@
             const mcq = list.filter(t => t.type === 'mcq' && t.answerOrMeaning && t.options.filter(Boolean).length >= 2);
             return mcq.concat(vocabAsMcq(list));
         };
+
+        const vnd = (n) => Number(n || 0).toLocaleString('vi-VN') + 'đ';
+        const useFund = () => {
+            const [fund, setFund] = useState(() => E.Quota.read());
+            useEffect(() => E.Quota.subscribe(setFund), []);
+            return fund;
+        };
+        const requireTurns = (toast, quiet) => {
+            const n = E.Quota.balance();
+            if (n < 1) {
+                toast('Quỹ lượt thi đã hết. Mua thêm gói để vào phòng EOS.', 'info');
+                E.Quota.openShop();
+                return false;
+            }
+            if (!quiet && n < 5) toast('Quỹ còn ' + n + ' lượt. Nên mua thêm gói sỉ trước khi kỳ thi tới.', 'info');
+            return true;
+        };
+        const chargeTurn = (toast, note) => {
+            const next = E.Quota.spend(note);
+            if (!next) {
+                toast('Quỹ đã hết lượt, bài này không trừ thêm.', 'info');
+                return;
+            }
+            if (next.balance < 5) toast('Đã trừ 1 lượt. Quỹ còn ' + next.balance + '.', 'info');
+        };
+
+        const FundBody = ({ toast }) => {
+            const fund = useFund();
+            const [picked, setPicked] = useState(null);
+            const [code, setCode] = useState(fund.code);
+            const [incoming, setIncoming] = useState('');
+            const pack = E.Quota.packs.find(p => p.id === picked);
+            const when = (t) => new Date(t).toLocaleString('vi-VN', { hour: '2-digit', minute: '2-digit', day: '2-digit', month: '2-digit' });
+            const copyFund = () => {
+                copyText(E.Quota.exportCode()).then(() => toast('Đã copy mã quỹ. Máy khác dán mã này để cộng cùng sổ lượt.', 'success')).catch(() => toast('Không copy được. Hãy chọn mã và copy tay.', 'error'));
+            };
+            return (
+                <div className="space-y-4">
+                    <div className="flex flex-wrap items-end justify-between gap-3">
+                        <div>
+                            <p className="text-[11px] font-semibold uppercase tracking-wider text-muted">Kho học liệu của tôi</p>
+                            <p className="text-3xl font-bold tnum text-ink">{fund.balance} <span className="text-base font-semibold text-ink2">lượt</span></p>
+                            <p className="text-sm text-ink2">Quỹ chung mã <b className="text-ink">{fund.code}</b>. Không khóa máy. Lượt dư giữ nguyên sang kỳ sau.</p>
+                        </div>
+                        <label className="text-sm">
+                            <span className="label">Mã quỹ</span>
+                            <span className="flex gap-2">
+                                <input value={code} onChange={(e) => setCode(e.target.value.toUpperCase())} maxLength={12} className="field w-32 uppercase" aria-label="Mã quỹ lượt" />
+                                <button type="button" className="btn btn-secondary btn-sm" onClick={() => { try { setCode(E.Quota.setCode(code).code); toast('Đã lưu mã quỹ ' + E.Quota.read().code, 'success'); } catch (e) { toast(e.message, 'error'); } }}>Lưu</button>
+                            </span>
+                        </label>
+                    </div>
+                    {fund.balance < 5 && (
+                        <p className="text-sm rounded-xl px-3 py-2 bg-warn-soft text-warn">
+                            {fund.balance === 0
+                                ? 'Quỹ đang trống. Chọn một gói bên dưới để có lượt vào phòng EOS. Lượt mua xong không bị xóa khi hết môn.'
+                                : 'Quỹ còn ' + fund.balance + ' lượt. Mua thêm gói sỉ trước khi xuống 0 — số mới cộng thẳng vào số đang có.'}
+                        </p>
+                    )}
+                    <div className="grid sm:grid-cols-3 gap-3">
+                        {E.Quota.packs.map(p => (
+                            <button key={p.id} type="button" onClick={() => setPicked(p.id)} className={'text-left rounded-2xl border-2 p-4 transition-colors ' + (picked === p.id ? 'border-primary bg-primary-soft' : 'border-line hover:border-primary')}>
+                                <span className="block text-xs font-semibold uppercase tracking-wide text-muted">{p.who}</span>
+                                <span className="block font-bold mt-1">{p.name}</span>
+                                <span className="block text-lg font-bold tnum mt-2">{p.turns} lượt</span>
+                                <span className="block text-sm tnum mt-1">{vnd(p.price)}{p.off ? <span className="text-success"> · giảm {Math.round(p.off * 100)}%</span> : ''}</span>
+                                {p.off ? <span className="block text-xs text-muted line-through tnum">{vnd(p.list)}</span> : <span className="block text-xs text-muted">Giá tiêu chuẩn {vnd(E.Quota.UNIT)}/lượt</span>}
+                            </button>
+                        ))}
+                    </div>
+                    {pack && (
+                        <div className="rounded-2xl border border-line p-4 flex flex-wrap gap-4 items-center">
+                            <img src="assets/qr-ung-ho.png" alt="Mã QR chuyển khoản ủng hộ team" className="w-40 h-40 rounded-xl border border-line object-contain bg-white" />
+                            <div className="min-w-0 flex-1">
+                                <p className="font-semibold">Chuyển khoản {pack.name}</p>
+                                <p className="text-sm text-ink2 mt-1 tnum">Số tiền: <b className="text-ink">{vnd(pack.price)}</b></p>
+                                <p className="text-sm text-ink2 tnum">Nội dung: <b className="text-ink">EDUONE {fund.code} {pack.id}</b></p>
+                                <p className="text-xs text-muted mt-2">QR là tài khoản sẵn của team. Trang chưa nối cổng thanh toán tự động — chuyển đúng số tiền rồi bấm xác nhận để cộng lượt trên trình duyệt này.</p>
+                                <button type="button" className="btn btn-primary mt-3" onClick={() => { const next = E.Quota.buy(pack.id); toast('Đã cộng ' + pack.turns + ' lượt. Quỹ hiện có ' + next.balance + ' lượt.', 'success'); }}>Tôi đã chuyển khoản — cộng {pack.turns} lượt</button>
+                            </div>
+                        </div>
+                    )}
+                    <div className="grid sm:grid-cols-2 gap-3">
+                        <div>
+                            <p className="text-sm font-semibold mb-2">Lịch sử quỹ</p>
+                            {fund.history.length ? (
+                                <ul className="text-sm space-y-1 max-h-40 overflow-y-auto">
+                                    {fund.history.slice(0, 12).map(ev => (
+                                        <li key={ev.id} className="flex justify-between gap-3 tnum">
+                                            <span className="text-ink2 truncate">{when(ev.t)} · {ev.kind === 'buy' ? ev.note : 'Nộp EOS'}</span>
+                                            <span className={ev.delta > 0 ? 'text-success' : 'text-danger'}>{ev.delta > 0 ? '+' : ''}{ev.delta}</span>
+                                        </li>
+                                    ))}
+                                </ul>
+                            ) : <p className="text-sm text-muted">Chưa có lần mua hoặc lần nộp EOS.</p>}
+                        </div>
+                        <div>
+                            <p className="text-sm font-semibold mb-2">Đưa quỹ sang máy khác</p>
+                            <p className="text-xs text-muted mb-2">Cùng một mã không tự nhảy số giữa hai trình duyệt. Copy mã quỹ rồi dán ở máy kia — các lần mua và lần trừ được cộng vào, không ghi đè số đang có.</p>
+                            <div className="flex flex-wrap gap-2">
+                                <button type="button" className="btn btn-secondary btn-sm" onClick={copyFund}>Copy mã quỹ</button>
+                            </div>
+                            <label className="block mt-2"><span className="label">Dán mã quỹ</span>
+                                <textarea value={incoming} onChange={(e) => setIncoming(e.target.value)} rows={2} className="field text-xs" placeholder="EDUF1...." />
+                            </label>
+                            <button type="button" className="btn btn-secondary btn-sm mt-2" disabled={!incoming.trim()} onClick={() => {
+                                try {
+                                    const r = E.Quota.importCode(incoming);
+                                    setIncoming('');
+                                    setCode(r.code);
+                                    toast(r.added > 0 ? 'Đã cộng ' + r.added + ' lượt vào quỹ ' + r.code + '. Tổng ' + r.balance + '.' : 'Đã nhập sổ quỹ ' + r.code + '. Không có lượt mới để cộng. Tổng ' + r.balance + '.', 'success');
+                                } catch (e) { toast(e.message, 'error'); }
+                            }}>Cộng mã này vào quỹ</button>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+        const FundPanel = ({ toast }) => (
+            <section className="card p-4 sm:p-5 mb-4">
+                <FundBody toast={toast} />
+            </section>
+        );
+        const FundShop = ({ toast, onClose }) => (
+            <Modal title="Quỹ lượt thi" onClose={onClose} size="lg">
+                <FundBody toast={toast} />
+            </Modal>
+        );
     </script>
 
     <!-- ===================== PRACTICE ENGINES: Flashcard · Băng đạn 5 câu · EOS ===================== -->
@@ -552,37 +716,34 @@
                 Escape: () => { if (onExit) onExit(); }
             });
 
-            const header = (
-                <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
-                    <div className="min-w-0">
-                        <p className="text-xs font-semibold uppercase tracking-wider text-muted">{subtitle || 'Băng đạn 5 câu'}</p>
-                        <h2 className="text-lg font-semibold text-flow">{title}</h2>
-                    </div>
-                    <div className="flex flex-wrap items-center gap-2">
-                        {timerMin ? <Elapsed startedAt={s.startedAt} limitMin={timerMin} /> : null}
-                        <HighlightButton on={hl} onToggle={toggleHl} locked={!canHighlight} />
-                        {onExit && <button type="button" className="btn btn-ghost btn-sm" onClick={onExit}><Icon name="x" size={14} /> Thoát <Kbd>Esc</Kbd></button>}
-                    </div>
-                </div>
-            );
-
             const clearedN = batch.filter(id => s.cleared.indexOf(id) >= 0).length;
-            const meta = (
-                <div className="flex flex-wrap items-center justify-end gap-x-3 gap-y-2 mb-4">
-                    <span className="text-sm text-ink2 tnum">
-                        Băng đạn <b className="text-ink">{s.b + 1}/{s.batches.length}</b> · Đã nắm <b className={clearedN === batch.length ? 'text-success' : 'text-ink'}>{clearedN}/{batch.length}</b>
-                    </span>
-                    <span role="img" aria-label={'Đã nắm ' + clearedN + ' trên ' + batch.length + ' câu của băng đạn'} className="flex items-center gap-1.5">
-                        {batch.map(id => {
-                            const clear = s.cleared.indexOf(id) >= 0;
-                            const miss = !clear && s.misses[id];
-                            const active = cur && cur.id === id && s.phase === 'drill';
-                            return (
-                                <span key={id} className={'w-3 h-3 rounded-full transition-colors duration-200 ' +
-                                    (clear ? 'bg-success' : miss ? 'bg-danger-soft ring-2 ring-danger' : active ? 'bg-surface ring-2 ring-primary' : 'bg-line')} />
-                            );
-                        })}
-                    </span>
+            const header = (
+                <div className="drill-head">
+                    <div className="drill-head-row">
+                        <div className="min-w-0">
+                            <p className="text-[11px] font-semibold uppercase tracking-wider text-muted">{subtitle || 'Băng đạn 5 câu'}</p>
+                            <h2 className="text-base font-bold text-flow truncate">{title}</h2>
+                        </div>
+                        <div className="flex flex-wrap items-center gap-2">
+                            {timerMin ? <Elapsed startedAt={s.startedAt} limitMin={timerMin} /> : null}
+                            <HighlightButton on={hl} onToggle={toggleHl} locked={!canHighlight} />
+                            {onExit && <button type="button" className="btn btn-ghost btn-sm" onClick={onExit}><Icon name="x" size={14} /> Thoát <Kbd>Esc</Kbd></button>}
+                        </div>
+                    </div>
+                    <div className="drill-progress">
+                        <span className="text-xs text-ink2 tnum">
+                            Băng đạn <b className="text-ink">{s.b + 1}/{s.batches.length}</b> · Đã nắm <b className={clearedN === batch.length && batch.length ? 'text-success' : 'text-ink'}>{clearedN}/{batch.length}</b>
+                        </span>
+                        <span role="img" aria-label={'Đã nắm ' + clearedN + ' trên ' + batch.length + ' câu của băng đạn'} className="segs">
+                            {batch.map(id => {
+                                const clear = s.cleared.indexOf(id) >= 0;
+                                const miss = !clear && s.misses[id];
+                                const active = cur && cur.id === id && s.phase === 'drill';
+                                const cls = clear ? 'seg hit' : (active && miss) ? 'seg redo' : active ? 'seg on' : miss ? 'seg miss' : 'seg';
+                                return <span key={id} className={cls} />;
+                            })}
+                        </span>
+                    </div>
                 </div>
             );
 
@@ -617,7 +778,7 @@
 
             if (s.phase === 'preview') {
                 return (
-                    <div className="card p-5 sm:p-7 enter">
+                    <div className="drill-stage enter">
                         {header}
                         <div className="flex flex-wrap items-center justify-between gap-3 mb-3">
                             <p className="font-semibold flex items-center gap-2"><Icon name="eye" /> Vòng 1 · Nhìn lướt 15 giây</p>
@@ -660,9 +821,8 @@
 
             if (waiting && cur) {
                 return (
-                    <div className="card p-5 sm:p-7 enter">
+                    <div className="drill-stage enter">
                         {header}
-                        {meta}
                         <div className="rounded-2xl bg-warn-soft border border-amber-200 p-4 sm:p-5">
                             <p className="text-sm font-semibold text-warn flex items-center gap-2"><Icon name="rotate" size={16} /> Câu này quay lại sau <span className="tnum">{Math.ceil(head.waitMs / 1000)}s</span> — nhìn lại đáp án:</p>
                             <div className="mt-3 space-y-2">
@@ -683,70 +843,70 @@
             const order = orders[cur.id] || [0, 1, 2, 3];
             const showAnswer = fb && !fb.ok;
 
+            const tone = fb ? (fb.ok ? ' ok' : ' bad') : '';
             return (
-                <div className="enter">
-                    <div className="card p-5 sm:p-7">
-                        {header}
-                        {meta}
-                        <div ref={cardRef} tabIndex={-1} key={cur.id + ':' + (s.misses[cur.id] || 0)}
-                            className={'rounded-2xl border-2 p-4 sm:p-6 transition-colors enter ' +
-                                (fb ? (fb.ok ? 'border-success bg-success-soft pop-ok' : 'border-danger bg-danger-soft shake') : 'border-line bg-surface')}>
-                            <div className="flex items-center gap-2 mb-2">
+                <div className="drill-stage">
+                    {header}
+                    <div ref={cardRef} tabIndex={-1} key={cur.id + ':' + (s.misses[cur.id] || 0)} className={'q-card q-spring' + tone}>
+                        <div className="px-6 sm:px-8 pt-8 sm:pt-10 pb-7 sm:pb-8">
+                            <div className="flex items-center gap-2 mb-3">
                                 <span className="chip bg-surface2 text-ink2">{cur.type === 'mcq' ? 'Trắc nghiệm' : 'Gõ từ tiếng Anh'}</span>
                                 {s.misses[cur.id] ? <span className="chip bg-danger-soft text-danger"><Icon name="rotate" size={12} /> làm lại</span> : null}
                             </div>
                             <ItemPrompt t={cur} hl={hl} big />
-                            {fb && fb.ok && <p className="mt-3 font-semibold text-success flex items-center gap-2" role="status"><Icon name="check" /> Chính xác</p>}
-                            {showAnswer && (
-                                <div className="mt-4 rounded-xl bg-surface border border-danger/30 p-3" role="alert">
-                                    <p className="text-sm font-semibold text-danger mb-1">Chưa đúng — đáp án:</p>
-                                    <ItemAnswer t={cur} hl />
-                                    {cur.explanationOrExample && <p className="text-sm text-ink2 mt-1 text-flow">{cur.explanationOrExample}</p>}
-                                    <div className="h-1 rounded-full bg-surface2 overflow-hidden mt-3"><div className="h-full bg-danger bar-run" style={{ animationDuration: '1500ms' }} /></div>
-                                </div>
-                            )}
                         </div>
-
-                        {cur.type === 'vocab' && (
-                            <div className="mt-4">
-                                <label htmlFor="burst-input" className="label">Gõ từ tiếng Anh — khớp là tự chấm</label>
-                                <input id="burst-input" ref={inputRef} value={input} autoComplete="off" autoCapitalize="off" spellCheck={false} disabled={!!fb}
-                                    className="field text-lg min-h-[52px]" placeholder="Gõ đáp án…"
-                                    onCompositionStart={() => { composing.current = true; }}
-                                    onCompositionEnd={(e) => { composing.current = false; if (matches(e.currentTarget.value)) answer(true); }}
-                                    onChange={(e) => {
-                                        const v = e.target.value;
-                                        setInput(v);
-                                        if (!composing.current && !(e.nativeEvent && e.nativeEvent.isComposing) && matches(v)) answer(true);
-                                    }}
-                                    onKeyDown={(e) => {
-                                        if (e.key !== 'Enter' || e.nativeEvent.isComposing || composing.current) return;
-                                        e.preventDefault();
-                                        answer(matches(input));
-                                    }} />
-                                <p className="text-xs text-muted mt-2">Bí thì nhấn <Kbd>Enter</Kbd> để xem đáp án — câu sẽ quay lại cuối băng sau 15 giây.</p>
-                            </div>
-                        )}
                     </div>
-
-                    {cur.type === 'mcq' && (
-                        <div className="sticky bottom-0 z-10 mt-3 -mx-4 px-4 pt-3 safe-bottom bg-gradient-to-t from-canvas via-canvas to-transparent sm:static sm:mx-0 sm:px-0 sm:bg-none">
-                            <div className="grid gap-2 sm:grid-cols-2" role="group" aria-label="Lựa chọn đáp án">
-                                {order.map((oi, di) => {
-                                    const isRight = Sch.LETTERS[oi] === cur.answerOrMeaning;
-                                    const chosen = fb && fb.chosen === di;
-                                    const tone = fb ? (isRight ? 'border-success bg-success-soft' : chosen ? 'border-danger bg-danger-soft' : 'border-line bg-surface opacity-70') : 'border-line bg-surface hover:border-primary hover:bg-primary-soft';
-                                    return (
-                                        <button key={oi} type="button" onClick={() => pick(di)} disabled={!!fb}
-                                            className={'min-h-[56px] w-full rounded-2xl border-2 px-4 py-3 text-left flex items-start gap-3 transition-colors ' + tone}>
-                                            <span className="kbd mt-0.5">{di + 1}</span>
-                                            <span className="text-flow font-medium">
-                                                <Hl text={cur.options[oi]} keywords={fb && isRight ? cur.keywords : []} on={hl && !!fb} />
-                                            </span>
-                                        </button>
-                                    );
-                                })}
+                    {fb && fb.ok && (
+                        <div className="callout ok" role="status">
+                            <span className="callout-ico">✓</span>
+                            <p className="font-semibold pt-0.5">Chính xác</p>
+                        </div>
+                    )}
+                    {showAnswer && (
+                        <div className="callout bad" role="alert">
+                            <span className="callout-ico">✕</span>
+                            <div className="min-w-0">
+                                <p className="font-semibold mb-1">Chưa đúng — đáp án</p>
+                                <ItemAnswer t={cur} hl />
+                                {cur.explanationOrExample && <p className="text-sm mt-1 text-flow">{cur.explanationOrExample}</p>}
                             </div>
+                        </div>
+                    )}
+                    {cur.type === 'vocab' && (
+                        <div className="mt-4">
+                            <label htmlFor="burst-input" className="label">Gõ từ tiếng Anh — khớp là tự chấm</label>
+                            <input id="burst-input" ref={inputRef} value={input} autoComplete="off" autoCapitalize="off" spellCheck={false} disabled={!!fb}
+                                className="field text-lg min-h-[52px]" placeholder="Gõ đáp án…"
+                                onCompositionStart={() => { composing.current = true; }}
+                                onCompositionEnd={(e) => { composing.current = false; if (matches(e.currentTarget.value)) answer(true); }}
+                                onChange={(e) => {
+                                    const v = e.target.value;
+                                    setInput(v);
+                                    if (!composing.current && !(e.nativeEvent && e.nativeEvent.isComposing) && matches(v)) answer(true);
+                                }}
+                                onKeyDown={(e) => {
+                                    if (e.key !== 'Enter' || e.nativeEvent.isComposing || composing.current) return;
+                                    e.preventDefault();
+                                    answer(matches(input));
+                                }} />
+                            <p className="text-xs text-muted mt-2">Bí thì nhấn <Kbd>Enter</Kbd> để xem đáp án — câu sẽ quay lại cuối băng sau 15 giây.</p>
+                        </div>
+                    )}
+                    {cur.type === 'mcq' && (
+                        <div className="choices safe-bottom" role="group" aria-label="Lựa chọn đáp án">
+                            {order.map((oi, di) => {
+                                const isRight = Sch.LETTERS[oi] === cur.answerOrMeaning;
+                                const chosen = fb && fb.chosen === di;
+                                const cls = fb ? (isRight ? 'choice right' : chosen ? 'choice wrong' : 'choice dim') : 'choice';
+                                return (
+                                    <button key={oi} type="button" onClick={() => pick(di)} disabled={!!fb} className={cls}>
+                                        <span className="keycap">{fb && isRight ? '✓' : (chosen && !fb.ok ? '✕' : di + 1)}</span>
+                                        <span className="text-flow font-medium leading-snug">
+                                            <Hl text={cur.options[oi]} keywords={fb && isRight ? cur.keywords : []} on={hl && !!fb} />
+                                        </span>
+                                    </button>
+                                );
+                            })}
                         </div>
                     )}
                 </div>
@@ -961,7 +1121,7 @@
                             <div className="scene">
                                 <div ref={cardRef} tabIndex={0} role="button" aria-label={flipped ? 'Mặt sau thẻ, nhấn để lật lại' : 'Mặt trước thẻ, nhấn để lật'}
                                     className={'card3d rounded-3xl ' + (flipped ? 'flipped' : '')} onClick={() => setFlipped(v => !v)}>
-                                    <div className="face front card rounded-3xl shadow-lg overflow-hidden">
+                                    <div className="face front card rounded-3xl overflow-hidden" style={{ boxShadow: '0 20px 25px -5px rgba(15,23,42,.08), 0 8px 10px -6px rgba(15,23,42,.04), 0 0 0 1px rgba(15,23,42,.06)' }}>
                                         <div className="h-1.5" style={{ background: Sch.groupColor(t.group || t.questionOrWord) }} />
                                         <div className="px-6 sm:px-10 pt-10 pb-8 flex flex-col items-center text-center">
                                             <p className="text-xs font-semibold uppercase tracking-wider text-muted mb-4 text-flow">{t.group || 'Chưa nhóm'} · {isMcq ? 'Câu hỏi' : face === 'recognize' ? 'Từ' : 'Gợi nhớ'}</p>
@@ -977,7 +1137,7 @@
                                             <p className="text-sm text-muted mt-8">Nhấn thẻ hoặc <Kbd>Space</Kbd> để lật</p>
                                         </div>
                                     </div>
-                                    <div className="face back card rounded-3xl shadow-lg overflow-hidden">
+                                    <div className="face back card rounded-3xl overflow-hidden" style={{ boxShadow: '0 20px 25px -5px rgba(15,23,42,.08), 0 8px 10px -6px rgba(15,23,42,.04), 0 0 0 1px rgba(15,23,42,.06)' }}>
                                         <div className="h-1.5 bg-success" />
                                         <div className="px-6 sm:px-10 py-8 text-center">
                                             {isMcq ? (
@@ -1016,22 +1176,34 @@
                             {note && <p className="text-center text-sm text-muted mt-3" role="status">{note}</p>}
                         </div>
                     ) : isMcq ? (
-                        <div ref={cardRef} tabIndex={-1} className={'card p-5 sm:p-7 ' + (result ? (result.ok ? 'pop-ok' : 'shake') : '')}>
-                            <ItemPrompt t={t} hl={hl} big />
-                            <div className="grid gap-2 mt-5">
+                        <div ref={cardRef} tabIndex={-1} className="drill-stage">
+                            <div className={'q-card q-spring' + (result ? (result.ok ? ' ok' : ' bad') : '')}>
+                                <div className="px-6 sm:px-8 pt-8 sm:pt-10 pb-7 sm:pb-8"><ItemPrompt t={t} hl={hl} big /></div>
+                            </div>
+                            {result && (
+                                <div className={result.ok ? 'callout ok' : 'callout bad'} role="status">
+                                    <span className="callout-ico">{result.ok ? '✓' : '✕'}</span>
+                                    <div>
+                                        <p className="font-semibold">{result.ok ? 'Chính xác' : 'Chưa đúng — đáp án'}</p>
+                                        {!result.ok && <div className="mt-1"><ItemAnswer t={t} hl={hl} /></div>}
+                                        {!result.ok && t.explanationOrExample && <p className="text-sm mt-1 text-flow">{t.explanationOrExample}</p>}
+                                    </div>
+                                </div>
+                            )}
+                            <div className="choices" role="group" aria-label="Lựa chọn đáp án">
                                 {t.options.map((o, i) => {
                                     if (!o) return null;
                                     const right = Sch.LETTERS[i] === t.answerOrMeaning;
                                     const chosen = result && result.chosen === i;
-                                    const tone = result ? (right ? 'border-success bg-success-soft' : chosen ? 'border-danger bg-danger-soft' : 'border-line opacity-70') : 'border-line hover:border-primary hover:bg-primary-soft';
+                                    const cls = result ? (right ? 'choice right' : chosen ? 'choice wrong' : 'choice dim') : 'choice';
                                     return (
-                                        <button key={i} type="button" disabled={!!result} onClick={() => pickMcq(i)} className={'min-h-[52px] rounded-2xl border-2 px-4 py-3 text-left flex items-start gap-3 bg-surface ' + tone}>
-                                            <span className="kbd mt-0.5">{i + 1}</span><span className="text-flow"><Hl text={o} keywords={result && right ? t.keywords : []} on={hl && !!result} /></span>
+                                        <button key={i} type="button" disabled={!!result} onClick={() => pickMcq(i)} className={cls}>
+                                            <span className="keycap">{result && right ? '✓' : (chosen && !result.ok ? '✕' : i + 1)}</span>
+                                            <span className="text-flow font-medium leading-snug"><Hl text={o} keywords={result && right ? t.keywords : []} on={hl && !!result} /></span>
                                         </button>
                                     );
                                 })}
                             </div>
-                            {result && !result.ok && t.explanationOrExample && <p className="mt-4 text-sm text-ink2 text-flow reading" role="alert">{t.explanationOrExample}</p>}
                             <div className="flex justify-between mt-5">
                                 <button type="button" onClick={prev} disabled={index === 0} className="btn btn-secondary">Trước</button>
                                 <button type="button" onClick={next} className="btn btn-secondary">{result ? <>Tiếp <Kbd>Enter</Kbd></> : 'Bỏ qua'}</button>
@@ -2112,6 +2284,8 @@
                         </div>
                     </div>
 
+                    <FundPanel toast={toast} />
+
                     {quick && <QuickPaste groups={groups} toast={toast} onAdd={(list) => confirmImport({ items: list, mode: 'append' })} />}
 
                     <div className="card mb-4">
@@ -2136,7 +2310,7 @@
                             <button type="button" onClick={() => onPractice(studyable, 'burst', 'Băng đạn · ' + Sch.groupLabel(groupFilter))} disabled={!studyable.length} className="btn btn-secondary"><Icon name="zap" /> Băng đạn 5 câu</button>
                             <button type="button" onClick={() => onPractice(studyable, 'test', Sch.groupLabel(groupFilter))} disabled={!studyable.length} className="btn btn-secondary"><Icon name="pen" /> Test {groupFilter === 'all' ? 'tất cả' : 'nhóm này'}</button>
                             <button type="button" onClick={onWeak} className="btn btn-secondary"><Icon name="flame" /> Ôn từ yếu ({weakCount})</button>
-                            <button type="button" onClick={() => onPractice(mcqPool, 'eos', 'EOS · ' + Sch.groupLabel(groupFilter))} disabled={mcqPool.length < 5} className="btn btn-secondary"><Icon name="monitor" /> Thi thử EOS</button>
+                            <button type="button" onClick={() => { if (!requireTurns(toast)) return; onPractice(mcqPool, 'eos', 'EOS · ' + Sch.groupLabel(groupFilter)); }} disabled={mcqPool.length < 5} className="btn btn-secondary"><Icon name="monitor" /> Thi thử EOS</button>
                         </div>
                         <div className="px-3 sm:px-4 pb-3 sm:pb-4 flex flex-wrap gap-2">
                             <button type="button" onClick={() => fileRef.current && fileRef.current.click()} className="btn btn-ghost btn-sm"><Icon name="upload" size={14} /> Nhập JSON / Excel</button>
@@ -2273,7 +2447,7 @@
             if (session && session.mode === 'eos') {
                 return (
                     <EOSSimulator key={session.id} title={session.title} items={session.pool} count={session.count} minutes={session.minutes} toast={toast} canExplain={AI.ready()}
-                        onSubmit={(r) => r.wrong.forEach(w => review(w.id, false))}
+                        onSubmit={(r) => { chargeTurn(toast, 'Nộp ' + session.title); r.wrong.forEach(w => review(w.id, false)); }}
                         onDrillWrong={(ids) => startSession(ids, 'burst', 'Nhồi lại câu sai EOS')}
                         onExit={closeSession} />
                 );
@@ -2290,7 +2464,7 @@
                 { k: 'burst', icon: 'zap', title: 'Băng đạn 5 câu', body: 'Nhìn lướt 15s → phản xạ 1 chạm. Sai là nhồi lại cuối băng sau 15 giây.', run: () => onPractice(pool, 'burst', 'Băng đạn · ' + Sch.groupLabel(groupFilter)), off: !pool.length },
                 { k: 'test', icon: 'pen', title: groupFilter === 'all' ? 'Test tất cả' : 'Test nhóm này', body: 'Điền từ / nghe viết / ghi âm. Gõ khớp là tự chấm, an toàn với Unikey/EVKey.', run: () => onPractice(pool, 'test', Sch.groupLabel(groupFilter)), off: !pool.length },
                 { k: 'weak', icon: 'flame', title: 'Ôn từ yếu (' + weakCount + ')', body: 'Hay sai, chưa ôn, hoặc đến hạn 1 / 3 / 7 / 14 ngày.', run: onWeak, off: false },
-                { k: 'eos', icon: 'monitor', title: 'Thi thử EOS', body: mcqPool.length >= 5 ? mcqPool.length + ' câu trắc nghiệm có thể vào đề.' : 'Cần ít nhất 5 câu trắc nghiệm hoặc 4 từ có nghĩa.', run: () => setEosSetup(mcqPool), off: mcqPool.length < 5 }
+                { k: 'eos', icon: 'monitor', title: 'Thi thử EOS', body: mcqPool.length >= 5 ? mcqPool.length + ' câu trắc nghiệm có thể vào đề. Mỗi lần nộp trừ 1 lượt quỹ.' : 'Cần ít nhất 5 câu trắc nghiệm hoặc 4 từ có nghĩa.', run: () => { if (!requireTurns(toast)) return; setEosSetup(mcqPool); }, off: mcqPool.length < 5 }
             ];
 
             return (
@@ -2312,7 +2486,7 @@
                             </button>
                         ))}
                     </div>
-                    {eosSetup && <EOSSetup max={eosSetup.length} onClose={() => setEosSetup(null)} onStart={(n, min) => { onPractice(eosSetup, 'eos', 'EOS · ' + Sch.groupLabel(groupFilter), { count: n, minutes: min }); setEosSetup(null); }} />}
+                    {eosSetup && <EOSSetup max={eosSetup.length} onClose={() => setEosSetup(null)} onStart={(n, min) => { if (!requireTurns(toast, true)) return; onPractice(eosSetup, 'eos', 'EOS · ' + Sch.groupLabel(groupFilter), { count: n, minutes: min }); setEosSetup(null); }} />}
                 </div>
             );
         };
@@ -2581,6 +2755,7 @@
             const mcqPool = pack.type === 'mcq' ? items.filter(t => t.type === 'mcq') : vocabAsMcq(items);
             const openEOS = () => {
                 if (mcqPool.length < 5) { toast('Cần ít nhất 5 câu để mở phòng thi EOS', 'info'); return; }
+                if (!requireTurns(toast)) return;
                 setEosSetup(mcqPool);
             };
 
@@ -2599,7 +2774,7 @@
             if (view === 'eos' && run) {
                 return (
                     <EOSSimulator key={run.key} title={pack.code + ' · ' + pack.name} items={run.pool} count={run.count} minutes={run.minutes} toast={toast} canExplain={AI.ready()}
-                        onSubmit={(r) => r.wrong.forEach(w => reviewPack(pack.id, w.id, false))}
+                        onSubmit={(r) => { chargeTurn(toast, 'Nộp ' + pack.code); r.wrong.forEach(w => reviewPack(pack.id, w.id, false)); }}
                         onDrillWrong={(ids) => { setRun({ kind: 'eos', ids, key: Date.now() }); setView('burst'); }}
                         onExit={backToPack} />
                 );
@@ -2697,7 +2872,7 @@
 
                     {unlockOpen && <UnlockModal pack={pack} onUnlock={onUnlock} onClose={() => setUnlockOpen(false)} />}
                     {contribOpen && <ContributeModal pack={pack} toast={toast} onClose={() => setContribOpen(false)} />}
-                    {eosSetup && <EOSSetup max={eosSetup.length} onClose={() => setEosSetup(null)} onStart={(n, min) => { setRun({ kind: 'eos', pool: eosSetup, count: n, minutes: min, key: Date.now() }); setEosSetup(null); setView('eos'); }} />}
+                    {eosSetup && <EOSSetup max={eosSetup.length} onClose={() => setEosSetup(null)} onStart={(n, min) => { if (!requireTurns(toast, true)) return; setRun({ kind: 'eos', pool: eosSetup, count: n, minutes: min, key: Date.now() }); setEosSetup(null); setView('eos'); }} />}
                 </div>
             );
         };
@@ -2796,6 +2971,12 @@
             const [exams, setExams] = useState(() => Store.prefs.get('exams', {}) || {});
             const [milestones, setMilestones] = useState(() => Store.prefs.get('milestones', {}) || {});
             const [settingsOpen, setSettingsOpen] = useState(false);
+            const [fundShop, setFundShop] = useState(false);
+            useEffect(() => {
+                const open = () => setFundShop(true);
+                window.addEventListener('edu-fund-shop', open);
+                return () => window.removeEventListener('edu-fund-shop', open);
+            }, []);
             const [muted, setMutedState] = useState(Sfx.isMuted());
             const savedItems = useRef([]);
             const saveTimer = useRef(null);
@@ -2948,6 +3129,7 @@
                 const pool = (list || []).filter(Sch.isFilled);
                 if (!pool.length) { toast('Không có mục để luyện', 'error'); return; }
                 if (mode === 'eos') {
+                    if (!requireTurns(toast, true)) return;
                     const n = (opts && opts.count) || Math.min(40, pool.length);
                     setSession({ id: Date.now(), title, mode: 'eos', pool, count: n, minutes: (opts && opts.minutes) || Math.max(5, Math.round(n * 1.2)), ids: [] });
                 } else {
@@ -3127,7 +3309,7 @@
             return (
                 <div className="min-h-screen flex flex-col">
                     <a href="#main" className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[70] btn btn-primary">Bỏ qua tới nội dung</a>
-                    <header className="sticky top-0 z-30 border-b border-line" style={{ background: 'rgba(245,246,248,.92)', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)' }}>
+                    <header className="sticky top-0 z-30 border-b border-line" style={{ background: 'rgba(226,232,240,.9)', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)' }}>
                         <div className="max-w-7xl mx-auto px-4 py-3 flex flex-wrap items-center gap-3">
                             <div className="flex items-center gap-2 mr-auto">
                                 <span className="w-9 h-9 rounded-xl bg-primary text-white flex items-center justify-center"><Icon name="cap" /></span>
@@ -3185,8 +3367,9 @@
                         )}
                     </main>
 
-                    <footer className="text-center text-xs text-muted py-6 px-4 text-flow">Dữ liệu lưu trên trình duyệt này (IndexedDB). Xuất JSON định kỳ để sao lưu.</footer>
+                    <footer className="site-note">Dữ liệu lưu trên trình duyệt này (IndexedDB). Xuất JSON định kỳ để sao lưu.</footer>
                     {settingsOpen && <SettingsModal onClose={() => setSettingsOpen(false)} toast={toast} muted={muted} setMuted={setMuted} />}
+                    {fundShop && <FundShop toast={toast} onClose={() => setFundShop(false)} />}
                     <Toasts list={toasts} />
                 </div>
             );
