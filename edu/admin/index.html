@@ -38,6 +38,13 @@
         const vnd = (n) => new Intl.NumberFormat('vi-VN').format(n || 0) + 'đ';
         const when = (t) => t ? new Date(t).toLocaleString('vi-VN', { timeZone: 'Asia/Ho_Chi_Minh', hour12: false }) : '—';
 
+        const errorText = (data) => {
+            if (!data) return '';
+            if (typeof data.error === 'string') return data.error;
+            if (data.error && typeof data.error.message === 'string') return data.error.message;
+            return '';
+        };
+
         const api = async (token, path, body, method) => {
             const res = await fetch(path, {
                 method: method || (body ? 'POST' : 'GET'),
@@ -51,11 +58,11 @@
             let data = {};
             try { data = await res.json(); } catch (e) { data = {}; }
             if (res.status === 401) {
-                const err = new Error(data.error || 'Cần đăng nhập lại.');
+                const err = new Error(errorText(data) || 'Cần đăng nhập lại.');
                 err.auth = true;
                 throw err;
             }
-            if (!res.ok) throw new Error(data.error || 'Không thực hiện được.');
+            if (!res.ok) throw new Error(errorText(data) || 'Không thực hiện được.');
             return data;
         };
 
@@ -74,7 +81,7 @@
                         body: JSON.stringify({ password })
                     });
                     const data = await res.json().catch(() => ({}));
-                    if (!res.ok || !data.token) throw new Error(data.error || 'Không đăng nhập được.');
+                    if (!res.ok || !data.token) throw new Error(errorText(data) || 'Không đăng nhập được.');
                     sessionStorage.setItem(TOKEN_KEY, data.token);
                     onOk(data.token);
                 } catch (err) {

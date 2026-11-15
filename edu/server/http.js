@@ -95,18 +95,36 @@ export function fromNode(req) {
     };
 }
 
+function webRequest(value) {
+    return value && value.headers && typeof value.headers.get === 'function' ? value : null;
+}
+
+async function send(res, response) {
+    res.status(response.status);
+    response.headers.forEach((value, name) => res.setHeader(name, value));
+    res.send(await response.text());
+}
+
 export function mount(handle) {
-    const onRequest = (context) => handle(fromWeb(context.request), context.env || {});
     async function handler(req, res) {
-        if (res && typeof res.status === 'function') {
-            const response = await handle(fromNode(req), process.env);
-            res.status(response.status);
-            response.headers.forEach((value, name) => res.setHeader(name, value));
-            res.send(await response.text());
-            return;
+        try {
+            const nodeRes = res && typeof res.status === 'function' ? res : null;
+            const incoming = webRequest(req) || webRequest(req && req.request);
+            const env = (req && req.env) || (typeof process !== 'undefined' ? process.env : {});
+            const response = await handle(incoming ? fromWeb(incoming) : fromNode(req && req.request ? req.request : req), env);
+            if (nodeRes) {
+                await send(nodeRes, response);
+                return;
+            }
+            return response;
+        } catch (e) {
+            const body = json(500, { error: 'Không thực hiện được.' });
+            if (res && typeof res.status === 'function') {
+                await send(res, body);
+                return;
+            }
+            return body;
         }
-        const request = req && typeof req.headers !== 'undefined' && typeof req.headers.get === 'function' ? req : null;
-        return handle(request ? fromWeb(request) : fromNode(req), process.env);
     }
-    return { onRequest, handler };
+    return { onRequest: handler, handler };
 }
