@@ -129,6 +129,10 @@
         .choice.right .keycap { background: #10B981; border-color: #059669; color: #fff; }
         .choice.wrong .keycap { background: #EF4444; border-color: #DC2626; color: #fff; }
         .site-note { text-align: center; font-size: 11px; line-height: 1.4; color: #94A3B8; padding: 10px 16px 16px; }
+        .foot-live { width: 8px; height: 8px; border-radius: 999px; background: #22C55E; box-shadow: 0 0 0 0 rgba(34, 197, 94, .7); animation: foot-pulse 1.8s ease-out infinite; }
+        @keyframes foot-pulse { 0% { box-shadow: 0 0 0 0 rgba(34, 197, 94, .65); } 100% { box-shadow: 0 0 0 8px rgba(34, 197, 94, 0); } }
+        .foot-pill { color: #fff; background: #4338CA; border: 1px solid #A5B4FC; border-radius: 999px; box-shadow: 0 0 0 1px rgba(99, 102, 241, .35), 0 0 18px rgba(99, 102, 241, .45); }
+        .foot-pill:hover { background: #3730A3; }
         .scene { perspective: 1400px; }
         .card3d { display: grid; transform-style: preserve-3d; transition: transform .5s cubic-bezier(.2, .75, .2, 1); cursor: pointer; }
         .card3d.flipped { transform: rotateY(180deg); }
@@ -417,9 +421,32 @@
             setTimeout(() => URL.revokeObjectURL(url), 1000);
         };
 
-        const copyText = (text) => (navigator.clipboard && navigator.clipboard.writeText
-            ? navigator.clipboard.writeText(text)
-            : Promise.reject(new Error('no-clipboard')));
+        const copyText = (text) => {
+            const viaBox = () => {
+                const area = document.createElement('textarea');
+                area.value = text;
+                area.setAttribute('readonly', '');
+                area.style.position = 'fixed';
+                area.style.left = '-9999px';
+                document.body.appendChild(area);
+                area.select();
+                let ok = false;
+                try { ok = document.execCommand('copy'); } catch (e) { ok = false; }
+                area.remove();
+                return ok ? Promise.resolve() : Promise.reject(new Error('no-clipboard'));
+            };
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                return navigator.clipboard.writeText(text).catch(viaBox);
+            }
+            return viaBox();
+        };
+
+        const openLegal = (tab) => {
+            try { window.dispatchEvent(new CustomEvent('fpass-legal', { detail: { tab: tab || 'id' } })); } catch (e) {}
+        };
+        const openSupport = () => {
+            try { window.dispatchEvent(new CustomEvent('fpass-support')); } catch (e) {}
+        };
 
         const todayIso = () => new Date().toISOString().split('T')[0];
 
@@ -565,6 +592,10 @@
                                 <p className="text-sm text-ink2 tnum">Số tiền: <b className="text-ink">{vnd(pack.price)}</b></p>
                                 <p className="text-sm text-ink2 tnum">Nội dung: <b className="text-ink">{memo}</b></p>
                                 <p className="text-xs text-muted mt-2">SePay cộng đúng {pack.turns} lượt vào mã quỹ này khi tiền vào tài khoản trên với đúng số tiền và nội dung. Lượt không tự cộng nếu bấm nút khi chưa có giao dịch.</p>
+                                <p className="text-xs mt-2 flex flex-wrap gap-x-3 gap-y-1">
+                                    <button type="button" className="font-semibold text-primary underline underline-offset-2" onClick={() => openLegal('id')}>Chính sách bảo lưu Mã Quỹ</button>
+                                    <button type="button" className="font-semibold text-primary underline underline-offset-2" onClick={openSupport}>Ghi sai nội dung? Liên hệ hỗ trợ cộng lượt</button>
+                                </p>
                                 <button type="button" className="btn btn-primary mt-3" disabled={syncing} onClick={() => checkPay(false)}>{syncing ? 'Đang kiểm tra…' : 'Kiểm tra chuyển khoản'}</button>
                             </div>
                         </div>
@@ -608,6 +639,100 @@
                 <FundBody toast={toast} />
             </Modal>
         );
+
+        const LEGAL_TABS = [
+            ['id', 'Mã quỹ'],
+            ['pay', 'Thanh toán'],
+            ['study', 'Miễn trừ']
+        ];
+
+        const LegalModal = ({ tab, onClose, onSupport }) => {
+            const [current, setCurrent] = useState(tab || 'id');
+            useEffect(() => { setCurrent(tab || 'id'); }, [tab]);
+            return (
+                <Modal title="Điều khoản Dịch vụ & Chính sách Hoạt động" onClose={onClose} size="lg">
+                    <div role="tablist" aria-label="Mục điều khoản" className="flex flex-wrap gap-1 mb-4">
+                        {LEGAL_TABS.map(([id, label]) => (
+                            <button key={id} type="button" role="tab" aria-selected={current === id} className="tab" onClick={() => setCurrent(id)}>{label}</button>
+                        ))}
+                    </div>
+                    {current === 'id' && (
+                        <div className="space-y-3 text-sm text-ink2 leading-relaxed">
+                            <p className="font-semibold text-ink">Mã quỹ là định danh của số lượt, không phải tài khoản ngân hàng.</p>
+                            <p>Mỗi trình duyệt chưa từng lưu mã được cấp một mã 8 ký tự. Máy đã lưu mã, kể cả mã đã nhận tiền, giữ nguyên mã đó. Mã hợp lệ dài 4–12 chữ hoặc số. Số còn lại bằng số lượt đã cấp trừ số lần nộp bài, ghi trên server và dùng chung cho mọi máy đang nhập đúng mã.</p>
+                            <p>Muốn học trên máy tính và điện thoại bằng cùng một gói, hãy copy mã ngắn ở mục Kho của tôi, rồi trên máy mới dán vào ô «Dán mã quỹ» và bấm «Dùng mã này». Mã dài EDUF1 cũ vẫn nhận được, sau đó số còn lại lấy từ server. Ai có mã đều có thể tiêu lượt của mã đó.</p>
+                            <p>Nội dung chuyển khoản phải là <b className="text-ink">EDU</b>, một dấu cách, rồi đúng mã. Ví dụ <b className="text-ink">EDU LOP10A</b>. Viết dính như EDUCHUNG thì hệ thống không nhận.</p>
+                            <p>Trước khi xóa dữ liệu trang, xóa cache hoặc mở tab ẩn danh, hãy chụp hoặc copy mã. Xóa trình duyệt không xóa số lượt trên server, nhưng máy mới chỉ lấy lại được số đó khi bạn còn giữ mã. Tab ẩn danh có thể không giữ mã sau khi đóng.</p>
+                        </div>
+                    )}
+                    {current === 'pay' && (
+                        <div className="space-y-3 text-sm text-ink2 leading-relaxed">
+                            <p className="font-semibold text-ink">Lượt được cộng khi chuyển khoản khớp gói, số tiền và nội dung.</p>
+                            <p>Cổng đang dùng là VietQR TPBank, số tài khoản 10006548943, chủ tài khoản NGUYEN VAN NHAT. Ba gói: 20 lượt / 100.000đ, 100 lượt / 350.000đ, 250 lượt / 625.000đ. SePay chỉ cộng khi tiền đi vào đúng tài khoản, đúng một trong ba số tiền, và nội dung có dạng EDU rồi mã. Khi webhook tới, lượt vào mã đó trên server. Trang tự kiểm tra lại; bạn cũng có thể bấm «Kiểm tra chuyển khoản». Thời gian thường tính bằng vài giây sau khi ngân hàng báo giao dịch, không phải lúc vừa bấm chuyển trong app ngân hàng.</p>
+                            <p>Gói lượt là dịch vụ số, cấp thẳng vào mã quỹ ngay khi giao dịch hợp lệ. Lượt đã cấp không đổi lại thành tiền mặt. Lượt chưa dùng giữ trên mã đó cho đến khi nộp bài, không gắn hạn dùng theo môn.</p>
+                            <p>Chuyển thiếu nội dung, sai mã hoặc sai số tiền thì hệ thống không tự cộng. Sau khi đối chiếu biên lai, phần lượt của gói mà số tiền thực tế khớp sẽ được cấp đủ vào mã quỹ bạn xác nhận. Số tiền không khớp một gói nào thì cần bổ sung hoặc được xử lý riêng, không tự quy đổi tùy ý.</p>
+                            <button type="button" className="btn btn-primary btn-sm" onClick={onSupport}>Mở khung Liên hệ Hỗ trợ</button>
+                        </div>
+                    )}
+                    {current === 'study' && (
+                        <div className="space-y-3 text-sm text-ink2 leading-relaxed">
+                            <p className="font-semibold text-ink">FPass là công cụ luyện tập, không phải đề thi chính thức.</p>
+                            <p>Nền tảng dùng để rèn phản xạ từ vựng, làm trắc nghiệm tính giờ và xem giải thích do AI soạn. Ngân hàng câu hỏi, đề đóng góp và câu AI chỉ để ôn. Nội dung đó không phải đề, đáp án hay tài liệu chính thức của trường, của kỳ thi, hay của bất kỳ tổ chức giáo dục nào.</p>
+                            <p>Trang không hỏi mật khẩu ngân hàng, số thẻ hay OTP. Bạn chuyển khoản trong ứng dụng ngân hàng của mình. Máy chủ chỉ nhận thông báo SePay gồm số tiền, nội dung và mã giao dịch để cộng lượt.</p>
+                            <p>Từ và câu bạn tự ghi nằm trên chính trình duyệt đó, trong IndexedDB. Xóa dữ liệu trang là mất phần này trên máy đó, nên hãy xuất JSON khi cần giữ bản sao. Đề chỉ lên server khi bạn chủ động bấm gửi cho admin. Lệnh AI gửi nội dung bài học tới máy chủ của FPass; khóa OpenAI không nằm trong trình duyệt.</p>
+                        </div>
+                    )}
+                </Modal>
+            );
+        };
+
+        const SupportModal = ({ onClose }) => {
+            const fund = useFund();
+            const [copiedPhone, setCopiedPhone] = useState(false);
+            const [copiedCode, setCopiedCode] = useState(false);
+            const markPhone = () => {
+                setCopiedPhone(true);
+                setTimeout(() => setCopiedPhone(false), 2000);
+            };
+            const markCode = () => {
+                setCopiedCode(true);
+                setTimeout(() => setCopiedCode(false), 2000);
+            };
+            const copyPhone = () => {
+                copyText('0369293676').then(markPhone).catch(() => {});
+            };
+            const copyCodeAndZalo = () => {
+                const go = () => window.open('https://zalo.me/0369293676', '_blank', 'noopener,noreferrer');
+                copyText(fund.code).then(() => { markCode(); go(); }).catch(go);
+            };
+            return (
+                <Modal title="Hỗ trợ Kỹ thuật & Cộng lượt Thủ công" onClose={onClose} size="md">
+                    <p className="text-sm text-ink2 -mt-1 mb-4">Phản hồi nhanh qua Zalo và Hotline.</p>
+                    <div className="grid gap-3">
+                        <section className="rounded-2xl border-2 border-primary bg-primary-soft p-4">
+                            <p className="text-xs font-semibold uppercase tracking-wide text-primary">Zalo hỗ trợ trực tuyến · khuyên dùng</p>
+                            <p className="text-2xl font-bold tnum text-ink mt-1">0369 293 676</p>
+                            <p className="text-xs text-ink2 mt-1">Gửi ảnh biên lai chuyển khoản kèm mã quỹ.</p>
+                            <a className="btn btn-primary mt-3" href="https://zalo.me/0369293676" target="_blank" rel="noopener noreferrer">Nhắn tin Zalo ngay ↗</a>
+                        </section>
+                        <section className="rounded-2xl border border-line p-4">
+                            <p className="text-xs font-semibold uppercase tracking-wide text-muted">Hotline trực tiếp</p>
+                            <p className="text-2xl font-bold tnum text-ink mt-1">0369 293 676</p>
+                            <div className="flex flex-wrap gap-2 mt-3">
+                                <a className="btn btn-secondary btn-sm" href="tel:0369293676">Gọi ngay</a>
+                                <button type="button" className="btn btn-secondary btn-sm" onClick={copyPhone}>{copiedPhone ? '✓ Đã sao chép' : 'Sao chép SĐT'}</button>
+                            </div>
+                        </section>
+                        <section className="rounded-2xl border border-dashed border-line bg-surface2 p-4">
+                            <p className="text-sm font-semibold text-ink">Mẹo xử lý cộng bù lượt trong 1 phút</p>
+                            <p className="text-sm text-ink2 mt-2 leading-relaxed">Khi nhắn Zalo, gửi kèm ảnh chụp giao dịch chuyển khoản và mã quỹ hiện tại trên máy này.</p>
+                            <p className="mt-3 text-sm">Mã quỹ trên máy này: <b className="tnum text-ink">{fund.code}</b></p>
+                            <button type="button" className="btn btn-primary btn-sm mt-3" onClick={copyCodeAndZalo}>{copiedCode ? '✓ Đã sao chép mã' : 'Copy mã quỹ & Mở Zalo'}</button>
+                        </section>
+                    </div>
+                </Modal>
+            );
+        };
     </script>
 
     <!-- ===================== PRACTICE ENGINES: Flashcard · Băng đạn 5 câu · EOS ===================== -->
@@ -3239,12 +3364,28 @@
             const [milestones, setMilestones] = useState(() => Store.prefs.get('milestones', {}) || {});
             const [settingsOpen, setSettingsOpen] = useState(false);
             const [fundShop, setFundShop] = useState(false);
+            const [legalTab, setLegalTab] = useState(null);
+            const [supportOpen, setSupportOpen] = useState(false);
             const [systemPacks, setSystemPacks] = useState([]);
             const [contribOpen, setContribOpen] = useState(false);
             useEffect(() => {
                 const open = () => setFundShop(true);
+                const showLegal = (e) => {
+                    setSupportOpen(false);
+                    setLegalTab((e.detail && e.detail.tab) || 'id');
+                };
+                const showSupport = () => {
+                    setLegalTab(null);
+                    setSupportOpen(true);
+                };
                 window.addEventListener('edu-fund-shop', open);
-                return () => window.removeEventListener('edu-fund-shop', open);
+                window.addEventListener('fpass-legal', showLegal);
+                window.addEventListener('fpass-support', showSupport);
+                return () => {
+                    window.removeEventListener('edu-fund-shop', open);
+                    window.removeEventListener('fpass-legal', showLegal);
+                    window.removeEventListener('fpass-support', showSupport);
+                };
             }, []);
             useEffect(() => {
                 const quota = window.EDU && window.EDU.Quota;
@@ -3670,9 +3811,31 @@
                         )}
                     </main>
 
-                    <footer className="site-note">Dữ liệu lưu trên trình duyệt này (IndexedDB). Xuất JSON định kỳ để sao lưu.</footer>
+                    <footer className="border-t border-[#1E293B] bg-[#0F172A] text-slate-200">
+                        <div className="max-w-7xl mx-auto px-4 py-4 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+                            <div>
+                                <p className="text-sm font-semibold text-white">© 2026 FPass</p>
+                                <p className="mt-1 inline-flex items-center gap-2 text-xs text-slate-300">
+                                    <span className="foot-live" aria-hidden="true" />
+                                    Hệ thống cấp lượt tự động 24/7: Hoạt động ổn định
+                                </p>
+                            </div>
+                            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-end">
+                                <nav aria-label="Pháp lý" className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs">
+                                    <button type="button" className="text-slate-100 underline-offset-2 hover:underline" onClick={() => openLegal('id')}>Điều khoản & Mã định danh</button>
+                                    <span aria-hidden="true" className="text-slate-500">•</span>
+                                    <button type="button" className="text-slate-100 underline-offset-2 hover:underline" onClick={() => openLegal('pay')}>Chính sách Thanh toán</button>
+                                    <span aria-hidden="true" className="text-slate-500">•</span>
+                                    <button type="button" className="text-slate-100 underline-offset-2 hover:underline" onClick={() => openLegal('study')}>Miễn trừ Học thuật</button>
+                                </nav>
+                                <button type="button" className="foot-pill inline-flex items-center justify-center min-h-[40px] px-4 text-sm font-semibold" onClick={openSupport}>🎧 Liên hệ Hỗ trợ 24/7</button>
+                            </div>
+                        </div>
+                    </footer>
                     {settingsOpen && <SettingsModal onClose={() => setSettingsOpen(false)} toast={toast} muted={muted} setMuted={setMuted} />}
                     {fundShop && <FundShop toast={toast} onClose={() => setFundShop(false)} />}
+                    {legalTab && <LegalModal tab={legalTab} onClose={() => setLegalTab(null)} onSupport={openSupport} />}
+                    {supportOpen && <SupportModal onClose={() => setSupportOpen(false)} />}
                     {contribOpen && <ContributeModal pack={null} toast={toast} onClose={() => setContribOpen(false)} />}
                     <Toasts list={toasts} />
                 </div>
