@@ -150,14 +150,14 @@
                         <table className="w-full text-sm">
                             <caption className="text-left px-4 py-3 font-semibold">Mã quỹ</caption>
                             <thead className="text-left text-slate-500">
-                                <tr><th className="px-4 py-2">Mã quỹ</th><th className="px-4 py-2">Lượt đã cấp</th><th className="px-4 py-2">Tổng tiền đã nạp</th><th className="px-4 py-2">Cập nhật</th><th className="px-4 py-2">Cộng / trừ hoặc đặt lại</th></tr>
+                                <tr><th className="px-4 py-2">Mã quỹ</th><th className="px-4 py-2">Lượt đã cấp</th><th className="px-4 py-2">Còn lại</th><th className="px-4 py-2">Tổng tiền đã nạp</th><th className="px-4 py-2">Cập nhật</th><th className="px-4 py-2">Cộng / trừ hoặc đặt lại</th></tr>
                             </thead>
                             <tbody>
-                                {quotas.length ? quotas.map((row) => <QuotaRow key={row.code + ':' + row.balance} row={row} busy={busy} onRun={run} />) : <tr><td className="px-4 py-6 text-slate-500" colSpan={5}>Chưa có mã quỹ nào được SePay cộng hoặc admin tạo.</td></tr>}
+                                {quotas.length ? quotas.map((row) => <QuotaRow key={row.code + ':' + row.balance + ':' + row.remaining} row={row} busy={busy} onRun={run} />) : <tr><td className="px-4 py-6 text-slate-500" colSpan={6}>Chưa có mã quỹ nào được SePay cộng hoặc admin tạo.</td></tr>}
                             </tbody>
                         </table>
                     </div>
-                    <p className="text-xs text-slate-500">Lượt đã cấp là số server đã cộng cho mã quỹ. Lần nộp bài trên từng máy không trừ vào cột này. Sinh viên bấm Kiểm tra chuyển khoản để nhận phần vừa cấp.</p>
+                    <p className="text-xs text-slate-500">Lượt đã cấp là tổng đã cộng. Còn lại = đã cấp trừ số lần nộp bài trên mọi trình duyệt dùng cùng mã. Sinh viên bấm Kiểm tra chuyển khoản để nhận phần vừa cấp.</p>
                     <div className="bg-white rounded-2xl border border-slate-200 overflow-x-auto">
                         <table className="w-full text-sm">
                             <caption className="text-left px-4 py-3 font-semibold">Lịch sử chuyển khoản SePay</caption>
@@ -189,6 +189,7 @@
                 <tr className="border-t border-slate-100 align-top">
                     <td className="px-4 py-3 tnum font-semibold">{row.code}</td>
                     <td className="px-4 py-3 tnum">{row.balance}</td>
+                    <td className="px-4 py-3 tnum">{row.remaining != null ? row.remaining : row.balance}</td>
                     <td className="px-4 py-3 tnum">{vnd(row.money)}</td>
                     <td className="px-4 py-3 whitespace-nowrap">{when(row.updated)}</td>
                     <td className="px-4 py-3">

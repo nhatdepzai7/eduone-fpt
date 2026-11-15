@@ -44,6 +44,24 @@ end
 return redis.call('HGET', KEYS[1], 'balance')
 `;
 
+const SPEND = `
+local bal = tonumber(redis.call('HGET', KEYS[1], 'balance') or '0') or 0
+local spent = tonumber(redis.call('HGET', KEYS[1], 'spent') or '0') or 0
+local left = bal - spent
+if redis.call('EXISTS', KEYS[3]) == 1 then
+  return left
+end
+if left < 1 then
+  return -1
+end
+redis.call('SET', KEYS[3], '1', 'EX', 172800)
+redis.call('HINCRBY', KEYS[1], 'spent', 1)
+redis.call('HSET', KEYS[1], 'updated', ARGV[2])
+redis.call('LPUSH', KEYS[2], ARGV[1])
+redis.call('LTRIM', KEYS[2], 0, 299)
+return left - 1
+`;
+
 export function envGet(env, name) {
     if (env && typeof env[name] === 'string' && env[name]) return env[name];
     if (typeof process !== 'undefined' && process.env && process.env[name]) return String(process.env[name]);
@@ -153,16 +171,60 @@ export async function creditPurchase(env, purchase) {
     return Number(claimed) === 1;
 }
 
-export async function listPurchases(env, code) {
-    const rows = await redisCommand(env, ['LRANGE', 'fpass:fund:' + code, '0', '299']);
-    const purchases = [];
+function readFundRows(rows) {
+    const events = [];
     (Array.isArray(rows) ? rows : []).forEach((row) => {
         try {
             const ev = JSON.parse(row);
-            if (ev && ev.kind === 'buy') purchases.push(ev);
+            if (ev && (ev.kind === 'buy' || ev.kind === 'eos')) events.push(ev);
         } catch (e) {}
     });
-    return purchases;
+    return events;
+}
+
+export async function listPurchases(env, code) {
+    const rows = await redisCommand(env, ['LRANGE', 'fpass:fund:' + code, '0', '299']);
+    return readFundRows(rows).filter((ev) => ev.kind === 'buy');
+}
+
+export async function fundState(env, code) {
+    const hash = hashObject(await redisCommand(env, ['HGETALL', 'fpass:quota:' + code]));
+    const granted = Math.max(0, Math.floor(Number(hash.balance) || 0));
+    const spent = Math.max(0, Math.floor(Number(hash.spent) || 0));
+    const rows = await redisCommand(env, ['LRANGE', 'fpass:fund:' + code, '0', '299']);
+    return {
+        granted,
+        spent,
+        balance: Math.max(0, granted - spent),
+        events: readFundRows(rows)
+    };
+}
+
+export async function spendTurn(env, input) {
+    const code = cleanCode(input && input.code);
+    if (!code) {
+        const err = new Error('bad-code');
+        err.code = 'bad-code';
+        throw err;
+    }
+    const id = String(input && input.id || '').toLowerCase().replace(/[^a-z0-9]/g, '').slice(0, 24);
+    if (!/^[a-z0-9]{8,24}$/.test(id)) {
+        const err = new Error('bad-id');
+        err.code = 'bad-id';
+        throw err;
+    }
+    const note = String(input && input.note || 'Nộp bài').replace(/[\u0000-\u001F]/g, '').slice(0, 80);
+    const now = Date.now();
+    const event = JSON.stringify({ id, t: now, delta: -1, kind: 'eos', pack: '', note });
+    const left = Number(await redisCommand(env, [
+        'EVAL', SPEND, 3,
+        'fpass:quota:' + code,
+        'fpass:fund:' + code,
+        'fpass:spend:' + id,
+        event,
+        String(now)
+    ]));
+    return { ok: left >= 0, balance: left < 0 ? 0 : left, code };
 }
 
 function hashObject(result) {
@@ -204,6 +266,8 @@ function quotaView(code, hash) {
     return {
         code,
         balance: Math.max(0, Math.floor(Number(h.balance) || 0)),
+        spent: Math.max(0, Math.floor(Number(h.spent) || 0)),
+        remaining: Math.max(0, Math.floor(Number(h.balance) || 0) - Math.max(0, Math.floor(Number(h.spent) || 0))),
         money: Math.max(0, Math.floor(Number(h.money) || 0)),
         updated: Math.floor(Number(h.updated) || 0),
         created: Math.floor(Number(h.created) || 0)

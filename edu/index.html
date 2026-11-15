@@ -456,21 +456,25 @@
         const requireTurns = (toast, quiet) => {
             const n = E.Quota.balance();
             if (n < 1) {
-                toast('Quỹ lượt thi đã hết. Mua thêm gói để vào phòng EOS.', 'info');
+                toast('Quỹ lượt thi đã hết. Mua thêm gói hoặc dán mã quỹ được chia sẻ.', 'info');
                 E.Quota.openShop();
                 return false;
             }
             if (!quiet && n < 5) toast('Quỹ còn ' + n + ' lượt. Nên mua thêm gói sỉ trước khi kỳ thi tới.', 'info');
             return true;
         };
-        const chargeTurn = (toast, note) => {
-            const next = E.Quota.spend(note);
+        const chargeTurn = (toast, note) => E.Quota.spend(note).then((next) => {
             if (!next) {
-                toast('Quỹ đã hết lượt, bài này không trừ thêm.', 'info');
-                return;
+                toast('Quỹ đã hết lượt trên máy chủ. Bài chưa được nộp.', 'info');
+                return false;
             }
-            if (next.balance < 5) toast('Đã trừ 1 lượt. Quỹ còn ' + next.balance + '.', 'info');
-        };
+            if (next.balance < 5) toast('Đã trừ 1 lượt. Mã này còn ' + next.balance + ' lượt trên mọi máy.', 'info');
+            return true;
+        }).catch((e) => {
+            toast(e.message || 'Chưa trừ được lượt. Bài chưa được nộp.', 'error');
+            return false;
+        });
+        window.EDU.chargeTurn = chargeTurn;
 
         const FundBody = ({ toast }) => {
             const fund = useFund();
@@ -498,7 +502,23 @@
                 return () => clearInterval(id);
             }, [picked, fund.code]);
             const copyFund = () => {
-                copyText(E.Quota.exportCode()).then(() => toast('Đã copy mã quỹ. Máy khác dán mã này để cộng cùng sổ lượt.', 'success')).catch(() => toast('Không copy được. Hãy chọn mã và copy tay.', 'error'));
+                copyText(fund.code).then(() => toast('Đã copy mã ' + fund.code + '. Máy khác dán mã này để dùng chung quỹ.', 'success')).catch(() => toast('Không copy được. Hãy chọn mã và copy tay.', 'error'));
+            };
+            const useSharedCode = () => {
+                const text = incoming.trim();
+                let saved;
+                try {
+                    saved = /^EDUF1\./i.test(text) ? E.Quota.importCode(text) : E.Quota.setCode(text);
+                } catch (e) {
+                    toast(e.message || 'Mã quỹ không hợp lệ.', 'error');
+                    return;
+                }
+                setIncoming('');
+                setCode(saved.code);
+                checkPay(true).then(() => {
+                    const now = E.Quota.read();
+                    toast('Máy này đang dùng mã ' + now.code + '. Còn ' + now.balance + ' lượt, trừ chung trên mọi trình duyệt.', 'success');
+                });
             };
             return (
                 <div className="space-y-4">
@@ -506,13 +526,13 @@
                         <div>
                             <p className="text-[11px] font-semibold uppercase tracking-wider text-muted">Kho học liệu của tôi</p>
                             <p className="text-3xl font-bold tnum text-ink">{fund.balance} <span className="text-base font-semibold text-ink2">lượt</span></p>
-                            <p className="text-sm text-ink2">Quỹ chung mã <b className="text-ink">{fund.code}</b>. Không khóa máy. Lượt dư giữ nguyên sang kỳ sau.</p>
+                            <p className="text-sm text-ink2">Mã <b className="text-ink">{fund.code}</b> dùng chung một số lượt trên mọi trình duyệt. Nộp bài ở máy nào cũng trừ mã này.</p>
                         </div>
                         <label className="text-sm">
                             <span className="label">Mã quỹ</span>
                             <span className="flex gap-2">
                                 <input value={code} onChange={(e) => setCode(e.target.value.toUpperCase())} maxLength={12} className="field w-32 uppercase" aria-label="Mã quỹ lượt" />
-                                <button type="button" className="btn btn-secondary btn-sm" onClick={() => { try { setCode(E.Quota.setCode(code).code); toast('Đã lưu mã quỹ ' + E.Quota.read().code, 'success'); } catch (e) { toast(e.message, 'error'); } }}>Lưu</button>
+                                <button type="button" className="btn btn-secondary btn-sm" onClick={() => { try { const saved = E.Quota.setCode(code); setCode(saved.code); checkPay(true); toast('Đã lưu mã quỹ ' + saved.code, 'success'); } catch (e) { toast(e.message, 'error'); } }}>Lưu</button>
                             </span>
                         </label>
                     </div>
@@ -564,22 +584,15 @@
                             ) : <p className="text-sm text-muted">Chưa có lần mua hoặc lần nộp EOS.</p>}
                         </div>
                         <div>
-                            <p className="text-sm font-semibold mb-2">Đưa quỹ sang máy khác</p>
-                            <p className="text-xs text-muted mb-2">Lượt mua theo nội dung EDU và mã quỹ được SePay ghi trên máy chủ. Máy khác bấm kiểm tra với cùng mã để nhận các lần mua đó. Lần nộp EOS vẫn nằm trên từng trình duyệt cho đến khi copy mã quỹ sang.</p>
+                            <p className="text-sm font-semibold mb-2">Dùng chung mã này</p>
+                            <p className="text-xs text-muted mb-2">Copy mã ngắn bên dưới. Máy khác dán đúng mã đó vào ô phía dưới. Hai máy trừ chung một số lượt trên server. Mã dài EDUF1 cũ vẫn dán được.</p>
                             <div className="flex flex-wrap gap-2">
-                                <button type="button" className="btn btn-secondary btn-sm" onClick={copyFund}>Copy mã quỹ</button>
+                                <button type="button" className="btn btn-secondary btn-sm" onClick={copyFund}>Copy mã {fund.code}</button>
                             </div>
                             <label className="block mt-2"><span className="label">Dán mã quỹ</span>
-                                <textarea value={incoming} onChange={(e) => setIncoming(e.target.value)} rows={2} className="field text-xs" placeholder="EDUF1...." />
+                                <textarea value={incoming} onChange={(e) => setIncoming(e.target.value)} rows={2} className="field text-xs" placeholder="Dán mã ngắn hoặc EDUF1...." />
                             </label>
-                            <button type="button" className="btn btn-secondary btn-sm mt-2" disabled={!incoming.trim()} onClick={() => {
-                                try {
-                                    const r = E.Quota.importCode(incoming);
-                                    setIncoming('');
-                                    setCode(r.code);
-                                    toast(r.added > 0 ? 'Đã cộng ' + r.added + ' lượt vào quỹ ' + r.code + '. Tổng ' + r.balance + '.' : 'Đã nhập sổ quỹ ' + r.code + '. Không có lượt mới để cộng. Tổng ' + r.balance + '.', 'success');
-                                } catch (e) { toast(e.message, 'error'); }
-                            }}>Cộng mã này vào quỹ</button>
+                            <button type="button" className="btn btn-secondary btn-sm mt-2" disabled={!incoming.trim()} onClick={useSharedCode}>Dùng mã này</button>
                         </div>
                     </div>
                 </div>
@@ -1478,6 +1491,8 @@
             const [fontSize, setFontSize] = useState(10);
             const startedAt = useRef(Date.now());
             const submitted = useRef(false);
+            const charging = useRef(false);
+            const [paying, setPaying] = useState(false);
             const now = useNow(1000, !result);
             const left = endAt - now;
             const examCode = useMemo(() => eosExamCode(title), [title]);
@@ -1485,17 +1500,30 @@
             const q = tab === 'mcq' ? paper[cur] : null;
             const t = q ? byId.get(q.id) : null;
 
-            const submit = (auto) => {
-                if (submitted.current) return;
-                submitted.current = true;
+            const submit = async (auto) => {
+                if (submitted.current || charging.current) return;
+                charging.current = true;
+                setPaying(true);
                 const r = EOS.grade(paper, answers, byId);
                 r.usedMs = Date.now() - startedAt.current;
+                let paid = true;
+                if (onSubmit) {
+                    try {
+                        const out = await onSubmit(r);
+                        if (out === false) paid = false;
+                    } catch (e) {
+                        paid = false;
+                    }
+                }
+                charging.current = false;
+                setPaying(false);
+                if (!paid) return;
+                submitted.current = true;
                 setWantFinish(true);
                 setReviewing(false);
                 setTab('mcq');
                 if (auto) setTimeUp(true);
                 setResult(r);
-                if (onSubmit) onSubmit(r);
                 if (auto && toast) toast('Hết giờ — hệ thống đã tự nộp bài', 'info');
             };
 
@@ -1684,8 +1712,8 @@
                                 <input type="checkbox" checked={wantFinish} disabled={!!result} onChange={(e) => setWantFinish(e.target.checked)} />
                                 I want to finish the exam.
                             </label>
-                            <button type="button" className="eos-btn" disabled={!wantFinish || !!result} onClick={() => submit(false)}
-                                style={wantFinish && !result ? { background: '#FFFF99' } : undefined}>Finish</button>
+                            <button type="button" className="eos-btn" disabled={!wantFinish || !!result || paying} onClick={() => submit(false)}
+                                style={wantFinish && !result && !paying ? { background: '#FFFF99' } : undefined}>{paying ? '…' : 'Finish'}</button>
                             <span style={{ marginLeft: 'auto', color: '#0000FF' }}>Updated 01/10/2010</span>
                             <button type="button" className="eos-btn" onClick={leave}>Exit</button>
                         </div>
@@ -2625,7 +2653,12 @@
             if (session && session.mode === 'eos') {
                 return (
                     <EOSSimulator key={session.id} title={session.title} items={session.pool} count={session.count} minutes={session.minutes} toast={toast} canExplain={AI.ready()}
-                        onSubmit={(r) => { chargeTurn(toast, 'Nộp ' + session.title); r.wrong.forEach(w => review(w.id, false)); }}
+                        onSubmit={async (r) => {
+                            const paid = await window.EDU.chargeTurn(toast, 'Nộp ' + session.title);
+                            if (!paid) return false;
+                            r.wrong.forEach(w => review(w.id, false));
+                            return true;
+                        }}
                         onDrillWrong={(ids) => startSession(ids, 'burst', 'Nhồi lại câu sai EOS')}
                         onExit={closeSession} />
                 );
@@ -3003,7 +3036,12 @@
             if (view === 'eos' && run) {
                 return (
                     <EOSSimulator key={run.key} title={pack.code + ' · ' + pack.name} items={run.pool} count={run.count} minutes={run.minutes} toast={toast} canExplain={AI.ready()}
-                        onSubmit={(r) => { chargeTurn(toast, 'Nộp ' + pack.code); r.wrong.forEach(w => reviewPack(pack.id, w.id, false)); }}
+                        onSubmit={async (r) => {
+                            const paid = await window.EDU.chargeTurn(toast, 'Nộp ' + pack.code);
+                            if (!paid) return false;
+                            r.wrong.forEach(w => reviewPack(pack.id, w.id, false));
+                            return true;
+                        }}
                         onDrillWrong={(ids) => { setRun({ kind: 'eos', ids, key: Date.now() }); setView('burst'); }}
                         onExit={backToPack} />
                 );
@@ -3207,6 +3245,14 @@
                 const open = () => setFundShop(true);
                 window.addEventListener('edu-fund-shop', open);
                 return () => window.removeEventListener('edu-fund-shop', open);
+            }, []);
+            useEffect(() => {
+                const quota = window.EDU && window.EDU.Quota;
+                if (!quota || !quota.sync) return undefined;
+                const pull = () => { quota.sync().catch(() => {}); };
+                pull();
+                const id = setInterval(pull, 15000);
+                return () => clearInterval(id);
             }, []);
             useEffect(() => {
                 let stop = false;

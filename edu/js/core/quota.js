@@ -2,9 +2,9 @@
     'use strict';
 
     /*
-     * Quỹ lượt thi. Lượt mua do SePay cộng khi nội dung chuyển khoản là "EDU <mã quỹ>".
-     * Không gắn máy. Lượt không hết hạn. Máy khác cùng mã nhận lần mua khi bấm kiểm tra.
-     * Mã EDUF1 vẫn chuyển sổ local (cả lần nộp) sang trình duyệt khác.
+     * Quỹ lượt thi. Mỗi trình duyệt mới có một mã riêng.
+     * Mua và nộp bài trừ trên server: mọi máy dán cùng mã thì dùng chung một số còn lại.
+     * Mã EDUF1 cũ vẫn nhận được, rồi số còn lại lấy từ server.
      */
     const KEY = 'fund';
     const UNIT = 5000;
@@ -18,9 +18,17 @@
 
     const priceOf = (pack) => Math.round(pack.turns * UNIT * (1 - pack.off));
 
-    const blank = () => ({ code: 'CHUNG', balance: 0, history: [] });
-
     const cleanCode = (value) => String(value || '').toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 12);
+
+    const ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+    const mintCode = () => {
+        const bytes = new Uint8Array(8);
+        if (window.crypto && crypto.getRandomValues) crypto.getRandomValues(bytes);
+        else for (let i = 0; i < bytes.length; i++) bytes[i] = Math.floor(Math.random() * 256);
+        let out = '';
+        for (let i = 0; i < bytes.length; i++) out += ALPHABET[bytes[i] % ALPHABET.length];
+        return out;
+    };
 
     const validEvent = (ev) => {
         if (!ev || typeof ev !== 'object') return false;
@@ -38,10 +46,12 @@
 
     const load = () => {
         const raw = EDU.Store.prefs.get(KEY, null);
-        const fund = blank();
-        if (!raw || typeof raw !== 'object') return fund;
-        const code = cleanCode(raw.code);
-        if (code.length >= 4) fund.code = code;
+        if (!raw || typeof raw !== 'object' || cleanCode(raw.code).length < 4) {
+            const fresh = { code: mintCode(), balance: 0, history: [] };
+            EDU.Store.prefs.set(KEY, fresh);
+            return fresh;
+        }
+        const fund = { code: cleanCode(raw.code), balance: 0, history: [] };
         const history = [];
         const seen = new Set();
         (Array.isArray(raw.history) ? raw.history : []).forEach((ev) => {
@@ -91,7 +101,11 @@
         const code = cleanCode(value);
         if (code.length < 4) throw new Error('Mã quỹ cần 4–12 chữ hoặc số.');
         const fund = load();
-        fund.code = code;
+        if (fund.code !== code) {
+            fund.code = code;
+            fund.balance = 0;
+            fund.history = [];
+        }
         return save(fund);
     };
 
@@ -132,6 +146,44 @@
         return { code: snap.code, balance: snap.balance, added };
     };
 
+    let syncedOnce = false;
+
+    const applyServer = (state) => {
+        const fund = load();
+        const seen = new Set(fund.history.map((ev) => ev.id));
+        let added = 0;
+        let fresh = 0;
+        let freshBuys = 0;
+        (Array.isArray(state.events) ? state.events : []).forEach((ev) => {
+            if (!validEvent(ev) || seen.has(ev.id)) return;
+            seen.add(ev.id);
+            fresh += 1;
+            fund.history.push({
+                id: ev.id,
+                t: ev.t,
+                delta: ev.delta,
+                kind: ev.kind,
+                pack: ev.pack || '',
+                note: EDU.Security.cleanText(ev.note || '', 80)
+            });
+            if (ev.kind === 'buy' && ev.delta > 0) {
+                added += ev.delta;
+                freshBuys += 1;
+            }
+        });
+        let remaining = Number(state.balance);
+        if (syncedOnce && Number.isFinite(remaining) && remaining > fund.balance && !freshBuys) remaining = fund.balance;
+        if (!fresh && Number.isFinite(remaining) && Math.floor(remaining) === fund.balance) {
+            syncedOnce = true;
+            return { code: fund.code, balance: fund.balance, added: 0 };
+        }
+        if (Number.isFinite(remaining)) fund.balance = Math.max(0, Math.floor(remaining));
+        fund.history.sort((a, b) => b.t - a.t);
+        syncedOnce = true;
+        const snap = save(fund);
+        return { code: snap.code, balance: snap.balance, added };
+    };
+
     const sync = async () => {
         const code = load().code;
         let res;
@@ -142,25 +194,48 @@
         }
         let data = null;
         try { data = await res.json(); } catch (e) { data = null; }
-        if (!res.ok || !data || !Array.isArray(data.purchases)) {
+        if (!res.ok || !data) {
             throw new Error(res.status === 503 ? 'Máy chủ chưa nối sổ quỹ. Lượt sẽ cộng khi SePay ghi được giao dịch.' : 'Chưa kiểm tra được thanh toán.');
         }
-        return applyPurchases(data.purchases);
+        if (Number.isFinite(Number(data.balance)) || Array.isArray(data.events)) {
+            return applyServer({ balance: data.balance, events: Array.isArray(data.events) ? data.events : data.purchases });
+        }
+        if (Array.isArray(data.purchases)) return applyPurchases(data.purchases);
+        throw new Error('Chưa kiểm tra được thanh toán.');
     };
 
-    const spend = (note) => {
+    const spend = async (note) => {
+        syncedOnce = true;
         const fund = load();
-        if (fund.balance < 1) return null;
-        fund.history.unshift({
-            id: newId('e'),
-            t: Date.now(),
-            delta: -1,
-            kind: 'eos',
-            pack: '',
-            note: EDU.Security.cleanText(note || 'Nộp bài EOS', 80)
-        });
-        fund.balance -= 1;
-        return save(fund);
+        const id = newId('e');
+        const cleanNote = EDU.Security.cleanText(note || 'Nộp bài EOS', 80);
+        let res;
+        try {
+            res = await fetch('/api/fund', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+                body: JSON.stringify({ code: fund.code, id, note: cleanNote })
+            });
+        } catch (e) {
+            throw new Error('Chưa trừ được lượt. Kiểm tra mạng rồi nộp lại.');
+        }
+        let data = null;
+        try { data = await res.json(); } catch (e) { data = null; }
+        if (res.status === 409) {
+            const empty = load();
+            empty.balance = 0;
+            save(empty);
+            return null;
+        }
+        if (!res.ok || !data || data.ok !== true || !Number.isFinite(Number(data.balance))) {
+            throw new Error(res.status === 503 ? 'Máy chủ chưa nối sổ quỹ, lượt chưa bị trừ.' : 'Chưa trừ được lượt.');
+        }
+        const next = load();
+        if (!next.history.some((ev) => ev.id === id)) {
+            next.history.unshift({ id, t: Date.now(), delta: -1, kind: 'eos', pack: '', note: cleanNote });
+        }
+        next.balance = Math.max(0, Math.floor(Number(data.balance)));
+        return save(next);
     };
 
     const encode = (fund) => {
