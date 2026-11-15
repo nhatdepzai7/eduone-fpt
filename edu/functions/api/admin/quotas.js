@@ -1,1 +1,1 @@
-export { onRequest } from '../../../api/admin/quotas.js';
+export { quotasOnRequest as onRequest } from '../../../server/admin-routes.js';

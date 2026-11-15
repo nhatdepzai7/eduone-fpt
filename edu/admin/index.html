@@ -68,7 +68,7 @@
                 setBusy(true);
                 setError('');
                 try {
-                    const res = await fetch('/api/admin/login', {
+                    const res = await fetch('/api/desk?action=login', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
                         body: JSON.stringify({ password })
@@ -105,13 +105,13 @@
             const [code, setCode] = useState('');
             const [turns, setTurns] = useState('0');
             const [busy, setBusy] = useState('');
-            const load = () => api(token, '/api/admin/quotas').then(setData).catch((e) => { if (e.auth) onAuth(); else setError(e.message); });
+            const load = () => api(token, '/api/desk?action=quotas').then(setData).catch((e) => { if (e.auth) onAuth(); else setError(e.message); });
             useEffect(() => { load(); }, []);
             const run = async (label, body) => {
                 setBusy(label);
                 setError('');
                 try {
-                    await api(token, '/api/admin/quotas', body);
+                    await api(token, '/api/desk?action=quotas', body);
                     await load();
                 } catch (e) {
                     if (e.auth) onAuth();
@@ -206,7 +206,7 @@
             const [info, setInfo] = useState('');
             const [busy, setBusy] = useState(false);
             const [rewards, setRewards] = useState({});
-            const load = () => api(token, '/api/admin/exams').then((data) => {
+            const load = () => api(token, '/api/desk?action=exams').then((data) => {
                 setExams(data.exams || []);
                 setPending(data.pending || []);
             }).catch((e) => { if (e.auth) onAuth(); else setError(e.message); });
@@ -223,7 +223,7 @@
                 setError('');
                 setInfo('');
                 try {
-                    await api(token, '/api/admin/exams', { op: 'save', id: form.id, name: form.name, code: form.code, subject: form.subject, text: form.text });
+                    await api(token, '/api/desk?action=exams', { op: 'save', id: form.id, name: form.name, code: form.code, subject: form.subject, text: form.text });
                     setForm(blankExam);
                     setInfo(form.id ? 'Đã lưu đề.' : 'Đã đăng đề. Sinh viên mở lại trang sẽ thấy trong Đề hệ thống.');
                     await load();
@@ -239,7 +239,7 @@
                 setError('');
                 setInfo('');
                 try {
-                    const res = await api(token, '/api/admin/exams', body);
+                    const res = await api(token, '/api/desk?action=exams', body);
                     setInfo(res.grantError || done);
                     await load();
                 } catch (err) {
@@ -338,7 +338,7 @@
         const Shell = ({ token, onLogout }) => {
             const [tab, setTab] = useState('quota');
             const leave = async () => {
-                try { await api(token, '/api/admin/login', {}, 'DELETE'); } catch (e) {}
+                try { await api(token, '/api/desk?action=login', {}, 'DELETE'); } catch (e) {}
                 sessionStorage.removeItem(TOKEN_KEY);
                 onLogout();
             };

@@ -1,1 +1,1 @@
-export { onRequest } from '../../../api/admin/exams.js';
+export { examsOnRequest as onRequest } from '../../../server/admin-routes.js';

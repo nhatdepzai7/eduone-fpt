@@ -1,1 +1,1 @@
-export { onRequest } from '../../../api/admin/login.js';
+export { loginOnRequest as onRequest } from '../../../server/admin-routes.js';
