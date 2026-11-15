@@ -1,6 +1,6 @@
-import { requireAdmin } from '../admin-auth.js';
-import { fail, json, mount } from '../http.js';
-import { adjustQuota, listQuotas, listTransactions } from '../ledger.js';
+import { requireAdmin } from '../../server/admin-auth.js';
+import { fail, json, mount } from '../../server/http.js';
+import { adjustQuota, listQuotas, listTransactions } from '../../server/ledger.js';
 
 async function handle(req, env) {
     try {

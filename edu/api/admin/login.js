@@ -1,5 +1,5 @@
-import { bearer, loginAdmin, logoutAdmin, requireAdmin } from '../admin-auth.js';
-import { clientIp, fail, json, mount } from '../http.js';
+import { bearer, loginAdmin, logoutAdmin, requireAdmin } from '../../server/admin-auth.js';
+import { clientIp, fail, json, mount } from '../../server/http.js';
 
 async function handle(req, env) {
     try {

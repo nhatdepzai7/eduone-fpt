@@ -1,7 +1,7 @@
-import { requireAdmin } from '../admin-auth.js';
-import { deleteOfficial, listOfficial, listPending, publishPending, rejectPending, saveOfficial, takePending } from '../exams-store.js';
-import { fail, json, mount } from '../http.js';
-import { adjustQuota } from '../ledger.js';
+import { requireAdmin } from '../../server/admin-auth.js';
+import { deleteOfficial, listOfficial, listPending, publishPending, rejectPending, saveOfficial, takePending } from '../../server/exams-store.js';
+import { fail, json, mount } from '../../server/http.js';
+import { adjustQuota } from '../../server/ledger.js';
 
 async function handle(req, env) {
     try {

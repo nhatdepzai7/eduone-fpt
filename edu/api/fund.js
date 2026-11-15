@@ -3,7 +3,7 @@
  * Trả các lần SePay đã cộng cho mã quỹ. Trình duyệt tự ghép vào sổ local.
  */
 
-import { cleanCode, listPurchases } from './ledger.js';
+import { cleanCode, listPurchases } from '../server/ledger.js';
 
 function json(status, obj, extra) {
     const headers = Object.assign({

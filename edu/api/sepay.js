@@ -8,7 +8,7 @@
  * Thiếu khóa xác thực hoặc Redis thì 503, SePay sẽ gửi lại.
  */
 
-import { ACCOUNT, BANK, creditPurchase, envGet, eventId, eventTime, fundCodeFrom, packForAmount } from './ledger.js';
+import { ACCOUNT, BANK, creditPurchase, envGet, eventId, eventTime, fundCodeFrom, packForAmount } from '../server/ledger.js';
 
 const MAX_BODY = 16000;
 

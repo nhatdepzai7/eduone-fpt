@@ -3,7 +3,7 @@
  * GET /api/machines — chỉ admin (header Authorization: Bearer ADMIN_KEY) xem danh sách.
  */
 
-import { cleanCode, envGet, listPurchases, redisCall } from './ledger.js';
+import { cleanCode, envGet, listPurchases, redisCall } from '../server/ledger.js';
 
 const MACHINE = /^[a-f0-9]{12}$/;
 const TXN = /^[a-z0-9]{8,24}$/;

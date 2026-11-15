@@ -1,5 +1,5 @@
-import { listOfficial } from './exams-store.js';
-import { fail, json, mount, sameOrigin } from './http.js';
+import { listOfficial } from '../server/exams-store.js';
+import { fail, json, mount, sameOrigin } from '../server/http.js';
 
 async function handle(req, env) {
     try {

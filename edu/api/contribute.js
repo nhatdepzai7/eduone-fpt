@@ -1,6 +1,6 @@
-import { submitPending } from './exams-store.js';
-import { clientIp, fail, json, mount, sameOrigin } from './http.js';
-import { redisCommand } from './ledger.js';
+import { submitPending } from '../server/exams-store.js';
+import { clientIp, fail, json, mount, sameOrigin } from '../server/http.js';
+import { redisCommand } from '../server/ledger.js';
 
 async function handle(req, env) {
     try {
