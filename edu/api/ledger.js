@@ -61,8 +61,8 @@ export function eventTime(transactionDate) {
 }
 
 function redisConfig(env) {
-    const url = envGet(env, 'UPSTASH_REDIS_REST_URL').trim().replace(/\/$/, '');
-    const token = envGet(env, 'UPSTASH_REDIS_REST_TOKEN').trim();
+    const url = (envGet(env, 'UPSTASH_REDIS_REST_URL') || envGet(env, 'KV_REST_API_URL')).trim().replace(/\/$/, '');
+    const token = (envGet(env, 'UPSTASH_REDIS_REST_TOKEN') || envGet(env, 'KV_REST_API_TOKEN')).trim();
     if (!url || !token) {
         const err = new Error('missing-redis');
         err.code = 'missing-redis';
