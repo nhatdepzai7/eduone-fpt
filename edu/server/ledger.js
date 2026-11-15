@@ -94,7 +94,7 @@ function redisConfig(env) {
     return { url, token };
 }
 
-async function redisCall(env, args) {
+export async function redisCall(env, args) {
     const { url, token } = redisConfig(env);
     const ctrl = new AbortController();
     const timer = setTimeout(() => ctrl.abort(), 8000);
@@ -118,6 +118,10 @@ async function redisCall(env, args) {
     } finally {
         clearTimeout(timer);
     }
+}
+
+export async function redisCommand(env, args) {
+    return redisCall(env, args);
 }
 
 export async function creditPurchase(env, purchase) {
