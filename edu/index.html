@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <!-- Proxy AI chạy trên domain riêng thì thêm domain đó vào connect-src. -->
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' file: 'unsafe-inline' 'unsafe-eval' https://unpkg.com https://cdn.tailwindcss.com https://cdn.sheetjs.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' file: data: blob:; media-src 'self' blob:; worker-src blob:; connect-src 'self' https://*.workers.dev https://*.vercel.app https://*.netlify.app https://*.supabase.co http://localhost:* http://127.0.0.1:*; object-src 'none'; base-uri 'none'; form-action 'none'">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' file: 'unsafe-inline' 'unsafe-eval' https://unpkg.com https://cdn.tailwindcss.com https://cdn.sheetjs.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' file: data: blob: https://img.vietqr.io; media-src 'self' blob:; worker-src blob:; connect-src 'self' https://*.workers.dev https://*.vercel.app https://*.netlify.app https://*.supabase.co http://localhost:* http://127.0.0.1:*; object-src 'none'; base-uri 'none'; form-action 'none'">
     <meta name="referrer" content="no-referrer">
     <meta name="theme-color" content="#F5F6F8">
     <title>EduOne · Học đúng giờ, thi chắc qua</title>
@@ -449,8 +449,26 @@
             const [picked, setPicked] = useState(null);
             const [code, setCode] = useState(fund.code);
             const [incoming, setIncoming] = useState('');
+            const [syncing, setSyncing] = useState(false);
             const pack = E.Quota.packs.find(p => p.id === picked);
+            const bank = E.Quota.BANK;
+            const memo = E.Quota.memoOf(fund.code);
             const when = (t) => new Date(t).toLocaleString('vi-VN', { hour: '2-digit', minute: '2-digit', day: '2-digit', month: '2-digit' });
+            const checkPay = (quiet) => {
+                setSyncing(true);
+                return E.Quota.sync().then((r) => {
+                    if (r.added > 0) toast('Đã cộng ' + r.added + ' lượt từ chuyển khoản. Quỹ hiện có ' + r.balance + ' lượt.', 'success');
+                    else if (!quiet) toast('Chưa thấy giao dịch mới cho nội dung ' + E.Quota.memoOf(r.code) + '.', 'info');
+                }).catch((e) => {
+                    if (!quiet) toast(e.message || 'Chưa kiểm tra được thanh toán.', 'error');
+                }).finally(() => setSyncing(false));
+            };
+            useEffect(() => {
+                if (!picked) return undefined;
+                checkPay(true);
+                const id = setInterval(() => checkPay(true), 12000);
+                return () => clearInterval(id);
+            }, [picked, fund.code]);
             const copyFund = () => {
                 copyText(E.Quota.exportCode()).then(() => toast('Đã copy mã quỹ. Máy khác dán mã này để cộng cùng sổ lượt.', 'success')).catch(() => toast('Không copy được. Hãy chọn mã và copy tay.', 'error'));
             };
@@ -490,13 +508,16 @@
                     </div>
                     {pack && (
                         <div className="rounded-2xl border border-line p-4 flex flex-wrap gap-4 items-center">
-                            <img src="assets/qr-ung-ho.png" alt="Mã QR chuyển khoản ủng hộ team" className="w-40 h-40 rounded-xl border border-line object-contain bg-white" />
+                            <img src={E.Quota.qrUrl(pack.price, fund.code)} alt={'VietQR ' + bank.name + ' ' + bank.account} className="w-40 h-40 rounded-xl border border-line object-contain bg-white" />
                             <div className="min-w-0 flex-1">
                                 <p className="font-semibold">Chuyển khoản {pack.name}</p>
-                                <p className="text-sm text-ink2 mt-1 tnum">Số tiền: <b className="text-ink">{vnd(pack.price)}</b></p>
-                                <p className="text-sm text-ink2 tnum">Nội dung: <b className="text-ink">EDUONE {fund.code} {pack.id}</b></p>
-                                <p className="text-xs text-muted mt-2">QR là tài khoản sẵn của team. Trang chưa nối cổng thanh toán tự động — chuyển đúng số tiền rồi bấm xác nhận để cộng lượt trên trình duyệt này.</p>
-                                <button type="button" className="btn btn-primary mt-3" onClick={() => { const next = E.Quota.buy(pack.id); toast('Đã cộng ' + pack.turns + ' lượt. Quỹ hiện có ' + next.balance + ' lượt.', 'success'); }}>Tôi đã chuyển khoản — cộng {pack.turns} lượt</button>
+                                <p className="text-sm text-ink2 mt-1">{bank.name} · {bank.bin}</p>
+                                <p className="text-sm text-ink2 tnum">Số tài khoản: <b className="text-ink">{bank.account}</b></p>
+                                <p className="text-sm text-ink2">Chủ tài khoản: <b className="text-ink">{bank.holder}</b></p>
+                                <p className="text-sm text-ink2 tnum">Số tiền: <b className="text-ink">{vnd(pack.price)}</b></p>
+                                <p className="text-sm text-ink2 tnum">Nội dung: <b className="text-ink">{memo}</b></p>
+                                <p className="text-xs text-muted mt-2">SePay cộng đúng {pack.turns} lượt vào mã quỹ này khi tiền vào tài khoản trên với đúng số tiền và nội dung. Lượt không tự cộng nếu bấm nút khi chưa có giao dịch.</p>
+                                <button type="button" className="btn btn-primary mt-3" disabled={syncing} onClick={() => checkPay(false)}>{syncing ? 'Đang kiểm tra…' : 'Kiểm tra chuyển khoản'}</button>
                             </div>
                         </div>
                     )}
@@ -516,7 +537,7 @@
                         </div>
                         <div>
                             <p className="text-sm font-semibold mb-2">Đưa quỹ sang máy khác</p>
-                            <p className="text-xs text-muted mb-2">Cùng một mã không tự nhảy số giữa hai trình duyệt. Copy mã quỹ rồi dán ở máy kia — các lần mua và lần trừ được cộng vào, không ghi đè số đang có.</p>
+                            <p className="text-xs text-muted mb-2">Lượt mua theo nội dung EDU và mã quỹ được SePay ghi trên máy chủ. Máy khác bấm kiểm tra với cùng mã để nhận các lần mua đó. Lần nộp EOS vẫn nằm trên từng trình duyệt cho đến khi copy mã quỹ sang.</p>
                             <div className="flex flex-wrap gap-2">
                                 <button type="button" className="btn btn-secondary btn-sm" onClick={copyFund}>Copy mã quỹ</button>
                             </div>

@@ -2,9 +2,9 @@
     'use strict';
 
     /*
-     * Quỹ lượt thi dùng chung trên trình duyệt này.
-     * Không gắn máy. Lượt không hết hạn: mua thêm là cộng vào số dư.
-     * Máy khác nhận cùng quỹ khi dán mã EDUF1 (sổ cái các lần mua và lần nộp).
+     * Quỹ lượt thi. Lượt mua do SePay cộng khi nội dung chuyển khoản là "EDU <mã quỹ>".
+     * Không gắn máy. Lượt không hết hạn. Máy khác cùng mã nhận lần mua khi bấm kiểm tra.
+     * Mã EDUF1 vẫn chuyển sổ local (cả lần nộp) sang trình duyệt khác.
      */
     const KEY = 'fund';
     const UNIT = 5000;
@@ -91,20 +91,57 @@
         return save(fund);
     };
 
-    const buy = (packId) => {
-        const pack = PACKS.find((p) => p.id === packId);
-        if (!pack) throw new Error('Gói không hợp lệ.');
+    const BANK = {
+        bin: 'TPB',
+        name: 'TPBank',
+        account: '10006548943',
+        holder: 'NGUYEN VAN NHAT'
+    };
+
+    const memoOf = (code) => 'EDU ' + cleanCode(code);
+
+    const qrUrl = (amount, code) => {
+        const money = Math.round(Number(amount) || 0);
+        return 'https://img.vietqr.io/image/TPB-10006548943-compact2.png?amount=' + money + '&addInfo=' + encodeURIComponent(memoOf(code));
+    };
+
+    const applyPurchases = (list) => {
         const fund = load();
-        fund.history.unshift({
-            id: newId('b'),
-            t: Date.now(),
-            delta: pack.turns,
-            kind: 'buy',
-            pack: pack.id,
-            note: pack.name
+        const seen = new Set(fund.history.map((ev) => ev.id));
+        let added = 0;
+        (Array.isArray(list) ? list : []).forEach((ev) => {
+            if (!validEvent(ev) || ev.kind !== 'buy' || seen.has(ev.id)) return;
+            seen.add(ev.id);
+            fund.history.push({
+                id: ev.id,
+                t: ev.t,
+                delta: ev.delta,
+                kind: 'buy',
+                pack: ev.pack || '',
+                note: EDU.Security.cleanText(ev.note || '', 80)
+            });
+            fund.balance += ev.delta;
+            added += ev.delta;
         });
-        fund.balance += pack.turns;
-        return save(fund);
+        fund.history.sort((a, b) => b.t - a.t);
+        const snap = save(fund);
+        return { code: snap.code, balance: snap.balance, added };
+    };
+
+    const sync = async () => {
+        const code = load().code;
+        let res;
+        try {
+            res = await fetch('/api/fund?code=' + encodeURIComponent(code), { headers: { Accept: 'application/json' } });
+        } catch (e) {
+            throw new Error('Chưa kiểm tra được thanh toán.');
+        }
+        let data = null;
+        try { data = await res.json(); } catch (e) { data = null; }
+        if (!res.ok || !data || !Array.isArray(data.purchases)) {
+            throw new Error(res.status === 503 ? 'Máy chủ chưa nối sổ quỹ. Lượt sẽ cộng khi SePay ghi được giao dịch.' : 'Chưa kiểm tra được thanh toán.');
+        }
+        return applyPurchases(data.purchases);
     };
 
     const spend = (note) => {
@@ -181,8 +218,11 @@
         read,
         subscribe,
         balance: () => load().balance,
+        BANK,
+        memoOf,
+        qrUrl,
         setCode,
-        buy,
+        sync,
         spend,
         exportCode: () => encode(load()),
         importCode,
