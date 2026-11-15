@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="referrer" content="no-referrer">
+    <meta name="robots" content="noindex">
+    <title>FPass · Quản trị</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+    <script crossorigin="anonymous" src="https://unpkg.com/react@18.3.1/umd/react.production.min.js" integrity="sha384-DGyLxAyjq0f9SPpVevD6IgztCFlnMF6oW/XQGmfe+IsZ8TqEiDrcHkMLKI6fiB/Z"></script>
+    <script crossorigin="anonymous" src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js" integrity="sha384-gTGxhz21lVGYNMcdJOyq01Edg0jhn/c22nsx0kyqP0TxaV5WVdsSH1fSDUf5YJj1"></script>
+    <script crossorigin="anonymous" src="https://unpkg.com/@babel/standalone@7.26.4/babel.min.js" integrity="sha384-x/ilTFv/u/eu6YSmkFDZl5V5Mm/pkxxcVv2cVJOrr1J0rvILhMvRBCy6yA75wYBj"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        :root { color-scheme: light; }
+        body { font-family: "Be Vietnam Pro", system-ui, sans-serif; background: #E2E8F0; color: #111827; }
+        .tnum { font-family: "JetBrains Mono", ui-monospace, Consolas, monospace; font-variant-numeric: tabular-nums; }
+        .field { width: 100%; min-height: 44px; border-radius: 12px; border: 1px solid #DCE0E8; background: #fff; padding: 8px 12px; }
+        .field:focus { outline: 3px solid #4338CA; outline-offset: 1px; }
+        button:focus-visible, a:focus-visible { outline: 3px solid #4338CA; outline-offset: 2px; }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+    <script type="text/babel" data-presets="react">
+        const { useEffect, useState } = React;
+        const TOKEN_KEY = 'fpass-admin-token';
+        const SUBJECTS = [
+            ['eos', 'EOS'],
+            ['fe', 'FE'],
+            ['pt', 'PT'],
+            ['vocab', 'Từ vựng'],
+            ['other', 'Khác']
+        ];
+
+        const vnd = (n) => new Intl.NumberFormat('vi-VN').format(n || 0) + 'đ';
+        const when = (t) => t ? new Date(t).toLocaleString('vi-VN', { timeZone: 'Asia/Ho_Chi_Minh', hour12: false }) : '—';
+
+        const api = async (token, path, body, method) => {
+            const res = await fetch(path, {
+                method: method || (body ? 'POST' : 'GET'),
+                headers: {
+                    Accept: 'application/json',
+                    'Content-Type': 'application/json',
+                    Authorization: 'Bearer ' + token
+                },
+                body: body ? JSON.stringify(body) : undefined
+            });
+            let data = {};
+            try { data = await res.json(); } catch (e) { data = {}; }
+            if (res.status === 401) {
+                const err = new Error(data.error || 'Cần đăng nhập lại.');
+                err.auth = true;
+                throw err;
+            }
+            if (!res.ok) throw new Error(data.error || 'Không thực hiện được.');
+            return data;
+        };
+
+        const Login = ({ onOk }) => {
+            const [password, setPassword] = useState('');
+            const [error, setError] = useState('');
+            const [busy, setBusy] = useState(false);
+            const submit = async (e) => {
+                e.preventDefault();
+                setBusy(true);
+                setError('');
+                try {
+                    const res = await fetch('/api/admin/login', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+                        body: JSON.stringify({ password })
+                    });
+                    const data = await res.json().catch(() => ({}));
+                    if (!res.ok || !data.token) throw new Error(data.error || 'Không đăng nhập được.');
+                    sessionStorage.setItem(TOKEN_KEY, data.token);
+                    onOk(data.token);
+                } catch (err) {
+                    setError(err.message || 'Không đăng nhập được.');
+                } finally {
+                    setBusy(false);
+                }
+            };
+            return (
+                <main className="min-h-screen flex items-center justify-center px-4">
+                    <form onSubmit={submit} className="w-full max-w-sm bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
+                        <p className="text-sm font-semibold text-indigo-700">FPass</p>
+                        <h1 className="text-2xl font-bold mt-1">Quản trị</h1>
+                        <p className="text-sm text-slate-600 mt-2">Nhập mật khẩu quản trị để xem mã quỹ, doanh thu và kho đề.</p>
+                        <label className="block mt-5 text-sm font-medium">Mật khẩu
+                            <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} autoComplete="current-password" className="field mt-1" autoFocus />
+                        </label>
+                        {error && <p className="text-sm text-rose-700 mt-3" role="alert">{error}</p>}
+                        <button type="submit" disabled={busy || !password} className="mt-4 w-full min-h-[44px] rounded-xl bg-indigo-700 text-white font-semibold disabled:opacity-50">{busy ? 'Đang kiểm tra…' : 'Vào trang quản trị'}</button>
+                    </form>
+                </main>
+            );
+        };
+
+        const QuotaTab = ({ token, onAuth }) => {
+            const [data, setData] = useState(null);
+            const [error, setError] = useState('');
+            const [code, setCode] = useState('');
+            const [turns, setTurns] = useState('0');
+            const [busy, setBusy] = useState('');
+            const load = () => api(token, '/api/admin/quotas').then(setData).catch((e) => { if (e.auth) onAuth(); else setError(e.message); });
+            useEffect(() => { load(); }, []);
+            const run = async (label, body) => {
+                setBusy(label);
+                setError('');
+                try {
+                    await api(token, '/api/admin/quotas', body);
+                    await load();
+                } catch (e) {
+                    if (e.auth) onAuth();
+                    else setError(e.message);
+                } finally {
+                    setBusy('');
+                }
+            };
+            const quotas = data && data.quotas || [];
+            const txs = data && data.transactions || [];
+            return (
+                <div className="space-y-4">
+                    <div className="grid sm:grid-cols-3 gap-3">
+                        <div className="bg-white rounded-2xl border border-slate-200 p-4"><p className="text-sm text-slate-500">Tổng doanh thu</p><p className="text-2xl font-bold tnum mt-1">{vnd(data ? data.revenue : 0)}</p></div>
+                        <div className="bg-white rounded-2xl border border-slate-200 p-4"><p className="text-sm text-slate-500">Mã quỹ đã có</p><p className="text-2xl font-bold tnum mt-1">{data ? data.count : 0}</p></div>
+                        <div className="bg-white rounded-2xl border border-slate-200 p-4"><p className="text-sm text-slate-500">Giao dịch SePay gần nhất</p><p className="text-2xl font-bold tnum mt-1">{txs.length}</p></div>
+                    </div>
+                    <form className="bg-white rounded-2xl border border-slate-200 p-4 flex flex-wrap gap-3 items-end" onSubmit={(e) => { e.preventDefault(); run('create', { op: 'create', code, turns: Number(turns) || 0 }); }}>
+                        <label className="text-sm font-medium">Mã quỹ mới
+                            <input value={code} onChange={(e) => setCode(e.target.value.toUpperCase())} maxLength={12} className="field mt-1 w-36 uppercase" placeholder="CHUNG" />
+                        </label>
+                        <label className="text-sm font-medium">Lượt cấp ngay
+                            <input value={turns} onChange={(e) => setTurns(e.target.value)} inputMode="numeric" className="field mt-1 w-28 tnum" />
+                        </label>
+                        <button type="submit" disabled={!!busy} className="min-h-[44px] px-4 rounded-xl bg-indigo-700 text-white font-semibold">{busy === 'create' ? 'Đang tạo…' : 'Tạo mã quỹ'}</button>
+                    </form>
+                    {error && <p className="text-sm text-rose-700" role="alert">{error}</p>}
+                    <div className="bg-white rounded-2xl border border-slate-200 overflow-x-auto">
+                        <table className="w-full text-sm">
+                            <caption className="text-left px-4 py-3 font-semibold">Mã quỹ</caption>
+                            <thead className="text-left text-slate-500">
+                                <tr><th className="px-4 py-2">Mã quỹ</th><th className="px-4 py-2">Lượt đã cấp</th><th className="px-4 py-2">Tổng tiền đã nạp</th><th className="px-4 py-2">Cập nhật</th><th className="px-4 py-2">Cộng / trừ hoặc đặt lại</th></tr>
+                            </thead>
+                            <tbody>
+                                {quotas.length ? quotas.map((row) => <QuotaRow key={row.code + ':' + row.balance} row={row} busy={busy} onRun={run} />) : <tr><td className="px-4 py-6 text-slate-500" colSpan={5}>Chưa có mã quỹ nào được SePay cộng hoặc admin tạo.</td></tr>}
+                            </tbody>
+                        </table>
+                    </div>
+                    <p className="text-xs text-slate-500">Lượt đã cấp là số server đã cộng cho mã quỹ. Lần nộp bài trên từng máy không trừ vào cột này. Sinh viên bấm Kiểm tra chuyển khoản để nhận phần vừa cấp.</p>
+                    <div className="bg-white rounded-2xl border border-slate-200 overflow-x-auto">
+                        <table className="w-full text-sm">
+                            <caption className="text-left px-4 py-3 font-semibold">Lịch sử chuyển khoản SePay</caption>
+                            <thead className="text-left text-slate-500">
+                                <tr><th className="px-4 py-2">Thời gian</th><th className="px-4 py-2">Mã giao dịch</th><th className="px-4 py-2">Mã quỹ</th><th className="px-4 py-2">Số tiền</th><th className="px-4 py-2">Lượt</th><th className="px-4 py-2">Nội dung</th></tr>
+                            </thead>
+                            <tbody>
+                                {txs.length ? txs.map((tx) => (
+                                    <tr key={tx.id} className="border-t border-slate-100">
+                                        <td className="px-4 py-2 whitespace-nowrap">{when(tx.t)}</td>
+                                        <td className="px-4 py-2 tnum">{tx.id}</td>
+                                        <td className="px-4 py-2 tnum font-semibold">{tx.quotaId}</td>
+                                        <td className="px-4 py-2 tnum">{vnd(tx.amount)}</td>
+                                        <td className="px-4 py-2 tnum">+{tx.turns}</td>
+                                        <td className="px-4 py-2 max-w-xs truncate" title={tx.content}>{tx.content || '—'}</td>
+                                    </tr>
+                                )) : <tr><td className="px-4 py-6 text-slate-500" colSpan={6}>Chưa có giao dịch nào được ghi sau khi bản này chạy. Các lần nạp cũ không tự hiện lại.</td></tr>}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            );
+        };
+
+        const QuotaRow = ({ row, busy, onRun }) => {
+            const [delta, setDelta] = useState('10');
+            const [next, setNext] = useState(String(row.balance));
+            return (
+                <tr className="border-t border-slate-100 align-top">
+                    <td className="px-4 py-3 tnum font-semibold">{row.code}</td>
+                    <td className="px-4 py-3 tnum">{row.balance}</td>
+                    <td className="px-4 py-3 tnum">{vnd(row.money)}</td>
+                    <td className="px-4 py-3 whitespace-nowrap">{when(row.updated)}</td>
+                    <td className="px-4 py-3">
+                        <div className="flex flex-wrap gap-2">
+                            <input value={delta} onChange={(e) => setDelta(e.target.value)} aria-label={'Số lượt cộng hoặc trừ cho ' + row.code} className="field w-20 tnum" />
+                            <button type="button" disabled={!!busy} onClick={() => onRun(row.code + ':delta', { op: 'delta', code: row.code, delta: Number(delta) })} className="min-h-[44px] px-3 rounded-xl border border-slate-300 font-semibold">Cộng / trừ</button>
+                            <input value={next} onChange={(e) => setNext(e.target.value)} aria-label={'Đặt lượt đã cấp cho ' + row.code} className="field w-20 tnum" />
+                            <button type="button" disabled={!!busy} onClick={() => onRun(row.code + ':set', { op: 'set', code: row.code, balance: Number(next) })} className="min-h-[44px] px-3 rounded-xl border border-slate-300 font-semibold">Đặt số lượt</button>
+                        </div>
+                    </td>
+                </tr>
+            );
+        };
+
+        const blankExam = { id: '', name: '', code: '', subject: 'eos', text: '' };
+
+        const ExamTab = ({ token, onAuth }) => {
+            const [exams, setExams] = useState([]);
+            const [pending, setPending] = useState([]);
+            const [form, setForm] = useState(blankExam);
+            const [error, setError] = useState('');
+            const [info, setInfo] = useState('');
+            const [busy, setBusy] = useState(false);
+            const [rewards, setRewards] = useState({});
+            const load = () => api(token, '/api/admin/exams').then((data) => {
+                setExams(data.exams || []);
+                setPending(data.pending || []);
+            }).catch((e) => { if (e.auth) onAuth(); else setError(e.message); });
+            useEffect(() => { load(); }, []);
+            const setField = (key, value) => setForm((prev) => Object.assign({}, prev, { [key]: value }));
+            const readFile = async (file) => {
+                if (!file) return;
+                if (file.size > 400000) { setError('File lớn hơn 400KB.'); return; }
+                setField('text', await file.text());
+            };
+            const save = async (e) => {
+                e.preventDefault();
+                setBusy(true);
+                setError('');
+                setInfo('');
+                try {
+                    await api(token, '/api/admin/exams', { op: 'save', id: form.id, name: form.name, code: form.code, subject: form.subject, text: form.text });
+                    setForm(blankExam);
+                    setInfo(form.id ? 'Đã lưu đề.' : 'Đã đăng đề. Sinh viên mở lại trang sẽ thấy trong Đề hệ thống.');
+                    await load();
+                } catch (err) {
+                    if (err.auth) onAuth();
+                    else setError(err.message);
+                } finally {
+                    setBusy(false);
+                }
+            };
+            const act = async (body, done) => {
+                setBusy(true);
+                setError('');
+                setInfo('');
+                try {
+                    const res = await api(token, '/api/admin/exams', body);
+                    setInfo(res.grantError || done);
+                    await load();
+                } catch (err) {
+                    if (err.auth) onAuth();
+                    else setError(err.message);
+                } finally {
+                    setBusy(false);
+                }
+            };
+            return (
+                <div className="space-y-4">
+                    <form onSubmit={save} className="bg-white rounded-2xl border border-slate-200 p-4 space-y-3">
+                        <h2 className="font-semibold">{form.id ? 'Sửa đề đã đăng' : 'Đăng đề hệ thống'}</h2>
+                        <div className="grid sm:grid-cols-3 gap-3">
+                            <label className="text-sm font-medium">Tên đề
+                                <input value={form.name} onChange={(e) => setField('name', e.target.value)} className="field mt-1" maxLength={80} required />
+                            </label>
+                            <label className="text-sm font-medium">Mã môn
+                                <input value={form.code} onChange={(e) => setField('code', e.target.value.toUpperCase())} className="field mt-1 uppercase" maxLength={16} placeholder="SWT301" required />
+                            </label>
+                            <label className="text-sm font-medium">Loại
+                                <select value={form.subject} onChange={(e) => setField('subject', e.target.value)} className="field mt-1">
+                                    {SUBJECTS.map(([id, label]) => <option key={id} value={id}>{label}</option>)}
+                                </select>
+                            </label>
+                        </div>
+                        <label className="text-sm font-medium block">File JSON hoặc TXT
+                            <input type="file" accept=".json,.txt,application/json,text/plain" className="block mt-1 text-sm" onChange={(e) => readFile(e.target.files && e.target.files[0])} />
+                        </label>
+                        <label className="text-sm font-medium block">Hoặc dán nội dung
+                            <textarea value={form.text} onChange={(e) => setField('text', e.target.value)} rows={8} className="field mt-1 font-mono text-xs" placeholder={'{"items":[{"type":"mcq","question":"...","options":["A","B","C","D"],"answer":"B"}]}'} required />
+                        </label>
+                        <div className="flex flex-wrap gap-2">
+                            <button type="submit" disabled={busy} className="min-h-[44px] px-4 rounded-xl bg-indigo-700 text-white font-semibold">{busy ? 'Đang lưu…' : (form.id ? 'Lưu sửa' : 'Đăng đề')}</button>
+                            {form.id && <button type="button" className="min-h-[44px] px-4 rounded-xl border border-slate-300 font-semibold" onClick={() => setForm(blankExam)}>Hủy sửa</button>}
+                        </div>
+                        <p className="text-xs text-slate-500">Đề đăng lên mở cho mọi sinh viên, không khóa bằng mã kích hoạt. Tối đa 120 câu mỗi đề và 25 bộ.</p>
+                    </form>
+                    {error && <p className="text-sm text-rose-700" role="alert">{error}</p>}
+                    {info && <p className="text-sm text-emerald-800" role="status">{info}</p>}
+                    <ExamTable title="Kho đề hệ thống" rows={exams} empty="Chưa có đề hệ thống." actions={(row) => (
+                        <>
+                            <button type="button" className="min-h-[36px] px-3 rounded-lg border border-slate-300 font-semibold" onClick={() => setForm({ id: row.id, name: row.name, code: row.code, subject: row.subject || 'other', text: JSON.stringify({ items: row.items }, null, 2) })}>Sửa</button>
+                            <button type="button" className="min-h-[36px] px-3 rounded-lg border border-rose-200 text-rose-700 font-semibold" onClick={() => { if (confirm('Xóa đề ' + row.code + '?')) act({ op: 'delete', id: row.id }, 'Đã xóa đề.'); }}>Xóa</button>
+                        </>
+                    )} />
+                    <div className="bg-white rounded-2xl border border-slate-200 overflow-x-auto">
+                        <table className="w-full text-sm">
+                            <caption className="text-left px-4 py-3 font-semibold">Đề chờ duyệt</caption>
+                            <thead className="text-left text-slate-500"><tr><th className="px-4 py-2">Tên</th><th className="px-4 py-2">Mã</th><th className="px-4 py-2">Loại</th><th className="px-4 py-2">Câu</th><th className="px-4 py-2">Mã quỹ</th><th className="px-4 py-2">Duyệt</th></tr></thead>
+                            <tbody>
+                                {pending.length ? pending.map((row) => (
+                                    <tr key={row.id} className="border-t border-slate-100 align-top">
+                                        <td className="px-4 py-3">{row.name}</td>
+                                        <td className="px-4 py-3 tnum">{row.code}</td>
+                                        <td className="px-4 py-3">{(SUBJECTS.find((s) => s[0] === row.subject) || ['', row.subject])[1]}</td>
+                                        <td className="px-4 py-3 tnum">{row.count}</td>
+                                        <td className="px-4 py-3 tnum">{row.quotaId || '—'}</td>
+                                        <td className="px-4 py-3">
+                                            <div className="flex flex-wrap gap-2 items-center">
+                                                <input value={rewards[row.id] || ''} onChange={(e) => setRewards(Object.assign({}, rewards, { [row.id]: e.target.value }))} placeholder="Lượt thưởng" aria-label={'Lượt thưởng cho ' + row.name} className="field w-28 tnum" />
+                                                <button type="button" disabled={busy} className="min-h-[36px] px-3 rounded-lg bg-indigo-700 text-white font-semibold" onClick={() => act({ op: 'approve', id: row.id, reward: Number(rewards[row.id]) || 0, quotaId: row.quotaId }, 'Đã đưa đề vào kho hệ thống.')}>Duyệt</button>
+                                                <button type="button" disabled={busy} className="min-h-[36px] px-3 rounded-lg border border-slate-300 font-semibold" onClick={() => act({ op: 'reject', id: row.id }, 'Đã từ chối đề.')}>Từ chối</button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                )) : <tr><td className="px-4 py-6 text-slate-500" colSpan={6}>Chưa có đề sinh viên gửi.</td></tr>}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            );
+        };
+
+        const ExamTable = ({ title, rows, empty, actions }) => (
+            <div className="bg-white rounded-2xl border border-slate-200 overflow-x-auto">
+                <table className="w-full text-sm">
+                    <caption className="text-left px-4 py-3 font-semibold">{title}</caption>
+                    <thead className="text-left text-slate-500"><tr><th className="px-4 py-2">Tên</th><th className="px-4 py-2">Mã</th><th className="px-4 py-2">Loại</th><th className="px-4 py-2">Câu</th><th className="px-4 py-2">Cập nhật</th><th className="px-4 py-2"></th></tr></thead>
+                    <tbody>
+                        {rows.length ? rows.map((row) => (
+                            <tr key={row.id} className="border-t border-slate-100">
+                                <td className="px-4 py-3">{row.name}</td>
+                                <td className="px-4 py-3 tnum">{row.code}</td>
+                                <td className="px-4 py-3">{(SUBJECTS.find((s) => s[0] === row.subject) || ['', row.subject])[1]}</td>
+                                <td className="px-4 py-3 tnum">{row.count}</td>
+                                <td className="px-4 py-3 whitespace-nowrap">{when(row.updated)}</td>
+                                <td className="px-4 py-3"><div className="flex gap-2">{actions(row)}</div></td>
+                            </tr>
+                        )) : <tr><td className="px-4 py-6 text-slate-500" colSpan={6}>{empty}</td></tr>}
+                    </tbody>
+                </table>
+            </div>
+        );
+
+        const Shell = ({ token, onLogout }) => {
+            const [tab, setTab] = useState('quota');
+            const leave = async () => {
+                try { await api(token, '/api/admin/login', {}, 'DELETE'); } catch (e) {}
+                sessionStorage.removeItem(TOKEN_KEY);
+                onLogout();
+            };
+            const tabClass = (id) => 'min-h-[44px] px-4 rounded-xl font-semibold ' + (tab === id ? 'bg-indigo-700 text-white' : 'bg-white border border-slate-200');
+            return (
+                <main className="max-w-6xl mx-auto px-4 py-6">
+                    <header className="flex flex-wrap items-center justify-between gap-3 mb-5">
+                        <div>
+                            <p className="text-sm font-semibold text-indigo-700">FPass</p>
+                            <h1 className="text-2xl font-bold">Quản trị</h1>
+                        </div>
+                        <div className="flex gap-2">
+                            <a href="/" className="min-h-[44px] px-4 inline-flex items-center rounded-xl border border-slate-300 bg-white font-semibold">Về trang học</a>
+                            <button type="button" onClick={leave} className="min-h-[44px] px-4 rounded-xl border border-slate-300 bg-white font-semibold">Đăng xuất</button>
+                        </div>
+                    </header>
+                    <div className="flex flex-wrap gap-2 mb-4" role="tablist">
+                        <button type="button" role="tab" aria-selected={tab === 'quota'} className={tabClass('quota')} onClick={() => setTab('quota')}>Quản lý Máy & Doanh thu</button>
+                        <button type="button" role="tab" aria-selected={tab === 'exams'} className={tabClass('exams')} onClick={() => setTab('exams')}>Kho Đề Hệ Thống</button>
+                    </div>
+                    {tab === 'quota' ? <QuotaTab token={token} onAuth={onLogout} /> : <ExamTab token={token} onAuth={onLogout} />}
+                </main>
+            );
+        };
+
+        const App = () => {
+            const [token, setToken] = useState(() => sessionStorage.getItem(TOKEN_KEY) || '');
+            if (!token) return <Login onOk={setToken} />;
+            return <Shell token={token} onLogout={() => setToken('')} />;
+        };
+
+        ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+    </script>
+</body>
+</html>

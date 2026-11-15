@@ -1,4 +1,4 @@
-# EduOne — Design System (MASTER)
+# FPass — Design System (MASTER)
 
 Sinh theo quy trình Design System Generator của `ui-ux-pro-max` (Product → Style → Color → Typography → Effects → Anti-patterns → Checklist).
 

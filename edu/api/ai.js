@@ -100,7 +100,7 @@ function dayStamp() {
 
 async function takeSlot(bucket, limit) {
     let used = buckets.get(bucket) || 0;
-    const cacheUrl = 'https://quota.eduone.local/' + encodeURIComponent(bucket);
+    const cacheUrl = 'https://quota.fpass.local/' + encodeURIComponent(bucket);
     try {
         if (typeof caches !== 'undefined' && caches.default) {
             const hit = await caches.default.match(cacheUrl);

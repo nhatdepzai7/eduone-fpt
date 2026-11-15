@@ -125,7 +125,14 @@ async function handleRequest(req, env) {
     };
 
     try {
-        const added = await creditPurchase(env, { id: txn, code, event });
+        const added = await creditPurchase(env, {
+            id: txn,
+            code,
+            event,
+            turns: pack.turns,
+            money: body.transferAmount,
+            content: body.content || body.description || ''
+        });
         console.error('[sepay]', added ? 'đã cộng' : 'giao dịch đã xử lý', txn, code, pack.turns);
         return json(200, { success: true, credited: added, turns: added ? pack.turns : 0 });
     } catch (e) {

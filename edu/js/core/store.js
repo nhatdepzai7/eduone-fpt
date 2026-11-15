@@ -1,7 +1,7 @@
 (function (EDU) {
     'use strict';
 
-    const DB_NAME = 'eduone';
+    const DB_NAME = 'fpass';
     const DB_VERSION = 1;
     const STORES = {
         items: { keyPath: 'id', indexes: [['group', 'group'], ['type', 'type']] },
@@ -69,6 +69,38 @@
         req.onerror = () => reject(req.error);
     });
 
+    const copyRows = (fromDb, toDb, name) => new Promise((resolve, reject) => {
+        if (!fromDb.objectStoreNames.contains(name) || !toDb.objectStoreNames.contains(name)) { resolve(0); return; }
+        const read = fromDb.transaction(name, 'readonly').objectStore(name).getAll();
+        read.onerror = () => reject(read.error);
+        read.onsuccess = () => {
+            const rows = read.result || [];
+            if (!rows.length) { resolve(0); return; }
+            const write = toDb.transaction(name, 'readwrite');
+            rows.forEach((row) => write.objectStore(name).put(row));
+            write.oncomplete = () => resolve(rows.length);
+            write.onerror = () => reject(write.error);
+        };
+    });
+
+    const adoptLegacy = (db) => new Promise((resolve) => {
+        const count = db.transaction('items', 'readonly').objectStore('items').count();
+        count.onerror = () => resolve();
+        count.onsuccess = () => {
+            if (count.result) { resolve(); return; }
+            const oldReq = indexedDB.open('eduone');
+            oldReq.onupgradeneeded = () => { try { oldReq.transaction.abort(); } catch (e) {} };
+            oldReq.onerror = () => resolve();
+            oldReq.onsuccess = () => {
+                const old = oldReq.result;
+                Promise.all(Object.keys(STORES).map((name) => copyRows(old, db, name))).then(() => {
+                    old.close();
+                    resolve();
+                }, () => { old.close(); resolve(); });
+            };
+        };
+    });
+
     const open = () => {
         if (dbPromise) return dbPromise;
         dbPromise = new Promise((resolve, reject) => {
@@ -82,7 +114,10 @@
                     STORES[name].indexes.forEach(([n, k]) => os.createIndex(n, k, { unique: false }));
                 });
             };
-            req.onsuccess = () => resolve(req.result);
+            req.onsuccess = () => {
+                const db = req.result;
+                adoptLegacy(db).then(() => resolve(db), () => resolve(db));
+            };
             req.onerror = () => reject(req.error);
             req.onblocked = () => reject(new Error('IndexedDB bị chặn bởi tab khác'));
         }).catch((err) => {

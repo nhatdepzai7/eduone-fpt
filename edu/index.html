@@ -7,7 +7,7 @@
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' file: 'unsafe-inline' 'unsafe-eval' https://unpkg.com https://cdn.tailwindcss.com https://cdn.sheetjs.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' file: data: blob: https://img.vietqr.io; media-src 'self' blob:; worker-src blob:; connect-src 'self' https://*.workers.dev https://*.vercel.app https://*.netlify.app https://*.supabase.co http://localhost:* http://127.0.0.1:*; object-src 'none'; base-uri 'none'; form-action 'none'">
     <meta name="referrer" content="no-referrer">
     <meta name="theme-color" content="#F5F6F8">
-    <title>EduOne · Học đúng giờ, thi chắc qua</title>
+    <title>FPass · Học đúng giờ, thi chắc qua</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
@@ -80,6 +80,34 @@
         .q-card::before { content: ""; display: block; height: 4px; background: #4F46E5; }
         .q-card.ok::before { background: #10B981; }
         .q-card.bad::before { background: #EF4444; }
+        .q-card.shake { animation: shake .45s ease-in-out; }
+        .jack-corner { width: 148px; flex: none; display: flex; flex-direction: column; align-items: center; gap: 6px; }
+        .jack-sticker { width: 140px; height: 140px; display: block; }
+        .jack-sticker img, .jack-face { width: 140px; height: 140px; object-fit: contain; background: transparent; border: 0; display: block; filter: drop-shadow(0 10px 12px rgba(15, 23, 42, .22)); }
+        .jack-runner .jack-sticker, .jack-runner .jack-sticker img, .jack-runner .jack-face { width: 108px; height: 108px; }
+        .jack-tip { margin: 0; max-width: 148px; font-size: 12px; line-height: 1.35; text-align: center; color: #3730A3; background: #EEF0FF; border-radius: 10px; padding: 6px 8px; }
+        @media (max-width: 639px) {
+            .jack-corner { width: 112px; }
+            .jack-sticker, .jack-sticker img, .jack-face { width: 104px; height: 104px; }
+            .jack-tip { max-width: 112px; }
+        }
+        .jack-evo { display: flex; flex-direction: column; gap: 8px; }
+        .jack-evo-top { display: flex; justify-content: space-between; gap: 8px; align-items: baseline; }
+        .jack-track { position: relative; height: 14px; margin: 112px 64px 0; border-radius: 999px; background: #CBD5E1; }
+        .jack-fill { position: absolute; inset: 0 auto 0 0; border-radius: inherit; background: linear-gradient(90deg, #A5B4FC, #4F46E5); transition: width .45s ease; }
+        .jack-mark { position: absolute; top: 50%; width: 10px; height: 10px; margin: -5px 0 0 -5px; border-radius: 999px; background: #fff; border: 2px solid #94A3B8; }
+        .jack-mark.on { border-color: #4338CA; background: #4338CA; }
+        .jack-runner { position: absolute; top: 0; width: 108px; margin-left: -54px; transform: translateY(-88%); }
+        .jack-evolve { animation: jack-evolve .6s cubic-bezier(.2, 1.35, .4, 1); }
+        @keyframes jack-evolve {
+            0% { transform: translateY(-88%) scale(.72); }
+            42% { transform: translateY(-124%) scale(1.16); }
+            72% { transform: translateY(-74%) scale(.96); }
+            100% { transform: translateY(-88%) scale(1); }
+        }
+        .jack-labels { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; }
+        .jack-labels span { font-size: 11px; line-height: 1.3; color: #64748B; text-align: center; }
+        .jack-labels span.is-now { color: #312E81; font-weight: 700; }
         .q-spring { animation: q-spring 180ms cubic-bezier(.2, 1.4, .4, 1); }
         @keyframes q-spring { from { transform: scale(.98); opacity: .72; } to { transform: scale(1); opacity: 1; } }
         .callout { display: flex; gap: 12px; align-items: flex-start; margin-top: 12px; padding: 14px 16px; border-radius: 16px; border-left: 4px solid; }
@@ -165,7 +193,7 @@
     </style>
 </head>
 <body>
-    <noscript>EduOne cần bật JavaScript.</noscript>
+    <noscript>FPass cần bật JavaScript.</noscript>
     <div id="root"></div>
 
     <script src="js/core/security.js"></script>
@@ -612,6 +640,130 @@
             );
         };
 
+        const JACK_STAGES = [
+            { kind: 'stage1', src: 'public/stickers/jack-stage1.png', label: 'Nhập môn ngơ ngác' },
+            { kind: 'stage2', src: 'public/stickers/jack-stage2.png', label: 'Tự tin 5+5=8' },
+            { kind: 'stage3', src: 'public/stickers/jack-stage3.png', label: 'Càn quét đề thi' },
+            { kind: 'stage4', src: 'public/stickers/jack-stage4.png', label: 'Bá chủ phòng thi!' }
+        ];
+        const JACK_SRC = {
+            question: 'public/stickers/jack-question.png',
+            wrong: 'public/stickers/jack-wrong.png'
+        };
+        const jackTier = (pct) => (pct >= 100 ? 3 : pct >= 60 ? 2 : pct >= 25 ? 1 : 0);
+
+        const JackFace = ({ kind }) => {
+            const mood = kind === 'wrong' ? 'M3 16 Q12 22 21 16' : kind === 'stage4' ? 'M4 15 Q12 20 20 15' : 'M5 16 Q12 19 19 16';
+            const eyes = kind === 'wrong'
+                ? <><circle cx="8" cy="11" r="2.2" /><circle cx="16" cy="11" r="2.2" /></>
+                : <><circle cx="8.5" cy="12" r="1.3" /><circle cx="15.5" cy="12" r="1.3" /></>;
+            return (
+                <svg className="jack-face" viewBox="0 0 24 24" aria-hidden="true">
+                    <rect width="24" height="24" rx="6" fill={kind === 'wrong' ? '#FEE2E2' : kind === 'stage4' ? '#FEF3C7' : '#EEF0FF'} />
+                    <circle cx="12" cy="13" r="6.2" fill="#FDBA74" />
+                    <path d="M6 8 L4 4 L9 7" fill="#FDBA74" />
+                    <path d="M18 8 L20 4 L15 7" fill="#FDBA74" />
+                    {eyes}
+                    <path d={mood} fill="none" stroke="#9A3412" strokeWidth="1.2" strokeLinecap="round" />
+                </svg>
+            );
+        };
+
+        const knockBlack = (img) => {
+            const nw = img.naturalWidth || 1;
+            const nh = img.naturalHeight || 1;
+            const max = 960;
+            const scale = Math.min(1, max / Math.max(nw, nh));
+            const w = Math.max(1, Math.round(nw * scale));
+            const h = Math.max(1, Math.round(nh * scale));
+            const canvas = document.createElement('canvas');
+            canvas.width = w;
+            canvas.height = h;
+            const pen = canvas.getContext('2d', { willReadFrequently: true });
+            pen.imageSmoothingEnabled = true;
+            pen.imageSmoothingQuality = 'high';
+            pen.drawImage(img, 0, 0, w, h);
+            const frame = pen.getImageData(0, 0, w, h);
+            const px = frame.data;
+            for (let i = 0; i < px.length; i += 4) {
+                if (px[i] < 24 && px[i + 1] < 24 && px[i + 2] < 24) px[i + 3] = 0;
+            }
+            pen.putImageData(frame, 0, 0);
+            let minX = w, minY = h, maxX = -1, maxY = -1;
+            for (let y = 0; y < h; y++) {
+                for (let x = 0; x < w; x++) {
+                    if (px[(y * w + x) * 4 + 3] < 16) continue;
+                    if (x < minX) minX = x;
+                    if (y < minY) minY = y;
+                    if (x > maxX) maxX = x;
+                    if (y > maxY) maxY = y;
+                }
+            }
+            if (maxX < minX) return canvas.toDataURL('image/png');
+            const cw = maxX - minX + 1;
+            const ch = maxY - minY + 1;
+            const trimmed = document.createElement('canvas');
+            trimmed.width = cw;
+            trimmed.height = ch;
+            trimmed.getContext('2d').drawImage(canvas, minX, minY, cw, ch, 0, 0, cw, ch);
+            return trimmed.toDataURL('image/png');
+        };
+
+        const JackSticker = ({ kind, src }) => {
+            const [missing, setMissing] = useState(false);
+            const [cut, setCut] = useState('');
+            useEffect(() => { setMissing(false); setCut(''); }, [src]);
+            if (missing || !src) return <JackFace kind={kind} />;
+            return (
+                <img src={cut || src} alt=""
+                    onLoad={(e) => {
+                        if (cut || String(e.currentTarget.src).indexOf('data:') === 0) return;
+                        try { setCut(knockBlack(e.currentTarget)); } catch (err) {}
+                    }}
+                    onError={() => { if (!cut) setMissing(true); }} />
+            );
+        };
+
+        const JackCorner = ({ wrong }) => (
+            <div className="jack-corner">
+                <span className="jack-sticker">
+                    <JackSticker kind={wrong ? 'wrong' : 'question'} src={wrong ? JACK_SRC.wrong : JACK_SRC.question} />
+                </span>
+                {!wrong && <p className="jack-tip">Câu này chọn gì đây ta...</p>}
+            </div>
+        );
+
+        const JackEvolveBar = ({ value, max }) => {
+            const pct = max > 0 ? Math.max(0, Math.min(100, Math.round((value / max) * 100))) : 0;
+            const tier = jackTier(pct);
+            const stage = JACK_STAGES[tier];
+            const [pop, setPop] = useState(0);
+            const prev = useRef(tier);
+            useEffect(() => {
+                if (tier === prev.current) return;
+                prev.current = tier;
+                setPop((n) => n + 1);
+            }, [tier]);
+            return (
+                <div className="jack-evo">
+                    <div className="jack-evo-top">
+                        <span className="text-xs font-semibold text-ink">{stage.label}</span>
+                        <span className="tnum text-xs text-muted">{pct}%</span>
+                    </div>
+                    <div className="jack-track" role="progressbar" aria-valuenow={pct} aria-valuemin={0} aria-valuemax={100} aria-label={'Jack: ' + stage.label}>
+                        <div className="jack-fill" style={{ width: pct + '%' }} />
+                        {[0, 25, 60, 100].map((mark) => <span key={mark} className={'jack-mark' + (pct >= mark ? ' on' : '')} style={{ left: mark + '%' }} />)}
+                        <span key={stage.kind + '-' + pop} className={'jack-runner' + (pop ? ' jack-evolve' : '')} style={{ left: pct + '%' }}>
+                            <span className="jack-sticker"><JackSticker kind={stage.kind} src={stage.src} /></span>
+                        </span>
+                    </div>
+                    <div className="jack-labels">
+                        {JACK_STAGES.map((item, i) => <span key={item.kind} className={i === tier ? 'is-now' : ''}>{item.label}</span>)}
+                    </div>
+                </div>
+            );
+        };
+
         const HighlightButton = ({ on, onToggle, locked }) => (
             <button type="button" onClick={onToggle} aria-pressed={on} className={'btn btn-sm ' + (on ? 'btn-primary' : 'btn-secondary')} title="Highlight từ khóa ăn điểm (phím H)">
                 <Icon name={locked ? 'lock' : 'highlighter'} size={14} /> Highlight <Kbd>H</Kbd>
@@ -738,6 +890,7 @@
             });
 
             const clearedN = batch.filter(id => s.cleared.indexOf(id) >= 0).length;
+            const totalQ = s.batches.reduce((n, b) => n + b.length, 0);
             const header = (
                 <div className="drill-head">
                     <div className="drill-head-row">
@@ -755,15 +908,7 @@
                         <span className="text-xs text-ink2 tnum">
                             Băng đạn <b className="text-ink">{s.b + 1}/{s.batches.length}</b> · Đã nắm <b className={clearedN === batch.length && batch.length ? 'text-success' : 'text-ink'}>{clearedN}/{batch.length}</b>
                         </span>
-                        <span role="img" aria-label={'Đã nắm ' + clearedN + ' trên ' + batch.length + ' câu của băng đạn'} className="segs">
-                            {batch.map(id => {
-                                const clear = s.cleared.indexOf(id) >= 0;
-                                const miss = !clear && s.misses[id];
-                                const active = cur && cur.id === id && s.phase === 'drill';
-                                const cls = clear ? 'seg hit' : (active && miss) ? 'seg redo' : active ? 'seg on' : miss ? 'seg miss' : 'seg';
-                                return <span key={id} className={cls} />;
-                            })}
-                        </span>
+                        <JackEvolveBar value={s.cleared.length} max={totalQ} />
                     </div>
                 </div>
             );
@@ -778,7 +923,8 @@
                 const missed = st.missed.map(id => itemsById.get(id)).filter(Boolean);
                 return (
                     <div className="card p-6 sm:p-8 enter">
-                        <div className="w-12 h-12 rounded-2xl bg-success-soft text-success flex items-center justify-center mb-3"><Icon name="trophy" size={24} /></div>
+                        <JackEvolveBar value={st.total} max={st.total || 1} />
+                        <div className="w-12 h-12 rounded-2xl bg-success-soft text-success flex items-center justify-center mb-3 mt-4"><Icon name="trophy" size={24} /></div>
                         <h2 className="text-2xl font-bold">Sạch toàn bộ {st.total} câu</h2>
                         <p className="text-muted mt-1">Đúng ngay lần đầu {st.firstTryCorrect}/{st.total} · thời gian {Plan.fmtCountdown(st.elapsedMs)}</p>
                         {missed.length > 0 && (
@@ -865,16 +1011,20 @@
             const showAnswer = fb && !fb.ok;
 
             const tone = fb ? (fb.ok ? ' ok' : ' bad') : '';
+            const missed = !!(fb && !fb.ok);
             return (
                 <div className="drill-stage">
                     {header}
-                    <div ref={cardRef} tabIndex={-1} key={cur.id + ':' + (s.misses[cur.id] || 0)} className={'q-card q-spring' + tone}>
-                        <div className="px-6 sm:px-8 pt-8 sm:pt-10 pb-7 sm:pb-8">
-                            <div className="flex items-center gap-2 mb-3">
-                                <span className="chip bg-surface2 text-ink2">{cur.type === 'mcq' ? 'Trắc nghiệm' : 'Gõ từ tiếng Anh'}</span>
-                                {s.misses[cur.id] ? <span className="chip bg-danger-soft text-danger"><Icon name="rotate" size={12} /> làm lại</span> : null}
+                    <div ref={cardRef} tabIndex={-1} key={cur.id + ':' + (s.misses[cur.id] || 0)} className={'q-card' + (missed ? ' shake bad' : ' q-spring' + tone)}>
+                        <div className="px-5 sm:px-8 pt-6 sm:pt-8 pb-6 sm:pb-8 flex items-start gap-3">
+                            <div className="min-w-0 flex-1">
+                                <div className="flex items-center gap-2 mb-3">
+                                    <span className="chip bg-surface2 text-ink2">{cur.type === 'mcq' ? 'Trắc nghiệm' : 'Gõ từ tiếng Anh'}</span>
+                                    {s.misses[cur.id] ? <span className="chip bg-danger-soft text-danger"><Icon name="rotate" size={12} /> làm lại</span> : null}
+                                </div>
+                                <ItemPrompt t={cur} hl={hl} big />
                             </div>
-                            <ItemPrompt t={cur} hl={hl} big />
+                            <JackCorner wrong={missed} />
                         </div>
                     </div>
                     {fb && fb.ok && (
@@ -887,7 +1037,7 @@
                         <div className="callout bad" role="alert">
                             <span className="callout-ico">✕</span>
                             <div className="min-w-0">
-                                <p className="font-semibold mb-1">Chưa đúng — đáp án</p>
+                                <p className="font-semibold mb-1">Alo tổng đài cứu nét! Sai rồi, nhai lại câu này ngay!</p>
                                 <ItemAnswer t={cur} hl />
                                 {cur.explanationOrExample && <p className="text-sm mt-1 text-flow">{cur.explanationOrExample}</p>}
                             </div>
@@ -1120,7 +1270,7 @@
                             {!isSlot && <button type="button" className="btn btn-ghost btn-sm" onClick={onClose}><Icon name="x" size={14} /> Kết thúc</button>}
                         </div>
                     </div>
-                    <Progress value={index} max={ids.length} label="Tiến độ bộ thẻ" />
+                    <JackEvolveBar value={known.length + forgot.length} max={ids.length} />
                     <div className="h-4" />
 
                     {!t ? (
@@ -1198,14 +1348,17 @@
                         </div>
                     ) : isMcq ? (
                         <div ref={cardRef} tabIndex={-1} className="drill-stage">
-                            <div className={'q-card q-spring' + (result ? (result.ok ? ' ok' : ' bad') : '')}>
-                                <div className="px-6 sm:px-8 pt-8 sm:pt-10 pb-7 sm:pb-8"><ItemPrompt t={t} hl={hl} big /></div>
+                            <div className={'q-card' + (result && !result.ok ? ' shake bad' : ' q-spring' + (result ? (result.ok ? ' ok' : '') : ''))}>
+                                <div className="px-5 sm:px-8 pt-6 sm:pt-8 pb-6 sm:pb-8 flex items-start gap-3">
+                                    <div className="min-w-0 flex-1"><ItemPrompt t={t} hl={hl} big /></div>
+                                    <JackCorner wrong={!!(result && !result.ok)} />
+                                </div>
                             </div>
                             {result && (
                                 <div className={result.ok ? 'callout ok' : 'callout bad'} role="status">
                                     <span className="callout-ico">{result.ok ? '✓' : '✕'}</span>
                                     <div>
-                                        <p className="font-semibold">{result.ok ? 'Chính xác' : 'Chưa đúng — đáp án'}</p>
+                                        <p className="font-semibold">{result.ok ? 'Chính xác' : 'Alo tổng đài cứu nét! Sai rồi, nhai lại câu này ngay!'}</p>
                                         {!result.ok && <div className="mt-1"><ItemAnswer t={t} hl={hl} /></div>}
                                         {!result.ok && t.explanationOrExample && <p className="text-sm mt-1 text-flow">{t.explanationOrExample}</p>}
                                     </div>
@@ -1232,7 +1385,10 @@
                         </div>
                     ) : (
                         <div className={'card p-5 sm:p-7 ' + (result ? (result.ok ? 'pop-ok' : 'shake') : '')}>
-                            <h3 className="text-lg font-semibold mb-3">{mode === 'test' ? 'Điền từ' : 'Nghe và viết'}</h3>
+                            <div className="flex items-start gap-3 mb-3">
+                                <h3 className="text-lg font-semibold min-w-0 flex-1">{mode === 'test' ? 'Điền từ' : 'Nghe và viết'}</h3>
+                                <JackCorner wrong={!!(result && !result.ok)} />
+                            </div>
                             {mode === 'test' ? (
                                 <div className="rounded-xl bg-primary-soft border border-indigo-100 p-4 mb-4 text-lg text-flow reading">
                                     {hasBlank ? cloze : (t.answerOrMeaning || t.exampleVi || 'Gõ từ tiếng Anh')}
@@ -1274,7 +1430,7 @@
                             )}
                             {result && (
                                 <div className={'p-4 rounded-xl border-2 mb-4 text-flow ' + (result.ok ? 'bg-success-soft border-success' : 'bg-danger-soft border-danger')} role="status">
-                                    <p className="font-bold text-lg mb-1">{result.ok ? 'Chính xác' : 'Chưa đúng'}</p>
+                                    <p className="font-bold text-lg mb-1">{result.ok ? 'Chính xác' : 'Alo tổng đài cứu nét! Sai rồi, nhai lại câu này ngay!'}</p>
                                     {result.heard && <p>Bạn nói: {result.heard}</p>}
                                     {!result.ok && <p>Đáp án: <strong>{t.questionOrWord}</strong></p>}
                                     {t.answerOrMeaning && <p className="mt-1">Nghĩa: {t.answerOrMeaning}</p>}
@@ -2221,7 +2377,7 @@
 
             const exportJSON = () => {
                 if (!items.length) return;
-                const data = { format: 'eduone', version: 2, exportedAt: new Date().toISOString(), items: Sec.stripSecrets(items) };
+                const data = { format: 'fpass', version: 2, exportedAt: new Date().toISOString(), items: Sec.stripSecrets(items) };
                 downloadBlob(new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' }), 'kho-hoc-' + todayIso() + '.json');
                 toast('Đã xuất ' + items.length + ' mục (không kèm API key)', 'success');
             };
@@ -2335,6 +2491,7 @@
                         </div>
                         <div className="px-3 sm:px-4 pb-3 sm:pb-4 flex flex-wrap gap-2">
                             <button type="button" onClick={() => fileRef.current && fileRef.current.click()} className="btn btn-ghost btn-sm"><Icon name="upload" size={14} /> Nhập JSON / Excel</button>
+                            <button type="button" onClick={() => window.dispatchEvent(new CustomEvent('edu-contribute'))} className="btn btn-ghost btn-sm"><Icon name="share" size={14} /> Gửi đề cho admin</button>
                             <input ref={fileRef} type="file" multiple accept=".json,.xlsx,.xls,.csv,application/json" className="hidden" onChange={pickFiles} />
                             <button type="button" onClick={exportJSON} disabled={!items.length} className="btn btn-ghost btn-sm"><Icon name="file" size={14} /> Xuất JSON</button>
                             <button type="button" onClick={exportExcel} disabled={!items.length} className="btn btn-ghost btn-sm"><Icon name="sheet" size={14} /> Xuất Excel</button>
@@ -2535,7 +2692,7 @@
             );
         };
 
-        const inviteText = (pack) => 'Mình đang ôn ' + pack.code + ' bằng EduOne — Chặng 1 (' + ((pack.stages && pack.stages[0] && pack.stages[0].count) || 35) +
+        const inviteText = (pack) => 'Mình đang ôn ' + pack.code + ' bằng FPass — Chặng 1 (' + ((pack.stages && pack.stages[0] && pack.stages[0].count) || 35) +
             ' câu nền tảng) free 100%, có Băng đạn 5 câu và phòng thi giả lập EOS. Học chung cho đỡ sợ mùa thi nhé!' +
             (/^https?:/.test(location.protocol) ? ' ' + location.origin + location.pathname : '');
 
@@ -2582,25 +2739,73 @@
             );
         };
 
-        const ContributeModal = ({ pack, onClose, toast }) => (
-            <Modal title="Góp đề · Giới thiệu bạn bè" onClose={onClose} footer={<button type="button" className="btn btn-primary" onClick={onClose}>Xong</button>}>
-                <div className="space-y-4 text-sm text-ink2">
-                    <div className="rounded-xl border border-line p-4">
-                        <p className="font-semibold text-ink flex items-center gap-2"><Icon name="file" /> Đóng góp 1 bộ đề mới</p>
-                        <p className="mt-1 text-flow">Soạn theo file mẫu (mỗi câu: câu hỏi, 4 lựa chọn, đáp án, giải thích, từ khóa) rồi gửi team qua fanpage. Bộ đề được duyệt sẽ có tên bạn và bạn nhận mã mở khóa free.</p>
-                        <button type="button" className="btn btn-secondary btn-sm mt-3" onClick={() => downloadBlob(new Blob([JSON.stringify(contributeTemplate(pack), null, 2)], { type: 'application/json' }), 'mau-gop-de.json')}><Icon name="download" size={14} /> Tải file mẫu</button>
-                    </div>
-                    {pack && pack.status === 'ready' && (
-                        <div className="rounded-xl border border-line p-4">
-                            <p className="font-semibold text-ink flex items-center gap-2"><Icon name="users" /> Chia sẻ cho 3 bạn cùng lớp</p>
-                            <p className="mt-1 text-flow">Gửi lời mời dưới đây. Khi 3 bạn cùng học Chặng 1, nhắn team ảnh chụp để nhận mã.</p>
-                            <p className="mt-2 rounded-lg bg-surface2 p-3 text-flow">{inviteText(pack)}</p>
-                            <button type="button" className="btn btn-secondary btn-sm mt-3" onClick={() => copyText(inviteText(pack)).then(() => toast('Đã copy lời mời', 'success')).catch(() => toast('Trình duyệt chặn clipboard', 'error'))}><Icon name="copy" size={14} /> Copy lời mời</button>
+        const ContributeModal = ({ pack, onClose, toast }) => {
+            const fundCode = (E.Quota && E.Quota.read) ? E.Quota.read().code : '';
+            const [name, setName] = useState((pack && pack.name) || '');
+            const [code, setCode] = useState((pack && pack.code) || '');
+            const [subject, setSubject] = useState(pack && pack.type === 'vocab' ? 'vocab' : 'eos');
+            const [quotaId, setQuotaId] = useState(fundCode || '');
+            const [text, setText] = useState('');
+            const [fileName, setFileName] = useState('');
+            const [busy, setBusy] = useState(false);
+            const readFile = async (file) => {
+                if (!file) return;
+                if (file.size > 400000) { toast('File lớn hơn 400KB', 'error'); return; }
+                setText(await file.text());
+                setFileName(file.name);
+            };
+            const send = async () => {
+                if (!name.trim() || !code.trim() || !text.trim()) { toast('Điền tên đề, mã môn và nội dung', 'error'); return; }
+                setBusy(true);
+                try {
+                    const res = await fetch('/api/contribute', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+                        body: JSON.stringify({ name, code, subject, quotaId, text })
+                    });
+                    const data = await res.json().catch(() => ({}));
+                    if (!res.ok) throw new Error(data.error || 'Chưa gửi được đề.');
+                    toast('Đã gửi ' + (data.count || '') + ' câu cho admin. Khi được duyệt, đề hiện trong Đề hệ thống.', 'success');
+                    onClose();
+                } catch (e) {
+                    toast(e.message || 'Chưa gửi được đề.', 'error');
+                } finally {
+                    setBusy(false);
+                }
+            };
+            return (
+                <Modal title="Gửi đề đóng góp cho admin" onClose={onClose} footer={<><button type="button" className="btn btn-secondary" onClick={onClose}>Đóng</button><button type="button" className="btn btn-primary" disabled={busy} onClick={send}>{busy ? 'Đang gửi…' : 'Gửi đề đóng góp cho admin'}</button></>}>
+                    <div className="space-y-4 text-sm text-ink2">
+                        <p className="text-flow">Đề gửi vào hàng chờ. Admin duyệt thì cả lớp thấy trong Đề hệ thống. File tự tải ở Kho của tôi vẫn chỉ nằm trên máy này.</p>
+                        <div className="grid sm:grid-cols-2 gap-3">
+                            <label className="block text-ink"><span className="label">Tên đề</span><input value={name} onChange={(e) => setName(e.target.value)} className="field" maxLength={80} /></label>
+                            <label className="block text-ink"><span className="label">Mã môn</span><input value={code} onChange={(e) => setCode(e.target.value.toUpperCase())} className="field uppercase" maxLength={16} /></label>
+                            <label className="block text-ink"><span className="label">Loại</span>
+                                <select value={subject} onChange={(e) => setSubject(e.target.value)} className="field">
+                                    <option value="eos">EOS</option><option value="fe">FE</option><option value="pt">PT</option><option value="vocab">Từ vựng</option><option value="other">Khác</option>
+                                </select>
+                            </label>
+                            <label className="block text-ink"><span className="label">Mã quỹ để nhận lượt thưởng</span><input value={quotaId} onChange={(e) => setQuotaId(e.target.value.toUpperCase())} className="field uppercase" maxLength={12} /></label>
                         </div>
-                    )}
-                </div>
-            </Modal>
-        );
+                        <label className="block text-ink"><span className="label">File JSON / TXT</span>
+                            <input type="file" accept=".json,.txt,application/json,text/plain" className="block mt-1 text-sm" onChange={(e) => readFile(e.target.files && e.target.files[0])} />
+                            {fileName && <span className="text-xs text-muted">{fileName}</span>}
+                        </label>
+                        <label className="block text-ink"><span className="label">Hoặc dán nội dung</span>
+                            <textarea value={text} onChange={(e) => setText(e.target.value)} rows={6} className="field text-xs" placeholder="Dán JSON hoặc từng câu có A. B. C. D. và Đáp án" />
+                        </label>
+                        <button type="button" className="btn btn-secondary btn-sm" onClick={() => downloadBlob(new Blob([JSON.stringify(contributeTemplate(pack), null, 2)], { type: 'application/json' }), 'mau-gop-de.json')}><Icon name="download" size={14} /> Tải file mẫu</button>
+                        {pack && pack.status === 'ready' && (
+                            <div className="rounded-xl border border-line p-4">
+                                <p className="font-semibold text-ink flex items-center gap-2"><Icon name="users" /> Chia sẻ cho bạn cùng lớp</p>
+                                <p className="mt-2 rounded-lg bg-surface2 p-3 text-flow">{inviteText(pack)}</p>
+                                <button type="button" className="btn btn-secondary btn-sm mt-3" onClick={() => copyText(inviteText(pack)).then(() => toast('Đã copy lời mời', 'success')).catch(() => toast('Trình duyệt chặn clipboard', 'error'))}><Icon name="copy" size={14} /> Copy lời mời</button>
+                            </div>
+                        )}
+                    </div>
+                </Modal>
+            );
+        };
 
         const PanicDivider = ({ pack, remaining, onSave, onSkip, onCancel }) => {
             const [days, setDays] = useState(3);
@@ -2681,7 +2886,7 @@
         };
 
         const Storefront = ({ packs, block, setBlock, statsOf, unlockedIds, exams, openPack, onContribute, now }) => {
-            const blocks = Catalog.blocks || [];
+            const blocks = (Catalog.blocks || []).concat(packs.some(p => p.block === 'system') ? [{ id: 'system', name: 'Đề hệ thống' }] : []);
             const list = packs.filter(p => p.block === block);
             const onTabKey = (e) => {
                 const i = blocks.findIndex(b => b.id === block);
@@ -2697,7 +2902,8 @@
                 <div>
                     <div className="mb-5">
                         <h1 className="text-xl font-bold">Kho Src Qua Môn</h1>
-                        <p className="text-sm text-ink2 mt-1 text-flow">Bộ Src ôn thi FE / EOS / PT do team biên soạn. Chặng 1 của mọi bộ đề: free 100% với đầy đủ Băng đạn 5 câu.</p>
+                        <p className="text-sm text-ink2 mt-1 text-flow">Bộ Src ôn thi FE / EOS / PT do team biên soạn. Chặng 1 của mọi bộ đề: free 100% với đầy đủ Băng đạn 5 câu. Đề hệ thống là bản admin vừa đăng.</p>
+                        <button type="button" className="btn btn-secondary btn-sm mt-3" onClick={() => onContribute(null)}><Icon name="share" size={14} /> Gửi đề đóng góp cho admin</button>
                     </div>
                     <div role="tablist" aria-label="Khối ngành" className="flex flex-wrap gap-1 p-1 rounded-2xl bg-surface border border-line mb-5" onKeyDown={onTabKey}>
                         {blocks.map(b => (
@@ -2725,7 +2931,9 @@
                                     <div className="flex flex-wrap items-center gap-2">
                                         <span className="chip bg-primary-soft text-primary tnum font-semibold">{p.code}</span>
                                         <span className="chip bg-surface2 text-ink2">{p.type === 'mcq' ? 'Trắc nghiệm' : 'Từ vựng'}</span>
-                                        <span className={'chip ' + (unlocked ? 'bg-success-soft text-success' : 'bg-surface2 text-muted')}><Icon name={unlocked ? 'unlock' : 'lock'} size={12} /> {unlocked ? 'Đã mở 3 chặng' : 'Chặng 1 free'}</span>
+                                        {p.system
+                                            ? <span className="chip bg-success-soft text-success">Đề hệ thống</span>
+                                            : <span className={'chip ' + (unlocked ? 'bg-success-soft text-success' : 'bg-surface2 text-muted')}><Icon name={unlocked ? 'unlock' : 'lock'} size={12} /> {unlocked ? 'Đã mở 3 chặng' : 'Chặng 1 free'}</span>}
                                     </div>
                                     <p className="font-semibold mt-3 text-flow">{p.name}</p>
                                     <p className="text-sm text-ink2 mt-1 text-flow flex-1">{p.desc}</p>
@@ -2748,7 +2956,7 @@
             const [replan, setReplan] = useState(false);
             const [eosSetup, setEosSetup] = useState(null);
             const [run, setRun] = useState(null);
-            const unlocked = !!unlockedItems;
+            const unlocked = !!unlockedItems || !!pack.system;
             const base = useMemo(() => pack.items.concat(unlockedItems || []), [pack, unlockedItems]);
             const rec = (t) => progress[progKey(pack.id, t.id)];
             const view$ = (t) => { const r = rec(t); return r ? Object.assign({}, t, { srsStage: r.srsStage, wrongCount: r.wrongCount, correctCount: r.correctCount, reviewCount: r.reviewCount, nextReview: r.nextReview, lastReview: r.lastReview }) : t; };
@@ -2901,7 +3109,7 @@
 
     <!-- ===================== APP ROOT ===================== -->
     <script type="text/babel" data-presets="react">
-        const BASE_TITLE = 'EduOne · Học đúng giờ, thi chắc qua';
+        const BASE_TITLE = 'FPass · Học đúng giờ, thi chắc qua';
 
         const promptOf = (t) => {
             if (!t) return '';
@@ -2993,10 +3201,37 @@
             const [milestones, setMilestones] = useState(() => Store.prefs.get('milestones', {}) || {});
             const [settingsOpen, setSettingsOpen] = useState(false);
             const [fundShop, setFundShop] = useState(false);
+            const [systemPacks, setSystemPacks] = useState([]);
+            const [contribOpen, setContribOpen] = useState(false);
             useEffect(() => {
                 const open = () => setFundShop(true);
                 window.addEventListener('edu-fund-shop', open);
                 return () => window.removeEventListener('edu-fund-shop', open);
+            }, []);
+            useEffect(() => {
+                let stop = false;
+                const packFrom = (raw) => {
+                    if (!raw || typeof raw.id !== 'string' || !Array.isArray(raw.items)) return null;
+                    const items = raw.items.map(d => Sch.normalizeItem(d, { source: 'system:' + raw.id, group: raw.code || 'Hệ thống' })).filter(Sch.isFilled);
+                    if (!items.length) return null;
+                    return {
+                        id: raw.id, code: raw.code || 'ĐỀ', name: raw.name || 'Đề hệ thống', block: 'system',
+                        type: raw.type === 'vocab' ? 'vocab' : 'mcq',
+                        desc: raw.desc || 'Đề hệ thống. Mọi máy mở trang đều thấy bản này.',
+                        status: 'ready', system: true,
+                        stages: [{ n: 1, count: items.length, free: true }], total: items.length, items
+                    };
+                };
+                fetch('/api/exams', { headers: { Accept: 'application/json' } })
+                    .then(r => r.ok ? r.json() : null)
+                    .then(data => {
+                        if (stop || !data || !Array.isArray(data.exams)) return;
+                        setSystemPacks(data.exams.map(packFrom).filter(Boolean));
+                    })
+                    .catch(() => {});
+                const openContrib = () => setContribOpen(true);
+                window.addEventListener('edu-contribute', openContrib);
+                return () => { stop = true; window.removeEventListener('edu-contribute', openContrib); };
             }, []);
             const [muted, setMutedState] = useState(Sfx.isMuted());
             const savedItems = useRef([]);
@@ -3013,9 +3248,10 @@
             };
             const setMuted = (v) => { Sfx.setMuted(v); setMutedState(v); };
 
-            const packs = useMemo(() => (Catalog.packs || []).map(p => (p.status === 'ready'
+            const catalogPacks = useMemo(() => (Catalog.packs || []).map(p => (p.status === 'ready'
                 ? Object.assign({}, p, { items: (p.free || []).map(d => Sch.normalizeItem(d, { source: 'pack:' + p.id, group: p.code })) })
                 : p)), []);
+            const packs = useMemo(() => catalogPacks.concat(systemPacks), [catalogPacks, systemPacks]);
             const packById = useMemo(() => new Map(packs.map(p => [p.id, p])), [packs]);
             const itemsById = useMemo(() => new Map(items.map(t => [t.id, t])), [items]);
 
@@ -3334,7 +3570,7 @@
                         <div className="max-w-7xl mx-auto px-4 py-3 flex flex-wrap items-center gap-3">
                             <div className="flex items-center gap-2 mr-auto">
                                 <span className="w-9 h-9 rounded-xl bg-primary text-white flex items-center justify-center"><Icon name="cap" /></span>
-                                <div><p className="font-bold leading-tight">EduOne</p><p className="text-[11px] text-muted leading-tight">Học đúng giờ · thi chắc qua</p></div>
+                                <div><p className="font-bold leading-tight">FPass</p><p className="text-[11px] text-muted leading-tight">Học đúng giờ · thi chắc qua</p></div>
                             </div>
                             <div className="order-last w-full sm:order-none sm:w-auto"><ModeSwitch mode={nav.mode} onChange={switchMode} slotDue={live && nav.mode === 'bank'} /></div>
                             <div className="flex gap-1">
@@ -3391,6 +3627,7 @@
                     <footer className="site-note">Dữ liệu lưu trên trình duyệt này (IndexedDB). Xuất JSON định kỳ để sao lưu.</footer>
                     {settingsOpen && <SettingsModal onClose={() => setSettingsOpen(false)} toast={toast} muted={muted} setMuted={setMuted} />}
                     {fundShop && <FundShop toast={toast} onClose={() => setFundShop(false)} />}
+                    {contribOpen && <ContributeModal pack={null} toast={toast} onClose={() => setContribOpen(false)} />}
                     <Toasts list={toasts} />
                 </div>
             );
@@ -3398,10 +3635,11 @@
 
         const StorefrontHost = (props) => {
             const [contrib, setContrib] = useState(null);
+            const [open, setOpen] = useState(false);
             return (
                 <>
-                    <Storefront {...props} onContribute={setContrib} />
-                    {contrib && <ContributeModal pack={contrib} toast={props.toast} onClose={() => setContrib(null)} />}
+                    <Storefront {...props} onContribute={(p) => { setContrib(p); setOpen(true); }} />
+                    {open && <ContributeModal pack={contrib} toast={props.toast} onClose={() => setOpen(false)} />}
                 </>
             );
         };
