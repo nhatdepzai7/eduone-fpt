@@ -4060,19 +4060,31 @@
                 setLegalTab(null);
                 setFeedbackOpen(true);
             };
+            const goHome = () => {
+                if (nav.busy && !confirm('Bạn đang giữa một ca / phòng thi. Thoát ra?')) return;
+                setSession(s => (s && s.slotId ? s : null));
+                setSettingsOpen(false);
+                setFundShop(false);
+                setLegalTab(null);
+                setSupportOpen(false);
+                setFeedbackOpen(false);
+                setContribOpen(false);
+                dispatch({ type: 'TAB', tab: 'today', force: true });
+                window.scrollTo(0, 0);
+            };
 
             return (
                 <div className="min-h-screen flex flex-col">
                     <a href="#main" className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[70] btn btn-primary">Bỏ qua tới nội dung</a>
                     <header className="sticky top-0 z-30 border-b border-line" style={{ background: 'rgba(226,232,240,.9)', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)' }}>
                         <div className="max-w-7xl mx-auto px-4 py-3 flex flex-wrap items-center gap-3">
-                            <div className="flex items-center gap-3 mr-auto">
+                            <button type="button" onClick={goHome} aria-label="Về trang chủ" className="flex items-center gap-3 mr-auto border-0 bg-transparent p-0 text-left cursor-pointer">
                                 <img src="public/stickers/logo.png" alt="" className="h-12 w-auto object-contain" />
-                                <div className="flex flex-col justify-center">
-                                    <p className="text-2xl font-extrabold leading-none text-[#0B192C]">FPass</p>
-                                    <p className="mt-1 text-sm font-medium leading-none tracking-wide text-slate-500">Học đúng giờ · thi chắc qua</p>
-                                </div>
-                            </div>
+                                <span className="flex flex-col justify-center">
+                                    <span className="text-2xl font-extrabold leading-none text-[#0B192C]">FPass</span>
+                                    <span className="mt-1 text-sm font-medium leading-none tracking-wide text-slate-500">Học đúng giờ · thi chắc qua</span>
+                                </span>
+                            </button>
                             <div className="order-last w-full sm:order-none sm:w-auto"><ModeSwitch mode={nav.mode} onChange={switchMode} slotDue={live && nav.mode === 'bank'} /></div>
                             <div className="flex gap-1">
                                 <button type="button" className="btn btn-ghost btn-icon" onClick={() => setMuted(!muted)} aria-pressed={!muted} aria-label={muted ? 'Bật âm thanh' : 'Tắt âm thanh'}><Icon name={muted ? 'mute' : 'volume'} /></button>
