@@ -238,7 +238,7 @@
     <script src="js/core/store.js"></script>
     <script src="js/core/quota.js"></script>
     <script src="js/core/audio-keys.js"></script>
-    <script src="js/core/engine.js"></script>
+    <script src="js/core/engine.js?v=blank"></script>
     <script src="js/core/vault.js"></script>
     <script src="js/core/ai-adapter.js"></script>
     <script src="js/data/catalog.js"></script>
@@ -3761,6 +3761,15 @@
 
                 const today = Plan.dayKeyOf(new Date());
                 const dayKey = Plan.weekdayOf(new Date());
+                const shippedPersonal = (value) => {
+                    try {
+                        const text = JSON.stringify(value);
+                        return text.indexOf('lớp FPT') >= 0 || text.indexOf('Tối · IELTS') >= 0;
+                    } catch (e) { return false; }
+                };
+                ['weeklyPlan', 'nextWeeklyPlan', 'hybridToday'].forEach((key) => {
+                    if (shippedPersonal(Store.prefs.get(key, null))) Store.prefs.remove(key);
+                });
                 let w = Plan.normWeek(Store.prefs.get('weeklyPlan', null));
                 const nx = Store.prefs.get('nextWeeklyPlan', null);
                 const saved = Store.prefs.get('hybridToday', null);

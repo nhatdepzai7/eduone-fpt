@@ -99,56 +99,16 @@
         },
         dienTam: !!(ext && ext.dienTam)
     });
-    const oneSentence = (prompt) => ({ gate: 'sentence_creation', prompt: prompt, cau: 1 });
-    const twoSentences = (prompt) => ({ gate: 'sentence_creation', prompt: prompt, cau: 2 });
-    const harvest = (prompt) => ({ gate: 'harvest_words', prompt: prompt, min: 2 });
+    const blankDay = () => [
+        makeSlot(1, '08:00', 'Sáng', 'all', 'flashcard', 8, {}),
+        makeSlot(2, '13:00', 'Chiều', 'all', 'flashcard', 8, {}),
+        makeSlot(3, '20:00', 'Tối', 'all', 'flashcard', 8, {})
+    ];
 
     const defaultWeek = () => {
-        const am = '10:30';
-        const pm = '16:15';
-        const eve = '19:00';
-        const weak = (book, task, prompt, dienTam) => makeSlot(3, eve, 'Tối · IELTS', 'all', 'weak', 5, Object.assign({ book: book, task: task, phut: 30 }, harvest(prompt), dienTam ? { dienTam: true } : {}));
-        return {
-            version: 2,
-            title: 'Tuần 1',
-            days: {
-                monday: [
-                    makeSlot(1, am, 'Sáng', 'Unit 1 - Jobs', 'flashcard', 8, Object.assign({ book: 'Tổng Ôn Ngữ Pháp Tập 1', task: 'Học Thì Hiện Tại Đơn', phut: 25 }, oneSentence('Viết 1 câu Hiện tại đơn, có một từ chỉ nghề nghiệp vừa học.'))),
-                    makeSlot(2, pm, 'Chiều · lớp FPT', 'Unit 1 - Lesson 1: Getting to Know You', 'test', 8, { note: 'Sprint đồng bộ lớp FPT, Lesson 1.' }),
-                    weak('Mindset for IELTS Foundation', 'Unit 1: Daily Life, Grammar & Vocab trang đầu', 'Nhập 2 từ mới vừa gặp trong sách.')
-                ],
-                tuesday: [
-                    makeSlot(1, am, 'Sáng', 'Unit 1 - Lesson 2: Quốc tịch và cá nhân', 'flashcard', 8, Object.assign({ book: 'Tổng Ôn Ngữ Pháp Tập 1', task: 'Bài tập vận dụng Thì Hiện Tại Đơn', phut: 25 }, oneSentence('Viết 1 câu Hiện tại đơn, có một từ của Lesson 2.'))),
-                    makeSlot(2, pm, 'Chiều · lớp FPT', 'Unit 1 - Lesson 2: Quốc tịch và cá nhân', 'burst', 8, { note: 'Củng cố sau giờ lên lớp, Lesson 2.' }),
-                    weak('Basic IELTS Listening', 'Unit 1: Number & Alphabet, nghe và check script', 'Nhập 2 từ hoặc cụm từ lấy từ script.')
-                ],
-                wednesday: [
-                    makeSlot(1, am, 'Sáng', 'Unit 1 - Ngành học', 'flashcard', 8, Object.assign({ book: 'Tổng Ôn Ngữ Pháp Tập 1', task: 'Động từ To be và Wh-questions', phut: 25 }, oneSentence('Đặt 1 câu hỏi Wh-question, có một từ chỉ ngành học.'))),
-                    makeSlot(2, pm, 'Chiều · lớp FPT', 'Unit 1 - Lesson 3 & Reading', 'test', 8, { note: 'Sprint Lesson 3 và Reading.' }),
-                    weak('Get Ready for IELTS Reading', 'Unit 1: Family & Friends, luyện Scanning', 'Nhập 2 từ mới từ bài đọc.')
-                ],
-                thursday: [
-                    makeSlot(1, am, 'Sáng', 'Unit 1', 'flashcard', 8, Object.assign({ book: 'Tổng Ôn Ngữ Pháp Tập 1', task: 'Ôn câu hỏi Yes/No', phut: 25 }, twoSentences('Viết 2 câu mô tả một bạn cùng lớp, để chuẩn bị Writing Handbook.'))),
-                    makeSlot(2, pm, 'Chiều · lớp FPT', 'Unit 1', 'burst', 8, { note: 'Sprint Băng đạn Unit 1.' }),
-                    weak('Mindset for IELTS Foundation', 'Reading và Listening Unit 1', 'Nhập 2 từ mới phát sinh.')
-                ],
-                friday: [
-                    makeSlot(1, am, 'Sáng', 'Unit 2: Events and Places', 'flashcard', 8, Object.assign({ book: 'Tổng Ôn Ngữ Pháp Tập 1', task: 'Thì Quá Khứ Đơn', phut: 25 }, oneSentence('Viết 1 câu Quá khứ đơn, có một từ Unit 2 (concert, play, exhibit...).'))),
-                    makeSlot(2, pm, 'Chiều · lớp FPT', 'Unit 2: Events and Places', 'test', 8, { note: 'Chuẩn bị trước bài Unit 2 trên lớp.' }),
-                    weak('Complete IELTS Band 4-5', 'Unit 1: Where do you live?', 'Nhập 2 từ mới từ bài.')
-                ],
-                saturday: [
-                    makeSlot(1, am, 'Sáng', 'Unit 2: Events and Places', 'flashcard', 8, Object.assign({ book: 'Tổng Ôn Ngữ Pháp Tập 1', task: 'Bài tập vận dụng Thì Quá Khứ Đơn', phut: 25 }, oneSentence('Viết 1 câu Quá khứ đơn, có một từ phương hướng hoặc âm nhạc.'))),
-                    makeSlot(2, pm, 'Chiều · lớp FPT', 'Unit 2: Events and Places', 'burst', 8, { note: 'Đồng bộ sau giờ học FPT, Unit 2.' }),
-                    weak('Basic IELTS Listening', 'Ôn Unit 1: nghe lại một đoạn số và chữ cái, đối script', 'Nhập 2 từ hoặc cụm từ từ script.', true)
-                ],
-                sunday: [
-                    makeSlot(1, am, 'Sáng', 'Unit 1', 'flashcard', 8, Object.assign({ book: 'Tổng Ôn Ngữ Pháp Tập 1', task: 'Ôn Hiện tại đơn và Quá khứ đơn', phut: 25, dienTam: true }, oneSentence('Viết 1 câu ôn thì, có một từ Unit 1.'))),
-                    makeSlot(2, pm, 'Chiều', 'Unit 2: Events and Places', 'test', 8, { note: 'Sprint ôn cuối tuần Unit 2.', dienTam: true }),
-                    weak('Mindset for IELTS Foundation', 'Ôn lại Unit 1: Daily Life', 'Nhập 2 từ còn mới sau tuần.', true)
-                ]
-            }
-        };
+        const days = {};
+        WEEK.forEach((key) => { days[key] = blankDay(); });
+        return { version: 2, title: 'Tuần của bạn', days: days };
     };
 
     const normGroup = (g) => (g === 'tat-ca' || !g ? 'all' : g === '__trong' ? '__none' : g);
@@ -163,7 +123,7 @@
         const hasBook = !!(p2.hasExternal && (p2.bookTitle || p2.taskDetail));
         return {
             id: [1, 2, 3].indexOf(s && s.id) >= 0 ? s.id : (i + 1),
-            time: /^\d{2}:\d{2}$/.test(s && s.time) ? s.time : ['10:30', '16:15', '19:00'][i] || '10:30',
+            time: /^\d{2}:\d{2}$/.test(s && s.time) ? s.time : ['08:00', '13:00', '20:00'][i] || '08:00',
             anchorLabel: String((s && s.anchorLabel) || '').trim().slice(0, 60) || (['Sáng', 'Chiều', 'Tối'][i] || ('Ca ' + (i + 1))),
             group: group,
             mode: mode,
