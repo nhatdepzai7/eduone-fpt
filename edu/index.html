@@ -173,6 +173,8 @@
         .face.back { transform: rotateY(180deg); }
         .card3d:not(.flipped) .back, .card3d.flipped .front { pointer-events: none; }
         .cell-ta { field-sizing: content; width: 100%; min-height: 40px; resize: none; border: 0; padding: 9px 12px; background: transparent; color: inherit; line-height: 1.45; overflow-wrap: anywhere; }
+        .col-example { width: 280px; min-width: 240px; max-width: 320px; }
+        .col-example .cell-ta { overflow-wrap: break-word; word-break: normal; }
         .cell-ta:focus { background: var(--primary-soft); box-shadow: inset 0 0 0 2px var(--primary); outline: none; }
         tr.row-sel td { background: #1F2937; color: #fff; }
         tr.row-sel .cell-ta::placeholder { color: #9CA3AF; }
@@ -578,13 +580,15 @@
         });
         window.EDU.chargeTurn = chargeTurn;
 
-        const FundBody = ({ toast, kind }) => {
+        const FundBody = ({ toast, kind, compact = false }) => {
             const fund = useFund();
             const eos = kind === 'eos';
             const [picked, setPicked] = useState(null);
             const [code, setCode] = useState(fund.code);
             const [incoming, setIncoming] = useState('');
             const [syncing, setSyncing] = useState(false);
+            const [tools, setTools] = useState(false);
+            const [offer, setOffer] = useState(false);
             const shelf = eos ? E.Quota.packs : [E.Quota.vocab];
             const pack = shelf.find(p => p.id === picked);
             const aiCap = fund.aiLimit || E.Quota.AI_FREE;
@@ -629,6 +633,126 @@
                     toast('Máy này đang dùng mã ' + now.code + '. Còn ' + now.balance + ' lượt, trừ chung trên mọi trình duyệt.', 'success');
                 });
             };
+            const saveCode = () => {
+                try { const saved = E.Quota.setCode(code); setCode(saved.code); checkPay(true); toast('Đã lưu mã quỹ ' + saved.code, 'success'); }
+                catch (e) { toast(e.message, 'error'); }
+            };
+            const vocabCard = (
+                <div className="rounded-2xl border-2 border-[#4338CA]/80 bg-gradient-to-br from-white to-indigo-50/30 p-6 shadow-sm">
+                    <span className="inline-flex rounded-full bg-indigo-100 px-2.5 py-1 text-xs font-semibold text-[#4338CA]">GÓI HỌC TỪ VỰNG & READING SIÊU TỐC • TIẾT KIỆM 50%</span>
+                    <div className="mt-4 flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
+                        <div className="min-w-0">
+                            <h3 className="text-lg font-bold text-ink">Gói Trợ Lý AI Từ Vựng & Đọc Hiểu Toàn Diện (Trọn Kỳ)</h3>
+                            <p className="mt-2 flex flex-wrap items-baseline gap-x-2 gap-y-1">
+                                <span className="text-3xl font-bold tnum text-ink">29.000đ</span>
+                                <span className="text-sm text-slate-400 line-through tnum">59.000đ</span>
+                                <span className="text-sm text-ink2">Chỉ bằng 1 cốc trà sữa cho cả học kỳ • Kích hoạt tự động sau 3 giây</span>
+                            </p>
+                            <ul className="mt-4 space-y-2 text-sm text-ink2">
+                                <li className="flex items-start gap-2"><Icon name="check" size={16} className="mt-0.5 text-[#10B981]" /><span><b className="text-ink">+500 lượt AI Tự động điền thẻ</b> (Nghĩa sát ngữ cảnh, Câu ví dụ, Phiên âm IPA & Mẹo nhớ siêu tốc).</span></li>
+                                <li className="flex items-start gap-2"><Icon name="check" size={16} className="mt-0.5 text-[#10B981]" /><span><b className="text-ink">+30 lượt AI Quét Bài Đọc / Đề Thi</b> (Tự động highlight từ vựng đắt giá & Luyện đọc Shadowing).</span></li>
+                                <li className="flex items-start gap-2"><Icon name="check" size={16} className="mt-0.5 text-[#10B981]" /><span><b className="text-ink">Đồng bộ đa thiết bị qua Mã Quỹ</b> (Học mọi lúc trên cả Laptop & Điện thoại, không cần mua kèm lượt EOS).</span></li>
+                            </ul>
+                        </div>
+                        {vocabOn ? (
+                            <p className="shrink-0 rounded-xl bg-white px-6 py-3 text-sm font-semibold text-[#4338CA]">Đã kích hoạt trên mã này</p>
+                        ) : (
+                            <button type="button" className="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl bg-[#4338CA] px-6 py-3 font-semibold text-white shadow-sm transition-all hover:bg-[#3730A3]" onClick={() => setPicked('vocab')}>Mở khóa ngay — 29.000đ (Quét QR tự động 3s)<Icon name="arrow" size={16} /></button>
+                        )}
+                    </div>
+                </div>
+            );
+            const payBox = pack && (
+                <div className="rounded-2xl border border-line p-4 flex flex-wrap gap-4 items-center">
+                    <img src={E.Quota.qrUrl(pack.price, fund.code)} alt={'VietQR ' + bank.name + ' ' + bank.account} className="w-40 h-40 rounded-xl border border-line object-contain bg-white" />
+                    <div className="min-w-0 flex-1">
+                        <p className="font-semibold">Chuyển khoản {pack.name}</p>
+                        <p className="text-sm text-ink2 mt-1">{bank.name} · {bank.bin}</p>
+                        <p className="text-sm text-ink2 tnum">Số tài khoản: <b className="text-ink">{bank.account}</b></p>
+                        <p className="text-sm text-ink2">Chủ tài khoản: <b className="text-ink">{bank.holder}</b></p>
+                        <p className="text-sm text-ink2 tnum">Số tiền: <b className="text-ink">{vnd(pack.price)}</b></p>
+                        <p className="text-sm text-ink2 tnum">Nội dung: <b className="text-ink">{memo}</b></p>
+                        <p className="text-xs text-muted mt-2">{pack.id === 'vocab' ? 'SePay cộng 500 lượt điền thẻ và 30 lượt quét bài đọc khi tiền vào đúng 29.000đ và đúng nội dung. Gói này không cộng lượt EOS.' : 'SePay cộng đúng ' + pack.turns + ' lượt EOS và bật trợ lý AI khi tiền vào đúng số tiền và nội dung. Lượt không tự cộng nếu bấm nút khi chưa có giao dịch.'}</p>
+                        <p className="text-xs mt-2 flex flex-wrap gap-x-3 gap-y-1">
+                            <button type="button" className="font-semibold text-primary underline underline-offset-2" onClick={() => openLegal('id')}>Chính sách bảo lưu Mã Quỹ</button>
+                            <button type="button" className="font-semibold text-primary underline underline-offset-2" onClick={openSupport}>Ghi sai nội dung? Liên hệ hỗ trợ cộng lượt</button>
+                        </p>
+                        <button type="button" className="btn btn-primary mt-3" disabled={syncing} onClick={() => checkPay(false)}>{syncing ? 'Đang kiểm tra…' : 'Kiểm tra chuyển khoản'}</button>
+                    </div>
+                </div>
+            );
+            if (compact && !eos) {
+                const aiLabel = fund.aiUnlocked && !vocabOn
+                    ? 'AI tự điền: đang mở'
+                    : 'AI tự điền: ' + aiLeft + '/' + aiCap + (vocabOn ? '' : ' miễn phí');
+                return (
+                    <div className="space-y-3">
+                        <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2 rounded-2xl border border-slate-200 bg-white px-4 py-2.5 shadow-sm">
+                            <div className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1 text-xs text-slate-700">
+                                <span className="inline-flex items-center gap-1 font-medium">
+                                    Mã quỹ: <b className="tnum text-ink">{fund.code}</b>
+                                    <button type="button" onClick={copyFund} aria-label={'Copy mã ' + fund.code} className="inline-flex h-6 w-6 items-center justify-center rounded-md text-slate-500 hover:bg-slate-100 hover:text-slate-800"><Icon name="copy" size={13} /></button>
+                                </span>
+                                <span aria-hidden="true" className="text-slate-300">•</span>
+                                <span className="inline-flex items-center rounded-full bg-indigo-50 px-2.5 py-1 font-medium text-[#4338CA]">{aiLabel}</span>
+                                <span aria-hidden="true" className="text-slate-300">•</span>
+                                <span className="font-medium">Phòng thi EOS: <b className="tnum text-ink">{fund.balance}</b> lượt</span>
+                            </div>
+                            <div className="flex shrink-0 flex-wrap items-center gap-2">
+                                <button type="button" aria-expanded={tools} onClick={() => setTools(v => !v)} className="rounded-xl bg-slate-100 px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-200">Đổi mã / Lịch sử quỹ</button>
+                                <button type="button" onClick={() => setOffer(true)} className="rounded-xl bg-[#4338CA] px-3.5 py-1.5 text-xs font-semibold text-white shadow-sm hover:bg-[#3730A3]">Mở khóa gói AI 29k / Nạp lượt ↗</button>
+                            </div>
+                        </div>
+                        {tools && (
+                            <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+                                <div className="grid gap-4 sm:grid-cols-2">
+                                    <div>
+                                        <label className="text-sm">
+                                            <span className="label">Mã quỹ</span>
+                                            <span className="flex gap-2">
+                                                <input value={code} onChange={(e) => setCode(e.target.value.toUpperCase())} maxLength={12} className="field w-32 uppercase" aria-label="Mã quỹ lượt" />
+                                                <button type="button" className="btn btn-secondary btn-sm" onClick={saveCode}>Lưu</button>
+                                            </span>
+                                        </label>
+                                        <p className="mb-2 mt-4 text-sm font-semibold">Lịch sử quỹ</p>
+                                        {fund.history.length ? (
+                                            <ul className="max-h-40 space-y-1 overflow-y-auto text-sm">
+                                                {fund.history.slice(0, 12).map(ev => (
+                                                    <li key={ev.id} className="flex justify-between gap-3 tnum">
+                                                        <span className="truncate text-ink2">{when(ev.t)} · {ev.kind === 'buy' ? ev.note : 'Nộp EOS'}</span>
+                                                        <span className={ev.delta > 0 ? 'text-success' : 'text-danger'}>{ev.delta > 0 ? '+' : ''}{ev.delta}</span>
+                                                    </li>
+                                                ))}
+                                            </ul>
+                                        ) : <p className="text-sm text-muted">Chưa có lần mua hoặc lần nộp EOS.</p>}
+                                    </div>
+                                    <div>
+                                        <p className="mb-2 text-sm font-semibold">Dùng chung mã này</p>
+                                        <p className="mb-2 text-xs text-muted">Máy khác dán đúng mã này. Hai máy trừ chung một số lượt trên server. Mã dài EDUF1 cũ vẫn dán được.</p>
+                                        <label className="block"><span className="label">Dán mã quỹ</span>
+                                            <textarea value={incoming} onChange={(e) => setIncoming(e.target.value)} rows={2} className="field text-xs" placeholder="Dán mã ngắn hoặc EDUF1...." />
+                                        </label>
+                                        <button type="button" className="btn btn-secondary btn-sm mt-2" disabled={!incoming.trim()} onClick={useSharedCode}>Dùng mã này</button>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+                        {offer && (
+                            <Modal title="Mở khóa gói AI từ vựng" onClose={() => { setOffer(false); setPicked(null); }} size="lg">
+                                {fund.aiUnlocked && !vocabOn ? (
+                                    <p className="rounded-xl bg-indigo-50 px-3 py-2 text-sm text-[#4338CA]">Mã này đã có trợ lý AI từ gói EOS.</p>
+                                ) : (
+                                    <div className="space-y-4">
+                                        {!vocabOn && <p className="text-sm font-medium text-ink">Nâng cấp Trợ lý AI Từ Vựng — Giải phóng 100% thời gian tự tra từ điển, bóc tách bài đọc IELTS & giáo trình chỉ trong 1 giây.</p>}
+                                        {vocabCard}
+                                        {payBox}
+                                    </div>
+                                )}
+                            </Modal>
+                        )}
+                    </div>
+                );
+            }
             return (
                 <div className="space-y-4">
                     <div className="flex flex-wrap items-end justify-between gap-3">
@@ -683,52 +807,10 @@
                                 );
                             })}
                         </div>
-                    ) : fund.aiUnlocked ? (
+                    ) : fund.aiUnlocked && !vocabOn ? (
                         <p className="rounded-xl bg-indigo-50 px-3 py-2 text-sm text-[#4338CA]">Mã này đã có trợ lý AI từ gói EOS.</p>
-                    ) : (
-                        <div className="rounded-2xl border-2 border-[#4338CA]/80 bg-gradient-to-br from-white to-indigo-50/30 p-6 shadow-sm">
-                            <span className="inline-flex rounded-full bg-indigo-100 px-2.5 py-1 text-xs font-semibold text-[#4338CA]">GÓI HỌC TỪ VỰNG & READING SIÊU TỐC • TIẾT KIỆM 50%</span>
-                            <div className="mt-4 flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
-                                <div className="min-w-0">
-                                    <h3 className="text-lg font-bold text-ink">Gói Trợ Lý AI Từ Vựng & Đọc Hiểu Toàn Diện (Trọn Kỳ)</h3>
-                                    <p className="mt-2 flex flex-wrap items-baseline gap-x-2 gap-y-1">
-                                        <span className="text-3xl font-bold tnum text-ink">29.000đ</span>
-                                        <span className="text-sm text-slate-400 line-through tnum">59.000đ</span>
-                                        <span className="text-sm text-ink2">Chỉ bằng 1 cốc trà sữa cho cả học kỳ • Kích hoạt tự động sau 3 giây</span>
-                                    </p>
-                                    <ul className="mt-4 space-y-2 text-sm text-ink2">
-                                        <li className="flex items-start gap-2"><Icon name="check" size={16} className="mt-0.5 text-[#10B981]" /><span><b className="text-ink">+500 lượt AI Tự động điền thẻ</b> (Nghĩa sát ngữ cảnh, Câu ví dụ, Phiên âm IPA & Mẹo nhớ siêu tốc).</span></li>
-                                        <li className="flex items-start gap-2"><Icon name="check" size={16} className="mt-0.5 text-[#10B981]" /><span><b className="text-ink">+30 lượt AI Quét Bài Đọc / Đề Thi</b> (Tự động highlight từ vựng đắt giá & Luyện đọc Shadowing).</span></li>
-                                        <li className="flex items-start gap-2"><Icon name="check" size={16} className="mt-0.5 text-[#10B981]" /><span><b className="text-ink">Đồng bộ đa thiết bị qua Mã Quỹ</b> (Học mọi lúc trên cả Laptop & Điện thoại, không cần mua kèm lượt EOS).</span></li>
-                                    </ul>
-                                </div>
-                                {vocabOn ? (
-                                    <p className="shrink-0 rounded-xl bg-white px-6 py-3 text-sm font-semibold text-[#4338CA]">Đã kích hoạt trên mã này</p>
-                                ) : (
-                                    <button type="button" className="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl bg-[#4338CA] px-6 py-3 font-semibold text-white shadow-sm transition-all hover:bg-[#3730A3]" onClick={() => setPicked('vocab')}>Mở khóa ngay — 29.000đ (Quét QR tự động 3s)<Icon name="arrow" size={16} /></button>
-                                )}
-                            </div>
-                        </div>
-                    )}
-                    {pack && (
-                        <div className="rounded-2xl border border-line p-4 flex flex-wrap gap-4 items-center">
-                            <img src={E.Quota.qrUrl(pack.price, fund.code)} alt={'VietQR ' + bank.name + ' ' + bank.account} className="w-40 h-40 rounded-xl border border-line object-contain bg-white" />
-                            <div className="min-w-0 flex-1">
-                                <p className="font-semibold">Chuyển khoản {pack.name}</p>
-                                <p className="text-sm text-ink2 mt-1">{bank.name} · {bank.bin}</p>
-                                <p className="text-sm text-ink2 tnum">Số tài khoản: <b className="text-ink">{bank.account}</b></p>
-                                <p className="text-sm text-ink2">Chủ tài khoản: <b className="text-ink">{bank.holder}</b></p>
-                                <p className="text-sm text-ink2 tnum">Số tiền: <b className="text-ink">{vnd(pack.price)}</b></p>
-                                <p className="text-sm text-ink2 tnum">Nội dung: <b className="text-ink">{memo}</b></p>
-                                <p className="text-xs text-muted mt-2">{pack.id === 'vocab' ? 'SePay cộng 500 lượt điền thẻ và 30 lượt quét bài đọc khi tiền vào đúng 29.000đ và đúng nội dung. Gói này không cộng lượt EOS.' : 'SePay cộng đúng ' + pack.turns + ' lượt EOS và bật trợ lý AI khi tiền vào đúng số tiền và nội dung. Lượt không tự cộng nếu bấm nút khi chưa có giao dịch.'}</p>
-                                <p className="text-xs mt-2 flex flex-wrap gap-x-3 gap-y-1">
-                                    <button type="button" className="font-semibold text-primary underline underline-offset-2" onClick={() => openLegal('id')}>Chính sách bảo lưu Mã Quỹ</button>
-                                    <button type="button" className="font-semibold text-primary underline underline-offset-2" onClick={openSupport}>Ghi sai nội dung? Liên hệ hỗ trợ cộng lượt</button>
-                                </p>
-                                <button type="button" className="btn btn-primary mt-3" disabled={syncing} onClick={() => checkPay(false)}>{syncing ? 'Đang kiểm tra…' : 'Kiểm tra chuyển khoản'}</button>
-                            </div>
-                        </div>
-                    )}
+                    ) : vocabCard}
+                    {payBox}
                     <div className="grid sm:grid-cols-2 gap-3">
                         <div>
                             <p className="text-sm font-semibold mb-2">Lịch sử quỹ</p>
@@ -758,10 +840,16 @@
                 </div>
             );
         };
-        const FundPanel = ({ toast, kind = 'vocab' }) => (
-            <section className="card p-4 sm:p-5 mb-4">
-                <FundBody toast={toast} kind={kind} />
-            </section>
+        const FundPanel = ({ toast, kind = 'vocab', compact = false }) => (
+            compact ? (
+                <div className="mb-4">
+                    <FundBody toast={toast} kind={kind} compact />
+                </div>
+            ) : (
+                <section className="card p-4 sm:p-5 mb-4">
+                    <FundBody toast={toast} kind={kind} />
+                </section>
+            )
         );
         const FundShop = ({ toast, onClose }) => (
             <Modal title="Quỹ lượt thi" onClose={onClose} size="lg">
@@ -3361,7 +3449,7 @@
                         </div>
                     </div>
 
-                    <FundPanel toast={toast} />
+                    <FundPanel toast={toast} compact />
 
                     {quick && <QuickPaste groups={groups} toast={toast} onLocked={() => setPaywall(true)} onAdd={(list) => confirmImport({ items: list, mode: 'append' })} />}
 
@@ -3411,20 +3499,20 @@
                         </div>
                     )}
 
-                    <div className="card overflow-hidden">
+                    <div className="card overflow-hidden pb-24">
                         <div className="overflow-x-auto">
                             <table className="w-full min-w-[1080px] text-sm border-collapse">
                                 <caption className="sr-only">Bảng kho học</caption>
                                 <thead className="bg-surface2 text-ink2 text-xs">
                                     <tr>
-                                        <th scope="col" className="px-2 py-2 text-left w-12" title="Giữ chuột và kéo để chọn nhiều hàng">#</th>
+                                        <th scope="col" className="w-auto whitespace-nowrap px-2 py-2 text-left" title="Giữ chuột và kéo để chọn nhiều hàng">#</th>
                                         <th scope="col" className="px-3 py-2 text-left w-48">Nhóm</th>
-                                        <th scope="col" className="px-3 py-2 text-left w-24">Loại</th>
+                                        <th scope="col" className="w-auto whitespace-nowrap px-3 py-2 text-left">Loại</th>
                                         <th scope="col" className="px-3 py-2 text-left">Từ / Câu hỏi</th>
                                         <th scope="col" className="px-3 py-2 text-left w-56">Nghĩa / Đáp án</th>
-                                        <th scope="col" className="px-3 py-2 text-left">Ví dụ / Giải thích</th>
+                                        <th scope="col" className="col-example min-w-[240px] max-w-[320px] px-3 py-2 text-left">Ví dụ / Giải thích</th>
                                         <th scope="col" className="px-3 py-2 text-left w-40">Phát âm</th>
-                                        <th scope="col" className="px-3 py-2 text-left w-28">Tiến độ</th>
+                                        <th scope="col" className="w-auto whitespace-nowrap px-3 py-2 text-left">Tiến độ</th>
                                         <th scope="col" className="px-3 py-2 text-left w-40">Thao tác</th>
                                     </tr>
                                 </thead>
@@ -3436,7 +3524,7 @@
                                         const mcq = t.type === 'mcq';
                                         return (
                                             <tr key={t.id} className={'border-t border-line align-top ' + (on ? 'row-sel' : 'hover:bg-surface2')} onMouseEnter={() => { if (dragging.current) selectRange(anchor.current, i); }}>
-                                                <td className="p-0">
+                                                <td className="w-auto whitespace-nowrap p-0">
                                                     <button type="button" aria-pressed={on} aria-label={'Chọn hàng ' + (i + 1)} className={'w-full min-h-[40px] px-2 text-xs tnum cursor-crosshair ' + (on ? 'text-white' : 'text-muted')}
                                                         onMouseDown={(e) => { if (e.button !== 0) return; e.preventDefault(); const a = e.shiftKey ? anchor.current : i; if (!e.shiftKey) anchor.current = i; dragging.current = true; selectRange(a, i); }}
                                                         onKeyDown={(e) => { if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); setSel(s => { const n = new Set(s); if (n.has(t.id)) n.delete(t.id); else n.add(t.id); return n; }); } }}>
@@ -3450,7 +3538,7 @@
                                                             onChange={(e) => { if (on) bulkSetGroup(e.target.value); else update(t.id, { group: e.target.value }); }} />
                                                     </div>
                                                 </td>
-                                                <td className="p-2">
+                                                <td className="w-auto whitespace-nowrap p-2">
                                                     <select aria-label="Loại" className="field !min-h-[36px] text-xs px-2" value={t.type}
                                                         onChange={(e) => update(t.id, e.target.value === 'mcq' ? { type: 'mcq', options: t.options.length ? t.options : ['', '', '', ''], answerOrMeaning: 'A' } : { type: 'vocab', options: [], answerOrMeaning: '' })}>
                                                         <option value="vocab">Từ</option><option value="mcq">MCQ</option>
@@ -3483,7 +3571,7 @@
                                                         <textarea rows={1} className="cell-ta" value={t.answerOrMeaning} maxLength={1500} aria-label="Nghĩa" placeholder="Nghĩa…" onChange={(e) => update(t.id, { answerOrMeaning: e.target.value })} />
                                                     )}
                                                 </td>
-                                                <td className="p-0">
+                                                <td className="col-example min-w-[240px] max-w-[320px] p-0">
                                                     <textarea rows={1} className="cell-ta" value={t.explanationOrExample} maxLength={2500} aria-label={mcq ? 'Giải thích' : 'Câu ví dụ'} placeholder={mcq ? 'Giải thích…' : 'Câu ví dụ…'} onChange={(e) => update(t.id, { explanationOrExample: e.target.value })} />
                                                 </td>
                                                 <td className="p-2">
@@ -3494,7 +3582,7 @@
                                                         </div>
                                                     )}
                                                 </td>
-                                                <td className="p-2 text-xs">
+                                                <td className="w-auto whitespace-nowrap p-2 text-xs">
                                                     <p className="tnum">Đ {t.correctCount || 0} · S {t.wrongCount || 0}</p>
                                                     <p className="tnum text-muted">Ôn {t.reviewCount || 0}</p>
                                                     {Sch.reviewNote(t) && <p className={Sch.isWeak(t) ? 'text-warn font-medium' : 'text-muted'}>{Sch.reviewNote(t)}</p>}
