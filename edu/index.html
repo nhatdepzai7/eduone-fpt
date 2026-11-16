@@ -637,29 +637,28 @@
                 try { const saved = E.Quota.setCode(code); setCode(saved.code); checkPay(true); toast('Đã lưu mã quỹ ' + saved.code, 'success'); }
                 catch (e) { toast(e.message, 'error'); }
             };
+            const vocabBenefits = (
+                <ul className="mt-3 space-y-1.5 text-sm text-ink2">
+                    <li className="flex items-start gap-2"><Icon name="check" size={16} className="mt-0.5 shrink-0 text-[#10B981]" /><span><b className="text-ink">+500 lượt AI Tự động điền thẻ</b> (Nghĩa sát ngữ cảnh, Câu ví dụ, Phiên âm IPA & Mẹo nhớ siêu tốc).</span></li>
+                    <li className="flex items-start gap-2"><Icon name="check" size={16} className="mt-0.5 shrink-0 text-[#10B981]" /><span><b className="text-ink">+30 lượt AI Quét Bài Đọc / Đề Thi</b> (Tự động highlight từ vựng đắt giá & Luyện đọc Shadowing).</span></li>
+                    <li className="flex items-start gap-2"><Icon name="check" size={16} className="mt-0.5 shrink-0 text-[#10B981]" /><span><b className="text-ink">Đồng bộ đa thiết bị qua Mã Quỹ</b> (Học mọi lúc trên cả Laptop & Điện thoại, không cần mua kèm lượt EOS).</span></li>
+                </ul>
+            );
             const vocabCard = (
-                <div className="rounded-2xl border-2 border-[#4338CA]/80 bg-gradient-to-br from-white to-indigo-50/30 p-6 shadow-sm">
+                <div className="rounded-2xl border-2 border-[#4338CA]/80 bg-gradient-to-br from-white to-indigo-50/30 p-4 shadow-sm">
                     <span className="inline-flex rounded-full bg-indigo-100 px-2.5 py-1 text-xs font-semibold text-[#4338CA]">GÓI HỌC TỪ VỰNG & READING SIÊU TỐC • TIẾT KIỆM 50%</span>
-                    <div className="mt-4 flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
-                        <div className="min-w-0">
-                            <h3 className="text-lg font-bold text-ink">Gói Trợ Lý AI Từ Vựng & Đọc Hiểu Toàn Diện (Trọn Kỳ)</h3>
-                            <p className="mt-2 flex flex-wrap items-baseline gap-x-2 gap-y-1">
-                                <span className="text-3xl font-bold tnum text-ink">29.000đ</span>
-                                <span className="text-sm text-slate-400 line-through tnum">59.000đ</span>
-                                <span className="text-sm text-ink2">Chỉ bằng 1 cốc trà sữa cho cả học kỳ • Kích hoạt tự động sau 3 giây</span>
-                            </p>
-                            <ul className="mt-4 space-y-2 text-sm text-ink2">
-                                <li className="flex items-start gap-2"><Icon name="check" size={16} className="mt-0.5 text-[#10B981]" /><span><b className="text-ink">+500 lượt AI Tự động điền thẻ</b> (Nghĩa sát ngữ cảnh, Câu ví dụ, Phiên âm IPA & Mẹo nhớ siêu tốc).</span></li>
-                                <li className="flex items-start gap-2"><Icon name="check" size={16} className="mt-0.5 text-[#10B981]" /><span><b className="text-ink">+30 lượt AI Quét Bài Đọc / Đề Thi</b> (Tự động highlight từ vựng đắt giá & Luyện đọc Shadowing).</span></li>
-                                <li className="flex items-start gap-2"><Icon name="check" size={16} className="mt-0.5 text-[#10B981]" /><span><b className="text-ink">Đồng bộ đa thiết bị qua Mã Quỹ</b> (Học mọi lúc trên cả Laptop & Điện thoại, không cần mua kèm lượt EOS).</span></li>
-                            </ul>
-                        </div>
-                        {vocabOn ? (
-                            <p className="shrink-0 rounded-xl bg-white px-6 py-3 text-sm font-semibold text-[#4338CA]">Đã kích hoạt trên mã này</p>
-                        ) : (
-                            <button type="button" className="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl bg-[#4338CA] px-6 py-3 font-semibold text-white shadow-sm transition-all hover:bg-[#3730A3]" onClick={() => setPicked('vocab')}>Mở khóa ngay — 29.000đ (Quét QR tự động 3s)<Icon name="arrow" size={16} /></button>
-                        )}
-                    </div>
+                    <h3 className="mt-2 text-lg font-bold text-ink">Gói Trợ Lý AI Từ Vựng & Đọc Hiểu Toàn Diện (Trọn Kỳ)</h3>
+                    <p className="mt-1 flex flex-wrap items-baseline gap-x-2 gap-y-1">
+                        <span className="text-2xl font-bold tnum text-ink">29.000đ</span>
+                        <span className="text-sm text-slate-400 line-through tnum">59.000đ</span>
+                        <span className="text-sm text-ink2">Chỉ bằng 1 cốc trà sữa cho cả học kỳ • Kích hoạt tự động sau 3 giây</span>
+                    </p>
+                    {vocabBenefits}
+                    {vocabOn ? (
+                        <p className="mt-3 inline-flex rounded-xl bg-white px-4 py-2 text-sm font-semibold text-[#4338CA]">Đã kích hoạt trên mã này</p>
+                    ) : (
+                        <button type="button" className="mt-3 inline-flex items-center justify-center gap-2 rounded-xl bg-[#4338CA] px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-all hover:bg-[#3730A3]" onClick={() => setPicked('vocab')}>Mở khóa ngay — 29.000đ (Quét QR tự động 3s)<Icon name="arrow" size={16} /></button>
+                    )}
                 </div>
             );
             const payBox = pack && (
@@ -700,7 +699,7 @@
                             </div>
                             <div className="flex shrink-0 flex-wrap items-center gap-2">
                                 <button type="button" aria-expanded={tools} onClick={() => setTools(v => !v)} className="rounded-xl bg-slate-100 px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-200">Đổi mã / Lịch sử quỹ</button>
-                                <button type="button" onClick={() => setOffer(true)} className="rounded-xl bg-[#4338CA] px-3.5 py-1.5 text-xs font-semibold text-white shadow-sm hover:bg-[#3730A3]">Mở khóa gói AI 29k / Nạp lượt ↗</button>
+                                <button type="button" onClick={() => { setPicked('vocab'); setOffer(true); }} className="rounded-xl bg-[#4338CA] px-3.5 py-1.5 text-xs font-semibold text-white shadow-sm hover:bg-[#3730A3]">Mở khóa gói AI 29k / Nạp lượt ↗</button>
                             </div>
                         </div>
                         {tools && (
@@ -741,11 +740,27 @@
                             <Modal title="Mở khóa gói AI từ vựng" onClose={() => { setOffer(false); setPicked(null); }} size="lg">
                                 {fund.aiUnlocked && !vocabOn ? (
                                     <p className="rounded-xl bg-indigo-50 px-3 py-2 text-sm text-[#4338CA]">Mã này đã có trợ lý AI từ gói EOS.</p>
+                                ) : vocabOn ? (
+                                    <p className="rounded-xl bg-indigo-50 px-3 py-2 text-sm font-semibold text-[#4338CA]">Đã kích hoạt trên mã này</p>
                                 ) : (
-                                    <div className="space-y-4">
-                                        {!vocabOn && <p className="text-sm font-medium text-ink">Nâng cấp Trợ lý AI Từ Vựng — Giải phóng 100% thời gian tự tra từ điển, bóc tách bài đọc IELTS & giáo trình chỉ trong 1 giây.</p>}
-                                        {vocabCard}
-                                        {payBox}
+                                    <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
+                                        <div className="min-w-0 flex-1">
+                                            <span className="inline-flex rounded-full bg-indigo-100 px-2.5 py-1 text-xs font-semibold text-[#4338CA]">GÓI HỌC TỪ VỰNG & READING SIÊU TỐC • TIẾT KIỆM 50%</span>
+                                            <h3 className="mt-2 text-base font-bold text-ink">Gói Trợ Lý AI Từ Vựng & Đọc Hiểu Toàn Diện (Trọn Kỳ)</h3>
+                                            <p className="mt-1 flex flex-wrap items-baseline gap-x-2">
+                                                <span className="text-2xl font-bold tnum text-ink">29.000đ</span>
+                                                <span className="text-sm text-slate-400 line-through tnum">59.000đ</span>
+                                            </p>
+                                            <p className="mt-1 text-xs text-ink2">Chỉ bằng 1 cốc trà sữa cho cả học kỳ • Kích hoạt tự động sau 3 giây</p>
+                                            {vocabBenefits}
+                                        </div>
+                                        <div className="w-full shrink-0 rounded-xl border border-slate-200 bg-white p-3 sm:w-60">
+                                            <img src={E.Quota.qrUrl(29000, fund.code)} alt={'VietQR ' + bank.name + ' ' + bank.account} className="mx-auto h-36 w-36 rounded-lg border border-line bg-white object-contain" />
+                                            <p className="mt-2 text-center text-sm font-semibold tnum text-ink">29.000đ</p>
+                                            <p className="text-center text-xs tnum text-ink2">{memo}</p>
+                                            <p className="text-center text-[11px] text-muted">{bank.name} · {bank.account}</p>
+                                            <button type="button" className="btn btn-primary mt-2 w-full whitespace-nowrap" disabled={syncing} onClick={() => checkPay(false)}>{syncing ? 'Đang kiểm tra…' : 'Kiểm tra chuyển khoản'}</button>
+                                        </div>
                                     </div>
                                 )}
                             </Modal>
