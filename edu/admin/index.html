@@ -118,11 +118,13 @@
                 setBusy(label);
                 setError('');
                 try {
-                    await api(token, '/api/desk?action=quotas', body);
+                    const result = await api(token, '/api/desk?action=quotas', body);
                     await load();
+                    return result;
                 } catch (e) {
                     if (e.auth) onAuth();
                     else setError(e.message);
+                    return null;
                 } finally {
                     setBusy('');
                 }
@@ -145,19 +147,20 @@
                         </label>
                         <button type="submit" disabled={!!busy} className="min-h-[44px] px-4 rounded-xl bg-indigo-700 text-white font-semibold">{busy === 'create' ? 'Đang tạo…' : 'Tạo mã quỹ'}</button>
                     </form>
+                    <AiGrant quotas={quotas} busy={busy} onRun={run} />
                     {error && <p className="text-sm text-rose-700" role="alert">{error}</p>}
                     <div className="bg-white rounded-2xl border border-slate-200 overflow-x-auto">
                         <table className="w-full text-sm">
                             <caption className="text-left px-4 py-3 font-semibold">Mã quỹ</caption>
                             <thead className="text-left text-slate-500">
-                                <tr><th className="px-4 py-2">Mã quỹ</th><th className="px-4 py-2">Lượt đã cấp</th><th className="px-4 py-2">Còn lại</th><th className="px-4 py-2">Tổng tiền đã nạp</th><th className="px-4 py-2">Cập nhật</th><th className="px-4 py-2">Cộng / trừ hoặc đặt lại</th></tr>
+                                <tr><th className="px-4 py-2">Mã quỹ</th><th className="px-4 py-2">Lượt đã cấp</th><th className="px-4 py-2">Còn lại</th><th className="px-4 py-2">Điền thẻ AI</th><th className="px-4 py-2">Quét bài đọc</th><th className="px-4 py-2">Tổng tiền đã nạp</th><th className="px-4 py-2">Cập nhật</th><th className="px-4 py-2">Cộng / trừ hoặc đặt lại</th></tr>
                             </thead>
                             <tbody>
-                                {quotas.length ? quotas.map((row) => <QuotaRow key={row.code + ':' + row.balance + ':' + row.remaining} row={row} busy={busy} onRun={run} />) : <tr><td className="px-4 py-6 text-slate-500" colSpan={6}>Chưa có mã quỹ nào được SePay cộng hoặc admin tạo.</td></tr>}
+                                {quotas.length ? quotas.map((row) => <QuotaRow key={row.code + ':' + row.balance + ':' + row.aiUsed + ':' + row.scans + ':' + row.aiCredits + ':' + row.scanGrant} row={row} busy={busy} onRun={run} />) : <tr><td className="px-4 py-6 text-slate-500" colSpan={8}>Chưa có mã quỹ nào được SePay cộng hoặc admin tạo.</td></tr>}
                             </tbody>
                         </table>
                     </div>
-                    <p className="text-xs text-slate-500">Lượt đã cấp là tổng đã cộng. Còn lại = đã cấp trừ số lần nộp bài trên mọi trình duyệt dùng cùng mã. Sinh viên bấm Kiểm tra chuyển khoản để nhận phần vừa cấp.</p>
+                    <p className="text-xs text-slate-500">Lượt đã cấp là tổng lượt phòng thi đã cộng. Còn lại = đã cấp trừ số lần nộp bài. Điền thẻ và quét bài là hai sổ riêng: số đã dùng không bị xóa khi cộng thêm. Mỗi lần quét bài trừ 1 lượt quét và 10 lượt điền. Sinh viên bấm Kiểm tra chuyển khoản để nhận phần vừa cấp.</p>
                     <div className="bg-white rounded-2xl border border-slate-200 overflow-x-auto">
                         <table className="w-full text-sm">
                             <caption className="text-left px-4 py-3 font-semibold">Lịch sử chuyển khoản SePay</caption>
@@ -182,6 +185,62 @@
             );
         };
 
+        const AiGrant = ({ quotas, busy, onRun }) => {
+            const [code, setCode] = useState('');
+            const [fills, setFills] = useState('500');
+            const [scanN, setScanN] = useState('30');
+            const [note, setNote] = useState('');
+            const clean = code.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 12);
+            const row = quotas.find((item) => item.code === clean);
+            const send = async (fillCount, scanCount) => {
+                setNote('');
+                const result = await onRun('ai:' + clean, { op: 'ai', code: clean, fills: fillCount, scans: scanCount });
+                if (!result) return;
+                setNote('Đã cộng cho ' + result.code + '. Điền thẻ đã dùng ' + result.aiUsed + '/' + result.aiLimit + ', còn ' + result.aiLeft + '. Quét bài đã dùng ' + result.scansUsed + '/' + result.scanCap + ', còn ' + result.scanLeft + '.');
+            };
+            return (
+                <form className="bg-white rounded-2xl border border-slate-200 p-4 space-y-3" onSubmit={(e) => { e.preventDefault(); send(Number(fills) || 0, Number(scanN) || 0); }}>
+                    <div>
+                        <p className="font-semibold">Cộng lượt gói AI theo mã khách</p>
+                        <p className="text-xs text-slate-500 mt-1">Chỉ cộng lượt điền thẻ và lượt quét bài. Không cộng lượt phòng thi EOS. Số đã dùng giữ nguyên.</p>
+                    </div>
+                    <div className="flex flex-wrap gap-3 items-end">
+                        <label className="text-sm font-medium">Mã khách
+                            <input value={code} onChange={(e) => setCode(e.target.value.toUpperCase())} maxLength={12} className="field mt-1 w-40 uppercase" placeholder="3NLKQCCX" />
+                        </label>
+                        <label className="text-sm font-medium">Lượt điền thẻ
+                            <input value={fills} onChange={(e) => setFills(e.target.value)} inputMode="numeric" className="field mt-1 w-28 tnum" />
+                        </label>
+                        <label className="text-sm font-medium">Lượt quét bài
+                            <input value={scanN} onChange={(e) => setScanN(e.target.value)} inputMode="numeric" className="field mt-1 w-28 tnum" />
+                        </label>
+                        <button type="submit" disabled={!!busy || clean.length < 4} className="min-h-[44px] px-4 rounded-xl bg-indigo-700 text-white font-semibold">{busy === 'ai:' + clean ? 'Đang cộng…' : 'Cộng cả hai'}</button>
+                        <button type="button" disabled={!!busy || clean.length < 4} onClick={() => send(Number(fills) || 0, 0)} className="min-h-[44px] px-3 rounded-xl border border-slate-300 font-semibold">Chỉ điền thẻ</button>
+                        <button type="button" disabled={!!busy || clean.length < 4} onClick={() => send(0, Number(scanN) || 0)} className="min-h-[44px] px-3 rounded-xl border border-slate-300 font-semibold">Chỉ quét bài</button>
+                        <button type="button" disabled={!!busy || clean.length < 4} onClick={() => { setFills('500'); setScanN('30'); send(500, 30); }} className="min-h-[44px] px-3 rounded-xl border border-indigo-200 font-semibold text-indigo-800">Trọn gói 29k</button>
+                    </div>
+                    {clean.length >= 4 && (
+                        <div className="grid sm:grid-cols-2 gap-3">
+                            <div className="rounded-xl bg-slate-50 p-3">
+                                <p className="text-sm font-semibold">AI tự động điền thẻ</p>
+                                {row ? (row.aiUnlimited
+                                    ? <p className="mt-1 text-sm tnum">Không giới hạn (gói EOS) · đã ghi {row.aiUsed}</p>
+                                    : <p className="mt-1 text-sm tnum">Đã dùng {row.aiUsed}/{row.aiLimit} · còn {row.aiLeft}<br />Đã cấp thêm {row.aiCredits} · miễn phí 100</p>)
+                                    : <p className="mt-1 text-sm text-slate-500">Mã này chưa có sổ. Cộng lượt sẽ tạo sổ mới.</p>}
+                            </div>
+                            <div className="rounded-xl bg-slate-50 p-3">
+                                <p className="text-sm font-semibold">AI quét bài đọc</p>
+                                {row
+                                    ? <p className="mt-1 text-sm tnum">Đã dùng {row.scans}/{row.scanCap} · còn {row.scanLeft}<br />Đã cấp thêm {row.scanGrant} · miễn phí 2 · hôm nay {row.scanToday}/15</p>
+                                    : <p className="mt-1 text-sm text-slate-500">Mỗi lần quét trừ 1 lượt quét và 10 lượt điền.</p>}
+                            </div>
+                        </div>
+                    )}
+                    {note && <p className="text-sm text-emerald-700">{note}</p>}
+                </form>
+            );
+        };
+
         const QuotaRow = ({ row, busy, onRun }) => {
             const [delta, setDelta] = useState('10');
             const [next, setNext] = useState(String(row.balance));
@@ -190,6 +249,8 @@
                     <td className="px-4 py-3 tnum font-semibold">{row.code}</td>
                     <td className="px-4 py-3 tnum">{row.balance}</td>
                     <td className="px-4 py-3 tnum">{row.remaining != null ? row.remaining : row.balance}</td>
+                    <td className="px-4 py-3 tnum text-xs leading-5">{row.aiUnlimited ? <>Không giới hạn<br />đã ghi {row.aiUsed}</> : <>đã dùng {row.aiUsed}/{row.aiLimit}<br />còn {row.aiLeft} · cấp thêm {row.aiCredits}</>}</td>
+                    <td className="px-4 py-3 tnum text-xs leading-5">đã dùng {row.scans}/{row.scanCap}<br />còn {row.scanLeft} · cấp thêm {row.scanGrant}<br />hôm nay {row.scanToday}/15</td>
                     <td className="px-4 py-3 tnum">{vnd(row.money)}</td>
                     <td className="px-4 py-3 whitespace-nowrap">{when(row.updated)}</td>
                     <td className="px-4 py-3">

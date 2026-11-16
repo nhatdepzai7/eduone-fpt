@@ -1,7 +1,7 @@
 import { bearer, loginAdmin, logoutAdmin, requireAdmin } from './admin-auth.js';
 import { deleteOfficial, listOfficial, listPending, publishPending, rejectPending, saveOfficial, takePending } from './exams-store.js';
 import { clientIp, fail, json, mount, sameOrigin } from './http.js';
-import { adjustQuota, listQuotas, listTransactions } from './ledger.js';
+import { adjustAiGrant, adjustQuota, listQuotas, listTransactions } from './ledger.js';
 import { recordVisit, visitHistory } from './visits.js';
 
 export async function handleLogin(req, env) {
@@ -36,6 +36,10 @@ export async function handleQuotas(req, env) {
         }
         if (req.method === 'POST') {
             const body = await req.json(8000);
+            if (body && body.op === 'ai') {
+                const result = await adjustAiGrant(env, body);
+                return json(200, result);
+            }
             const mode = body && body.op === 'create' ? 'create' : (body && body.op === 'set' ? 'set' : 'delta');
             const result = await adjustQuota(env, {
                 mode,

@@ -56,6 +56,34 @@ end
 return redis.call('HGET', KEYS[1], 'balance')
 `;
 
+const ADJUST_AI = `
+local credits = tonumber(redis.call('HGET', KEYS[1], 'aiCredits') or '0') or 0
+local scans = tonumber(redis.call('HGET', KEYS[1], 'scanGrant') or '0') or 0
+local addC = tonumber(ARGV[1]) or 0
+local addS = tonumber(ARGV[2]) or 0
+if redis.call('HEXISTS', KEYS[1], 'created') == 0 then
+  redis.call('HSET', KEYS[1], 'created', ARGV[3], 'money', '0', 'balance', '0')
+end
+local nextC = credits + addC
+local nextS = scans + addS
+if nextC < 0 then nextC = 0 end
+if nextS < 0 then nextS = 0 end
+if nextC > 20000 then nextC = 20000 end
+if nextS > 5000 then nextS = 5000 end
+redis.call('HSET', KEYS[1], 'aiCredits', tostring(nextC), 'scanGrant', tostring(nextS), 'updated', ARGV[3])
+redis.call('SADD', KEYS[2], ARGV[4])
+if ARGV[5] ~= '' then
+  redis.call('LPUSH', KEYS[3], ARGV[5])
+  redis.call('LTRIM', KEYS[3], 0, 299)
+end
+local used = tonumber(redis.call('HGET', KEYS[1], 'aiUsed') or '0') or 0
+local spentScans = tonumber(redis.call('HGET', KEYS[1], 'scans') or '0') or 0
+local today = tonumber(redis.call('HGET', KEYS[1], 'scanToday') or '0') or 0
+local day = redis.call('HGET', KEYS[1], 'scanDay') or ''
+if day ~= ARGV[6] then today = 0 end
+return tostring(nextC) .. ':' .. tostring(nextS) .. ':' .. tostring(used) .. ':' .. tostring(spentScans) .. ':' .. tostring(today)
+`;
+
 const SPEND = `
 local bal = tonumber(redis.call('HGET', KEYS[1], 'balance') or '0') or 0
 local spent = tonumber(redis.call('HGET', KEYS[1], 'spent') or '0') or 0
@@ -485,7 +513,30 @@ function quotaView(code, hash) {
         remaining: Math.max(0, Math.floor(Number(h.balance) || 0) - Math.max(0, Math.floor(Number(h.spent) || 0))),
         money: Math.max(0, Math.floor(Number(h.money) || 0)),
         updated: Math.floor(Number(h.updated) || 0),
-        created: Math.floor(Number(h.created) || 0)
+        created: Math.floor(Number(h.created) || 0),
+        ...aiView(h)
+    };
+}
+
+function aiView(h) {
+    const credits = Math.max(0, Math.floor(Number(h.aiCredits) || 0));
+    const used = Math.max(0, Math.floor(Number(h.aiUsed) || 0));
+    const unlimited = String(h.ai) === '1' && credits === 0;
+    const limit = AI_FREE + credits;
+    const grant = Math.max(0, Math.floor(Number(h.scanGrant) || 0));
+    const scans = Math.max(0, Math.floor(Number(h.scans) || 0));
+    const scanCap = 2 + grant;
+    return {
+        aiUnlimited: unlimited,
+        aiCredits: credits,
+        aiUsed: used,
+        aiLimit: limit,
+        aiLeft: unlimited ? null : Math.max(0, limit - used),
+        scanGrant: grant,
+        scans,
+        scanCap,
+        scanLeft: Math.max(0, scanCap - scans),
+        scanToday: String(h.scanDay || '') === passageDay() ? Math.max(0, Math.floor(Number(h.scanToday) || 0)) : 0
     };
 }
 
@@ -575,4 +626,65 @@ export async function adjustQuota(env, input) {
         event ? JSON.stringify(event) : ''
     ]);
     return { code, balance: Math.max(0, Math.floor(Number(balance) || 0)), delta };
+}
+
+export async function adjustAiGrant(env, input) {
+    const code = cleanCode(input && input.code);
+    if (!code) {
+        const err = new Error('bad-code');
+        err.code = 'bad-code';
+        throw err;
+    }
+    const fills = Math.floor(Number(input && input.fills));
+    const scans = Math.floor(Number(input && input.scans));
+    if (!Number.isFinite(fills) || !Number.isFinite(scans) || (fills === 0 && scans === 0) || fills < -5000 || fills > 5000 || scans < -500 || scans > 500) {
+        const err = new Error('bad-turns');
+        err.code = 'bad-turns';
+        throw err;
+    }
+    const parts = [];
+    if (fills) parts.push((fills > 0 ? '+' : '') + fills + ' lượt điền thẻ');
+    if (scans) parts.push((scans > 0 ? '+' : '') + scans + ' lượt quét bài');
+    const now = Date.now();
+    const event = {
+        id: adminEventId(),
+        t: now,
+        delta: 0,
+        kind: 'buy',
+        pack: 'vocab',
+        note: ('Admin ' + parts.join(', ')).slice(0, 80)
+    };
+    const row = await redisCommand(env, [
+        'EVAL', ADJUST_AI, 3,
+        'fpass:quota:' + code,
+        'fpass:quotas',
+        'fpass:fund:' + code,
+        String(fills),
+        String(scans),
+        String(now),
+        code,
+        JSON.stringify(event),
+        passageDay()
+    ]);
+    const bits = String(row == null ? '' : row).split(':');
+    const aiCredits = Math.max(0, Math.floor(Number(bits[0]) || 0));
+    const scanGrant = Math.max(0, Math.floor(Number(bits[1]) || 0));
+    const aiUsed = Math.max(0, Math.floor(Number(bits[2]) || 0));
+    const spentScans = Math.max(0, Math.floor(Number(bits[3]) || 0));
+    const scanCap = 2 + scanGrant;
+    const aiLimit = AI_FREE + aiCredits;
+    return {
+        code,
+        fills,
+        scans,
+        aiCredits,
+        aiUsed,
+        aiLimit,
+        aiLeft: Math.max(0, aiLimit - aiUsed),
+        scanGrant,
+        scansUsed: spentScans,
+        scanCap,
+        scanLeft: Math.max(0, scanCap - spentScans),
+        scanToday: Math.max(0, Math.floor(Number(bits[4]) || 0))
+    };
 }
