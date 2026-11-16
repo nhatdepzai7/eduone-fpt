@@ -7,10 +7,13 @@
  * Client không được chọn model, max_tokens, hay system prompt.
  */
 
+import { chargeAiWords, readPassageCache, releaseAiFill, releasePassage, reserveAiFill, reservePassage, writePassageCache } from '../server/ledger.js';
+
 const MODEL = 'gpt-4o-mini';
 const MAX_TOKENS = 1500;
 const MAX_ITEMS = 15;
 const MAX_CHARS = 3000;
+const PASSAGE_CHARS = 2500;
 const MAX_BODY = 12000;
 const FREE_PER_DAY = 5;
 const LICENSED_PER_DAY = 30;
@@ -18,6 +21,7 @@ const LICENSED_PER_DAY = 30;
 const TASKS = {
     enrich: 0.3,
     structure: 0.2,
+    passage: 0.2,
     recall: 0.4,
     grade: 0,
     explain: 0.3
@@ -86,6 +90,11 @@ function normalizeKey(value) {
     return String(value || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
 }
 
+function fundCode(value) {
+    const code = String(value || '').toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 12);
+    return code.length >= 4 ? code : '';
+}
+
 function hasLicense(raw, env) {
     const key = normalizeKey(raw);
     if (!/^EDU[A-Z0-9]{12}$/.test(key)) return false;
@@ -125,6 +134,7 @@ async function takeSlot(bucket, limit) {
 }
 
 function countItems(task, body) {
+    if (task === 'passage') return String(body.text || '').trim().length >= 40 ? 1 : 0;
     if (task === 'enrich' || task === 'recall') return Array.isArray(body.items) ? body.items.length : 0;
     if (task === 'grade') return Array.isArray(body.sentences) ? body.sentences.length : 0;
     if (task === 'explain') return body.item ? 1 : 0;
@@ -133,7 +143,7 @@ function countItems(task, body) {
 }
 
 function userText(task, body) {
-    if (task === 'structure') return String(body.text || '');
+    if (task === 'structure' || task === 'passage') return String(body.text || '');
     if (task === 'grade') return JSON.stringify(body.sentences || []) + String(body.instruction || '');
     if (task === 'explain') return JSON.stringify(body.item || {});
     return JSON.stringify(body.items || []);
@@ -157,6 +167,12 @@ function messagesFor(task, body) {
         return [
             { role: 'system', content: SYS },
             { role: 'user', content: 'Tách văn bản sau thành tối đa 15 mục học liệu. Có 2 loại:\n- "vocab": từ tiếng Anh, điền wordType, ipa, meaning (tiếng Việt), example, exampleVi.\n- "mcq": câu trắc nghiệm, options đúng 4 phần tử (không kèm chữ A./B.), answer là "A"|"B"|"C"|"D", explanation tiếng Việt ngắn.\nMỗi mục có "keywords": 2-4 cụm xuất hiện nguyên văn trong câu hỏi hoặc đáp án đúng.\nTrả về {"items":[{"type":"vocab|mcq","word":"","question":"","options":[],"answer":"","wordType":"","ipa":"","meaning":"","example":"","exampleVi":"","explanation":"","keywords":[]}]}\n---\n' + clip(body.text, MAX_CHARS) }
+        ];
+    }
+    if (task === 'passage') {
+        return [
+            { role: 'system', content: SYS },
+            { role: 'user', content: 'Chọn đúng 10 từ hoặc cụm quan trọng nhất. Bỏ a, an, the và giới từ đứng một mình. JSON một dòng, khóa ngắn. w phải nằm nguyên văn trong đoạn. s là số câu bắt đầu từ 0.\n{"w":[{"w":"","t":"n","p":"/ /","m":"nghĩa Việt ngắn","h":"collocation ngắn","s":0}]}\n---\n' + clip(body.text, PASSAGE_CHARS) }
         ];
     }
     if (task === 'recall') {
@@ -187,6 +203,50 @@ function messagesFor(task, body) {
             answer: clip(item.answer, 80)
         }) }
     ];
+}
+
+function textHash(value) {
+    let h = 5381;
+    const text = String(value || '');
+    for (let i = 0; i < text.length; i++) h = ((h * 33) ^ text.charCodeAt(i)) >>> 0;
+    return h.toString(16);
+}
+
+const PASSAGE_STOP = {
+    the: 1, and: 1, that: 1, with: 1, from: 1, this: 1, have: 1, were: 1, been: 1, their: 1,
+    about: 1, which: 1, when: 1, where: 1, while: 1, into: 1, over: 1, after: 1, before: 1,
+    would: 1, could: 1, there: 1, these: 1, those: 1, your: 1, you: 1, she: 1, her: 1, his: 1,
+    they: 1, them: 1, for: 1, not: 1, but: 1, are: 1, was: 1, has: 1, had: 1, its: 1, also: 1
+};
+
+function syntheticPassage(text) {
+    const found = String(text || '').match(/[A-Za-z][A-Za-z'-]{3,}/g) || [];
+    const seen = {};
+    const ranked = [];
+    found.forEach((word) => {
+        const low = word.toLowerCase();
+        if (PASSAGE_STOP[low] || seen[low]) return;
+        seen[low] = 1;
+        ranked.push(word);
+    });
+    ranked.sort((a, b) => b.length - a.length);
+    const cards = ranked.slice(0, 3).map((word) => ({ w: word, t: '', p: '', m: '', h: '', s: 0 }));
+    while (cards.length < 3) cards.push({ w: 'sample', t: '', p: '', m: '', h: '', s: 0 });
+    for (let i = 0; i < 7; i++) cards.push({ w: 'locked', t: 'n', p: '', m: '', h: '', s: 0 });
+    return { w: cards };
+}
+
+function passageWordCount(content) {
+    try {
+        const match = String(content || '').match(/\{[\s\S]*\}/);
+        if (!match) return 0;
+        const parsed = JSON.parse(match[0]);
+        const list = Array.isArray(parsed.w) ? parsed.w : parsed.words;
+        const n = Array.isArray(list) ? list.length : 0;
+        return Math.max(0, Math.min(12, n));
+    } catch (e) {
+        return 0;
+    }
 }
 
 function safeUpstream(status, text) {
@@ -244,16 +304,94 @@ async function handleRequest(incoming, env) {
     const task = body.task;
     if (!Object.prototype.hasOwnProperty.call(TASKS, task)) return json(400, { error: 'Tác vụ không được hỗ trợ.' }, extra);
 
+    if (task === 'passage' && String(body.text || '').trim().length > PASSAGE_CHARS) {
+        return json(400, { error: 'Mỗi lần quét tối đa 2500 ký tự.' }, extra);
+    }
     const n = countItems(task, body);
     if (!n) return json(400, { error: 'Chưa có nội dung để xử lý.' }, extra);
     if (n > MAX_ITEMS) return json(400, { error: 'Mỗi lần chỉ gửi tối đa 15 từ hoặc câu hỏi.' }, extra);
     if (userText(task, body).length > MAX_CHARS) return json(400, { error: 'Nội dung vượt 3000 ký tự.' }, extra);
 
-    const limit = hasLicense(body.licenseKey, env) ? LICENSED_PER_DAY : FREE_PER_DAY;
-    const bucket = dayStamp() + ':' + clientIp(req);
-    if (!(await takeSlot(bucket, limit))) {
-        return json(429, { error: 'Đã hết ' + limit + ' lượt AI hôm nay. Mai dùng tiếp.' }, extra);
+    const passageTask = task === 'passage';
+    const fillTask = task === 'enrich' || task === 'structure' || passageTask;
+    let aiGate = null;
+    let chargedCode = '';
+    let heldPassage = false;
+    let passagePrev = 0;
+    let passagePreview = false;
+    if (passageTask) {
+        const code = fundCode(body.code);
+        if (!code) return json(400, { error: 'Thiếu mã quỹ.' }, extra);
+        const passageText = clip(body.text, PASSAGE_CHARS);
+        const passageKey = textHash(passageText);
+        const cached = await readPassageCache(env, passageKey);
+        if (cached) {
+            return json(200, { content: cached, preview: false, cached: true }, extra);
+        }
+        try {
+            aiGate = await reservePassage(env, code);
+        } catch (e) {
+            return json(503, { error: 'Máy chủ chưa kiểm tra được hạn mức AI.' }, extra);
+        }
+        if (aiGate.daily) return json(429, { error: 'Mã này đã dùng 15 lượt quét hôm nay. Mai quét tiếp.' }, extra);
+        if (aiGate.busy) return json(429, { error: 'AI đang bận. Thử lại sau ít phút.' }, extra);
+        if (aiGate.preview) {
+            return json(200, {
+                content: JSON.stringify(syntheticPassage(passageText)),
+                preview: true,
+                synthetic: true,
+                aiUsed: aiGate.used,
+                aiLimit: aiGate.limit,
+                aiUnlocked: !!aiGate.unlocked,
+                scans: aiGate.scans
+            }, extra);
+        }
+        if (!aiGate.ok) {
+            return json(402, {
+                error: 'Đã hết lượt quét bài đọc miễn phí.',
+                code: 'ai-locked',
+                aiUsed: aiGate.used,
+                aiLimit: aiGate.limit,
+                aiUnlocked: false
+            }, extra);
+        }
+        passagePreview = !!aiGate.preview;
+        chargedCode = code;
+        heldPassage = true;
+        passagePrev = aiGate.prev;
+    } else if (fillTask) {
+        const code = fundCode(body.code);
+        if (!code) return json(400, { error: 'Thiếu mã quỹ.' }, extra);
+        try {
+            aiGate = await reserveAiFill(env, code);
+        } catch (e) {
+            return json(503, { error: 'Máy chủ chưa kiểm tra được hạn mức AI.' }, extra);
+        }
+        if (aiGate.busy) return json(429, { error: 'AI đang bận. Thử lại sau ít phút.' }, extra);
+        if (!aiGate.ok) {
+            return json(402, {
+                error: 'Đã hết lượt AI của mã này.',
+                code: 'ai-locked',
+                aiUsed: aiGate.used,
+                aiLimit: aiGate.limit,
+                aiUnlocked: false
+            }, extra);
+        }
+        if (!aiGate.unlocked) chargedCode = code;
+    } else {
+        const limit = hasLicense(body.licenseKey, env) ? LICENSED_PER_DAY : FREE_PER_DAY;
+        const bucket = dayStamp() + ':' + clientIp(req);
+        if (!(await takeSlot(bucket, limit))) {
+            return json(429, { error: 'Đã hết ' + limit + ' lượt AI hôm nay. Mai dùng tiếp.' }, extra);
+        }
     }
+
+    const aiMeta = aiGate ? { aiUsed: aiGate.used, aiLimit: aiGate.limit, aiUnlocked: aiGate.unlocked, preview: passagePreview, scans: aiGate.scans } : {};
+    const refund = async () => {
+        if (!chargedCode) return;
+        if (heldPassage) await releasePassage(env, chargedCode, passagePrev).catch(() => {});
+        else await releaseAiFill(env, chargedCode).catch(() => {});
+    };
 
     let upstream;
     try {
@@ -266,27 +404,41 @@ async function handleRequest(incoming, env) {
             body: JSON.stringify({
                 model: MODEL,
                 temperature: TASKS[task],
-                max_tokens: MAX_TOKENS,
+                max_tokens: task === 'passage' ? 800 : MAX_TOKENS,
                 response_format: { type: 'json_object' },
                 messages: messagesFor(task, body)
             })
         });
     } catch (e) {
+        await refund();
         return json(502, { error: 'Không gọi được AI.' }, extra);
     }
 
     const text = await upstream.text();
-    if (!upstream.ok) return json(502, { error: safeUpstream(upstream.status, text) }, extra);
+    if (!upstream.ok) {
+        await refund();
+        return json(502, { error: safeUpstream(upstream.status, text) }, extra);
+    }
 
     let content = '';
     try {
         const data = JSON.parse(text);
         content = String((data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content) || '');
     } catch (e) {
+        await refund();
         return json(502, { error: 'AI không trả về JSON hợp lệ.' }, extra);
     }
     if (content.length > 20000) content = content.slice(0, 20000);
-    return json(200, { content: content }, extra);
+    if (heldPassage && !passagePreview) {
+        const words = passageWordCount(content);
+        if (!words) await refund();
+        else {
+            try { aiMeta.aiUsed = await chargeAiWords(env, chargedCode, 10); } catch (e) {}
+            const passageText = clip(body.text, PASSAGE_CHARS);
+            await writePassageCache(env, textHash(passageText), content);
+        }
+    }
+    return json(200, Object.assign({ content: content }, aiMeta), extra);
 }
 
 async function nodeRequest(req) {

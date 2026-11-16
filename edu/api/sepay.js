@@ -131,7 +131,8 @@ async function handleRequest(req, env) {
             event,
             turns: pack.turns,
             money: body.transferAmount,
-            content: body.content || body.description || ''
+            content: body.content || body.description || '',
+            packId: pack.id
         });
         console.error('[sepay]', added ? 'đã cộng' : 'giao dịch đã xử lý', txn, code, pack.turns);
         return json(200, { success: true, credited: added, turns: added ? pack.turns : 0 });

@@ -60,22 +60,29 @@
         let body = null;
         try { body = await res.json(); } catch (e) {}
         if (body && typeof body.error === 'string') msg = S.cleanText(body.error, 200);
-        if (res.status === 404) msg = 'Máy chủ này chưa có chức năng AI.';
+        if (res.status === 404 || res.status === 405 || res.status === 501) msg = 'Máy chủ này chưa có chức năng AI. Hãy mở bản đã đăng trên web.';
         if (res.status === 429) msg = S.cleanText((body && body.error) || '', 200) || 'Đã hết lượt AI hôm nay.';
-        if (res.status === 503) msg = 'Máy chủ chưa bật AI.';
-        return new Error(msg);
+        if (res.status === 503) msg = S.cleanText((body && body.error) || '', 200) || 'Máy chủ chưa bật AI.';
+        const err = new Error(msg);
+        if (res.status === 402 || (body && body.code === 'ai-locked')) {
+            err.code = 'ai-locked';
+            if (body && EDU.Quota && EDU.Quota.noteAi) EDU.Quota.noteAi(body);
+        }
+        return err;
     };
 
     const ask = (payload) => throttle(async () => {
         if (!ready()) throw new Error('AI chỉ chạy khi mở trang qua web, không mở file trực tiếp.');
+        const code = EDU.Quota && EDU.Quota.read ? EDU.Quota.read().code : '';
         const res = await withTimeout('/api/ai', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(Object.assign({ licenseKey: licenseKey() }, payload))
+            body: JSON.stringify(Object.assign({ licenseKey: licenseKey(), code: code }, payload))
         });
         if (!res.ok) throw await readError(res);
         let data = null;
         try { data = await res.json(); } catch (e) { throw new Error('Máy chủ này chưa có chức năng AI.'); }
+        if (data && EDU.Quota && EDU.Quota.noteAi && (data.aiUsed != null || data.aiUnlocked != null)) EDU.Quota.noteAi(data);
         return String((data && data.content) || '');
     });
 
@@ -181,5 +188,55 @@
         return S.cleanText(j.explanation, Sch.MAX.explanation);
     };
 
-    EDU.AI = { ready, transcribe, enrichVocab, structurePaste, recallPrompts, gradeSentences, explain };
+    const passageHash = (value) => {
+        let h = 5381;
+        for (let i = 0; i < value.length; i++) h = ((h * 33) ^ value.charCodeAt(i)) >>> 0;
+        return h.toString(16);
+    };
+
+    const extractPassage = async (text) => {
+        const raw = S.cleanText(text, 2500);
+        if (String(text || '').trim().length > 2500) throw new Error('Mỗi lần quét tối đa 2500 ký tự.');
+        if (raw.length < 40) throw new Error('Hãy dán một đoạn văn dài hơn một câu.');
+        const hash = passageHash(raw);
+        const bag = Store.prefs.get('passageCache', {}) || {};
+        if (bag[hash] && Array.isArray(bag[hash]) && bag[hash].length) return { words: bag[hash], preview: false, cached: true };
+        const data = await throttle(async () => {
+            if (!ready()) throw new Error('AI chỉ chạy khi mở trang qua web, không mở file trực tiếp.');
+            const code = EDU.Quota && EDU.Quota.read ? EDU.Quota.read().code : '';
+            const res = await withTimeout('/api/ai', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ licenseKey: licenseKey(), code: code, task: 'passage', text: raw })
+            });
+            if (!res.ok) throw await readError(res);
+            let body = null;
+            try { body = await res.json(); } catch (e) { throw new Error('Máy chủ này chưa có chức năng AI.'); }
+            if (body && EDU.Quota && EDU.Quota.noteAi && (body.aiUsed != null || body.aiUnlocked != null)) EDU.Quota.noteAi(body);
+            return body || {};
+        });
+        const m = String(data.content || '').match(/\{[\s\S]*\}/);
+        if (!m) throw new Error('AI không trả về JSON hợp lệ.');
+        const json = S.safeJSONParse(m[0], 2 * 1024 * 1024);
+        const rows = Array.isArray(json.w) ? json.w : (Array.isArray(json.words) ? json.words : []);
+        const words = rows.slice(0, 12).map((r) => ({
+            word: S.cleanText(r.w || r.word, Sch.MAX.word),
+            wordType: S.cleanText(r.t || r.wordType, Sch.MAX.wordType),
+            ipa: S.cleanText(r.p || r.ipa, Sch.MAX.ipa),
+            meaning: S.cleanText(r.m || r.meaning, Sch.MAX.answer),
+            tip: S.cleanText(r.h || r.tip, 160),
+            sentence: S.cleanText(r.sentence, Sch.MAX.explanation),
+            sentenceIndex: Number.isFinite(Number(r.s)) ? Math.max(0, Math.floor(Number(r.s))) : -1
+        })).filter((r) => r.word);
+        if (!data.preview && words.length && words[0].word !== 'locked') {
+            const next = Object.assign({}, bag);
+            next[hash] = words;
+            const keys = Object.keys(next);
+            while (keys.length > 20) delete next[keys.shift()];
+            Store.prefs.set('passageCache', next);
+        }
+        return { words: words, preview: !!data.preview };
+    };
+
+    EDU.AI = { ready, transcribe, enrichVocab, structurePaste, recallPrompts, gradeSentences, explain, extractPassage };
 })(window.EDU = window.EDU || {});

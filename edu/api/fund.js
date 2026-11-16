@@ -67,7 +67,20 @@ async function handleRequest(req, env, body) {
     try {
         const state = await fundState(env, code);
         const purchases = state.events.filter((ev) => ev.kind === 'buy');
-        return json(200, { code, balance: state.balance, granted: state.granted, spent: state.spent, purchases, events: state.events }, extra);
+        return json(200, {
+            code,
+            balance: state.balance,
+            granted: state.granted,
+            spent: state.spent,
+            purchases,
+            events: state.events,
+            aiUnlocked: state.aiUnlocked,
+            aiUsed: state.aiUsed,
+            aiLimit: state.aiLimit,
+            aiCredits: state.aiCredits,
+            scans: state.scans,
+            scanGrant: state.scanGrant
+        }, extra);
     } catch (e) {
         console.error('[fund] chưa đọc được sổ', e && e.code ? e.code : 'error');
         return json(503, { error: 'Máy chủ chưa nối sổ quỹ.' }, extra);

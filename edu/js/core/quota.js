@@ -11,8 +11,16 @@
     const PACKS = [
         { id: 'basic', name: 'Gói Cơ Bản', who: 'Cá nhân', turns: 20, off: 0 },
         { id: 'group', name: 'Gói Nhóm', who: 'Phòng KTX', turns: 100, off: 0.3 },
-        { id: 'class', name: 'Gói Đại Gia', who: 'Cả lớp / Ôn trọn kỳ', turns: 250, off: 0.5 }
+        { id: 'class', name: 'Gói Toàn Diện', who: 'Cả lớp / Ôn trọn kỳ', turns: 250, off: 0.5 }
     ];
+    const VOCAB = {
+        id: 'vocab',
+        name: 'Gói Trợ Lý AI Từ Vựng & Đọc Hiểu Toàn Diện (Trọn Kỳ)',
+        price: 29000,
+        list: 59000,
+        turns: 0
+    };
+    const AI_FREE = 100;
     const TURNS = { basic: 20, group: 100, class: 250 };
     const listeners = new Set();
 
@@ -36,6 +44,7 @@
         const t = Number(ev.t);
         if (!t || t < 1700000000000 || t > Date.now() + 86400000) return false;
         if (ev.kind === 'buy') {
+            if (ev.pack === 'vocab' && ev.delta === 0) return true;
             if (TURNS[ev.pack] === ev.delta) return true;
             const grant = ev.delta;
             return ev.pack === 'admin' && grant === Math.floor(grant) && grant !== 0 && grant >= -5000 && grant <= 5000;
@@ -51,7 +60,17 @@
             EDU.Store.prefs.set(KEY, fresh);
             return fresh;
         }
-        const fund = { code: cleanCode(raw.code), balance: 0, history: [] };
+        const fund = {
+            code: cleanCode(raw.code),
+            balance: 0,
+            history: [],
+            aiUsed: Math.max(0, Math.floor(Number(raw.aiUsed)) || 0),
+            aiUnlocked: raw.aiUnlocked === true,
+            aiCredits: Math.max(0, Math.floor(Number(raw.aiCredits)) || 0),
+            aiLimit: Math.max(AI_FREE, Math.floor(Number(raw.aiLimit)) || AI_FREE),
+            scans: Math.max(0, Math.floor(Number(raw.scans)) || 0),
+            scanGrant: Math.max(0, Math.floor(Number(raw.scanGrant)) || 0)
+        };
         const history = [];
         const seen = new Set();
         (Array.isArray(raw.history) ? raw.history : []).forEach((ev) => {
@@ -68,7 +87,7 @@
         });
         history.sort((a, b) => b.t - a.t);
         fund.history = history.slice(0, 300);
-        const sum = fund.history.reduce((n, ev) => n + ev.delta, 0);
+        const sum = fund.history.reduce((n, ev) => n + (ev.delta || 0), 0);
         const stored = Math.floor(Number(raw.balance));
         fund.balance = Math.max(0, Number.isFinite(stored) ? stored : sum);
         return fund;
@@ -87,7 +106,17 @@
 
     const read = () => {
         const fund = load();
-        return { code: fund.code, balance: fund.balance, history: fund.history.slice() };
+        return {
+            code: fund.code,
+            balance: fund.balance,
+            history: fund.history.slice(),
+            aiUsed: fund.aiUsed || 0,
+            aiUnlocked: !!fund.aiUnlocked,
+            aiCredits: fund.aiCredits || 0,
+            aiLimit: fund.aiLimit || AI_FREE,
+            scans: fund.scans || 0,
+            scanGrant: fund.scanGrant || 0
+        };
     };
 
     const subscribe = (fn) => {
@@ -105,6 +134,12 @@
             fund.code = code;
             fund.balance = 0;
             fund.history = [];
+            fund.aiUsed = 0;
+            fund.aiUnlocked = false;
+            fund.aiCredits = 0;
+            fund.aiLimit = AI_FREE;
+            fund.scans = 0;
+            fund.scanGrant = 0;
         }
         return save(fund);
     };
@@ -148,8 +183,26 @@
 
     let syncedOnce = false;
 
+    const noteAi = (info) => {
+        if (!info || typeof info !== 'object') return read();
+        const fund = load();
+        const before = !!fund.aiUnlocked;
+        const beforeCredits = fund.aiCredits || 0;
+        if (info.aiUnlocked === true || info.unlocked === true) fund.aiUnlocked = true;
+        if (info.aiUnlocked === false || info.unlocked === false) fund.aiUnlocked = false;
+        const used = Number(info.aiUsed != null ? info.aiUsed : info.used);
+        if (Number.isFinite(used)) fund.aiUsed = Math.max(0, Math.floor(used));
+        ['aiCredits', 'aiLimit', 'scans', 'scanGrant'].forEach((key) => {
+            const n = Number(info[key]);
+            if (Number.isFinite(n)) fund[key] = Math.max(0, Math.floor(n));
+        });
+        const snap = save(fund);
+        return { code: snap.code, aiUsed: snap.aiUsed, aiUnlocked: snap.aiUnlocked, aiCredits: snap.aiCredits || 0, aiJustUnlocked: snap.aiUnlocked && !before, aiJustFunded: (snap.aiCredits || 0) > beforeCredits };
+    };
+
     const applyServer = (state) => {
         const fund = load();
+        const wasUnlocked = !!fund.aiUnlocked;
         const seen = new Set(fund.history.map((ev) => ev.id));
         let added = 0;
         let fresh = 0;
@@ -175,13 +228,15 @@
         if (syncedOnce && Number.isFinite(remaining) && remaining > fund.balance && !freshBuys) remaining = fund.balance;
         if (!fresh && Number.isFinite(remaining) && Math.floor(remaining) === fund.balance) {
             syncedOnce = true;
-            return { code: fund.code, balance: fund.balance, added: 0 };
+            const ai = noteAi(state);
+            return { code: fund.code, balance: fund.balance, added: 0, aiUnlocked: ai.aiUnlocked, aiJustUnlocked: !!ai.aiJustUnlocked, aiJustFunded: !!ai.aiJustFunded };
         }
         if (Number.isFinite(remaining)) fund.balance = Math.max(0, Math.floor(remaining));
         fund.history.sort((a, b) => b.t - a.t);
         syncedOnce = true;
         const snap = save(fund);
-        return { code: snap.code, balance: snap.balance, added };
+        const ai = noteAi(state);
+        return { code: snap.code, balance: snap.balance, added, aiUnlocked: ai.aiUnlocked, aiJustUnlocked: !!ai.aiJustUnlocked, aiJustFunded: !!ai.aiJustFunded };
     };
 
     const sync = async () => {
@@ -198,7 +253,16 @@
             throw new Error(res.status === 503 ? 'Máy chủ chưa nối sổ quỹ. Lượt sẽ cộng khi SePay ghi được giao dịch.' : 'Chưa kiểm tra được thanh toán.');
         }
         if (Number.isFinite(Number(data.balance)) || Array.isArray(data.events)) {
-            return applyServer({ balance: data.balance, events: Array.isArray(data.events) ? data.events : data.purchases });
+            return applyServer({
+                balance: data.balance,
+                events: Array.isArray(data.events) ? data.events : data.purchases,
+                aiUsed: data.aiUsed,
+                aiUnlocked: data.aiUnlocked,
+                aiCredits: data.aiCredits,
+                aiLimit: data.aiLimit,
+                scans: data.scans,
+                scanGrant: data.scanGrant
+            });
         }
         if (Array.isArray(data.purchases)) return applyPurchases(data.purchases);
         throw new Error('Chưa kiểm tra được thanh toán.');
@@ -294,6 +358,8 @@
     EDU.Quota = {
         UNIT,
         packs: PACKS.map((p) => Object.assign({ price: priceOf(p), list: p.turns * UNIT }, p)),
+        vocab: VOCAB,
+        AI_FREE,
         read,
         subscribe,
         balance: () => load().balance,
@@ -303,6 +369,11 @@
         setCode,
         sync,
         spend,
+        noteAi,
+        aiFillAllowed: () => {
+            const fund = load();
+            return !!fund.aiUnlocked || (fund.aiUsed || 0) < AI_FREE;
+        },
         exportCode: () => encode(load()),
         importCode,
         openShop

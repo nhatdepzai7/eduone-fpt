@@ -1,16 +1,21 @@
 /**
  * Sổ quỹ lượt thi. Webhook SePay ghi giao dịch, trình duyệt đọc lại theo mã quỹ.
  * Giá gói phải khớp edu/js/core/quota.js: 20 lượt = 100.000đ, 100 = 350.000đ, 250 = 625.000đ.
+ * 29.000đ cộng 500 lượt điền và 30 lượt quét, không cộng lượt EOS và không mở không giới hạn.
+ * Gói EOS vẫn bật cờ AI. Quét bài đọc tối đa 15 lần mỗi ngày trên một mã.
  */
 
 export const ACCOUNT = '10006548943';
 export const BANK = 'TPBank';
 
 const PACK_BY_PRICE = {
+    29000: { id: 'vocab', turns: 0, name: 'Gói Trợ Lý AI Từ Vựng & Đọc Hiểu Toàn Diện (Trọn Kỳ)', credits: 500, scans: 30 },
     100000: { id: 'basic', turns: 20, name: 'Gói Cơ Bản' },
     350000: { id: 'group', turns: 100, name: 'Gói Nhóm' },
-    625000: { id: 'class', turns: 250, name: 'Gói Đại Gia' }
+    625000: { id: 'class', turns: 250, name: 'Gói Toàn Diện' }
 };
+
+const AI_FREE = 100;
 
 const CLAIM = `
 if redis.call('SET', KEYS[1], '1', 'NX') then
@@ -23,6 +28,13 @@ if redis.call('SET', KEYS[1], '1', 'NX') then
   redis.call('HINCRBY', KEYS[4], 'balance', ARGV[3])
   redis.call('HINCRBY', KEYS[4], 'money', ARGV[4])
   redis.call('HSET', KEYS[4], 'updated', ARGV[5])
+  local credits = tonumber(ARGV[7]) or 0
+  if credits > 0 then
+    redis.call('HINCRBY', KEYS[4], 'aiCredits', ARGV[7])
+    redis.call('HINCRBY', KEYS[4], 'scanGrant', ARGV[8])
+  else
+    redis.call('HSET', KEYS[4], 'ai', '1')
+  end
   redis.call('LPUSH', KEYS[5], ARGV[6])
   redis.call('LTRIM', KEYS[5], 0, 199)
   return 1
@@ -60,6 +72,86 @@ redis.call('HSET', KEYS[1], 'updated', ARGV[2])
 redis.call('LPUSH', KEYS[2], ARGV[1])
 redis.call('LTRIM', KEYS[2], 0, 299)
 return left - 1
+`;
+
+const TAKE_AI = `
+local burst = redis.call('INCR', KEYS[2])
+if burst == 1 then redis.call('EXPIRE', KEYS[2], 60) end
+if burst > 40 then return '2:0:0:0' end
+local extra = tonumber(redis.call('HGET', KEYS[1], 'aiCredits') or '0') or 0
+local unlocked = redis.call('HGET', KEYS[1], 'ai')
+local used = tonumber(redis.call('HGET', KEYS[1], 'aiUsed') or '0') or 0
+local limit = tonumber(ARGV[1]) + extra
+if unlocked == '1' and extra == 0 then return '1:' .. used .. ':1:' .. limit end
+if used >= limit then return '0:' .. used .. ':0:' .. limit end
+local nextUsed = redis.call('HINCRBY', KEYS[1], 'aiUsed', 1)
+return '1:' .. nextUsed .. ':0:' .. limit
+`;
+
+const RELEASE_AI = `
+local used = tonumber(redis.call('HGET', KEYS[1], 'aiUsed') or '0') or 0
+if used > 0 then redis.call('HINCRBY', KEYS[1], 'aiUsed', -1) end
+return 1
+`;
+
+const TAKE_PASSAGE = `
+local burst = redis.call('INCR', KEYS[2])
+if burst == 1 then redis.call('EXPIRE', KEYS[2], 60) end
+if burst > 40 then return '2:0:0:0:0' end
+local today = ARGV[2]
+local day = redis.call('HGET', KEYS[1], 'scanDay') or ''
+local todayCount = tonumber(redis.call('HGET', KEYS[1], 'scanToday') or '0') or 0
+if day ~= today then todayCount = 0 end
+local extra = tonumber(redis.call('HGET', KEYS[1], 'aiCredits') or '0') or 0
+local grant = tonumber(redis.call('HGET', KEYS[1], 'scanGrant') or '0') or 0
+local unlocked = redis.call('HGET', KEYS[1], 'ai')
+local used = tonumber(redis.call('HGET', KEYS[1], 'aiUsed') or '0') or 0
+local scans = tonumber(redis.call('HGET', KEYS[1], 'scans') or '0') or 0
+local limit = tonumber(ARGV[1]) + extra
+if todayCount >= 15 then return '5:' .. used .. ':0:' .. scans .. ':' .. scans end
+local allow = 0
+if unlocked == '1' and extra == 0 then
+  allow = 1
+else
+  local scanCap = 2 + grant
+  if used + 10 > limit or scans >= scanCap then
+    return '3:' .. used .. ':0:' .. scans .. ':' .. scans
+  end
+  allow = 1
+end
+if allow == 1 then
+  if day ~= today then
+    redis.call('HSET', KEYS[1], 'scanDay', today, 'scanToday', '1')
+  else
+    redis.call('HINCRBY', KEYS[1], 'scanToday', 1)
+  end
+end
+if unlocked == '1' and extra == 0 then
+  return '1:' .. used .. ':1:' .. scans .. ':' .. scans
+end
+local nextScans = redis.call('HINCRBY', KEYS[1], 'scans', 1)
+return '1:' .. used .. ':0:' .. nextScans .. ':' .. scans
+`;
+
+const CHARGE_WORDS = `
+local extra = tonumber(redis.call('HGET', KEYS[1], 'aiCredits') or '0') or 0
+local unlocked = redis.call('HGET', KEYS[1], 'ai')
+local used = tonumber(redis.call('HGET', KEYS[1], 'aiUsed') or '0') or 0
+if unlocked == '1' and extra == 0 then return tostring(used) end
+local n = tonumber(ARGV[1]) or 0
+local limit = (tonumber(ARGV[2]) or 100) + extra
+if n < 1 then return tostring(used) end
+local room = limit - used
+if room < 1 then return tostring(used) end
+if n > room then n = room end
+return tostring(redis.call('HINCRBY', KEYS[1], 'aiUsed', n))
+`;
+
+const RESTORE_SCANS = `
+redis.call('HSET', KEYS[1], 'scans', ARGV[1])
+local n = tonumber(redis.call('HGET', KEYS[1], 'scanToday') or '0') or 0
+if n > 0 then redis.call('HINCRBY', KEYS[1], 'scanToday', -1) end
+return 1
 `;
 
 export function envGet(env, name) {
@@ -166,7 +258,9 @@ export async function creditPurchase(env, purchase) {
         String(turns),
         String(money),
         when,
-        log
+        log,
+        purchase.packId === 'vocab' ? '500' : '0',
+        purchase.packId === 'vocab' ? '30' : '0'
     ]);
     return Number(claimed) === 1;
 }
@@ -196,8 +290,129 @@ export async function fundState(env, code) {
         granted,
         spent,
         balance: Math.max(0, granted - spent),
-        events: readFundRows(rows)
+        events: readFundRows(rows),
+        aiCredits: Math.max(0, Math.floor(Number(hash.aiCredits) || 0)),
+        aiUnlocked: String(hash.ai) === '1' && !(Number(hash.aiCredits) > 0),
+        aiUsed: Math.max(0, Math.floor(Number(hash.aiUsed) || 0)),
+        aiLimit: AI_FREE + Math.max(0, Math.floor(Number(hash.aiCredits) || 0)),
+        scans: Math.max(0, Math.floor(Number(hash.scans) || 0)),
+        scanGrant: Math.max(0, Math.floor(Number(hash.scanGrant) || 0))
     };
+}
+
+export async function reserveAiFill(env, code) {
+    const clean = cleanCode(code);
+    if (!clean) {
+        const err = new Error('bad-code');
+        err.code = 'bad-code';
+        throw err;
+    }
+    const row = await redisCommand(env, [
+        'EVAL', TAKE_AI, 2,
+        'fpass:quota:' + clean,
+        'fpass:ai:burst:' + clean,
+        String(AI_FREE)
+    ]);
+    const parts = String(row == null ? '' : row).split(':');
+    const flag = Number(parts[0]);
+    return {
+        ok: flag === 1,
+        busy: flag === 2,
+        used: Math.max(0, Math.floor(Number(parts[1]) || 0)),
+        unlocked: Number(parts[2]) === 1,
+        limit: Math.max(AI_FREE, Math.floor(Number(parts[3]) || AI_FREE))
+    };
+}
+
+export async function releaseAiFill(env, code) {
+    const clean = cleanCode(code);
+    if (!clean) return;
+    await redisCommand(env, ['EVAL', RELEASE_AI, 1, 'fpass:quota:' + clean]);
+}
+
+function readPassageFlag(row) {
+    const parts = String(row == null ? '' : row).split(':');
+    const flag = Number(parts[0]);
+    return {
+        ok: flag === 1 || flag === 3,
+        preview: flag === 3,
+        daily: flag === 5,
+        busy: flag === 2,
+        used: Math.max(0, Math.floor(Number(parts[1]) || 0)),
+        unlocked: Number(parts[2]) === 1,
+        scans: Math.max(0, Math.floor(Number(parts[3]) || 0)),
+        prev: Math.max(0, Math.floor(Number(parts[4]) || 0)),
+        limit: AI_FREE
+    };
+}
+
+export async function reservePassage(env, code) {
+    const clean = cleanCode(code);
+    if (!clean) {
+        const err = new Error('bad-code');
+        err.code = 'bad-code';
+        throw err;
+    }
+    const row = await redisCommand(env, [
+        'EVAL', TAKE_PASSAGE, 2,
+        'fpass:quota:' + clean,
+        'fpass:ai:burst:' + clean,
+        String(AI_FREE),
+        passageDay()
+    ]);
+    return readPassageFlag(row);
+}
+
+function passageDay() {
+    try {
+        return new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Ho_Chi_Minh', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date());
+    } catch (e) {
+        return new Date().toISOString().slice(0, 10);
+    }
+}
+
+function cacheKey(hash) {
+    const clean = String(hash || '').toLowerCase().replace(/[^a-f0-9]/g, '').slice(0, 16);
+    return clean ? 'fpass:pcache:' + clean : '';
+}
+
+export async function readPassageCache(env, hash) {
+    const key = cacheKey(hash);
+    if (!key) return '';
+    try {
+        const row = await redisCommand(env, ['GET', key]);
+        return typeof row === 'string' ? row : '';
+    } catch (e) {
+        return '';
+    }
+}
+
+export async function writePassageCache(env, hash, content) {
+    const key = cacheKey(hash);
+    if (!key || !content) return;
+    try {
+        await redisCommand(env, ['SET', key, String(content).slice(0, 8000), 'EX', '1209600']);
+    } catch (e) {}
+}
+
+export async function releasePassage(env, code, prev) {
+    const clean = cleanCode(code);
+    if (!clean) return;
+    const scans = Math.max(0, Math.floor(Number(prev) || 0));
+    await redisCommand(env, ['EVAL', RESTORE_SCANS, 1, 'fpass:quota:' + clean, String(scans)]);
+}
+
+export async function chargeAiWords(env, code, count) {
+    const clean = cleanCode(code);
+    if (!clean) return 0;
+    const n = Math.max(0, Math.min(12, Math.floor(Number(count) || 0)));
+    const row = await redisCommand(env, [
+        'EVAL', CHARGE_WORDS, 1,
+        'fpass:quota:' + clean,
+        String(n),
+        String(AI_FREE)
+    ]);
+    return Math.max(0, Math.floor(Number(row) || 0));
 }
 
 export async function spendTurn(env, input) {
