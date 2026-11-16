@@ -197,10 +197,13 @@
         const pending = slots.filter((s) => !s.nghi && s.status !== 'done');
         if (!pending.length) return { kind: 'ALL_DONE', slot: null, early: false };
         const ds = pending.map((s) => ({ slot: s, st: slotStatus(s, now) }));
-        const live = ds.filter((x) => x.st === 'ON_TIME' || x.st === 'LATE').sort((a, b) => triggerMin(a.slot) - triggerMin(b.slot));
-        if (live.length) return { kind: live[0].st === 'ON_TIME' ? 'ON_TIME_ACTIVE' : 'LATE_RECOVERY', slot: live[0].slot, early: false };
+        const opened = ds.filter((x) => x.st === 'EARLY' || x.st === 'ON_TIME' || x.st === 'LATE').sort((a, b) => triggerMin(a.slot) - triggerMin(b.slot));
+        const live = opened.length ? opened[opened.length - 1] : null;
+        if (live && live.st === 'ON_TIME') return { kind: 'ON_TIME_ACTIVE', slot: live.slot, early: false };
+        if (live && live.st === 'LATE') return { kind: 'LATE_RECOVERY', slot: live.slot, early: false };
+        if (live && live.st === 'EARLY') return { kind: 'STANDBY', slot: live.slot, early: true };
         const next = ds.slice().sort((a, b) => triggerMin(a.slot) - triggerMin(b.slot))[0];
-        return { kind: 'STANDBY', slot: next.slot, early: next.st === 'EARLY' };
+        return { kind: 'STANDBY', slot: next.slot, early: false };
     };
 
     const buildDeck = (slot, items, limit) => {
