@@ -468,21 +468,26 @@
         const memberDay = (t) => t ? new Date(t).toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' }) : '';
         const paidVocab = (fund) => (fund && fund.history || []).some(ev => ev && ev.kind === 'buy' && ev.pack === 'vocab' && String(ev.note || '').indexOf('Admin') !== 0);
 
-        const MembershipCard = ({ fund, compact = false }) => {
+        const MembershipCard = ({ fund }) => {
             const since = memberSince(fund);
+            const aiCap = fund.aiLimit || E.Quota.AI_FREE;
+            const aiLeft = Math.max(0, aiCap - (fund.aiUsed || 0));
             return (
-                <div className={'obsidian-card ' + (compact ? 'px-3 py-2' : 'px-5 py-5')}>
+                <div className="obsidian-card px-5 py-5">
                     <div className="relative flex items-start justify-between gap-3">
                         <div>
                             <p className="text-[10px] font-semibold tracking-[0.22em] text-[#D8C7A0]">OBSIDIAN</p>
-                            <p className={compact ? 'text-sm font-semibold tracking-wide' : 'mt-1 text-2xl font-semibold tracking-wide'}>PRO MEMBER</p>
-                            {!compact && <p className="mt-1 text-xs tracking-[0.14em] text-[#C6CBD4]">FPASS PREMIUM MEMBERSHIP</p>}
+                            <p className="mt-1 text-2xl font-semibold tracking-wide">PRO MEMBER</p>
+                            <p className="mt-1 text-xs tracking-[0.14em] text-[#C6CBD4]">FPASS PREMIUM MEMBERSHIP</p>
                         </div>
-                        <Icon name="gem" size={compact ? 16 : 22} className="text-[#D8C7A0]" />
+                        <Icon name="gem" size={22} className="text-[#D8C7A0]" />
                     </div>
-                    <div className={'relative flex items-end justify-between gap-3 text-[11px] text-[#C6CBD4] ' + (compact ? 'mt-1' : 'mt-6')}>
-                        <span className="tnum">Mã {fund.code}</span>
-                        <span>{since ? memberDay(since) : 'Đang hiệu lực'}</span>
+                    <div className="relative mt-6 flex items-end justify-between gap-3 text-[11px] text-[#C6CBD4]">
+                        <span className="tnum">Mã {fund.code}{since ? ' · ' + memberDay(since) : ''}</span>
+                        <span className="text-right">
+                            <span className="block text-[#D8C7A0]">Đang hoạt động</span>
+                            <span className="tnum text-[#F8F9FC]">AI {aiLeft}/{aiCap} · EOS {fund.balance}</span>
+                        </span>
                     </div>
                 </div>
             );
@@ -506,7 +511,7 @@
                         <div className="rounded-2xl border border-line bg-white p-4">
                             <p className="text-[11px] font-semibold tracking-[0.14em] text-[#202637]">GÓI ĐANG GIỮ</p>
                             <p className="mt-2 text-sm font-semibold text-ink">{E.Quota.vocab.name}</p>
-                            <p className="mt-2 text-sm text-ink2">Trạng thái: Đang hiệu lực</p>
+                            <p className="mt-2 text-sm font-medium text-[#202637]">Trạng thái: Đang hoạt động</p>
                             <p className="mt-1 text-sm text-ink2">Thanh toán: {paidVocab(fund) ? 'Đã xác nhận trên sổ quỹ' : 'Đã cấp trên sổ quỹ'}</p>
                             {since ? <p className="mt-1 text-sm text-ink2">Kích hoạt: {memberDay(since)}</p> : null}
                             <ul className="mt-3 space-y-1.5 text-sm text-ink2">
@@ -516,7 +521,7 @@
                             </ul>
                         </div>
                         <div className="rounded-2xl border border-[#202637]/10 bg-[#F8F9FC] p-4">
-                            <p className="text-[11px] font-semibold tracking-[0.14em] text-[#202637]">QUYỀN LỢI AI</p>
+                            <p className="text-[11px] font-semibold tracking-[0.14em] text-[#202637]">AI CREDITS · {fund.aiCredits || 0} ĐÃ CẤP</p>
                             <div className="mt-3 grid grid-cols-3 gap-2 text-center">
                                 <div><p className="text-xs text-slate-500">Tổng</p><p className="tnum text-lg font-semibold text-ink">{aiCap}</p></div>
                                 <div><p className="text-xs text-slate-500">Đã dùng</p><p className="tnum text-lg font-semibold text-ink">{aiUsed}</p></div>
@@ -803,8 +808,8 @@
                 </div>
             );
             if (compact && !eos) {
-                const obsidian = vocabOn;
-                const unlimited = !!(fund.aiUnlocked && !vocabOn);
+                const obsidian = obsidianOf(fund);
+                const unlimited = !!(fund.aiUnlocked && !obsidian);
                 const openMembership = () => window.dispatchEvent(new CustomEvent('edu-membership'));
                 return (
                     <div className="space-y-3">
@@ -816,13 +821,11 @@
                                 </span>
                                 <span aria-hidden="true" className="text-slate-300">•</span>
                                 {obsidian ? (
-                                    <button type="button" onClick={openMembership} aria-label="Mở thẻ thành viên Obsidian" className="inline-flex items-center gap-2 rounded-xl border border-[#D8C7A0]/70 bg-[#10141F] px-2.5 py-1 text-left text-white shadow-sm">
-                                        <Icon name="gem" size={14} className="text-[#D8C7A0]" />
-                                        <span className="leading-none">
-                                            <span className="block text-[9px] font-semibold tracking-[0.16em] text-[#D8C7A0]">OBSIDIAN</span>
-                                            <span className="mt-0.5 block text-[11px] font-semibold tracking-wide">PRO MEMBER</span>
-                                        </span>
-                                        <span className="tnum text-[11px] text-[#F8F9FC]">{aiLeft}/{aiCap}</span>
+                                    <button type="button" onClick={openMembership} aria-label="Mở thẻ thành viên Obsidian" className="inline-flex h-7 items-center gap-2 rounded-full border border-[#D8C7A0]/60 bg-[#10141F] px-2.5 text-[11px] text-white shadow-sm">
+                                        <Icon name="gem" size={13} className="text-[#D8C7A0]" />
+                                        <span className="font-semibold tracking-wide">PRO MEMBER</span>
+                                        <span className="text-[#D8C7A0]">Đang hoạt động</span>
+                                        <span className="tnum">AI {aiLeft}/{aiCap}</span>
                                     </button>
                                 ) : unlimited ? (
                                     <span className="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-1 font-medium text-slate-700">AI tự điền: đang mở</span>
@@ -834,7 +837,9 @@
                             </div>
                             <div className="flex shrink-0 flex-wrap items-center gap-2">
                                 <button type="button" aria-expanded={tools} onClick={() => setTools(v => !v)} className="rounded-xl bg-slate-100 px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-200">Đổi mã / Lịch sử quỹ</button>
-                                <button type="button" onClick={() => { setPicked('vocab'); setOffer(true); }} className="rounded-xl bg-[#4338CA] px-3.5 py-1.5 text-xs font-semibold text-white shadow-sm hover:bg-[#3730A3]">⚡ Mở khóa gói AI 29k / Nạp lượt ↗</button>
+                                {!obsidian && (
+                                    <button type="button" onClick={() => { setPicked('vocab'); setOffer(true); }} className="rounded-xl bg-[#4338CA] px-3.5 py-1.5 text-xs font-semibold text-white shadow-sm hover:bg-[#3730A3]">Mở khóa gói AI 29k ↗</button>
+                                )}
                             </div>
                         </div>
                         {tools && (
@@ -871,7 +876,7 @@
                                 </div>
                             </div>
                         )}
-                        {offer && (
+                        {offer && !obsidian && (
                             <Modal title="Mở khóa gói AI từ vựng" onClose={() => { setOffer(false); setPicked(null); }} size="lg">
                                 {fund.aiUnlocked && !vocabOn ? (
                                     <p className="rounded-xl bg-indigo-50 px-3 py-2 text-sm text-[#4338CA]">Mã này đã có trợ lý AI từ gói EOS.</p>
