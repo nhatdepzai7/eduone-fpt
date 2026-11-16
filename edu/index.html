@@ -201,6 +201,17 @@
         .eos-shell button.eos-tab[aria-selected="true"] { background: #ECE9D8; border-style: inset; border-bottom: 2px solid #ECE9D8; z-index: 1; font-weight: 700; }
         .eos-shell :focus-visible { outline: 1px dotted #000; outline-offset: -3px; border-radius: 0; }
         .eos-clock { color: #FF0000; font-family: Arial, Helvetica, sans-serif; font-size: 44px; font-weight: 700; line-height: .9; letter-spacing: 1px; }
+
+        .obsidian-head { background: rgba(16, 20, 31, .96); border-bottom-color: #202637; color: #F8F9FC; }
+        .obsidian-head .btn-ghost { color: #C6CBD4; }
+        .obsidian-head .btn-ghost:hover:not(:disabled) { background: #202637; }
+        .obsidian-head .tab { color: #C6CBD4; }
+        .obsidian-head .tab[aria-selected="true"] { background: #F8F9FC; color: #10141F; }
+        .obsidian-head .tab:hover:not([aria-selected="true"]) { background: #202637; color: #F8F9FC; }
+        .obsidian-card { position: relative; overflow: hidden; border-radius: 18px; border: 1px solid rgba(216, 199, 160, .6); background: linear-gradient(145deg, #202637 0%, #10141F 58%, #161b28 100%); color: #F8F9FC; box-shadow: 0 16px 36px rgba(16, 20, 31, .18); }
+        .obsidian-card::after { content: ""; position: absolute; inset: 0; background: linear-gradient(115deg, transparent 42%, rgba(216, 199, 160, .1) 50%, transparent 58%); pointer-events: none; }
+        .obsidian-rise { animation: obsidian-rise 1.2s ease; }
+        @keyframes obsidian-rise { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
     </style>
     <style type="text/tailwindcss">
         @layer components {
@@ -284,6 +295,7 @@
             stop: <rect width="14" height="14" x="5" y="5" rx="2" />,
             sliders: <><path d="M21 4h-7" /><path d="M10 4H3" /><path d="M21 12h-9" /><path d="M8 12H3" /><path d="M21 20h-5" /><path d="M12 20H3" /><path d="M14 2v4" /><path d="M8 10v4" /><path d="M16 18v4" /></>,
             sparkles: <><path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3Z" /><path d="M5 3v4" /><path d="M19 17v4" /><path d="M3 5h4" /><path d="M17 19h4" /></>,
+            gem: <><path d="M6 3h12l4 7-10 11L2 10z" /><path d="M11 3 8 10l4 11 4-11-3-7" /><path d="M2 10h20" /></>,
             book: <><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" /><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" /></>,
             layers: <><path d="M12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z" /><path d="m22 17.65-9.17 4.16a2 2 0 0 1-1.66 0L2 17.65" /><path d="m22 12.65-9.17 4.16a2 2 0 0 1-1.66 0L2 12.65" /></>,
             cap: <><path d="M22 10v6" /><path d="M2 10l10-5 10 5-10 5z" /><path d="M6 12v5c3 3 9 3 12 0v-5" /></>,
@@ -442,6 +454,116 @@
                         </div>
                         <div className="px-5 py-4 overflow-y-auto">{children}</div>
                         {footer && <div className="px-5 py-3 border-t border-line flex flex-wrap justify-end gap-2 safe-bottom">{footer}</div>}
+                    </div>
+                </div>
+            );
+        };
+
+        const obsidianOf = (fund) => !!fund && (fund.aiCredits || 0) > 0;
+        const memberSince = (fund) => {
+            const buys = (fund && fund.history || []).filter(ev => ev && ev.kind === 'buy' && ev.pack === 'vocab' && ev.t);
+            if (!buys.length) return 0;
+            return buys.reduce((min, ev) => Math.min(min, ev.t), buys[0].t);
+        };
+        const memberDay = (t) => t ? new Date(t).toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' }) : '';
+        const paidVocab = (fund) => (fund && fund.history || []).some(ev => ev && ev.kind === 'buy' && ev.pack === 'vocab' && String(ev.note || '').indexOf('Admin') !== 0);
+
+        const MembershipCard = ({ fund, compact = false }) => {
+            const since = memberSince(fund);
+            return (
+                <div className={'obsidian-card ' + (compact ? 'px-3 py-2' : 'px-5 py-5')}>
+                    <div className="relative flex items-start justify-between gap-3">
+                        <div>
+                            <p className="text-[10px] font-semibold tracking-[0.22em] text-[#D8C7A0]">OBSIDIAN</p>
+                            <p className={compact ? 'text-sm font-semibold tracking-wide' : 'mt-1 text-2xl font-semibold tracking-wide'}>PRO MEMBER</p>
+                            {!compact && <p className="mt-1 text-xs tracking-[0.14em] text-[#C6CBD4]">FPASS PREMIUM MEMBERSHIP</p>}
+                        </div>
+                        <Icon name="gem" size={compact ? 16 : 22} className="text-[#D8C7A0]" />
+                    </div>
+                    <div className={'relative flex items-end justify-between gap-3 text-[11px] text-[#C6CBD4] ' + (compact ? 'mt-1' : 'mt-6')}>
+                        <span className="tnum">Mã {fund.code}</span>
+                        <span>{since ? memberDay(since) : 'Đang hiệu lực'}</span>
+                    </div>
+                </div>
+            );
+        };
+
+        const MembershipDesk = ({ fund, onClose }) => {
+            const since = memberSince(fund);
+            const aiCap = fund.aiLimit || E.Quota.AI_FREE;
+            const aiUsed = fund.aiUsed || 0;
+            const aiLeft = Math.max(0, aiCap - aiUsed);
+            const aiPct = aiCap > 0 ? Math.max(0, Math.min(100, Math.round((aiLeft / aiCap) * 100))) : 0;
+            const scanCap = 2 + (fund.scanGrant || 0);
+            const scans = fund.scans || 0;
+            const scanLeft = Math.max(0, scanCap - scans);
+            const buys = (fund.history || []).filter(ev => ev && ev.kind === 'buy');
+            const when = (t) => new Date(t).toLocaleString('vi-VN', { hour: '2-digit', minute: '2-digit', day: '2-digit', month: '2-digit', year: 'numeric' });
+            return (
+                <Modal title="My Membership" onClose={onClose} size="lg" badge="Obsidian">
+                    <MembershipCard fund={fund} />
+                    <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                        <div className="rounded-2xl border border-line bg-white p-4">
+                            <p className="text-[11px] font-semibold tracking-[0.14em] text-[#202637]">GÓI ĐANG GIỮ</p>
+                            <p className="mt-2 text-sm font-semibold text-ink">{E.Quota.vocab.name}</p>
+                            <p className="mt-2 text-sm text-ink2">Trạng thái: Đang hiệu lực</p>
+                            <p className="mt-1 text-sm text-ink2">Thanh toán: {paidVocab(fund) ? 'Đã xác nhận trên sổ quỹ' : 'Đã cấp trên sổ quỹ'}</p>
+                            {since ? <p className="mt-1 text-sm text-ink2">Kích hoạt: {memberDay(since)}</p> : null}
+                            <ul className="mt-3 space-y-1.5 text-sm text-ink2">
+                                <li>+{fund.aiCredits || 0} lượt điền thẻ đã cấp · hạn mức {aiCap}</li>
+                                <li>+{fund.scanGrant || 0} lượt quét bài đã cấp · hạn mức {scanCap}</li>
+                                <li>Đồng bộ trên mọi máy bằng mã {fund.code}</li>
+                            </ul>
+                        </div>
+                        <div className="rounded-2xl border border-[#202637]/10 bg-[#F8F9FC] p-4">
+                            <p className="text-[11px] font-semibold tracking-[0.14em] text-[#202637]">QUYỀN LỢI AI</p>
+                            <div className="mt-3 grid grid-cols-3 gap-2 text-center">
+                                <div><p className="text-xs text-slate-500">Tổng</p><p className="tnum text-lg font-semibold text-ink">{aiCap}</p></div>
+                                <div><p className="text-xs text-slate-500">Đã dùng</p><p className="tnum text-lg font-semibold text-ink">{aiUsed}</p></div>
+                                <div><p className="text-xs text-slate-500">Còn lại</p><p className="tnum text-lg font-semibold text-ink">{aiLeft}</p></div>
+                            </div>
+                            <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-[#202637]/10" aria-hidden="true">
+                                <div className="h-full rounded-full bg-[#10141F]" style={{ width: aiPct + '%' }} />
+                            </div>
+                            <p className="mt-2 text-xs text-slate-500">Còn {aiPct}% hạn mức điền thẻ</p>
+                            <p className="mt-1 text-xs text-slate-500">Quét bài đọc: đã dùng {scans}/{scanCap} · còn {scanLeft}</p>
+                        </div>
+                    </div>
+                    <div className="mt-4">
+                        <p className="text-sm font-semibold text-ink">Lịch sử giao dịch</p>
+                        {buys.length ? (
+                            <ul className="mt-2 max-h-40 space-y-1 overflow-y-auto text-sm">
+                                {buys.slice(0, 12).map(ev => (
+                                    <li key={ev.id} className="flex justify-between gap-3">
+                                        <span className="truncate text-ink2">{when(ev.t)} · {ev.note || ev.pack}</span>
+                                        <span className="tnum text-ink">{ev.pack === 'vocab' ? 'PRO' : (ev.delta > 0 ? '+' + ev.delta : ev.delta)}</span>
+                                    </li>
+                                ))}
+                            </ul>
+                        ) : <p className="mt-2 text-sm text-muted">Chưa có giao dịch mua trên máy này.</p>}
+                    </div>
+                </Modal>
+            );
+        };
+
+        const ObsidianWelcome = ({ fund, onSkip, onExplore }) => {
+            useEffect(() => {
+                const onKey = (e) => { if (e.key === 'Escape') onSkip(); };
+                window.addEventListener('keydown', onKey);
+                return () => window.removeEventListener('keydown', onKey);
+            }, [onSkip]);
+            const line = paidVocab(fund) ? 'Gói 29.000đ đã được xác nhận.' : 'Quyền lợi PRO đã được ghi trên sổ quỹ.';
+            return (
+                <div className="fixed inset-0 z-[70] flex items-center justify-center bg-[#10141F]/80 p-4" role="dialog" aria-modal="true" aria-labelledby="obsidian-welcome">
+                    <div className="obsidian-rise w-full max-w-md">
+                        <p id="obsidian-welcome" className="mb-3 text-center text-xs font-semibold tracking-[0.22em] text-[#D8C7A0]">FPASS OBSIDIAN</p>
+                        <MembershipCard fund={fund} />
+                        <p className="mt-4 text-center text-lg font-semibold text-[#F8F9FC]">{line}</p>
+                        <p className="mt-1 text-center text-sm text-[#C6CBD4]">Chào mừng bạn. Mã này đang ở tư cách thành viên PRO.</p>
+                        <div className="mt-4 flex justify-center gap-2">
+                            <button type="button" className="rounded-xl px-4 py-2 text-sm font-medium text-[#C6CBD4] hover:bg-white/10" onClick={onSkip}>Bỏ qua</button>
+                            <button type="button" data-autofocus className="rounded-xl border border-[#D8C7A0]/70 bg-[#F8F9FC] px-4 py-2 text-sm font-semibold text-[#10141F]" onClick={onExplore}>Khám phá quyền lợi</button>
+                        </div>
                     </div>
                 </div>
             );
@@ -681,9 +803,9 @@
                 </div>
             );
             if (compact && !eos) {
-                const pro = vocabOn || !!fund.aiUnlocked;
+                const obsidian = vocabOn;
                 const unlimited = !!(fund.aiUnlocked && !vocabOn);
-                const aiPct = aiCap > 0 ? Math.max(0, Math.min(100, Math.round((aiLeft / aiCap) * 100))) : 0;
+                const openMembership = () => window.dispatchEvent(new CustomEvent('edu-membership'));
                 return (
                     <div className="space-y-3">
                         <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2 rounded-2xl border border-slate-200 bg-white px-4 py-2.5 shadow-sm">
@@ -693,19 +815,17 @@
                                     <button type="button" onClick={copyFund} aria-label={'Copy mã ' + fund.code} className="inline-flex h-6 w-6 items-center justify-center rounded-md text-slate-500 hover:bg-slate-100 hover:text-slate-800"><Icon name="copy" size={13} /></button>
                                 </span>
                                 <span aria-hidden="true" className="text-slate-300">•</span>
-                                {pro ? (
-                                    <span className="inline-flex items-center gap-2 rounded-full border border-indigo-500/40 bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 px-2.5 py-1 font-semibold text-white shadow-sm">
-                                        <span className="tracking-wide">👑 PRO MEMBER</span>
-                                        <span aria-hidden="true" className="h-3 w-px shrink-0 bg-white/20" />
-                                        {unlimited ? <span className="font-medium text-indigo-100">AI đang mở</span> : (
-                                            <span className="inline-flex items-center gap-1.5">
-                                                <span className="relative h-1 w-10 overflow-hidden rounded-full bg-white/15" aria-hidden="true" title={aiPct + '% còn lại'}>
-                                                    <span className="absolute inset-y-0 left-0 rounded-full bg-gradient-to-r from-indigo-300 to-violet-300" style={{ width: aiPct + '%' }} />
-                                                </span>
-                                                <span className="tnum">[ {aiLeft} / {aiCap} lượt AI ]</span>
-                                            </span>
-                                        )}
-                                    </span>
+                                {obsidian ? (
+                                    <button type="button" onClick={openMembership} aria-label="Mở thẻ thành viên Obsidian" className="inline-flex items-center gap-2 rounded-xl border border-[#D8C7A0]/70 bg-[#10141F] px-2.5 py-1 text-left text-white shadow-sm">
+                                        <Icon name="gem" size={14} className="text-[#D8C7A0]" />
+                                        <span className="leading-none">
+                                            <span className="block text-[9px] font-semibold tracking-[0.16em] text-[#D8C7A0]">OBSIDIAN</span>
+                                            <span className="mt-0.5 block text-[11px] font-semibold tracking-wide">PRO MEMBER</span>
+                                        </span>
+                                        <span className="tnum text-[11px] text-[#F8F9FC]">{aiLeft}/{aiCap}</span>
+                                    </button>
+                                ) : unlimited ? (
+                                    <span className="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-1 font-medium text-slate-700">AI tự điền: đang mở</span>
                                 ) : (
                                     <span className="inline-flex items-center rounded-full bg-indigo-50 px-2.5 py-1 font-medium text-[#4338CA]">AI tự điền: {aiLeft}/{aiCap} miễn phí</span>
                                 )}
@@ -3307,7 +3427,7 @@
             const [paywall, setPaywall] = useState(false);
             const [passage, setPassage] = useState(false);
             const fund = useFund();
-            const pro = (fund.aiCredits || 0) > 0 || !!fund.aiUnlocked;
+            const obsidian = obsidianOf(fund);
             const teaseTimer = useRef(0);
             const anchor = useRef(0);
             const dragging = useRef(false);
@@ -3477,7 +3597,7 @@
                         <div className="flex flex-wrap gap-2">
                             <button type="button" onClick={() => setQuick(v => !v)} aria-expanded={quick} className={'btn ' + (quick ? 'btn-primary' : 'btn-secondary')}><Icon name="clipboard" /> Dán nhanh</button>
                             <button type="button" onClick={addRow} className="btn btn-secondary"><Icon name="plus" /> Thêm dòng</button>
-                            <button type="button" onClick={aiEverything} disabled={!!aiAll || !items.length} className={'btn btn-secondary' + (pro ? ' border border-indigo-300/60 shadow-sm' : '')}><Icon name="sparkles" /> {aiAll ? 'AI ' + aiAll.done + '/' + aiAll.total : 'AI bổ sung tất cả'}</button>
+                            <button type="button" onClick={aiEverything} disabled={!!aiAll || !items.length} className={'btn btn-secondary' + (obsidian ? ' border border-[#D8C7A0] shadow-sm' : '')}><Icon name="sparkles" /> {aiAll ? 'AI ' + aiAll.done + '/' + aiAll.total : 'AI bổ sung tất cả'}</button>
                         </div>
                     </div>
 
@@ -3510,7 +3630,7 @@
                             <button type="button" onClick={() => { if (!requireTurns(toast)) return; onPractice(mcqPool, 'eos', 'EOS · ' + Sch.groupLabel(groupFilter)); }} disabled={mcqPool.length < 5} className="btn btn-secondary"><Icon name="monitor" /> Thi thử EOS</button>
                         </div>
                         <div className="px-3 sm:px-4 pb-3 sm:pb-4 flex flex-wrap gap-2">
-                            <button type="button" onClick={() => setPassage(true)} className={'inline-flex items-center gap-2 rounded-xl border px-3 min-h-[36px] text-sm font-medium text-[#4338CA] hover:bg-[#4338CA]/20 ' + (pro ? 'border-indigo-300/60 bg-[#4338CA]/10 shadow-sm' : 'border-[#4338CA]/20 bg-[#4338CA]/10')}><Icon name="sparkles" size={14} /> AI Quét bài đọc / Đề thi</button>
+                            <button type="button" onClick={() => setPassage(true)} className={'inline-flex items-center gap-2 rounded-xl border px-3 min-h-[36px] text-sm font-medium text-[#4338CA] hover:bg-[#4338CA]/20 ' + (obsidian ? 'border-[#D8C7A0] bg-[#F8F9FC] shadow-sm' : 'border-[#4338CA]/20 bg-[#4338CA]/10')}><Icon name="sparkles" size={14} /> AI Quét bài đọc / Đề thi</button>
                             <button type="button" onClick={() => fileRef.current && fileRef.current.click()} className="btn btn-ghost btn-sm"><Icon name="upload" size={14} /> Nhập JSON / Excel</button>
                             <button type="button" onClick={() => window.dispatchEvent(new CustomEvent('edu-contribute'))} className="btn btn-ghost btn-sm"><Icon name="share" size={14} /> Gửi đề cho admin</button>
                             <input ref={fileRef} type="file" multiple accept=".json,.xlsx,.xls,.csv,application/json" className="hidden" onChange={pickFiles} />
@@ -3621,7 +3741,7 @@
                                                 </td>
                                                 <td className="p-2">
                                                     <div className="flex flex-wrap gap-1">
-                                                        <button type="button" onClick={() => aiOne(t)} disabled={!t.questionOrWord || aiRow === t.id} className={'btn btn-secondary btn-sm' + (pro ? ' border border-indigo-300/60 shadow-sm' : '')} title={mcq ? 'AI giải thích' : 'AI bổ sung'}><Icon name="sparkles" size={14} />{aiRow === t.id ? '…' : 'AI'}</button>
+                                                        <button type="button" onClick={() => aiOne(t)} disabled={!t.questionOrWord || aiRow === t.id} className={'btn btn-secondary btn-sm' + (obsidian ? ' border border-[#D8C7A0] shadow-sm' : '')} title={mcq ? 'AI giải thích' : 'AI bổ sung'}><Icon name="sparkles" size={14} />{aiRow === t.id ? '…' : 'AI'}</button>
                                                         <button type="button" onClick={() => onStudyFrom(t)} disabled={!t.questionOrWord} className="btn btn-secondary btn-sm">Học</button>
                                                         <button type="button" onClick={() => setEditing(t)} className="btn btn-secondary btn-sm btn-icon !w-9" aria-label="Sửa chi tiết"><Icon name="pen" size={14} /></button>
                                                         <button type="button" onClick={() => removeRow(t.id)} className="btn btn-danger btn-sm btn-icon !w-9" aria-label="Xóa"><Icon name="trash" size={14} /></button>
@@ -4161,9 +4281,9 @@
             return s.length > 90 ? s.slice(0, 88) + '…' : s;
         };
 
-        const ModeSwitch = ({ mode, onChange, slotDue }) => {
+        const ModeSwitch = ({ mode, onChange, slotDue, obsidian = false }) => {
             const opts = [
-                { id: 'self', icon: 'pen', label: 'Sổ tay & Lịch học', short: 'Sổ tay', badge: 'Tự tạo thẻ · AI điền · Free' },
+                { id: 'self', icon: 'pen', label: 'Sổ tay & Lịch học', short: 'Sổ tay', badge: obsidian ? 'Obsidian · PRO' : 'Tự tạo thẻ · AI điền · Free' },
                 { id: 'bank', icon: 'layers', label: 'Kho Src Qua Môn', short: 'Kho Src', badge: 'FE · EOS · PT · IELTS' }
             ];
             const onKey = (e) => {
@@ -4251,8 +4371,15 @@
             const helpReturn = useRef(null);
             const [systemPacks, setSystemPacks] = useState([]);
             const [contribOpen, setContribOpen] = useState(false);
+            const fund = useFund();
+            const obsidian = obsidianOf(fund);
+            const [memberOpen, setMemberOpen] = useState(false);
+            const [welcome, setWelcome] = useState(false);
+            const [welcomeHold, setWelcomeHold] = useState(false);
+            const obsidianWas = useRef(null);
             useEffect(() => {
                 const open = () => setFundShop(true);
+                const showMember = () => { if (obsidianOf(E.Quota.read())) setMemberOpen(true); };
                 const showLegal = (e) => {
                     setSupportOpen(false);
                     setLegalTab((e.detail && e.detail.tab) || 'id');
@@ -4264,14 +4391,34 @@
                     setSupportOpen(true);
                 };
                 window.addEventListener('edu-fund-shop', open);
+                window.addEventListener('edu-membership', showMember);
                 window.addEventListener('fpass-legal', showLegal);
                 window.addEventListener('fpass-support', showSupport);
                 return () => {
                     window.removeEventListener('edu-fund-shop', open);
+                    window.removeEventListener('edu-membership', showMember);
                     window.removeEventListener('fpass-legal', showLegal);
                     window.removeEventListener('fpass-support', showSupport);
                 };
             }, []);
+            useEffect(() => {
+                if (obsidianWas.current === null) {
+                    obsidianWas.current = obsidian;
+                    return;
+                }
+                if (!obsidianWas.current && obsidian) {
+                    if (session) setWelcomeHold(true);
+                    else setWelcome(true);
+                }
+                if (!obsidian) setWelcome(false);
+                obsidianWas.current = obsidian;
+            }, [obsidian, session]);
+            useEffect(() => {
+                if (welcomeHold && !session && obsidian) {
+                    setWelcomeHold(false);
+                    setWelcome(true);
+                }
+            }, [welcomeHold, session, obsidian]);
             useEffect(() => {
                 let id = '';
                 try {
@@ -4691,17 +4838,24 @@
             return (
                 <div className="min-h-screen flex flex-col">
                     <a href="#main" className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[70] btn btn-primary">Bỏ qua tới nội dung</a>
-                    <header className="sticky top-0 z-30 border-b border-line" style={{ background: 'rgba(226,232,240,.9)', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)' }}>
+                    <header className={'sticky top-0 z-30 border-b ' + (obsidian ? 'obsidian-head border-[#202637]' : 'border-line')} style={obsidian ? undefined : { background: 'rgba(226,232,240,.9)', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)' }}>
                         <div className="max-w-7xl mx-auto px-4 py-3 flex flex-wrap items-center gap-3">
                             <button type="button" onClick={goHome} aria-label="Về trang chủ" className="flex items-center gap-3 mr-auto border-0 bg-transparent p-0 text-left cursor-pointer">
-                                <img src="public/stickers/logo.png" alt="" className="h-12 w-auto object-contain" />
+                                <span className={obsidian ? 'inline-flex rounded-xl bg-[#F8F9FC] px-1.5 py-1' : ''}>
+                                    <img src="public/stickers/logo.png" alt="" className="h-12 w-auto object-contain" />
+                                </span>
                                 <span className="flex flex-col justify-center">
-                                    <span className="text-2xl font-extrabold leading-none text-[#0B192C]">FPass</span>
-                                    <span className="mt-1 text-sm font-medium leading-none tracking-wide text-slate-500">Học đúng giờ · thi chắc qua</span>
+                                    <span className={'text-2xl font-extrabold leading-none ' + (obsidian ? 'text-[#F8F9FC]' : 'text-[#0B192C]')}>FPass</span>
+                                    <span className={'mt-1 text-sm font-medium leading-none tracking-wide ' + (obsidian ? 'text-[#C6CBD4]' : 'text-slate-500')}>Học đúng giờ · thi chắc qua</span>
                                 </span>
                             </button>
-                            <div className="order-last w-full sm:order-none sm:w-auto"><ModeSwitch mode={nav.mode} onChange={switchMode} slotDue={live && nav.mode === 'bank'} /></div>
-                            <div className="flex gap-1">
+                            <div className="order-last w-full sm:order-none sm:w-auto"><ModeSwitch mode={nav.mode} onChange={switchMode} slotDue={live && nav.mode === 'bank'} obsidian={obsidian} /></div>
+                            <div className="flex items-center gap-1">
+                                {obsidian && (
+                                    <button type="button" onClick={() => setMemberOpen(true)} className="mr-1 inline-flex items-center gap-1.5 rounded-full border border-[#D8C7A0]/70 bg-[#202637] px-3 py-1.5 text-xs font-semibold tracking-wide text-[#F8F9FC]">
+                                        <Icon name="gem" size={14} className="text-[#D8C7A0]" /> Obsidian
+                                    </button>
+                                )}
                                 <button type="button" className="btn btn-ghost btn-icon" onClick={() => setMuted(!muted)} aria-pressed={!muted} aria-label={muted ? 'Bật âm thanh' : 'Tắt âm thanh'}><Icon name={muted ? 'mute' : 'volume'} /></button>
                                 <button type="button" className="btn btn-ghost btn-icon" onClick={() => setSettingsOpen(true)} aria-label="Cài đặt"><Icon name="sliders" /></button>
                             </div>
@@ -4709,7 +4863,7 @@
                         {nav.mode === 'self' && (
                             <div className="max-w-7xl mx-auto px-4 pb-2">
                                 {focusMode && (
-                                    <p className="text-sm text-ink2 flex items-center gap-2 min-h-[32px] mb-1"><span className="w-2 h-2 rounded-full bg-danger pulse-rec" /> Đang trong {session.title}</p>
+                                    <p className={'text-sm flex items-center gap-2 min-h-[32px] mb-1 ' + (obsidian ? 'text-[#C6CBD4]' : 'text-ink2')}><span className="w-2 h-2 rounded-full bg-danger pulse-rec" /> Đang trong {session.title}</p>
                                 )}
                                 <nav role="tablist" aria-label="Mục Sổ tay & Lịch học" className="flex flex-wrap gap-1">
                                     {tabs.map(([k, ic, l]) => (
@@ -4782,6 +4936,10 @@
                     {contribOpen && <ContributeModal pack={null} toast={toast} onClose={() => setContribOpen(false)} />}
                     <SupportDock open={supportOpen} toast={toast} returnTo={helpReturn} onOpen={(el) => { helpReturn.current = el || document.activeElement; setFeedbackOpen(false); setSupportOpen(true); }} onClose={() => setSupportOpen(false)} onFeedback={openFeedback} />
                     {feedbackOpen && <FeedbackModal screen={screenNow} onClose={() => setFeedbackOpen(false)} />}
+                    {memberOpen && obsidian && <MembershipDesk fund={fund} onClose={() => setMemberOpen(false)} />}
+                    {welcome && obsidian && (
+                        <ObsidianWelcome fund={fund} onSkip={() => setWelcome(false)} onExplore={() => { setWelcome(false); setMemberOpen(true); }} />
+                    )}
                     <Toasts list={toasts} />
                 </div>
             );
