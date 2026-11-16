@@ -210,6 +210,9 @@
         .obsidian-head .tab:hover:not([aria-selected="true"]) { background: #202637; color: #F8F9FC; }
         .obsidian-card { position: relative; overflow: hidden; border-radius: 18px; border: 1px solid rgba(216, 199, 160, .6); background: linear-gradient(145deg, #202637 0%, #10141F 58%, #161b28 100%); color: #F8F9FC; box-shadow: 0 16px 36px rgba(16, 20, 31, .18); }
         .obsidian-card::after { content: ""; position: absolute; inset: 0; background: linear-gradient(115deg, transparent 42%, rgba(216, 199, 160, .1) 50%, transparent 58%); pointer-events: none; }
+        .obsidian-dialog { background: #10141F; color: #F8F9FC; border: 1px solid #202637; box-shadow: 0 24px 60px rgba(0, 0, 0, .4); }
+        .obsidian-dialog .btn-ghost { color: #C6CBD4; }
+        .obsidian-dialog .btn-ghost:hover:not(:disabled) { background: #202637; }
         .obsidian-rise { animation: obsidian-rise 1.2s ease; }
         @keyframes obsidian-rise { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
     </style>
@@ -416,7 +419,7 @@
 
         const Kbd = ({ children }) => <kbd className="kbd">{children}</kbd>;
 
-        const Modal = ({ title, onClose, children, size = 'md', footer, badge }) => {
+        const Modal = ({ title, onClose, children, size = 'md', footer, badge, tone }) => {
             const box = useRef(null);
             const titleId = useMemo(() => 'dlg-' + Math.random().toString(36).slice(2, 8), []);
             useHotkeys('modal', { Escape: { run: () => onClose && onClose(), allowInInput: true } }, { modal: true });
@@ -437,14 +440,15 @@
                 else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
             };
             const width = size === 'xl' ? 'sm:max-w-6xl' : size === 'lg' ? 'sm:max-w-3xl' : size === 'sm' ? 'sm:max-w-sm' : 'sm:max-w-lg';
+            const dark = tone === 'obsidian';
             return (
                 <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/40 sm:p-4" onMouseDown={(e) => { if (e.target === e.currentTarget && onClose) onClose(); }}>
                     <div ref={box} role="dialog" aria-modal="true" aria-labelledby={titleId} onKeyDown={trap}
-                        className={'card enter w-full ' + width + ' max-h-[92vh] flex flex-col rounded-b-none sm:rounded-2xl'}>
-                        <div className="flex items-start justify-between gap-3 px-5 pt-4 pb-3 border-b border-line">
-                            <h2 id={titleId} className="text-base font-semibold text-flow">{title}</h2>
+                        className={(dark ? 'obsidian-dialog ' : 'card ') + 'enter w-full ' + width + ' max-h-[92vh] flex flex-col rounded-b-none sm:rounded-2xl'}>
+                        <div className={'flex items-start justify-between gap-3 px-5 pt-4 pb-3 border-b ' + (dark ? 'border-[#202637]' : 'border-line')}>
+                            <h2 id={titleId} className={'text-base font-semibold text-flow ' + (dark ? 'text-[#F8F9FC]' : '')}>{title}</h2>
                             <div className="flex items-center gap-2">
-                                {badge && <span className="rounded-full bg-indigo-50 px-2.5 py-1 text-xs font-medium text-[#4338CA]">{badge}</span>}
+                                {badge && <span className={dark ? 'rounded-full border border-[#D8C7A0]/60 px-2.5 py-1 text-xs font-medium text-[#D8C7A0]' : 'rounded-full bg-indigo-50 px-2.5 py-1 text-xs font-medium text-[#4338CA]'}>{badge}</span>}
                                 {onClose && (
                                     <button type="button" data-close className="btn btn-ghost btn-icon -mr-2 -mt-1" onClick={onClose} aria-label="Đóng">
                                         <Icon name="x" />
@@ -453,7 +457,7 @@
                             </div>
                         </div>
                         <div className="px-5 py-4 overflow-y-auto">{children}</div>
-                        {footer && <div className="px-5 py-3 border-t border-line flex flex-wrap justify-end gap-2 safe-bottom">{footer}</div>}
+                        {footer && <div className={'px-5 py-3 border-t flex flex-wrap justify-end gap-2 safe-bottom ' + (dark ? 'border-[#202637]' : 'border-line')}>{footer}</div>}
                     </div>
                 </div>
             );
@@ -482,9 +486,9 @@
                         </div>
                         <Icon name="gem" size={22} className="text-[#D8C7A0]" />
                     </div>
-                    <div className="relative mt-6 flex items-end justify-between gap-3 text-[11px] text-[#C6CBD4]">
-                        <span className="tnum">Mã {fund.code}{since ? ' · ' + memberDay(since) : ''}</span>
-                        <span className="text-right">
+                    <div className="relative mt-6 flex flex-wrap items-end justify-between gap-x-3 gap-y-2 text-[11px] text-[#C6CBD4]">
+                        <span className="tnum min-w-0">Mã {fund.code}{since ? ' · ' + memberDay(since) : ''}</span>
+                        <span className="text-left sm:text-right">
                             <span className="block text-[#D8C7A0]">Đang hoạt động</span>
                             <span className="tnum text-[#F8F9FC]">AI {aiLeft}/{aiCap} · EOS {fund.balance}</span>
                         </span>
@@ -504,48 +508,60 @@
             const scanLeft = Math.max(0, scanCap - scans);
             const buys = (fund.history || []).filter(ev => ev && ev.kind === 'buy');
             const when = (t) => new Date(t).toLocaleString('vi-VN', { hour: '2-digit', minute: '2-digit', day: '2-digit', month: '2-digit', year: 'numeric' });
+            const perks = [
+                ['+' + (fund.aiCredits || 0) + ' lượt AI tự động điền thẻ', 'Bổ sung nghĩa sát ngữ cảnh, câu ví dụ, phiên âm IPA và mẹo ghi nhớ thông minh.'],
+                ['+' + (fund.scanGrant || 0) + ' lượt AI quét bài đọc / đề thi', 'Tự động nhận diện từ vựng quan trọng, highlight nội dung và hỗ trợ luyện đọc Shadowing.'],
+                ['Đồng bộ đa thiết bị qua Mã Quỹ (' + fund.code + ')', 'Học tập liền mạch trên Laptop và Điện thoại, không cần mua kèm lượt EOS.'],
+                ['Không gian Obsidian & Đặc quyền định danh', 'Mở khóa giao diện thành viên cao cấp với nhận diện Obsidian độc quyền, huy hiệu định danh độc bản và trải nghiệm nâng cấp tinh tế xuyên suốt hệ sinh thái FPass.']
+            ];
             return (
-                <Modal title="My Membership" onClose={onClose} size="lg" badge="Obsidian">
+                <Modal title="My Membership" onClose={onClose} size="lg" badge="Obsidian" tone="obsidian">
                     <MembershipCard fund={fund} />
                     <div className="mt-4 grid gap-3 sm:grid-cols-2">
-                        <div className="rounded-2xl border border-line bg-white p-4">
-                            <p className="text-[11px] font-semibold tracking-[0.14em] text-[#202637]">GÓI ĐANG GIỮ</p>
-                            <p className="mt-2 text-sm font-semibold text-ink">{E.Quota.vocab.name}</p>
-                            <p className="mt-2 text-sm font-medium text-[#202637]">Trạng thái: Đang hoạt động</p>
-                            <p className="mt-1 text-sm text-ink2">Thanh toán: {paidVocab(fund) ? 'Đã xác nhận trên sổ quỹ' : 'Đã cấp trên sổ quỹ'}</p>
-                            {since ? <p className="mt-1 text-sm text-ink2">Kích hoạt: {memberDay(since)}</p> : null}
-                            <ul className="mt-3 space-y-1.5 text-sm text-ink2">
-                                <li>+{fund.aiCredits || 0} lượt điền thẻ đã cấp · hạn mức {aiCap}</li>
-                                <li>+{fund.scanGrant || 0} lượt quét bài đã cấp · hạn mức {scanCap}</li>
-                                <li>Đồng bộ trên mọi máy bằng mã {fund.code}</li>
-                            </ul>
-                        </div>
-                        <div className="rounded-2xl border border-[#202637]/10 bg-[#F8F9FC] p-4">
-                            <p className="text-[11px] font-semibold tracking-[0.14em] text-[#202637]">AI CREDITS · {fund.aiCredits || 0} ĐÃ CẤP</p>
-                            <div className="mt-3 grid grid-cols-3 gap-2 text-center">
-                                <div><p className="text-xs text-slate-500">Tổng</p><p className="tnum text-lg font-semibold text-ink">{aiCap}</p></div>
-                                <div><p className="text-xs text-slate-500">Đã dùng</p><p className="tnum text-lg font-semibold text-ink">{aiUsed}</p></div>
-                                <div><p className="text-xs text-slate-500">Còn lại</p><p className="tnum text-lg font-semibold text-ink">{aiLeft}</p></div>
-                            </div>
-                            <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-[#202637]/10" aria-hidden="true">
-                                <div className="h-full rounded-full bg-[#10141F]" style={{ width: aiPct + '%' }} />
-                            </div>
-                            <p className="mt-2 text-xs text-slate-500">Còn {aiPct}% hạn mức điền thẻ</p>
-                            <p className="mt-1 text-xs text-slate-500">Quét bài đọc: đã dùng {scans}/{scanCap} · còn {scanLeft}</p>
-                        </div>
-                    </div>
-                    <div className="mt-4">
-                        <p className="text-sm font-semibold text-ink">Lịch sử giao dịch</p>
-                        {buys.length ? (
-                            <ul className="mt-2 max-h-40 space-y-1 overflow-y-auto text-sm">
-                                {buys.slice(0, 12).map(ev => (
-                                    <li key={ev.id} className="flex justify-between gap-3">
-                                        <span className="truncate text-ink2">{when(ev.t)} · {ev.note || ev.pack}</span>
-                                        <span className="tnum text-ink">{ev.pack === 'vocab' ? 'PRO' : (ev.delta > 0 ? '+' + ev.delta : ev.delta)}</span>
+                        <div className="min-w-0 rounded-2xl border border-[#D8C7A0]/25 bg-[#202637] p-4">
+                            <p className="text-[11px] font-semibold tracking-[0.14em] text-[#D8C7A0]">GÓI ĐANG GIỮ</p>
+                            <p className="mt-2 text-sm font-semibold text-[#F8F9FC]">{E.Quota.vocab.name}</p>
+                            <p className="mt-3 flex flex-wrap gap-x-2 gap-y-1 text-sm text-[#C6CBD4]">
+                                <span>Trạng thái: <b className="font-medium text-[#D8C7A0]">Đang hoạt động</b></span>
+                                <span aria-hidden="true">·</span>
+                                <span>Thanh toán: {paidVocab(fund) ? 'Đã xác nhận trên sổ quỹ' : 'Đã cấp trên sổ quỹ'}</span>
+                                {since ? <><span aria-hidden="true">·</span><span>Kích hoạt: {memberDay(since)}</span></> : null}
+                            </p>
+                            <ul className="mt-4 space-y-3">
+                                {perks.map((perk) => (
+                                    <li key={perk[0]} className="flex items-start gap-2 text-sm">
+                                        <Icon name="check" size={16} className="mt-0.5 shrink-0 text-[#D8C7A0]" />
+                                        <span className="min-w-0 text-[#C6CBD4]"><b className="font-semibold text-[#F8F9FC]">{perk[0]}:</b> {perk[1]}</span>
                                     </li>
                                 ))}
                             </ul>
-                        ) : <p className="mt-2 text-sm text-muted">Chưa có giao dịch mua trên máy này.</p>}
+                        </div>
+                        <div className="min-w-0 rounded-2xl border border-[#D8C7A0]/25 bg-[#202637] p-4">
+                            <p className="text-[11px] font-semibold tracking-[0.14em] text-[#D8C7A0]">AI CREDITS · {fund.aiCredits || 0} ĐÃ CẤP</p>
+                            <div className="mt-3 grid grid-cols-3 gap-2 text-center">
+                                <div><p className="text-xs text-[#C6CBD4]">Tổng</p><p className="tnum text-lg font-semibold text-[#F8F9FC]">{aiCap}</p></div>
+                                <div><p className="text-xs text-[#C6CBD4]">Đã dùng</p><p className="tnum text-lg font-semibold text-[#F8F9FC]">{aiUsed}</p></div>
+                                <div><p className="text-xs text-[#C6CBD4]">Còn lại</p><p className="tnum text-lg font-semibold text-[#F8F9FC]">{aiLeft}</p></div>
+                            </div>
+                            <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-[#10141F]" aria-hidden="true">
+                                <div className="h-full rounded-full bg-[#D8C7A0]" style={{ width: aiPct + '%' }} />
+                            </div>
+                            <p className="mt-2 text-xs text-[#C6CBD4]">Còn {aiPct}% hạn mức điền thẻ</p>
+                            <p className="mt-1 text-xs text-[#C6CBD4]">Quét bài đọc: đã dùng {scans}/{scanCap} · còn {scanLeft}</p>
+                        </div>
+                    </div>
+                    <div className="mt-4 min-w-0 rounded-2xl border border-[#D8C7A0]/25 bg-[#202637] p-4">
+                        <p className="text-[11px] font-semibold tracking-[0.14em] text-[#D8C7A0]">LỊCH SỬ GIAO DỊCH</p>
+                        {buys.length ? (
+                            <ul className="mt-3 max-h-40 space-y-2 overflow-x-hidden overflow-y-auto text-sm">
+                                {buys.slice(0, 12).map(ev => (
+                                    <li key={ev.id} className="flex min-w-0 items-baseline justify-between gap-3">
+                                        <span className="min-w-0 flex-1 truncate text-[#C6CBD4]">{when(ev.t)} · {ev.note || ev.pack}</span>
+                                        <span className="tnum shrink-0 text-[#F8F9FC]">{ev.pack === 'vocab' ? 'PRO' : (ev.delta > 0 ? '+' + ev.delta : ev.delta)}</span>
+                                    </li>
+                                ))}
+                            </ul>
+                        ) : <p className="mt-2 text-sm text-[#C6CBD4]">Chưa có giao dịch mua trên máy này.</p>}
                     </div>
                 </Modal>
             );
