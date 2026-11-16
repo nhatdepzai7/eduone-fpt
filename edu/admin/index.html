@@ -95,7 +95,7 @@
                     <form onSubmit={submit} className="w-full max-w-sm bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
                         <p className="text-sm font-semibold text-indigo-700">FPass</p>
                         <h1 className="text-2xl font-bold mt-1">Quản trị</h1>
-                        <p className="text-sm text-slate-600 mt-2">Nhập mật khẩu quản trị để xem mã quỹ, doanh thu và kho đề.</p>
+                        <p className="text-sm text-slate-600 mt-2">Nhập mật khẩu quản trị để xem mã quỹ, doanh thu, lượt truy cập, phản hồi và kho đề.</p>
                         <label className="block mt-5 text-sm font-medium">Mật khẩu
                             <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} autoComplete="current-password" className="field mt-1" autoFocus />
                         </label>
@@ -343,6 +343,127 @@
             </div>
         );
 
+        const countText = (n) => new Intl.NumberFormat('vi-VN').format(n || 0);
+
+        const VisitsTab = ({ token, onAuth }) => {
+            const [data, setData] = useState(null);
+            const [error, setError] = useState('');
+            useEffect(() => {
+                api(token, '/api/desk?action=visits').then(setData).catch((e) => { if (e.auth) onAuth(); else setError(e.message); });
+            }, []);
+            if (!data) {
+                return (
+                    <div className="bg-white rounded-2xl border border-slate-200 p-4">
+                        {error
+                            ? <p className="text-sm text-rose-700" role="alert">{error}</p>
+                            : <p className="text-sm text-slate-600">Đang tải số liệu truy cập…</p>}
+                    </div>
+                );
+            }
+            const days = data.days || [];
+            const today = data.today || { views: 0, users: 0, newUsers: 0 };
+            const week = data && data.week || { views: 0, newUsers: 0 };
+            const all = data && data.all || { views: 0, users: 0 };
+            const bars = days.slice(0, 14).slice().reverse();
+            const peak = bars.reduce((max, row) => Math.max(max, row.views), 1);
+            return (
+                <div className="space-y-4">
+                    <div className="grid sm:grid-cols-3 gap-3">
+                        <div className="bg-white rounded-2xl border border-slate-200 p-4"><p className="text-sm text-slate-500">Lượt mở trang hôm nay</p><p className="text-2xl font-bold tnum mt-1">{countText(today.views)}</p></div>
+                        <div className="bg-white rounded-2xl border border-slate-200 p-4"><p className="text-sm text-slate-500">Người dùng hôm nay</p><p className="text-2xl font-bold tnum mt-1">{countText(today.users)}</p></div>
+                        <div className="bg-white rounded-2xl border border-slate-200 p-4"><p className="text-sm text-slate-500">Người mới hôm nay</p><p className="text-2xl font-bold tnum mt-1">{countText(today.newUsers)}</p></div>
+                    </div>
+                    <div className="grid sm:grid-cols-2 gap-3">
+                        <div className="bg-white rounded-2xl border border-slate-200 p-4"><p className="text-sm text-slate-500">7 ngày: lượt mở / người mới</p><p className="text-2xl font-bold tnum mt-1">{countText(week.views)} <span className="text-base font-semibold text-slate-500">/ {countText(week.newUsers)}</span></p></div>
+                        <div className="bg-white rounded-2xl border border-slate-200 p-4"><p className="text-sm text-slate-500">Từ khi bật: lượt mở / người đã dùng</p><p className="text-2xl font-bold tnum mt-1">{countText(all.views)} <span className="text-base font-semibold text-slate-500">/ {countText(all.users)}</span></p></div>
+                    </div>
+                    {error && <p className="text-sm text-rose-700" role="alert">{error}</p>}
+                    <div className="bg-white rounded-2xl border border-slate-200 p-4">
+                        <h2 className="font-semibold">14 ngày gần nhất</h2>
+                        <div className="mt-3 flex items-end gap-1 h-28" aria-hidden="true">
+                            {bars.map((row) => (
+                                <div key={row.day} className="flex-1 min-w-0 flex flex-col justify-end h-full" title={row.day + ': ' + row.views + ' lượt'}>
+                                    <div className="rounded-t bg-indigo-600" style={{ height: Math.max(4, Math.round((row.views / peak) * 100)) + '%' }}></div>
+                                </div>
+                            ))}
+                        </div>
+                        <p className="text-xs text-slate-500 mt-2">Cột cao hơn là ngày có nhiều lượt mở trang hơn. Ngày cũ ở bên trái.</p>
+                    </div>
+                    <div className="bg-white rounded-2xl border border-slate-200 overflow-x-auto">
+                        <table className="w-full text-sm">
+                            <caption className="text-left px-4 py-3 font-semibold">Lịch sử 30 ngày</caption>
+                            <thead className="text-left text-slate-500">
+                                <tr><th className="px-4 py-2">Ngày</th><th className="px-4 py-2">Lượt mở trang</th><th className="px-4 py-2">Người dùng</th><th className="px-4 py-2">Người mới</th></tr>
+                            </thead>
+                            <tbody>
+                                {days.length ? days.map((row) => (
+                                    <tr key={row.day} className="border-t border-slate-100">
+                                        <td className="px-4 py-2 tnum">{row.day.split('-').reverse().join('/')}</td>
+                                        <td className="px-4 py-2 tnum">{countText(row.views)}</td>
+                                        <td className="px-4 py-2 tnum">{countText(row.users)}</td>
+                                        <td className="px-4 py-2 tnum">{countText(row.newUsers)}</td>
+                                    </tr>
+                                )) : <tr><td className="px-4 py-6 text-slate-500" colSpan={4}>Chưa có số liệu. Số liệu bắt đầu từ lúc bản này chạy.</td></tr>}
+                            </tbody>
+                        </table>
+                    </div>
+                    <p className="text-xs text-slate-500">Người dùng là số máy khác nhau mở trang học trong ngày. Người mới là máy lần đầu. Mỗi lần tải lại trang tính thêm một lượt mở. Trang này không lưu địa chỉ IP.</p>
+                </div>
+            );
+        };
+
+        const FEEDBACK_LABEL = { bug: '🐛 Báo lỗi', idea: '💡 Đề xuất', other: '💬 Góp ý khác' };
+
+        const FeedbackTab = ({ token, onAuth }) => {
+            const [items, setItems] = useState(null);
+            const [error, setError] = useState('');
+            useEffect(() => {
+                api(token, '/api/feedback').then((data) => setItems(data.items || [])).catch((e) => { if (e.auth) onAuth(); else setError(e.message); });
+            }, []);
+            if (!items) {
+                return (
+                    <div className="bg-white rounded-2xl border border-slate-200 p-4">
+                        {error
+                            ? <p className="text-sm text-rose-700" role="alert">{error}</p>
+                            : <p className="text-sm text-slate-600">Đang tải phản hồi…</p>}
+                    </div>
+                );
+            }
+            return (
+                <div className="space-y-4">
+                    <div className="bg-white rounded-2xl border border-slate-200 p-4 max-w-xs">
+                        <p className="text-sm text-slate-500">Phản hồi đang lưu</p>
+                        <p className="text-2xl font-bold tnum mt-1">{countText(items.length)}</p>
+                    </div>
+                    <div className="bg-white rounded-2xl border border-slate-200 overflow-x-auto">
+                        <table className="w-full text-sm">
+                            <caption className="text-left px-4 py-3 font-semibold">Phản hồi người dùng</caption>
+                            <thead className="text-left text-slate-500">
+                                <tr><th className="px-4 py-2">Thời gian</th><th className="px-4 py-2">Loại</th><th className="px-4 py-2">Nội dung</th><th className="px-4 py-2">Liên hệ</th><th className="px-4 py-2">Mã</th><th className="px-4 py-2">Màn hình</th></tr>
+                            </thead>
+                            <tbody>
+                                {items.length ? items.map((row) => (
+                                    <tr key={row.id} className="border-t border-slate-100 align-top">
+                                        <td className="px-4 py-3 whitespace-nowrap">{when(row.t)}</td>
+                                        <td className="px-4 py-3 whitespace-nowrap">{FEEDBACK_LABEL[row.kind] || row.kind}</td>
+                                        <td className="px-4 py-3 max-w-sm whitespace-pre-wrap">{row.message}</td>
+                                        <td className="px-4 py-3">{row.contact || '—'}</td>
+                                        <td className="px-4 py-3 tnum">{row.quotaId || '—'}</td>
+                                        <td className="px-4 py-3">
+                                            <p>{row.screen || '—'}</p>
+                                            <p className="text-xs text-slate-500 tnum break-all">{row.path || ''}</p>
+                                            {row.ua && <p className="text-xs text-slate-500 break-all" title={row.ua}>{row.ua}</p>}
+                                        </td>
+                                    </tr>
+                                )) : <tr><td className="px-4 py-6 text-slate-500" colSpan={6}>Chưa có góp ý nào. Số liệu bắt đầu từ lúc bản này chạy.</td></tr>}
+                            </tbody>
+                        </table>
+                    </div>
+                    <p className="text-xs text-slate-500">Mỗi máy hoặc mỗi mã gửi tối đa 3 lần trong 5 phút. Danh sách giữ 200 góp ý mới nhất. Trang này không lưu địa chỉ IP.</p>
+                </div>
+            );
+        };
+
         const Shell = ({ token, onLogout }) => {
             const [tab, setTab] = useState('quota');
             const leave = async () => {
@@ -365,9 +486,11 @@
                     </header>
                     <div className="flex flex-wrap gap-2 mb-4" role="tablist">
                         <button type="button" role="tab" aria-selected={tab === 'quota'} className={tabClass('quota')} onClick={() => setTab('quota')}>Quản lý Máy & Doanh thu</button>
+                        <button type="button" role="tab" aria-selected={tab === 'visits'} className={tabClass('visits')} onClick={() => setTab('visits')}>Lượt truy cập</button>
+                        <button type="button" role="tab" aria-selected={tab === 'feedback'} className={tabClass('feedback')} onClick={() => setTab('feedback')}>Phản hồi người dùng</button>
                         <button type="button" role="tab" aria-selected={tab === 'exams'} className={tabClass('exams')} onClick={() => setTab('exams')}>Kho Đề Hệ Thống</button>
                     </div>
-                    {tab === 'quota' ? <QuotaTab token={token} onAuth={onLogout} /> : <ExamTab token={token} onAuth={onLogout} />}
+                    {tab === 'quota' ? <QuotaTab token={token} onAuth={onLogout} /> : tab === 'visits' ? <VisitsTab token={token} onAuth={onLogout} /> : tab === 'feedback' ? <FeedbackTab token={token} onAuth={onLogout} /> : <ExamTab token={token} onAuth={onLogout} />}
                 </main>
             );
         };

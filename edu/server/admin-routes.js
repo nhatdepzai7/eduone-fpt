@@ -1,7 +1,8 @@
 import { bearer, loginAdmin, logoutAdmin, requireAdmin } from './admin-auth.js';
 import { deleteOfficial, listOfficial, listPending, publishPending, rejectPending, saveOfficial, takePending } from './exams-store.js';
-import { clientIp, fail, json, mount } from './http.js';
+import { clientIp, fail, json, mount, sameOrigin } from './http.js';
 import { adjustQuota, listQuotas, listTransactions } from './ledger.js';
+import { recordVisit, visitHistory } from './visits.js';
 
 export async function handleLogin(req, env) {
     try {
@@ -101,6 +102,28 @@ export async function handleExams(req, env) {
         return json(405, { error: 'Không hỗ trợ phương thức này.' });
     } catch (e) {
         return fail(e, 'admin-exams');
+    }
+}
+
+export async function handleVisits(req, env) {
+    try {
+        if (req.method === 'POST') {
+            const fromPage = sameOrigin(req) || req.header('sec-fetch-site') === 'same-origin';
+            if (!fromPage) return json(403, { error: 'Chỉ ghi nhận từ chính trang này.' });
+            const body = await req.json(200);
+            const id = String(body && body.id || '').toLowerCase();
+            if (!/^[a-f0-9]{16}$/.test(id)) return json(400, { error: 'Thiếu mã máy.' });
+            await recordVisit(env, id, clientIp(req));
+            return json(200, { ok: true });
+        }
+        if (req.method === 'GET') {
+            const token = await requireAdmin(req, env);
+            if (!token) return json(401, { error: 'Cần đăng nhập quản trị.' });
+            return json(200, await visitHistory(env));
+        }
+        return json(405, { error: 'Chỉ nhận GET hoặc POST.' });
+    } catch (e) {
+        return fail(e, 'visits');
     }
 }
 

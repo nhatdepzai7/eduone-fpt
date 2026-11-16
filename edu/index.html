@@ -327,9 +327,9 @@
             timeZone: 'Asia/Ho_Chi_Minh',
             utcOffsetHours: 7,
             faq: [
-                { q: 'Đã chuyển khoản nhưng chưa có lượt?', a: 'ĐIỀN CÂU 1. ĐIỀN CÂU 2 NẾU CẦN.' },
-                { q: 'Chuyển khoản bao lâu thì được cộng lượt?', a: 'ĐIỀN CÂU 1. ĐIỀN CÂU 2 NẾU CẦN.' },
-                { q: 'Chuyển nhầm nội dung thì sao?', a: 'ĐIỀN CÂU 1. ĐIỀN CÂU 2 NẾU CẦN.' }
+                { q: 'Đã chuyển khoản nhưng chưa có lượt?', a: 'Lượt chỉ vào khi tiền tới đúng tài khoản, đúng số tiền một gói, và nội dung có EDU rồi đúng mã của bạn. Bạn bấm Kiểm tra chuyển khoản; nếu vẫn trống, gửi ảnh biên lai trong khung hỗ trợ.' },
+                { q: 'Chuyển khoản bao lâu thì được cộng lượt?', a: 'Thường vài giây sau khi ngân hàng báo giao dịch, không phải lúc vừa bấm chuyển. Bạn chờ một chút rồi bấm Kiểm tra chuyển khoản.' },
+                { q: 'Chuyển nhầm nội dung thì sao?', a: 'Thiếu mã, sai số tiền hoặc viết dính EDU với mã thì lượt không tự vào. Bạn gửi ảnh biên lai kèm mã của bạn, chúng tôi đối chiếu rồi cấp đúng gói khớp số tiền.' }
             ]
         };
         const supportMinutes = (date) => {
@@ -768,7 +768,112 @@
             return on;
         };
 
-        const SupportPanel = ({ toast, onClose, returnTo }) => {
+        const FEEDBACK_KINDS = [
+            ['bug', '🐛 Báo lỗi đề / Web'],
+            ['idea', '💡 Đề xuất tính năng'],
+            ['other', '💬 Góp ý khác']
+        ];
+
+        const FeedbackModal = ({ screen, onClose }) => {
+            const fund = useFund();
+            const box = useRef(null);
+            const [kind, setKind] = useState('bug');
+            const [text, setText] = useState('');
+            const [contact, setContact] = useState('');
+            const [busy, setBusy] = useState(false);
+            const [error, setError] = useState('');
+            const [done, setDone] = useState(false);
+            const code = fund.code || '';
+            const path = (location.pathname || '/') + (location.search || '');
+            const ua = (navigator.userAgent || '').slice(0, 240);
+            useHotkeys('feedback', { Escape: { run: onClose, allowInInput: true } }, { modal: true });
+            useEffect(() => {
+                if (!done) return undefined;
+                const id = setTimeout(onClose, 1500);
+                return () => clearTimeout(id);
+            }, [done]);
+            useEffect(() => {
+                const prev = document.activeElement;
+                const el = box.current && box.current.querySelector('[data-autofocus]');
+                if (el) el.focus();
+                const prevOverflow = document.body.style.overflow;
+                document.body.style.overflow = 'hidden';
+                return () => {
+                    document.body.style.overflow = prevOverflow;
+                    if (prev && prev.focus) prev.focus();
+                };
+            }, []);
+            const trap = (e) => {
+                if (e.key !== 'Tab' || !box.current) return;
+                const els = Array.from(box.current.querySelectorAll('a[href], button:not([disabled]), input:not([disabled]), textarea, [tabindex]:not([tabindex="-1"])'));
+                if (!els.length) return;
+                const first = els[0];
+                const last = els[els.length - 1];
+                if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+                else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+            };
+            const send = async (e) => {
+                e.preventDefault();
+                const message = text.trim();
+                if (!message || busy || done) return;
+                setBusy(true);
+                setError('');
+                try {
+                    const res = await fetch('/api/feedback', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+                        body: JSON.stringify({ kind, message, contact: contact.trim(), quotaId: code, screen, path, ua })
+                    });
+                    let data = {};
+                    try { data = await res.json(); } catch (err) { data = {}; }
+                    const reason = typeof data.error === 'string' ? data.error : (data.error && data.error.message) || '';
+                    if (!res.ok) throw new Error(reason || 'Không gửi được. Thử lại sau.');
+                    setDone(true);
+                } catch (err) {
+                    setError(err.message || 'Không gửi được. Thử lại sau.');
+                    setBusy(false);
+                }
+            };
+            return (
+                <div className="fixed inset-0 z-[70] flex items-end sm:items-center justify-center bg-black/40 p-4" onMouseDown={(e) => { if (e.target === e.currentTarget) onClose(); }}>
+                    <div ref={box} role="dialog" aria-modal="true" aria-labelledby="fpass-feedback-title" onKeyDown={trap} className="card w-full sm:max-w-lg max-h-[92vh] flex flex-col rounded-2xl shadow-xl">
+                        <div className="flex items-start justify-between gap-3 px-5 pt-4 pb-3 border-b border-line">
+                            <div>
+                                <h2 id="fpass-feedback-title" className="text-base font-semibold text-flow">Góp ý & Báo lỗi Hệ thống</h2>
+                                <p className="text-xs text-slate-500 mt-1">Giúp FPass hoàn thiện trải nghiệm ôn thi và bộ đề tốt hơn mỗi ngày.</p>
+                            </div>
+                            <button type="button" className="btn btn-ghost btn-icon -mr-2 -mt-1" onClick={onClose} aria-label="Đóng"><Icon name="x" /></button>
+                        </div>
+                        {done ? (
+                            <p className="px-5 py-8 text-sm font-medium text-ink" role="status">Đã ghi nhận! Cảm ơn bạn đã đóng góp cho FPass.</p>
+                        ) : (
+                            <form onSubmit={send} className="px-5 py-4 overflow-y-auto">
+                                <div className="flex flex-wrap gap-2" role="radiogroup" aria-label="Phân loại góp ý">
+                                    {FEEDBACK_KINDS.map(([id, label]) => (
+                                        <button key={id} type="button" role="radio" aria-checked={kind === id} className={'min-h-[44px] px-3 rounded-xl text-sm font-medium ' + (kind === id ? 'bg-[#0F172A] text-white' : 'bg-slate-100 text-slate-700')} onClick={() => setKind(id)}>{label}</button>
+                                    ))}
+                                </div>
+                                <label className="block mt-4 text-sm font-medium">Nội dung
+                                    <textarea data-autofocus value={text} onChange={(e) => setText(e.target.value)} required maxLength={2000} rows={5} placeholder="Mô tả chi tiết lỗi bạn gặp phải (ví dụ: sai đáp án câu 12 môn SWT301) hoặc tính năng bạn mong muốn..." className="field mt-1 min-h-[120px] py-3" />
+                                </label>
+                                <label className="block mt-3 text-sm font-medium">Thông tin liên hệ <span className="font-normal text-slate-500">(không bắt buộc)</span>
+                                    <input value={contact} onChange={(e) => setContact(e.target.value)} maxLength={120} placeholder="Số Zalo hoặc Email của bạn (để tụi mình phản hồi / cảm ơn khi cần)" className="field mt-1" />
+                                </label>
+                                <div className="mt-3 flex flex-wrap gap-1.5">
+                                    <span className="rounded-full bg-slate-100 px-2 py-1 text-xs text-slate-500 tnum">Mã {code || '—'}</span>
+                                    <span className="rounded-full bg-slate-100 px-2 py-1 text-xs text-slate-500">{screen || 'Trang học'}</span>
+                                    <span className="rounded-full bg-slate-100 px-2 py-1 text-xs text-slate-500 max-w-full truncate" title={path + ' · ' + ua}>{path}</span>
+                                </div>
+                                {error && <p className="text-sm text-rose-700 mt-3" role="alert">{error}</p>}
+                                <button type="submit" disabled={busy || !text.trim()} className="mt-4 w-full min-h-[48px] rounded-xl bg-[#4338CA] text-white font-medium hover:bg-[#3730A3] disabled:opacity-50">{busy ? 'Đang gửi...' : 'Gửi phản hồi'}</button>
+                            </form>
+                        )}
+                    </div>
+                </div>
+            );
+        };
+
+        const SupportPanel = ({ toast, onClose, returnTo, onFeedback }) => {
             const fund = useFund();
             const box = useRef(null);
             const alive = useRef(true);
@@ -874,16 +979,17 @@
                             <span>Hoặc gửi email: <a className="help-link underline" href={mailHref}>{SUPPORT.email}</a></span>
                             {!touch && <button type="button" className="help-mini" onClick={() => copyValue(SUPPORT.email, 'email')}>{copied === 'email' ? 'Đã chép' : 'Sao chép email'}</button>}
                         </p>
+                        <button type="button" className="mt-4 w-full min-h-[44px] rounded-xl border border-white/15 bg-white/5 px-3 py-3 text-left text-sm leading-snug text-[#E2E8F0] hover:bg-white/10" onClick={onFeedback}>🐛 Phát hiện lỗi đề thi hoặc có ý tưởng mới? → Gửi góp ý ngay</button>
                     </div>
                 </div>
             );
         };
 
-        const SupportDock = ({ open, toast, returnTo, onOpen, onClose }) => (
+        const SupportDock = ({ open, toast, returnTo, onOpen, onClose, onFeedback }) => (
             <>
                 {open && <div className="help-scrim" onMouseDown={onClose} />}
                 <div className="help-dock">
-                    {open && <SupportPanel toast={toast} onClose={onClose} returnTo={returnTo} />}
+                    {open && <SupportPanel toast={toast} onClose={onClose} returnTo={returnTo} onFeedback={onFeedback} />}
                     <button type="button" className="help-launch" data-help-open aria-expanded={open} aria-controls="fpass-help" aria-haspopup="dialog" onClick={(e) => (open ? onClose() : onOpen(e.currentTarget))}>
                         <Icon name="headset" size={20} />
                         <span className="help-launch-label">Hỗ trợ</span>
@@ -3524,6 +3630,7 @@
             const [fundShop, setFundShop] = useState(false);
             const [legalTab, setLegalTab] = useState(null);
             const [supportOpen, setSupportOpen] = useState(false);
+            const [feedbackOpen, setFeedbackOpen] = useState(false);
             const helpReturn = useRef(null);
             const [systemPacks, setSystemPacks] = useState([]);
             const [contribOpen, setContribOpen] = useState(false);
@@ -3536,6 +3643,7 @@
                 const showSupport = () => {
                     helpReturn.current = document.activeElement;
                     setLegalTab(null);
+                    setFeedbackOpen(false);
                     setSupportOpen(true);
                 };
                 window.addEventListener('edu-fund-shop', open);
@@ -3546,6 +3654,25 @@
                     window.removeEventListener('fpass-legal', showLegal);
                     window.removeEventListener('fpass-support', showSupport);
                 };
+            }, []);
+            useEffect(() => {
+                let id = '';
+                try {
+                    id = localStorage.getItem('edu.visitor') || '';
+                    if (!/^[a-f0-9]{16}$/.test(id)) {
+                        const bytes = new Uint8Array(8);
+                        crypto.getRandomValues(bytes);
+                        id = Array.from(bytes, (b) => b.toString(16).padStart(2, '0')).join('');
+                        localStorage.setItem('edu.visitor', id);
+                    }
+                } catch (e) { id = ''; }
+                if (!id) return undefined;
+                fetch('/api/desk?action=visits', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+                    body: JSON.stringify({ id })
+                }).catch(() => {});
+                return undefined;
             }, []);
             useEffect(() => {
                 const quota = window.EDU && window.EDU.Quota;
@@ -3909,6 +4036,19 @@
             const focusMode = nav.mode === 'self' && nav.tab === 'today' && session && session.slotId;
             const tabs = [['today', 'home', 'Hôm nay'], ['library', 'list', 'Kho của tôi'], ['practice', 'target', 'Luyện tự do']];
             const pack = nav.packId ? packById.get(nav.packId) : null;
+            const screenNow = (() => {
+                const bits = [];
+                if (nav.mode === 'self') bits.push(nav.tab === 'library' ? 'Kho của tôi' : nav.tab === 'practice' ? 'Luyện tự do' : 'Hôm nay');
+                else if (pack) bits.push((pack.code ? pack.code + ' · ' : '') + (pack.name || 'Đề'));
+                else bits.push('Kệ đề');
+                if (session && session.title) bits.push(session.title);
+                return bits.join(' · ').slice(0, 160);
+            })();
+            const openFeedback = () => {
+                setSupportOpen(false);
+                setLegalTab(null);
+                setFeedbackOpen(true);
+            };
 
             return (
                 <div className="min-h-screen flex flex-col">
@@ -3989,6 +4129,8 @@
                                     <button type="button" className="text-slate-100 underline-offset-2 hover:underline" onClick={() => openLegal('study')}>Miễn trừ Học thuật</button>
                                     <span aria-hidden="true" className="text-slate-500">•</span>
                                     <button type="button" data-help-open className="inline-flex items-center min-h-[44px] px-1 text-slate-100 underline-offset-2 hover:underline" aria-expanded={supportOpen} aria-controls="fpass-help" aria-haspopup="dialog" onClick={() => { if (supportOpen) setSupportOpen(false); else openSupport(); }}>Hỗ trợ</button>
+                                    <span aria-hidden="true" className="text-slate-500">•</span>
+                                    <button type="button" className="inline-flex items-center min-h-[44px] px-1 text-slate-100 underline-offset-2 hover:underline" aria-expanded={feedbackOpen} aria-controls="fpass-feedback-title" aria-haspopup="dialog" onClick={openFeedback}>Góp ý & Báo lỗi</button>
                                 </nav>
                             </div>
                         </div>
@@ -3997,7 +4139,8 @@
                     {fundShop && <FundShop toast={toast} onClose={() => setFundShop(false)} />}
                     {legalTab && <LegalModal tab={legalTab} onClose={() => setLegalTab(null)} onSupport={openSupport} />}
                     {contribOpen && <ContributeModal pack={null} toast={toast} onClose={() => setContribOpen(false)} />}
-                    <SupportDock open={supportOpen} toast={toast} returnTo={helpReturn} onOpen={(el) => { helpReturn.current = el || document.activeElement; setSupportOpen(true); }} onClose={() => setSupportOpen(false)} />
+                    <SupportDock open={supportOpen} toast={toast} returnTo={helpReturn} onOpen={(el) => { helpReturn.current = el || document.activeElement; setFeedbackOpen(false); setSupportOpen(true); }} onClose={() => setSupportOpen(false)} onFeedback={openFeedback} />
+                    {feedbackOpen && <FeedbackModal screen={screenNow} onClose={() => setFeedbackOpen(false)} />}
                     <Toasts list={toasts} />
                 </div>
             );
