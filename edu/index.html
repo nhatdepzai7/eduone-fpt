@@ -221,8 +221,14 @@
             100% { box-shadow: 0 0 0 0 rgba(231, 197, 106, 0); }
         }
         .identity-cue { animation: identity-cue 1.4s ease-out 3; }
+        @keyframes identity-cue-free {
+            0% { box-shadow: 0 0 0 0 rgba(67, 56, 202, .4); }
+            70% { box-shadow: 0 0 0 8px rgba(67, 56, 202, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(67, 56, 202, 0); }
+        }
+        .identity-cue-free { animation: identity-cue-free 1.4s ease-out 3; }
         @media (prefers-reduced-motion: reduce) {
-            .identity-cue { animation: none !important; }
+            .identity-cue, .identity-cue-free { animation: none !important; }
         }
     </style>
     <style type="text/tailwindcss">
@@ -249,7 +255,7 @@
             .label { @apply block text-xs font-semibold mb-1; color: var(--ink-2); }
             .kbd { @apply inline-flex items-center justify-center min-w-[1.5rem] h-6 px-1.5 rounded-md text-[11px] font-semibold; font-family: 'JetBrains Mono', ui-monospace, monospace; background: var(--surface-2); border: 1px solid var(--border); border-bottom-width: 2px; color: var(--ink-2); }
             .tab { @apply inline-flex items-center gap-2 px-3 min-h-[40px] rounded-xl text-sm font-medium; color: var(--ink-2); }
-            .tab[aria-selected="true"] { background: var(--ink); color: #fff; }
+            .tab[aria-selected="true"] { background: var(--primary); color: #fff; }
             .tab:hover:not([aria-selected="true"]) { background: var(--surface-2); }
         }
     </style>
@@ -492,7 +498,10 @@
             'Chinh phục IELTS': 'Tôi là người luyện tiếng Anh mỗi ngày, kể cả hôm nay.',
             'Chiến thần Học bổng / Qua môn': 'Tôi là người tiến gần mục tiêu mỗi ngày, kể cả hôm nay.'
         };
+        const OBSIDIAN_IDENTITY = 'Học giả Obsidian Kỷ luật';
         const identityLine = (name) => IDENTITY_LINES[name] || 'Tôi là người học mỗi ngày, kể cả hôm nay.';
+        const shownIdentity = (raw, obsidian) => (raw === OBSIDIAN_IDENTITY && !obsidian) ? '' : (raw || '');
+        const identityOptions = (obsidian) => IDENTITY_PRESETS.filter(name => obsidian || name !== OBSIDIAN_IDENTITY);
         const readIdentity = () => {
             const raw = Store.prefs.get('identity', '');
             if (typeof raw !== 'string') return '';
@@ -560,7 +569,7 @@
                 try { sessionStorage.setItem('edu.ringAnim', 'pending'); } catch (e) {}
                 window.dispatchEvent(new CustomEvent('edu-votes'));
                 window.dispatchEvent(new CustomEvent('edu-study-start'));
-                const name = readIdentity() || 'người học mỗi ngày';
+                const name = shownIdentity(readIdentity(), obsidianOf(E.Quota.read())) || 'người học mỗi ngày';
                 Store.identityVotes.all().then((rows) => {
                     const summary = summarize(Array.isArray(rows) ? rows : [], dayKey(new Date()));
                     const goal = summary.rank.next == null ? String(summary.total) : (summary.total + '/' + summary.rank.next);
@@ -569,13 +578,13 @@
             }).catch(() => {});
         };
         const voteTypeFor = (mode) => (mode === 'burst' ? 'quiz5' : mode === 'test' ? 'testAll' : (mode === 'flash' || mode === 'listen' ? 'flashcard' : ''));
-        const VoteRing = ({ filled, animate }) => {
+        const VoteRing = ({ filled, animate, track = '#D8C7A0', stroke = '#E7C56A' }) => {
             const radius = 7;
             const turn = 2 * Math.PI * radius;
             return (
                 <svg width="22" height="22" viewBox="0 0 22 22" aria-hidden="true" className="shrink-0">
-                    <circle cx="11" cy="11" r={radius} fill="none" stroke="#D8C7A0" strokeOpacity="0.45" strokeWidth="2" />
-                    <circle cx="11" cy="11" r={radius} fill="none" stroke="#E7C56A" strokeWidth="2.5" strokeLinecap="round"
+                    <circle cx="11" cy="11" r={radius} fill="none" stroke={track} strokeOpacity="0.45" strokeWidth="2" />
+                    <circle cx="11" cy="11" r={radius} fill="none" stroke={stroke} strokeWidth="2.5" strokeLinecap="round"
                         strokeDasharray={turn} strokeDashoffset={filled ? 0 : turn} transform="rotate(-90 11 11)"
                         style={{ transition: animate ? 'stroke-dashoffset 400ms ease' : 'none' }} />
                 </svg>
@@ -634,38 +643,41 @@
                 return undefined;
             }, [summary]);
             const pulse = habitPulse(summary);
-            const name = label || 'Chọn bản sắc';
+            const obsidian = obsidianOf(useFund());
+            const shown = shownIdentity(label, obsidian);
+            const name = shown || 'Chọn bản sắc';
             const choose = (text) => { saveIdentity(text); setOpen(false); };
             const confirmed = !!(summary && summary.confirmedToday);
             const rank = summary ? summary.rank : null;
             const goal = !rank ? '' : (rank.next == null ? (summary.total + ' phiếu') : (summary.total + '/' + rank.next));
             const openBadge = () => { setCue(false); setOpen(v => !v); };
+            const accent = obsidian ? '#E7C56A' : '#4338CA';
             return (
                 <div className="relative max-w-full" ref={box}>
-                    <button type="button" onClick={openBadge} aria-expanded={open} aria-haspopup="dialog" className={'inline-flex max-w-full cursor-pointer items-center gap-1.5 rounded-full border bg-[#161B2B] px-2.5 py-1 text-left text-[13px] font-semibold leading-snug text-[#F8F4EA] ' + (confirmed ? 'border-[#E7C56A]' : 'border-[#D8C7A0]/45') + (cue ? ' identity-cue' : '')}>
-                        <VoteRing filled={drawn && confirmed} animate={animateRing} />
+                    <button type="button" onClick={openBadge} aria-expanded={open} aria-haspopup="dialog" className={'inline-flex max-w-full cursor-pointer items-center gap-1.5 rounded-full border px-2.5 py-1 text-left text-[13px] font-semibold leading-snug ' + (obsidian ? 'bg-[#161B2B] text-[#F8F4EA] ' + (confirmed ? 'border-[#E7C56A]' : 'border-[#D8C7A0]/45') : 'bg-white text-ink ' + (confirmed ? 'border-[#4338CA]' : 'border-[#DCE0E8]')) + (cue ? (obsidian ? ' identity-cue' : ' identity-cue-free') : '')}>
+                        <VoteRing filled={drawn && confirmed} animate={animateRing} track={obsidian ? '#D8C7A0' : '#C7D2FE'} stroke={accent} />
                         {!summary ? <span>Bản sắc</span> : confirmed ? (
                             <>
-                                <Icon name="check" size={14} className="shrink-0 text-[#E7C56A]" />
+                                <Icon name="check" size={14} className={'shrink-0 ' + (obsidian ? 'text-[#E7C56A]' : 'text-[#4338CA]')} />
                                 <span>Đã bỏ phiếu hôm nay</span>
                             </>
                         ) : (
                             <>
-                                <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-[#E7C56A]" aria-hidden="true" />
+                                <span className={'h-1.5 w-1.5 shrink-0 rounded-full ' + (obsidian ? 'bg-[#E7C56A]' : 'bg-[#4338CA]')} aria-hidden="true" />
                                 <span>Còn 1 phiếu hôm nay</span>
                             </>
                         )}
                     </button>
                     {open && (
-                        <div role="dialog" aria-label="Hồ sơ bản sắc" className="absolute left-0 z-40 mt-2 w-[min(20rem,calc(100vw-2rem))] rounded-2xl border border-[#E7C56A]/50 bg-[#161B2B] p-4 text-left shadow-xl">
-                            <p className="text-[11px] font-semibold tracking-[0.14em] text-[#E7C56A]">HỒ SƠ BẢN SẮC</p>
-                            <p className="mt-2 text-base font-semibold leading-snug text-[#F8F9FC]">{name}</p>
+                        <div role="dialog" aria-label="Hồ sơ bản sắc" className={'absolute left-0 z-40 mt-2 w-[min(20rem,calc(100vw-2rem))] rounded-2xl border p-4 text-left shadow-xl ' + (obsidian ? 'border-[#E7C56A]/50 bg-[#161B2B]' : 'border-line bg-white')}>
+                            <p className={'text-[11px] font-semibold tracking-[0.14em] ' + (obsidian ? 'text-[#E7C56A]' : 'text-[#4338CA]')}>HỒ SƠ BẢN SẮC</p>
+                            <p className={'mt-2 text-base font-semibold leading-snug ' + (obsidian ? 'text-[#F8F9FC]' : 'text-ink')}>{name}</p>
                             {summary ? (
-                                <p className="mt-2 text-sm leading-6 text-[#E6E1D6]">Tổng <b className="tnum font-semibold text-[#F8F9FC]">{summary.total}</b> phiếu · chuỗi <b className="tnum font-semibold text-[#F8F9FC]">{pulse.streak}</b> ngày · cấp <b className="tnum font-semibold text-[#F8F9FC]">{rank.level}</b>{goal ? <span className="tnum"> · {goal}</span> : null}</p>
-                            ) : <p className="mt-2 text-sm text-[#E6E1D6]">Đang mở phiếu…</p>}
+                                <p className={'mt-2 text-sm leading-6 ' + (obsidian ? 'text-[#E6E1D6]' : 'text-ink2')}>Tổng <b className={'tnum font-semibold ' + (obsidian ? 'text-[#F8F9FC]' : 'text-ink')}>{summary.total}</b> phiếu · chuỗi <b className={'tnum font-semibold ' + (obsidian ? 'text-[#F8F9FC]' : 'text-ink')}>{pulse.streak}</b> ngày · cấp <b className={'tnum font-semibold ' + (obsidian ? 'text-[#F8F9FC]' : 'text-ink')}>{rank.level}</b>{goal ? <span className="tnum"> · {goal}</span> : null}</p>
+                            ) : <p className={'mt-2 text-sm ' + (obsidian ? 'text-[#E6E1D6]' : 'text-ink2')}>Đang mở phiếu…</p>}
                             <div className="mt-3 space-y-1">
-                                {IDENTITY_PRESETS.map(option => (
-                                    <button key={option} type="button" className={'block w-full rounded-xl border px-2.5 py-2 text-left text-sm transition-colors ' + (option === label ? 'border-[#E7C56A] bg-[#10141F] font-semibold text-[#F8F4EA]' : 'border-transparent text-[#E6E1D6] hover:border-[#E7C56A]/60')} onClick={() => choose(option)}>{option}</button>
+                                {identityOptions(obsidian).map(option => (
+                                    <button key={option} type="button" className={'block w-full rounded-xl border px-2.5 py-2 text-left text-sm transition-colors ' + (option === shown ? (obsidian ? 'border-[#E7C56A] bg-[#10141F] font-semibold text-[#F8F4EA]' : 'border-[#4338CA] bg-[#EEF0FF] font-semibold text-ink') : (obsidian ? 'border-transparent text-[#E6E1D6] hover:border-[#E7C56A]/60' : 'border-transparent text-ink2 hover:border-[#4338CA]'))} onClick={() => choose(option)}>{option}</button>
                                 ))}
                             </div>
                         </div>
@@ -676,9 +688,11 @@
         const IdentityToday = ({ canBurst, onBurst }) => {
             const label = useIdentity();
             const summary = useVoteSummary();
+            const obsidian = obsidianOf(useFund());
+            const shown = shownIdentity(label, obsidian);
             const [pick, setPick] = useState(false);
             const box = useRef(null);
-            const name = label || 'Chọn bản sắc';
+            const name = shown || 'Chọn bản sắc';
             const pulse = habitPulse(summary);
             const rank = summary ? summary.rank : null;
             const progress = rank ? Math.max(0, Math.min(1, rank.progress)) : 0;
@@ -703,12 +717,12 @@
                     </h2>
                     {pick && (
                         <div role="dialog" aria-label="Chọn bản sắc" className="mt-3 space-y-1">
-                            {IDENTITY_PRESETS.map(option => (
-                                <button key={option} type="button" className={'block w-full rounded-xl border px-3 py-2 text-left text-sm ' + (option === label ? 'border-[#4338CA] bg-[#EEF0FF] font-semibold text-ink' : 'border-[#DCE0E8] text-ink2 hover:border-[#4338CA]')} onClick={() => choose(option)}>{option}</button>
+                            {identityOptions(obsidian).map(option => (
+                                <button key={option} type="button" className={'block w-full rounded-xl border px-3 py-2 text-left text-sm ' + (option === shown ? 'border-[#4338CA] bg-[#EEF0FF] font-semibold text-ink' : 'border-[#DCE0E8] text-ink2 hover:border-[#4338CA]')} onClick={() => choose(option)}>{option}</button>
                             ))}
                         </div>
                     )}
-                    <p className="mt-2 text-base leading-6 text-ink2">{identityLine(label)}</p>
+                    <p className="mt-2 text-base leading-6 text-ink2">{identityLine(shown)}</p>
                     {summary && rank ? (
                         <>
                             <div className="mt-4 flex flex-wrap gap-x-4 gap-y-1 text-sm font-semibold text-ink">
