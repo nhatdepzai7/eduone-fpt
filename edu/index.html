@@ -459,11 +459,11 @@
                             <h2 id={titleId} className={'text-base font-semibold text-flow ' + (dark ? 'text-[#F8F9FC]' : '')}>{title}</h2>
                             <div className="flex items-center gap-2">
                                 {badge && <span className={dark ? 'rounded-full border border-[#D8C7A0]/60 px-2.5 py-1 text-xs font-medium text-[#D8C7A0]' : 'rounded-full bg-indigo-50 px-2.5 py-1 text-xs font-medium text-[#4338CA]'}>{badge}</span>}
-                                {onClose && (
-                                    <button type="button" data-close className="btn btn-ghost btn-icon -mr-2 -mt-1" onClick={onClose} aria-label="Đóng">
-                                        <Icon name="x" />
-                                    </button>
-                                )}
+                            {onClose && (
+                                <button type="button" data-close className="btn btn-ghost btn-icon -mr-2 -mt-1" onClick={onClose} aria-label="Đóng">
+                                    <Icon name="x" />
+                                </button>
+                            )}
                             </div>
                         </div>
                         <div className="px-5 py-4 overflow-y-auto">{children}</div>
@@ -676,15 +676,38 @@
         const IdentityToday = ({ canBurst, onBurst }) => {
             const label = useIdentity();
             const summary = useVoteSummary();
+            const [pick, setPick] = useState(false);
+            const box = useRef(null);
             const name = label || 'Chọn bản sắc';
             const pulse = habitPulse(summary);
             const rank = summary ? summary.rank : null;
             const progress = rank ? Math.max(0, Math.min(1, rank.progress)) : 0;
             const lit = summary ? summary.last7.filter(d => d.on).length : 0;
+            useEffect(() => {
+                if (!pick) return undefined;
+                const close = (e) => { if (box.current && !box.current.contains(e.target)) setPick(false); };
+                const onKey = (e) => { if (e.key === 'Escape') setPick(false); };
+                document.addEventListener('mousedown', close);
+                document.addEventListener('keydown', onKey);
+                return () => {
+                    document.removeEventListener('mousedown', close);
+                    document.removeEventListener('keydown', onKey);
+                };
+            }, [pick]);
+            const choose = (text) => { saveIdentity(text); setPick(false); };
             return (
-                <section className="card mb-4 p-4 text-left sm:p-5" aria-label="Bản sắc hôm nay">
+                <section className="card mb-4 p-4 text-left sm:p-5" aria-label="Bản sắc hôm nay" ref={box}>
                     <p className="text-xs font-semibold tracking-[0.14em] text-ink2">BẢN SẮC</p>
-                    <h2 className="mt-1 text-xl font-bold leading-tight text-ink sm:text-2xl">{name}</h2>
+                    <h2 className="mt-1">
+                        <button type="button" onClick={() => setPick(v => !v)} aria-expanded={pick} aria-haspopup="dialog" className="text-left text-xl font-bold leading-tight text-ink underline decoration-[#4338CA]/40 underline-offset-4 hover:decoration-[#4338CA] sm:text-2xl">{name}</button>
+                    </h2>
+                    {pick && (
+                        <div role="dialog" aria-label="Chọn bản sắc" className="mt-3 space-y-1">
+                            {IDENTITY_PRESETS.map(option => (
+                                <button key={option} type="button" className={'block w-full rounded-xl border px-3 py-2 text-left text-sm ' + (option === label ? 'border-[#4338CA] bg-[#EEF0FF] font-semibold text-ink' : 'border-[#DCE0E8] text-ink2 hover:border-[#4338CA]')} onClick={() => choose(option)}>{option}</button>
+                            ))}
+                        </div>
+                    )}
                     <p className="mt-2 text-base leading-6 text-ink2">{identityLine(label)}</p>
                     {summary && rank ? (
                         <>
@@ -1912,20 +1935,20 @@
             const header = (
                 <div className="drill-head">
                     <div className="drill-head-row">
-                        <div className="min-w-0">
+                    <div className="min-w-0">
                             <p className="text-[11px] font-semibold uppercase tracking-wider text-muted">{subtitle || 'Băng đạn 5 câu'}</p>
                             <h2 className="text-base font-bold text-flow truncate">{title}</h2>
-                        </div>
-                        <div className="flex flex-wrap items-center gap-2">
-                            {timerMin ? <Elapsed startedAt={s.startedAt} limitMin={timerMin} /> : null}
-                            <HighlightButton on={hl} onToggle={toggleHl} locked={!canHighlight} />
-                            {onExit && <button type="button" className="btn btn-ghost btn-sm" onClick={onExit}><Icon name="x" size={14} /> Thoát <Kbd>Esc</Kbd></button>}
-                        </div>
                     </div>
+                    <div className="flex flex-wrap items-center gap-2">
+                        {timerMin ? <Elapsed startedAt={s.startedAt} limitMin={timerMin} /> : null}
+                        <HighlightButton on={hl} onToggle={toggleHl} locked={!canHighlight} />
+                        {onExit && <button type="button" className="btn btn-ghost btn-sm" onClick={onExit}><Icon name="x" size={14} /> Thoát <Kbd>Esc</Kbd></button>}
+                    </div>
+                </div>
                     <div className="drill-progress">
                         <span className="text-xs text-ink2 tnum">
                             Băng đạn <b className="text-ink">{s.b + 1}/{s.batches.length}</b> · Đã nắm <b className={clearedN === batch.length && batch.length ? 'text-success' : 'text-ink'}>{clearedN}/{batch.length}</b>
-                        </span>
+                    </span>
                         <JackEvolveBar value={s.cleared.length} max={totalQ} />
                     </div>
                 </div>
@@ -2032,15 +2055,15 @@
             const missed = !!(fb && !fb.ok);
             return (
                 <div className="drill-stage">
-                    {header}
+                        {header}
                     <div ref={cardRef} tabIndex={-1} key={cur.id + ':' + (s.misses[cur.id] || 0)} className={'q-card' + (missed ? ' shake bad' : ' q-spring' + tone)}>
                         <div className="px-5 sm:px-8 pt-6 sm:pt-8 pb-6 sm:pb-8 flex items-start gap-3">
                             <div className="min-w-0 flex-1">
                                 <div className="flex items-center gap-2 mb-3">
-                                    <span className="chip bg-surface2 text-ink2">{cur.type === 'mcq' ? 'Trắc nghiệm' : 'Gõ từ tiếng Anh'}</span>
-                                    {s.misses[cur.id] ? <span className="chip bg-danger-soft text-danger"><Icon name="rotate" size={12} /> làm lại</span> : null}
-                                </div>
-                                <ItemPrompt t={cur} hl={hl} big />
+                                <span className="chip bg-surface2 text-ink2">{cur.type === 'mcq' ? 'Trắc nghiệm' : 'Gõ từ tiếng Anh'}</span>
+                                {s.misses[cur.id] ? <span className="chip bg-danger-soft text-danger"><Icon name="rotate" size={12} /> làm lại</span> : null}
+                            </div>
+                            <ItemPrompt t={cur} hl={hl} big />
                             </div>
                             <JackCorner wrong={missed} />
                         </div>
@@ -2051,51 +2074,51 @@
                             <p className="font-semibold pt-0.5">Chính xác</p>
                         </div>
                     )}
-                    {showAnswer && (
+                            {showAnswer && (
                         <div className="callout bad" role="alert">
                             <span className="callout-ico">✕</span>
                             <div className="min-w-0">
                                 <p className="font-semibold mb-1">Alo tổng đài cứu nét! Sai rồi, nhai lại câu này ngay!</p>
-                                <ItemAnswer t={cur} hl />
+                                    <ItemAnswer t={cur} hl />
                                 {cur.explanationOrExample && <p className="text-sm mt-1 text-flow">{cur.explanationOrExample}</p>}
+                                </div>
+                        </div>
+                    )}
+                        {cur.type === 'vocab' && (
+                            <div className="mt-4">
+                                <label htmlFor="burst-input" className="label">Gõ từ tiếng Anh — khớp là tự chấm</label>
+                                <input id="burst-input" ref={inputRef} value={input} autoComplete="off" autoCapitalize="off" spellCheck={false} disabled={!!fb}
+                                    className="field text-lg min-h-[52px]" placeholder="Gõ đáp án…"
+                                    onCompositionStart={() => { composing.current = true; }}
+                                    onCompositionEnd={(e) => { composing.current = false; if (matches(e.currentTarget.value)) answer(true); }}
+                                    onChange={(e) => {
+                                        const v = e.target.value;
+                                        setInput(v);
+                                        if (!composing.current && !(e.nativeEvent && e.nativeEvent.isComposing) && matches(v)) answer(true);
+                                    }}
+                                    onKeyDown={(e) => {
+                                        if (e.key !== 'Enter' || e.nativeEvent.isComposing || composing.current) return;
+                                        e.preventDefault();
+                                        answer(matches(input));
+                                    }} />
+                                <p className="text-xs text-muted mt-2">Bí thì nhấn <Kbd>Enter</Kbd> để xem đáp án — câu sẽ quay lại cuối băng sau 15 giây.</p>
                             </div>
-                        </div>
-                    )}
-                    {cur.type === 'vocab' && (
-                        <div className="mt-4">
-                            <label htmlFor="burst-input" className="label">Gõ từ tiếng Anh — khớp là tự chấm</label>
-                            <input id="burst-input" ref={inputRef} value={input} autoComplete="off" autoCapitalize="off" spellCheck={false} disabled={!!fb}
-                                className="field text-lg min-h-[52px]" placeholder="Gõ đáp án…"
-                                onCompositionStart={() => { composing.current = true; }}
-                                onCompositionEnd={(e) => { composing.current = false; if (matches(e.currentTarget.value)) answer(true); }}
-                                onChange={(e) => {
-                                    const v = e.target.value;
-                                    setInput(v);
-                                    if (!composing.current && !(e.nativeEvent && e.nativeEvent.isComposing) && matches(v)) answer(true);
-                                }}
-                                onKeyDown={(e) => {
-                                    if (e.key !== 'Enter' || e.nativeEvent.isComposing || composing.current) return;
-                                    e.preventDefault();
-                                    answer(matches(input));
-                                }} />
-                            <p className="text-xs text-muted mt-2">Bí thì nhấn <Kbd>Enter</Kbd> để xem đáp án — câu sẽ quay lại cuối băng sau 15 giây.</p>
-                        </div>
-                    )}
+                        )}
                     {cur.type === 'mcq' && (
                         <div className="choices safe-bottom" role="group" aria-label="Lựa chọn đáp án">
-                            {order.map((oi, di) => {
-                                const isRight = Sch.LETTERS[oi] === cur.answerOrMeaning;
-                                const chosen = fb && fb.chosen === di;
+                                {order.map((oi, di) => {
+                                    const isRight = Sch.LETTERS[oi] === cur.answerOrMeaning;
+                                    const chosen = fb && fb.chosen === di;
                                 const cls = fb ? (isRight ? 'choice right' : chosen ? 'choice wrong' : 'choice dim') : 'choice';
-                                return (
+                                    return (
                                     <button key={oi} type="button" onClick={() => pick(di)} disabled={!!fb} className={cls}>
                                         <span className="keycap">{fb && isRight ? '✓' : (chosen && !fb.ok ? '✕' : di + 1)}</span>
                                         <span className="text-flow font-medium leading-snug">
-                                            <Hl text={cur.options[oi]} keywords={fb && isRight ? cur.keywords : []} on={hl && !!fb} />
-                                        </span>
-                                    </button>
-                                );
-                            })}
+                                                <Hl text={cur.options[oi]} keywords={fb && isRight ? cur.keywords : []} on={hl && !!fb} />
+                                            </span>
+                                        </button>
+                                    );
+                                })}
                         </div>
                     )}
                 </div>
@@ -3818,10 +3841,10 @@
                     const name = Sec.cleanText(f.name, 120);
                     const label = name.replace(/\.(xlsx|xls|csv)$/i, '').replace(/[_]+/g, ' ').trim() || 'Nhóm mới';
                     if (!/\.(xlsx|xls|csv)$/i.test(name)) throw new Error('Chỉ nhận file Excel (.xlsx, .xls) hoặc CSV');
-                    if (!window.XLSX) throw new Error('Thư viện Excel chưa tải xong');
-                    const wb = XLSX.read(await Sec.readBuffer(f), { type: 'array', cellFormula: false, cellHTML: false });
-                    const rowsX = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { header: 1, raw: false, defval: '' });
-                    batches.push({ label, defaultGroup: label, items: Sch.fromExcelRows(rowsX) });
+                        if (!window.XLSX) throw new Error('Thư viện Excel chưa tải xong');
+                        const wb = XLSX.read(await Sec.readBuffer(f), { type: 'array', cellFormula: false, cellHTML: false });
+                        const rowsX = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { header: 1, raw: false, defval: '' });
+                        batches.push({ label, defaultGroup: label, items: Sch.fromExcelRows(rowsX) });
                 }
                 const total = batches.reduce((n, b) => n + b.items.length, 0);
                 Sec.guardCount(total, 0);
@@ -4192,7 +4215,7 @@
             };
             return (
                 <Modal title="Gửi đề đóng góp cho admin" onClose={onClose} footer={<><button type="button" className="btn btn-secondary" onClick={onClose}>Đóng</button><button type="button" className="btn btn-primary" disabled={busy} onClick={send}>{busy ? 'Đang gửi…' : 'Gửi đề đóng góp cho admin'}</button></>}>
-                    <div className="space-y-4 text-sm text-ink2">
+                <div className="space-y-4 text-sm text-ink2">
                         <p className="text-flow">Đề gửi vào hàng chờ. Admin duyệt thì cả lớp thấy trong Đề hệ thống. File tự tải ở Kho của tôi vẫn chỉ nằm trên máy này.</p>
                         <div className="grid sm:grid-cols-2 gap-3">
                             <label className="block text-ink"><span className="label">Tên đề</span><input value={name} onChange={(e) => setName(e.target.value)} className="field" maxLength={80} /></label>
@@ -4203,7 +4226,7 @@
                                 </select>
                             </label>
                             <label className="block text-ink"><span className="label">Mã quỹ để nhận lượt thưởng</span><input value={quotaId} onChange={(e) => setQuotaId(e.target.value.toUpperCase())} className="field uppercase" maxLength={12} /></label>
-                        </div>
+                    </div>
                         <label className="block text-ink"><span className="label">File JSON / TXT</span>
                             <input type="file" accept=".json,.txt,application/json,text/plain" className="block mt-1 text-sm" onChange={(e) => readFile(e.target.files && e.target.files[0])} />
                             {fileName && <span className="text-xs text-muted">{fileName}</span>}
@@ -4212,16 +4235,16 @@
                             <textarea value={text} onChange={(e) => setText(e.target.value)} rows={6} className="field text-xs" placeholder="Dán JSON hoặc từng câu có A. B. C. D. và Đáp án" />
                         </label>
                         <button type="button" className="btn btn-secondary btn-sm" onClick={() => downloadBlob(new Blob([JSON.stringify(contributeTemplate(pack), null, 2)], { type: 'application/json' }), 'mau-gop-de.json')}><Icon name="download" size={14} /> Tải file mẫu</button>
-                        {pack && pack.status === 'ready' && (
-                            <div className="rounded-xl border border-line p-4">
+                    {pack && pack.status === 'ready' && (
+                        <div className="rounded-xl border border-line p-4">
                                 <p className="font-semibold text-ink flex items-center gap-2"><Icon name="users" /> Chia sẻ cho bạn cùng lớp</p>
-                                <p className="mt-2 rounded-lg bg-surface2 p-3 text-flow">{inviteText(pack)}</p>
-                                <button type="button" className="btn btn-secondary btn-sm mt-3" onClick={() => copyText(inviteText(pack)).then(() => toast('Đã copy lời mời', 'success')).catch(() => toast('Trình duyệt chặn clipboard', 'error'))}><Icon name="copy" size={14} /> Copy lời mời</button>
-                            </div>
-                        )}
-                    </div>
-                </Modal>
-            );
+                            <p className="mt-2 rounded-lg bg-surface2 p-3 text-flow">{inviteText(pack)}</p>
+                            <button type="button" className="btn btn-secondary btn-sm mt-3" onClick={() => copyText(inviteText(pack)).then(() => toast('Đã copy lời mời', 'success')).catch(() => toast('Trình duyệt chặn clipboard', 'error'))}><Icon name="copy" size={14} /> Copy lời mời</button>
+                        </div>
+                    )}
+                </div>
+            </Modal>
+        );
         };
 
         const PanicDivider = ({ pack, remaining, onSave, onSkip, onCancel }) => {
@@ -5138,13 +5161,13 @@
                                 {focusMode && (
                                     <p className={'text-sm flex items-center gap-2 min-h-[32px] mb-1 ' + (obsidian ? 'text-[#C6CBD4]' : 'text-ink2')}><span className="w-2 h-2 rounded-full bg-danger pulse-rec" /> Đang trong {session.title}</p>
                                 )}
-                                <nav role="tablist" aria-label="Mục Sổ tay & Lịch học" className="flex flex-wrap gap-1">
-                                    {tabs.map(([k, ic, l]) => (
-                                        <button key={k} type="button" role="tab" aria-selected={nav.tab === k} className="tab" onClick={() => { if (k === 'library') setSession(s => (s && s.slotId ? s : null)); dispatch({ type: 'TAB', tab: k }); }}>
-                                            <Icon name={ic} size={16} /> {l}
-                                        </button>
-                                    ))}
-                                </nav>
+                                    <nav role="tablist" aria-label="Mục Sổ tay & Lịch học" className="flex flex-wrap gap-1">
+                                        {tabs.map(([k, ic, l]) => (
+                                            <button key={k} type="button" role="tab" aria-selected={nav.tab === k} className="tab" onClick={() => { if (k === 'library') setSession(s => (s && s.slotId ? s : null)); dispatch({ type: 'TAB', tab: k }); }}>
+                                                <Icon name={ic} size={16} /> {l}
+                                            </button>
+                                        ))}
+                                    </nav>
                             </div>
                         )}
                     </header>
