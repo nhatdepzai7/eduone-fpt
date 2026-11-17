@@ -473,10 +473,9 @@
         const paidVocab = (fund) => (fund && fund.history || []).some(ev => ev && ev.kind === 'buy' && ev.pack === 'vocab' && String(ev.note || '').indexOf('Admin') !== 0);
 
         const IDENTITY_PRESETS = [
-            'Người học Kỷ luật & Chủ động',
-            'Chinh phục IELTS 6.5+',
-            'Kỹ sư Chuyên ngành Thực chiến',
-            'Chiến thần Qua môn A+'
+            'Học giả Obsidian Kỷ luật',
+            'Chinh phục IELTS',
+            'Chiến thần Học bổng / Qua môn'
         ];
         const IDENTITY_VOTES = [
             'Đã ghi nhận! Thêm 1 lá phiếu khẳng định bạn là người làm chủ kiến thức.',
@@ -485,7 +484,10 @@
         ];
         const readIdentity = () => {
             const raw = Store.prefs.get('identity', '');
-            return typeof raw === 'string' ? raw : '';
+            if (typeof raw !== 'string') return '';
+            if (raw === 'Chinh phục IELTS 6.5+') { Store.prefs.set('identity', 'Chinh phục IELTS'); return 'Chinh phục IELTS'; }
+            if (raw === 'Kỹ sư AI & Tech Thực chiến' || raw === 'Kỹ sư Chuyên ngành Thực chiến') { Store.prefs.remove('identity'); return ''; }
+            return raw;
         };
         const saveIdentity = (text) => {
             const clean = Sec.cleanText(String(text || '').replace(/\s+/g, ' '), 48);
@@ -532,13 +534,27 @@
             let earlier = false;
             Object.keys(set).forEach(d => { if (d < yesterday) earlier = true; });
             const studiedToday = !!set[today];
-            return { startCue: !studiedToday, neverMiss: !studiedToday && !set[yesterday] && earlier };
+            const cursor = new Date();
+            if (!studiedToday) cursor.setDate(cursor.getDate() - 1);
+            let streak = 0;
+            if (set[Plan.dayKeyOf(cursor)]) {
+                while (set[Plan.dayKeyOf(cursor)]) {
+                    streak += 1;
+                    cursor.setDate(cursor.getDate() - 1);
+                }
+            }
+            return { studiedToday, streak, startCue: !studiedToday, neverMiss: !studiedToday && !set[yesterday] && earlier };
         };
-        const IdentityTag = ({ obsidian }) => {
+        const LivingIdentityBadge = ({ items }) => {
             const label = useIdentity();
             const [open, setOpen] = useState(false);
-            const [draft, setDraft] = useState('');
+            const [tick, setTick] = useState(0);
             const box = useRef(null);
+            useEffect(() => {
+                const sync = () => setTick(n => n + 1);
+                window.addEventListener('edu-habit', sync);
+                return () => window.removeEventListener('edu-habit', sync);
+            }, []);
             useEffect(() => {
                 if (!open) return undefined;
                 const close = (e) => { if (box.current && !box.current.contains(e.target)) setOpen(false); };
@@ -550,30 +566,36 @@
                     document.removeEventListener('keydown', onKey);
                 };
             }, [open]);
-            const choose = (text) => { saveIdentity(text); setOpen(false); setDraft(''); };
-            const face = obsidian
-                ? 'border border-[#D8C7A0]/50 bg-[#10141F] text-[#D8C7A0]'
-                : 'border border-slate-200 bg-white text-slate-600';
+            const pulse = habitPulse(items);
+            void tick;
+            const name = label || 'Chọn bản sắc';
+            const units = (items || []).filter(Sch.isFilled).length;
+            const choose = (text) => { saveIdentity(text); setOpen(false); };
             return (
-                <div className="relative inline-block max-w-full" ref={box}>
-                    <button type="button" onClick={() => { setDraft(label); setOpen(v => !v); }} aria-expanded={open} aria-haspopup="dialog" className={'inline-flex max-w-full items-center rounded-full px-2.5 py-1 text-xs font-medium ' + face}>
-                        <span className="truncate">{label || 'Chọn bản sắc mục tiêu'}</span>
+                <div className="relative max-w-full" ref={box}>
+                    <button type="button" onClick={() => setOpen(v => !v)} aria-expanded={open} aria-haspopup="dialog" className="inline-flex max-w-full cursor-pointer items-center gap-1.5 rounded-full border border-[#D8C7A0]/50 bg-[#161B2B] px-3 py-1 text-left text-[11px] font-semibold leading-snug text-[#D8C7A0] transition-all hover:border-[#D8C7A0]">
+                        {pulse.studiedToday ? (
+                            <>
+                                <Icon name="shield" size={13} className="shrink-0 text-[#D8C7A0]" />
+                                <span>{name} · Đã xác nhận hôm nay</span>
+                                <Icon name="flame" size={13} className="shrink-0 text-[#D8C7A0]" />
+                                <span className="tnum">{pulse.streak} ngày</span>
+                            </>
+                        ) : (
+                            <>
+                                <Icon name="target" size={13} className="shrink-0 animate-pulse text-[#D8C7A0]" />
+                                <span>{name} · Bỏ phiếu kỷ luật hôm nay (60s)</span>
+                            </>
+                        )}
                     </button>
                     {open && (
-                        <div role="dialog" aria-label="Bản sắc mục tiêu" className="absolute left-0 z-30 mt-2 w-72 max-w-[calc(100vw-2rem)] rounded-2xl border border-slate-200 bg-white p-3 text-left shadow-lg">
-                            <p className="text-[11px] font-semibold tracking-[0.12em] text-slate-400">BẢN SẮC MỤC TIÊU</p>
-                            <div className="mt-2 space-y-1">
-                                {IDENTITY_PRESETS.map(name => (
-                                    <button key={name} type="button" className={'block w-full rounded-xl px-2.5 py-2 text-left text-sm ' + (name === label ? 'bg-slate-100 font-semibold text-ink' : 'text-ink hover:bg-slate-50')} onClick={() => choose(name)}>{name}</button>
+                        <div role="dialog" aria-label="Hồ sơ bản sắc" className="absolute left-0 z-40 mt-2 w-80 max-w-[calc(100vw-2rem)] rounded-2xl border border-[#D8C7A0]/40 bg-[#161B2B] p-4 text-left shadow-xl">
+                            <p className="text-[11px] font-semibold tracking-[0.14em] text-[#D8C7A0]">HỒ SƠ BẢN SẮC</p>
+                            <p className="mt-2 text-sm leading-6 text-[#C6CBD4]">Bạn đã tích lũy <b className="tnum font-semibold text-[#D8C7A0]">{units}</b> đơn vị kiến thức và duy trì chuỗi <b className="tnum font-semibold text-[#F8F9FC]">{pulse.streak}</b> ngày học chủ động. Mỗi hành động nhỏ là 1 lá phiếu khẳng định con người bạn.</p>
+                            <div className="mt-3 space-y-1">
+                                {IDENTITY_PRESETS.map(option => (
+                                    <button key={option} type="button" className={'block w-full rounded-xl border px-2.5 py-2 text-left text-sm transition-all ' + (option === label ? 'border-[#D8C7A0] bg-[#10141F] font-semibold text-[#D8C7A0]' : 'border-transparent text-[#C6CBD4] hover:border-[#D8C7A0]/50')} onClick={() => choose(option)}>{option}</button>
                                 ))}
-                            </div>
-                            <label className="mt-2 block text-xs text-slate-500">
-                                Tự nhập
-                                <input value={draft} maxLength={48} onChange={(e) => setDraft(e.target.value)} className="field mt-1" placeholder="Một câu ngắn" />
-                            </label>
-                            <div className="mt-2 flex items-center gap-2">
-                                <button type="button" className="btn btn-primary btn-sm" disabled={!draft.trim()} onClick={() => choose(draft)}>Lưu</button>
-                                {label ? <button type="button" className="btn btn-ghost btn-sm" onClick={() => choose('')}>Gỡ</button> : null}
                             </div>
                         </div>
                     )}
@@ -583,7 +605,6 @@
 
         const MembershipCard = ({ fund }) => {
             const since = memberSince(fund);
-            const identity = useIdentity();
             const aiCap = fund.aiLimit || E.Quota.AI_FREE;
             const aiLeft = Math.max(0, aiCap - (fund.aiUsed || 0));
             return (
@@ -593,7 +614,6 @@
                             <p className="text-[10px] font-semibold tracking-[0.22em] text-[#D8C7A0]">OBSIDIAN</p>
                             <p className="mt-1 text-2xl font-semibold tracking-wide">PRO MEMBER</p>
                             <p className="mt-1 text-xs tracking-[0.14em] text-[#C6CBD4]">FPASS PREMIUM MEMBERSHIP</p>
-                            {identity ? <p className="mt-3 max-w-[16rem] text-sm font-medium leading-5 text-[#D8C7A0]">{identity}</p> : null}
                         </div>
                         <Icon name="gem" size={22} className="text-[#D8C7A0]" />
                     </div>
@@ -835,9 +855,8 @@
         });
         window.EDU.chargeTurn = chargeTurn;
 
-        const FundBody = ({ toast, kind, compact = false }) => {
+        const FundBody = ({ toast, kind, compact = false, items = [] }) => {
             const fund = useFund();
-            const identity = useIdentity();
             const eos = kind === 'eos';
             const [picked, setPicked] = useState(null);
             const [code, setCode] = useState(fund.code);
@@ -964,7 +983,7 @@
                                 )}
                                 <span aria-hidden="true" className="text-slate-300">•</span>
                                 <span className="font-medium">EOS: <b className="tnum text-ink">{fund.balance}</b> lượt</span>
-                                {obsidian && identity ? <span className="inline-flex max-w-[14rem] truncate rounded-full border border-[#D8C7A0]/40 bg-[#10141F] px-2.5 py-1 text-[11px] font-medium text-[#D8C7A0]" title={identity}>{identity}</span> : null}
+                                <LivingIdentityBadge items={items} />
                             </div>
                             <div className="flex shrink-0 flex-wrap items-center gap-2">
                                 <button type="button" aria-expanded={tools} onClick={() => setTools(v => !v)} className="rounded-xl bg-slate-100 px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-200">Đổi mã / Lịch sử quỹ</button>
@@ -1126,10 +1145,10 @@
                 </div>
             );
         };
-        const FundPanel = ({ toast, kind = 'vocab', compact = false }) => (
+        const FundPanel = ({ toast, kind = 'vocab', compact = false, items }) => (
             compact ? (
                 <div className="mb-4">
-                    <FundBody toast={toast} kind={kind} compact />
+                    <FundBody toast={toast} kind={kind} compact items={items} />
                 </div>
             ) : (
                 <section className="card p-4 sm:p-5 mb-4">
@@ -1220,7 +1239,7 @@
                             <p className="font-semibold text-ink">FPass là công cụ luyện tập, không phải đề thi chính thức.</p>
                             <p>Nền tảng dùng để rèn phản xạ từ vựng, làm trắc nghiệm tính giờ và xem giải thích do AI soạn. Ngân hàng câu hỏi, đề đóng góp và câu AI chỉ để ôn. Nội dung đó không phải đề, đáp án hay tài liệu chính thức của trường, của kỳ thi, hay của bất kỳ tổ chức giáo dục nào.</p>
                             <p>Trang không hỏi mật khẩu ngân hàng, số thẻ hay OTP. Bạn chuyển khoản trong ứng dụng ngân hàng của mình. Máy chủ chỉ nhận thông báo SePay gồm số tiền, nội dung và mã giao dịch để cộng lượt.</p>
-                            <p>Từ và câu bạn tự ghi nằm trên chính trình duyệt đó, trong IndexedDB. Xóa dữ liệu trang là mất phần này trên máy đó, nên hãy xuất JSON khi cần giữ bản sao. Đề chỉ lên server khi bạn chủ động bấm gửi cho admin. Lệnh AI gửi nội dung bài học tới máy chủ của FPass; khóa OpenAI không nằm trong trình duyệt.</p>
+                            <p>Từ và câu bạn tự ghi nằm trên chính trình duyệt đó, trong IndexedDB. Xóa dữ liệu trang là mất phần này trên máy đó, nên hãy tải kho về Excel khi cần giữ bản sao. Đề chỉ lên server khi bạn chủ động bấm gửi cho admin. Lệnh AI gửi nội dung bài học tới máy chủ của FPass; khóa OpenAI không nằm trong trình duyệt.</p>
                         </div>
                     )}
                 </Modal>
@@ -3557,8 +3576,6 @@
         const LibraryView = ({ items, setItems, groups, groupFilter, setGroupFilter, onPractice, onWeak, onStudyFrom, toast, mergeItems }) => {
             const [quick, setQuick] = useState(false);
             const [importBatches, setImportBatches] = useState(null);
-            const [pasteOpen, setPasteOpen] = useState(false);
-            const [shareCode, setShareCode] = useState(null);
             const [editing, setEditing] = useState(null);
             const [sel, setSel] = useState(() => new Set());
             const [bulkGroup, setBulkGroup] = useState('');
@@ -3642,6 +3659,7 @@
                         applyEnrich(await AI.enrichVocab([t]));
                     }
                     toast('AI xong: ' + t.questionOrWord.slice(0, 40), 'success');
+                    noteStudyDay();
                 } catch (e) {
                     if (e && e.code === 'ai-locked' && t.type !== 'mcq') { armTease(t.id); return; }
                     toast(e.message, 'error');
@@ -3665,14 +3683,8 @@
                     setAiAll({ done, total: need.length });
                 }
                 setAiAll(null);
+                if (done > 0) noteStudyDay();
                 toast('AI đã xử lý ' + done + ' từ', 'success');
-            };
-
-            const exportJSON = () => {
-                if (!items.length) return;
-                const data = { format: 'fpass', version: 2, exportedAt: new Date().toISOString(), items: Sec.stripSecrets(items) };
-                downloadBlob(new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' }), 'kho-hoc-' + todayIso() + '.json');
-                toast('Đã xuất ' + items.length + ' mục (không kèm API key)', 'success');
             };
 
             const exportExcel = () => {
@@ -3684,33 +3696,19 @@
                 const wb = XLSX.utils.book_new();
                 XLSX.utils.book_append_sheet(wb, ws, 'Kho học');
                 XLSX.writeFile(wb, 'kho-hoc-' + todayIso() + '.xlsx');
-                toast('Đã xuất Excel ' + items.length + ' mục', 'success');
-            };
-
-            const makeShareCode = () => {
-                if (!items.length) return;
-                const payload = { v: 2, items: Sec.stripSecrets(rows.filter(Sch.isFilled).map(Sch.toShareable)) };
-                const code = 'EDU2:' + b64EncodeUtf8(JSON.stringify(payload));
-                if (code.length > Sec.LIMITS.shareCodeChars) { toast('Kho quá lớn để tạo mã. Lọc theo nhóm rồi tạo mã.', 'error'); return; }
-                copyText(code).then(() => toast('Đã copy mã chia sẻ ' + payload.items.length + ' mục (đang lọc)', 'success')).catch(() => setShareCode(code));
+                toast('Đã tải ' + items.length + ' mục về file Excel', 'success');
             };
 
             const readFiles = async (files) => {
                 const batches = [];
                 for (const f of files) {
                     const name = Sec.cleanText(f.name, 120);
-                    const label = name.replace(/\.(json|xlsx|xls|csv)$/i, '').replace(/[_]+/g, ' ').trim() || 'Nhóm mới';
-                    if (/\.json$/i.test(name)) {
-                        const data = Sec.safeJSONParse(await Sec.readText(f));
-                        batches.push({ label, defaultGroup: label, items: Sch.itemsFromJSON(data).filter(Sch.isFilled) });
-                    } else if (/\.(xlsx|xls|csv)$/i.test(name)) {
-                        if (!window.XLSX) throw new Error('Thư viện Excel chưa tải xong');
-                        const wb = XLSX.read(await Sec.readBuffer(f), { type: 'array', cellFormula: false, cellHTML: false });
-                        const rowsX = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { header: 1, raw: false, defval: '' });
-                        batches.push({ label, defaultGroup: label, items: Sch.fromExcelRows(rowsX) });
-                    } else {
-                        throw new Error('"' + name + '" không phải JSON / Excel');
-                    }
+                    const label = name.replace(/\.(xlsx|xls|csv)$/i, '').replace(/[_]+/g, ' ').trim() || 'Nhóm mới';
+                    if (!/\.(xlsx|xls|csv)$/i.test(name)) throw new Error('Chỉ nhận file Excel (.xlsx, .xls) hoặc CSV');
+                    if (!window.XLSX) throw new Error('Thư viện Excel chưa tải xong');
+                    const wb = XLSX.read(await Sec.readBuffer(f), { type: 'array', cellFormula: false, cellHTML: false });
+                    const rowsX = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { header: 1, raw: false, defval: '' });
+                    batches.push({ label, defaultGroup: label, items: Sch.fromExcelRows(rowsX) });
                 }
                 const total = batches.reduce((n, b) => n + b.items.length, 0);
                 Sec.guardCount(total, 0);
@@ -3729,7 +3727,7 @@
                 try {
                     Sec.guardCount(incoming.length, mode === 'replace' ? 0 : items.length);
                     const space = await Sec.ensureStorage(JSON.stringify(incoming).length * 2);
-                    if (!space.ok) { toast('Bộ nhớ trình duyệt sắp đầy — hãy xuất JSON để sao lưu rồi xóa bớt.', 'error'); return; }
+                    if (!space.ok) { toast('Bộ nhớ trình duyệt sắp đầy — hãy tải kho về Excel để sao lưu rồi xóa bớt.', 'error'); return; }
                     mergeItems(incoming, mode);
                     setImportBatches(null);
                     Store.requestPersist();
@@ -3746,7 +3744,6 @@
                         <div>
                             <h1 className="text-xl font-bold">Kho của tôi</h1>
                             <p className="text-sm text-muted">{rows.length}/{items.length} mục · Từ vựng và câu hỏi chuyên ngành bạn tự ghi</p>
-                            <div className="mt-2"><IdentityTag obsidian={obsidian} /></div>
                         </div>
                         <div className="flex flex-wrap gap-2">
                             <button type="button" onClick={() => setQuick(v => !v)} aria-expanded={quick} className={'btn ' + (quick ? 'btn-primary' : 'btn-secondary')}><Icon name="clipboard" /> Dán nhanh</button>
@@ -3755,7 +3752,7 @@
                         </div>
                     </div>
 
-                    <FundPanel toast={toast} compact />
+                    <FundPanel toast={toast} compact items={items} />
 
                     {quick && <QuickPaste groups={groups} toast={toast} onLocked={() => setPaywall(true)} onAdd={(list) => confirmImport({ items: list, mode: 'append' })} />}
 
@@ -3778,23 +3775,20 @@
                         </div>
                         <div className="p-3 sm:p-4 flex flex-wrap gap-2">
                             <button type="button" onClick={() => onPractice(studyable, 'flash', Sch.groupLabel(groupFilter))} disabled={!studyable.length} className="btn btn-primary"><Icon name="layers" /> Flashcard</button>
-                            <button type="button" onClick={() => onPractice(studyable, 'burst', 'Băng đạn · ' + Sch.groupLabel(groupFilter))} disabled={!studyable.length} className="btn btn-secondary relative"><Icon name="zap" /> Băng đạn 5 câu{pulse.startCue && studyable.length ? <span className="pointer-events-none absolute right-1.5 top-1.5 h-1.5 w-1.5 rounded-full bg-[#D8C7A0] shadow-[0_0_0_3px_rgba(216,199,160,.35)]" aria-hidden="true" /> : null}</button>
+                            <button type="button" onClick={() => onPractice(studyable, 'burst', 'Băng đạn · ' + Sch.groupLabel(groupFilter))} disabled={!studyable.length} className="btn btn-secondary"><Icon name="zap" /> Băng đạn 5 câu{pulse.startCue && studyable.length ? <span className="ml-1 inline-flex items-center rounded-full bg-[#D8C7A0] px-1.5 py-0.5 text-[10px] font-semibold leading-none text-[#161B2B]">Khởi động 60s</span> : null}</button>
                             <button type="button" onClick={() => onPractice(studyable, 'test', Sch.groupLabel(groupFilter))} disabled={!studyable.length} className="btn btn-secondary"><Icon name="pen" /> Test {groupFilter === 'all' ? 'tất cả' : 'nhóm này'}</button>
                             <button type="button" onClick={onWeak} className="btn btn-secondary"><Icon name="flame" /> Ôn từ yếu ({weakCount})</button>
                             <button type="button" onClick={() => { if (!requireTurns(toast)) return; onPractice(mcqPool, 'eos', 'EOS · ' + Sch.groupLabel(groupFilter)); }} disabled={mcqPool.length < 5} className="btn btn-secondary"><Icon name="monitor" /> Thi thử EOS</button>
                         </div>
-                        {(pulse.neverMiss || (pulse.startCue && studyable.length > 0)) && (
-                            <p className="-mt-1 px-3 pb-3 text-xs leading-5 text-slate-500 sm:px-4">{pulse.neverMiss ? 'Một người kỷ luật có thể gián đoạn 1 ngày, nhưng không bao giờ bỏ lỡ 2 ngày liên tiếp. Hoàn thành 5 câu ngay để khẳng định bản lĩnh của bạn!' : 'Khởi động 60s — Giữ vững kỷ luật hôm nay'}</p>
+                        {pulse.neverMiss && (
+                            <p className="-mt-1 px-3 pb-3 text-xs leading-5 text-slate-500 sm:px-4">Một người kỷ luật có thể gián đoạn 1 ngày, nhưng không bao giờ bỏ lỡ 2 ngày liên tiếp. Hoàn thành 5 câu ngay để khẳng định bản lĩnh của bạn!</p>
                         )}
                         <div className="px-3 sm:px-4 pb-3 sm:pb-4 flex flex-wrap gap-2">
                             <button type="button" onClick={() => setPassage(true)} className={'inline-flex items-center gap-2 rounded-xl border px-3 min-h-[36px] text-sm font-medium text-[#4338CA] hover:bg-[#4338CA]/20 ' + (obsidian ? 'border-[#D8C7A0] bg-[#F8F9FC] shadow-sm' : 'border-[#4338CA]/20 bg-[#4338CA]/10')}><Icon name="sparkles" size={14} /> AI Quét bài đọc / Đề thi</button>
-                            <button type="button" onClick={() => fileRef.current && fileRef.current.click()} className="btn btn-ghost btn-sm"><Icon name="upload" size={14} /> Nhập JSON / Excel</button>
+                            <button type="button" onClick={() => fileRef.current && fileRef.current.click()} className="btn btn-ghost btn-sm" title="Đưa từ và câu hỏi từ file Excel hoặc CSV vào kho"><Icon name="upload" size={14} /> Thêm từ file Excel</button>
+                            <button type="button" onClick={exportExcel} disabled={!items.length} className="btn btn-ghost btn-sm" title="Tải toàn bộ kho đang có thành file Excel"><Icon name="sheet" size={14} /> Tải kho về Excel</button>
                             <button type="button" onClick={() => window.dispatchEvent(new CustomEvent('edu-contribute'))} className="btn btn-ghost btn-sm"><Icon name="share" size={14} /> Gửi đề cho admin</button>
-                            <input ref={fileRef} type="file" multiple accept=".json,.xlsx,.xls,.csv,application/json" className="hidden" onChange={pickFiles} />
-                            <button type="button" onClick={exportJSON} disabled={!items.length} className="btn btn-ghost btn-sm"><Icon name="file" size={14} /> Xuất JSON</button>
-                            <button type="button" onClick={exportExcel} disabled={!items.length} className="btn btn-ghost btn-sm"><Icon name="sheet" size={14} /> Xuất Excel</button>
-                            <button type="button" onClick={makeShareCode} disabled={!rows.length} className="btn btn-ghost btn-sm"><Icon name="share" size={14} /> Tạo mã chia sẻ</button>
-                            <button type="button" onClick={() => setPasteOpen(true)} className="btn btn-ghost btn-sm"><Icon name="key" size={14} /> Dán mã</button>
+                            <input ref={fileRef} type="file" multiple accept=".xlsx,.xls,.csv" className="hidden" onChange={pickFiles} />
                         </div>
                     </div>
 
@@ -3914,8 +3908,6 @@
                     </div>
 
                     {importBatches && <ImportDialog batches={importBatches} existingCount={items.length} onClose={() => setImportBatches(null)} onConfirm={confirmImport} />}
-                    {pasteOpen && <PasteCodeDialog toast={toast} onClose={() => setPasteOpen(false)} onParsed={(b) => { setPasteOpen(false); setImportBatches(b); }} />}
-                    {shareCode && <ShareCodeDialog code={shareCode} onClose={() => setShareCode(null)} />}
                     {paywall && <AiUnlockModal toast={toast} onClose={() => setPaywall(false)} />}
                     {passage && <PassageReader toast={toast} onClose={() => setPassage(false)} onSave={(list) => confirmImport({ items: list, mode: 'append' })} />}
                     {editing && <ItemEditor item={editing} groups={groups} aiBusy={aiRow === editing.id}
