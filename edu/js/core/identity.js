@@ -1,4 +1,4 @@
-import { MIN_ANSWERS, RANK_THRESHOLDS, VOTE_TYPES } from './identity-config.js';
+import { DEFAULT_IDENTITY_LINE, IDENTITIES, MIN_ANSWERS, OBSIDIAN_IDENTITY, RANK_THRESHOLDS, VOTE_TYPES } from './identity-config.js';
 
 const DAY = /^\d{4}-\d{2}-\d{2}$/;
 const MAX_WALK = 3660;
@@ -30,6 +30,11 @@ export function shiftDay(key, delta) {
 
 export function isVoteType(type) {
     return VOTE_TYPES.indexOf(type) >= 0;
+}
+
+export function identityLine(name) {
+    const found = IDENTITIES.find((item) => item && item.name === name);
+    return found ? found.line : DEFAULT_IDENTITY_LINE;
 }
 
 export function meetsAnswerThreshold(count) {
@@ -158,6 +163,9 @@ const api = {
     RANK_THRESHOLDS: RANK_THRESHOLDS,
     VOTE_TYPES: VOTE_TYPES,
     MIN_ANSWERS: MIN_ANSWERS,
+    IDENTITIES: IDENTITIES,
+    OBSIDIAN_IDENTITY: OBSIDIAN_IDENTITY,
+    identityLine: identityLine,
     dayKey: dayKey,
     shiftDay: shiftDay,
     isVoteType: isVoteType,
@@ -171,7 +179,7 @@ const api = {
     summarize: summarize
 };
 
-export { MIN_ANSWERS, RANK_THRESHOLDS, VOTE_TYPES };
+export { DEFAULT_IDENTITY_LINE, IDENTITIES, MIN_ANSWERS, OBSIDIAN_IDENTITY, RANK_THRESHOLDS, VOTE_TYPES };
 
 if (typeof window !== 'undefined') {
     const root = window.EDU = window.EDU || {};

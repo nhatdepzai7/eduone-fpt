@@ -1,9 +1,12 @@
 import {
+    IDENTITIES,
     MIN_ANSWERS,
+    OBSIDIAN_IDENTITY,
     RANK_THRESHOLDS,
     VOTE_TYPES,
     dayKey,
     hasSession,
+    identityLine,
     meetsAnswerThreshold,
     planVote,
     rankOf,
@@ -22,6 +25,11 @@ function vote(date, sessionId) {
 }
 
 check('Ngưỡng cấp bậc là 0, 10, 30, 100, 300', RANK_THRESHOLDS.join() === '0,10,30,100,300');
+check('Câu IELTS lấy từ cấu hình', identityLine('Chinh phục IELTS') === 'Tôi là người luyện IELTS mỗi ngày, kể cả hôm nay.');
+check('Câu học bổng lấy từ cấu hình', identityLine('Chiến thần Học bổng / Qua môn') === 'Tôi là người ôn bài đều đặn, kể cả hôm nay.');
+check('Câu Obsidian lấy từ cấu hình', identityLine(OBSIDIAN_IDENTITY) === 'Tôi là người học mỗi ngày, kể cả hôm nay.');
+check('Bản Obsidian đứng cuối và là PRO', IDENTITIES.length === 3 && IDENTITIES[2].name === OBSIDIAN_IDENTITY && IDENTITIES[2].pro === true && IDENTITIES[0].pro === false);
+check('Phiếu không ghi bản sắc', planVote({ sessionId: 's-line', type: 'flashcard', answered: 5 }, new Date(2026, 10, 17, 12)).identity === undefined);
 check('Có sẵn loại eosMock', VOTE_TYPES.indexOf('eosMock') >= 0);
 check('Ngưỡng trả lời là 5', MIN_ANSWERS === 5 && meetsAnswerThreshold(5) && !meetsAnswerThreshold(4));
 
