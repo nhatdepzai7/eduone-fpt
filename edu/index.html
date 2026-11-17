@@ -472,8 +472,118 @@
         const memberDay = (t) => t ? new Date(t).toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' }) : '';
         const paidVocab = (fund) => (fund && fund.history || []).some(ev => ev && ev.kind === 'buy' && ev.pack === 'vocab' && String(ev.note || '').indexOf('Admin') !== 0);
 
+        const IDENTITY_PRESETS = [
+            'Người học Kỷ luật & Chủ động',
+            'Chinh phục IELTS 6.5+',
+            'Kỹ sư Chuyên ngành Thực chiến',
+            'Chiến thần Qua môn A+'
+        ];
+        const IDENTITY_VOTES = [
+            'Đã ghi nhận! Thêm 1 lá phiếu khẳng định bạn là người làm chủ kiến thức.',
+            'Hoàn thành xuất sắc. Kỷ luật mỗi ngày đang tạo nên sự khác biệt của một Obsidian Member.',
+            '1% tốt hơn mỗi ngày — Kho tài sản tri thức của bạn vừa được nâng cấp.'
+        ];
+        const readIdentity = () => {
+            const raw = Store.prefs.get('identity', '');
+            return typeof raw === 'string' ? raw : '';
+        };
+        const saveIdentity = (text) => {
+            const clean = Sec.cleanText(String(text || '').replace(/\s+/g, ' '), 48);
+            if (clean) Store.prefs.set('identity', clean);
+            else Store.prefs.remove('identity');
+            window.dispatchEvent(new CustomEvent('edu-identity'));
+        };
+        const useIdentity = () => {
+            const [label, setLabel] = useState(readIdentity);
+            useEffect(() => {
+                const sync = () => setLabel(readIdentity());
+                window.addEventListener('edu-identity', sync);
+                return () => window.removeEventListener('edu-identity', sync);
+            }, []);
+            return label;
+        };
+        const readHabitDays = () => {
+            const raw = Store.prefs.get('habitDays', []);
+            return Array.isArray(raw) ? raw.filter(d => typeof d === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(d)) : [];
+        };
+        const noteStudyDay = () => {
+            const today = Plan.dayKeyOf(new Date());
+            const days = readHabitDays();
+            if (days.indexOf(today) < 0) Store.prefs.set('habitDays', days.concat(today).slice(-400));
+            window.dispatchEvent(new CustomEvent('edu-habit'));
+        };
+        const identityVote = () => IDENTITY_VOTES[Math.floor(Math.random() * IDENTITY_VOTES.length)];
+        const affirmStudy = (toast) => {
+            noteStudyDay();
+            if (toast) toast(identityVote(), 'success', 4800);
+        };
+        const habitPulse = (items) => {
+            const set = {};
+            readHabitDays().forEach(d => { set[d] = true; });
+            (items || []).forEach(t => {
+                if (!t || !t.lastReview) return;
+                const at = new Date(t.lastReview);
+                if (!isNaN(at.getTime())) set[Plan.dayKeyOf(at)] = true;
+            });
+            const today = Plan.dayKeyOf(new Date());
+            const yest = new Date();
+            yest.setDate(yest.getDate() - 1);
+            const yesterday = Plan.dayKeyOf(yest);
+            let earlier = false;
+            Object.keys(set).forEach(d => { if (d < yesterday) earlier = true; });
+            const studiedToday = !!set[today];
+            return { startCue: !studiedToday, neverMiss: !studiedToday && !set[yesterday] && earlier };
+        };
+        const IdentityTag = ({ obsidian }) => {
+            const label = useIdentity();
+            const [open, setOpen] = useState(false);
+            const [draft, setDraft] = useState('');
+            const box = useRef(null);
+            useEffect(() => {
+                if (!open) return undefined;
+                const close = (e) => { if (box.current && !box.current.contains(e.target)) setOpen(false); };
+                const onKey = (e) => { if (e.key === 'Escape') setOpen(false); };
+                document.addEventListener('mousedown', close);
+                document.addEventListener('keydown', onKey);
+                return () => {
+                    document.removeEventListener('mousedown', close);
+                    document.removeEventListener('keydown', onKey);
+                };
+            }, [open]);
+            const choose = (text) => { saveIdentity(text); setOpen(false); setDraft(''); };
+            const face = obsidian
+                ? 'border border-[#D8C7A0]/50 bg-[#10141F] text-[#D8C7A0]'
+                : 'border border-slate-200 bg-white text-slate-600';
+            return (
+                <div className="relative inline-block max-w-full" ref={box}>
+                    <button type="button" onClick={() => { setDraft(label); setOpen(v => !v); }} aria-expanded={open} aria-haspopup="dialog" className={'inline-flex max-w-full items-center rounded-full px-2.5 py-1 text-xs font-medium ' + face}>
+                        <span className="truncate">{label || 'Chọn bản sắc mục tiêu'}</span>
+                    </button>
+                    {open && (
+                        <div role="dialog" aria-label="Bản sắc mục tiêu" className="absolute left-0 z-30 mt-2 w-72 max-w-[calc(100vw-2rem)] rounded-2xl border border-slate-200 bg-white p-3 text-left shadow-lg">
+                            <p className="text-[11px] font-semibold tracking-[0.12em] text-slate-400">BẢN SẮC MỤC TIÊU</p>
+                            <div className="mt-2 space-y-1">
+                                {IDENTITY_PRESETS.map(name => (
+                                    <button key={name} type="button" className={'block w-full rounded-xl px-2.5 py-2 text-left text-sm ' + (name === label ? 'bg-slate-100 font-semibold text-ink' : 'text-ink hover:bg-slate-50')} onClick={() => choose(name)}>{name}</button>
+                                ))}
+                            </div>
+                            <label className="mt-2 block text-xs text-slate-500">
+                                Tự nhập
+                                <input value={draft} maxLength={48} onChange={(e) => setDraft(e.target.value)} className="field mt-1" placeholder="Một câu ngắn" />
+                            </label>
+                            <div className="mt-2 flex items-center gap-2">
+                                <button type="button" className="btn btn-primary btn-sm" disabled={!draft.trim()} onClick={() => choose(draft)}>Lưu</button>
+                                {label ? <button type="button" className="btn btn-ghost btn-sm" onClick={() => choose('')}>Gỡ</button> : null}
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        };
+
         const MembershipCard = ({ fund }) => {
             const since = memberSince(fund);
+            const identity = useIdentity();
             const aiCap = fund.aiLimit || E.Quota.AI_FREE;
             const aiLeft = Math.max(0, aiCap - (fund.aiUsed || 0));
             return (
@@ -483,6 +593,7 @@
                             <p className="text-[10px] font-semibold tracking-[0.22em] text-[#D8C7A0]">OBSIDIAN</p>
                             <p className="mt-1 text-2xl font-semibold tracking-wide">PRO MEMBER</p>
                             <p className="mt-1 text-xs tracking-[0.14em] text-[#C6CBD4]">FPASS PREMIUM MEMBERSHIP</p>
+                            {identity ? <p className="mt-3 max-w-[16rem] text-sm font-medium leading-5 text-[#D8C7A0]">{identity}</p> : null}
                         </div>
                         <Icon name="gem" size={22} className="text-[#D8C7A0]" />
                     </div>
@@ -497,7 +608,7 @@
             );
         };
 
-        const MembershipDesk = ({ fund, onClose }) => {
+        const MembershipDesk = ({ fund, onClose, units = 0, reviews = 0 }) => {
             const since = memberSince(fund);
             const aiCap = fund.aiLimit || E.Quota.AI_FREE;
             const aiUsed = fund.aiUsed || 0;
@@ -517,6 +628,7 @@
             return (
                 <Modal title="My Membership" onClose={onClose} size="lg" badge="Obsidian" tone="obsidian">
                     <MembershipCard fund={fund} />
+                    <p className="mt-3 text-sm leading-6 text-[#C6CBD4]">Hồ sơ kỷ luật: Đã tích lũy <b className="tnum font-semibold text-[#D8C7A0]">{units}</b> đơn vị kiến thức • <b className="tnum font-semibold text-[#F8F9FC]">{reviews}</b> lần ôn tập • Duy trì thói quen học tập chủ động.</p>
                     <div className="mt-4 grid gap-3 sm:grid-cols-2">
                         <div className="min-w-0 rounded-2xl border border-[#D8C7A0]/25 bg-[#202637] p-4">
                             <p className="text-[11px] font-semibold tracking-[0.14em] text-[#D8C7A0]">GÓI ĐANG GIỮ</p>
@@ -725,6 +837,7 @@
 
         const FundBody = ({ toast, kind, compact = false }) => {
             const fund = useFund();
+            const identity = useIdentity();
             const eos = kind === 'eos';
             const [picked, setPicked] = useState(null);
             const [code, setCode] = useState(fund.code);
@@ -851,6 +964,7 @@
                                 )}
                                 <span aria-hidden="true" className="text-slate-300">•</span>
                                 <span className="font-medium">EOS: <b className="tnum text-ink">{fund.balance}</b> lượt</span>
+                                {obsidian && identity ? <span className="inline-flex max-w-[14rem] truncate rounded-full border border-[#D8C7A0]/40 bg-[#10141F] px-2.5 py-1 text-[11px] font-medium text-[#D8C7A0]" title={identity}>{identity}</span> : null}
                             </div>
                             <div className="flex shrink-0 flex-wrap items-center gap-2">
                                 <button type="button" aria-expanded={tools} onClick={() => setTools(v => !v)} className="rounded-xl bg-slate-100 px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-200">Đổi mã / Lịch sử quỹ</button>
@@ -1591,6 +1705,7 @@
             useEffect(() => {
                 if (s.phase === 'done' && !finished.current) {
                     finished.current = true;
+                    affirmStudy(toast);
                     if (onFinish) onFinish(Burst.stats(s));
                 }
             }, [s.phase]);
@@ -1875,6 +1990,7 @@
             const [preparing, setPreparing] = useState(false);
             const [hl, setHl] = useState(false);
             const recRef = useRef(null);
+            const voted = useRef(false);
             const inputRef = useRef(null);
             const cardRef = useRef(null);
             const composing = useRef(false);
@@ -1893,6 +2009,11 @@
                 const el = mode !== 'flash' && !isMcq ? inputRef.current : cardRef.current;
                 if (el) el.focus();
             }, [index, mode, isMcq]);
+            useEffect(() => {
+                if (!done || voted.current) return;
+                voted.current = true;
+                affirmStudy(toast);
+            }, [done]);
 
             useEffect(() => {
                 const need = ids.map(id => byId.get(id)).filter(x => x && x.type === 'vocab' && x.questionOrWord && !x.recallPrompt).slice(0, 40);
@@ -3253,6 +3374,7 @@
                         toast('AI chưa tách được từ nào trong đoạn này.', 'info');
                         return;
                     }
+                    affirmStudy(toast);
                     setSentences(lines);
                     setWords(result.words.map((w, i) => ({
                         id: 'p' + i,
@@ -3448,6 +3570,7 @@
             const [tease, setTease] = useState(null);
             const [paywall, setPaywall] = useState(false);
             const [passage, setPassage] = useState(false);
+            const [habitTick, setHabitTick] = useState(0);
             const fund = useFund();
             const obsidian = obsidianOf(fund);
             const teaseTimer = useRef(0);
@@ -3461,6 +3584,14 @@
                 return () => { window.removeEventListener('mouseup', up); window.clearTimeout(teaseTimer.current); };
             }, []);
             useEffect(() => { setSel(new Set()); setShown(150); }, [groupFilter, typeFilter, search]);
+            useEffect(() => {
+                const sync = () => setHabitTick(n => n + 1);
+                window.addEventListener('edu-habit', sync);
+                return () => window.removeEventListener('edu-habit', sync);
+            }, []);
+
+            const pulse = habitPulse(items);
+            void habitTick;
 
             const q = search.trim().toLowerCase();
             const rows = items.filter(t => Sch.inGroup(t, groupFilter) && (typeFilter === 'all' || t.type === typeFilter) &&
@@ -3615,6 +3746,7 @@
                         <div>
                             <h1 className="text-xl font-bold">Kho của tôi</h1>
                             <p className="text-sm text-muted">{rows.length}/{items.length} mục · Từ vựng và câu hỏi chuyên ngành bạn tự ghi</p>
+                            <div className="mt-2"><IdentityTag obsidian={obsidian} /></div>
                         </div>
                         <div className="flex flex-wrap gap-2">
                             <button type="button" onClick={() => setQuick(v => !v)} aria-expanded={quick} className={'btn ' + (quick ? 'btn-primary' : 'btn-secondary')}><Icon name="clipboard" /> Dán nhanh</button>
@@ -3646,11 +3778,14 @@
                         </div>
                         <div className="p-3 sm:p-4 flex flex-wrap gap-2">
                             <button type="button" onClick={() => onPractice(studyable, 'flash', Sch.groupLabel(groupFilter))} disabled={!studyable.length} className="btn btn-primary"><Icon name="layers" /> Flashcard</button>
-                            <button type="button" onClick={() => onPractice(studyable, 'burst', 'Băng đạn · ' + Sch.groupLabel(groupFilter))} disabled={!studyable.length} className="btn btn-secondary"><Icon name="zap" /> Băng đạn 5 câu</button>
+                            <button type="button" onClick={() => onPractice(studyable, 'burst', 'Băng đạn · ' + Sch.groupLabel(groupFilter))} disabled={!studyable.length} className="btn btn-secondary relative"><Icon name="zap" /> Băng đạn 5 câu{pulse.startCue && studyable.length ? <span className="pointer-events-none absolute right-1.5 top-1.5 h-1.5 w-1.5 rounded-full bg-[#D8C7A0] shadow-[0_0_0_3px_rgba(216,199,160,.35)]" aria-hidden="true" /> : null}</button>
                             <button type="button" onClick={() => onPractice(studyable, 'test', Sch.groupLabel(groupFilter))} disabled={!studyable.length} className="btn btn-secondary"><Icon name="pen" /> Test {groupFilter === 'all' ? 'tất cả' : 'nhóm này'}</button>
                             <button type="button" onClick={onWeak} className="btn btn-secondary"><Icon name="flame" /> Ôn từ yếu ({weakCount})</button>
                             <button type="button" onClick={() => { if (!requireTurns(toast)) return; onPractice(mcqPool, 'eos', 'EOS · ' + Sch.groupLabel(groupFilter)); }} disabled={mcqPool.length < 5} className="btn btn-secondary"><Icon name="monitor" /> Thi thử EOS</button>
                         </div>
+                        {(pulse.neverMiss || (pulse.startCue && studyable.length > 0)) && (
+                            <p className="-mt-1 px-3 pb-3 text-xs leading-5 text-slate-500 sm:px-4">{pulse.neverMiss ? 'Một người kỷ luật có thể gián đoạn 1 ngày, nhưng không bao giờ bỏ lỡ 2 ngày liên tiếp. Hoàn thành 5 câu ngay để khẳng định bản lĩnh của bạn!' : 'Khởi động 60s — Giữ vững kỷ luật hôm nay'}</p>
+                        )}
                         <div className="px-3 sm:px-4 pb-3 sm:pb-4 flex flex-wrap gap-2">
                             <button type="button" onClick={() => setPassage(true)} className={'inline-flex items-center gap-2 rounded-xl border px-3 min-h-[36px] text-sm font-medium text-[#4338CA] hover:bg-[#4338CA]/20 ' + (obsidian ? 'border-[#D8C7A0] bg-[#F8F9FC] shadow-sm' : 'border-[#4338CA]/20 bg-[#4338CA]/10')}><Icon name="sparkles" size={14} /> AI Quét bài đọc / Đề thi</button>
                             <button type="button" onClick={() => fileRef.current && fileRef.current.click()} className="btn btn-ghost btn-sm"><Icon name="upload" size={14} /> Nhập JSON / Excel</button>
@@ -4958,7 +5093,7 @@
                     {contribOpen && <ContributeModal pack={null} toast={toast} onClose={() => setContribOpen(false)} />}
                     <SupportDock open={supportOpen} toast={toast} returnTo={helpReturn} onOpen={(el) => { helpReturn.current = el || document.activeElement; setFeedbackOpen(false); setSupportOpen(true); }} onClose={() => setSupportOpen(false)} onFeedback={openFeedback} />
                     {feedbackOpen && <FeedbackModal screen={screenNow} onClose={() => setFeedbackOpen(false)} />}
-                    {memberOpen && obsidian && <MembershipDesk fund={fund} onClose={() => setMemberOpen(false)} />}
+                    {memberOpen && obsidian && <MembershipDesk fund={fund} units={items.filter(Sch.isFilled).length} reviews={items.reduce((n, t) => n + (t.reviewCount || 0), 0)} onClose={() => setMemberOpen(false)} />}
                     {welcome && obsidian && (
                         <ObsidianWelcome fund={fund} onSkip={() => setWelcome(false)} onExplore={() => { setWelcome(false); setMemberOpen(true); }} />
                     )}
