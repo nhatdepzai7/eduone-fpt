@@ -1,4 +1,4 @@
-import { handleExams, handleLogin, handleQuotas, handleVisits } from '../server/admin-routes.js';
+import { handleExams, handleGiftcodes, handleLogin, handleQuotas, handleVisits } from '../server/admin-routes.js';
 import { json, mount } from '../server/http.js';
 
 function actionOf(req) {
@@ -16,6 +16,7 @@ async function handle(req, env) {
     if (action === 'quotas') return handleQuotas(req, env);
     if (action === 'exams') return handleExams(req, env);
     if (action === 'visits') return handleVisits(req, env);
+    if (action === 'giftcodes') return handleGiftcodes(req, env);
     return json(404, { error: 'Không có route này.' });
 }
 

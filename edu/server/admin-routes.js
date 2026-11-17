@@ -1,3 +1,4 @@
+import { createGift, listGifts, toggleGift } from './account.js';
 import { bearer, loginAdmin, logoutAdmin, requireAdmin } from './admin-auth.js';
 import { deleteOfficial, listOfficial, listPending, publishPending, rejectPending, saveOfficial, takePending } from './exams-store.js';
 import { clientIp, fail, json, mount, sameOrigin } from './http.js';
@@ -128,6 +129,23 @@ export async function handleVisits(req, env) {
         return json(405, { error: 'Chỉ nhận GET hoặc POST.' });
     } catch (e) {
         return fail(e, 'visits');
+    }
+}
+
+export async function handleGiftcodes(req, env) {
+    try {
+        const token = await requireAdmin(req, env);
+        if (!token) return json(401, { error: 'Cần đăng nhập quản trị.' });
+        if (req.method === 'GET') return json(200, { gifts: await listGifts(env) });
+        if (req.method !== 'POST') return json(405, { error: 'Chỉ nhận GET hoặc POST.' });
+        const body = await req.json(8000);
+        const op = body && body.op;
+        if (op === 'toggle') return json(200, await toggleGift(env, body));
+        if (op === 'create') return json(200, await createGift(env, body));
+        return json(400, { error: 'Thiếu thao tác.' });
+    } catch (e) {
+        if (e && (e.code === 'exists' || e.code === 'bad-gift' || e.code === 'missing-gift')) return json(400, { error: e.message });
+        return fail(e, 'admin-gifts');
     }
 }
 

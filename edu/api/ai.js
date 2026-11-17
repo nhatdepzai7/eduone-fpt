@@ -356,9 +356,14 @@ async function handleRequest(incoming, env) {
             }, extra);
         }
         passagePreview = !!aiGate.preview;
-        chargedCode = code;
-        heldPassage = true;
-        passagePrev = aiGate.prev;
+        if (aiGate.pro) {
+            chargedCode = '';
+            heldPassage = false;
+        } else {
+            chargedCode = code;
+            heldPassage = true;
+            passagePrev = aiGate.prev;
+        }
     } else if (fillTask) {
         const code = fundCode(body.code);
         if (!code) return json(400, { error: 'Thiếu mã quỹ.' }, extra);

@@ -69,7 +69,8 @@
             aiCredits: Math.max(0, Math.floor(Number(raw.aiCredits)) || 0),
             aiLimit: Math.max(AI_FREE, Math.floor(Number(raw.aiLimit)) || AI_FREE),
             scans: Math.max(0, Math.floor(Number(raw.scans)) || 0),
-            scanGrant: Math.max(0, Math.floor(Number(raw.scanGrant)) || 0)
+            scanGrant: Math.max(0, Math.floor(Number(raw.scanGrant)) || 0),
+            proUntil: raw.proUntil === -1 ? -1 : Math.max(0, Math.floor(Number(raw.proUntil)) || 0)
         };
         const history = [];
         const seen = new Set();
@@ -196,6 +197,10 @@
             const n = Number(info[key]);
             if (Number.isFinite(n)) fund[key] = Math.max(0, Math.floor(n));
         });
+        if (info.proUntil != null && info.proUntil !== '') {
+            const until = Number(info.proUntil);
+            fund.proUntil = until === -1 ? -1 : (Number.isFinite(until) ? Math.max(0, Math.floor(until)) : 0);
+        }
         const snap = save(fund);
         return { code: snap.code, aiUsed: snap.aiUsed, aiUnlocked: snap.aiUnlocked, aiCredits: snap.aiCredits || 0, aiJustUnlocked: snap.aiUnlocked && !before, aiJustFunded: (snap.aiCredits || 0) > beforeCredits };
     };
@@ -261,7 +266,8 @@
                 aiCredits: data.aiCredits,
                 aiLimit: data.aiLimit,
                 scans: data.scans,
-                scanGrant: data.scanGrant
+                scanGrant: data.scanGrant,
+                proUntil: data.proUntil
             });
         }
         if (Array.isArray(data.purchases)) return applyPurchases(data.purchases);
@@ -372,7 +378,9 @@
         noteAi,
         aiFillAllowed: () => {
             const fund = load();
-            return !!fund.aiUnlocked || (fund.aiUsed || 0) < AI_FREE;
+            const until = Number(fund.proUntil);
+            const pro = until === -1 || until > Date.now();
+            return pro || !!fund.aiUnlocked || (fund.aiUsed || 0) < AI_FREE;
         },
         exportCode: () => encode(load()),
         importCode,

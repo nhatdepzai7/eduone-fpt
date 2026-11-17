@@ -3,6 +3,7 @@
  * POST /api/fund — trừ 1 lượt trên server, mọi trình duyệt cùng mã thấy cùng số.
  */
 
+import { authConfig, currentAccount, loginGoogle, redeemGift } from '../server/account.js';
 import { fundState, spendTurn } from '../server/ledger.js';
 
 function json(status, obj, extra) {
@@ -23,13 +24,31 @@ function sameOrigin(req) {
     }
 }
 
-function parseBody(raw) {
-    if (typeof Buffer !== 'undefined' && Buffer.isBuffer(raw)) return parseBody(raw.toString('utf8'));
+function bodyLimit(url) {
+    return /(?:\?|&)action=login(?:&|$)/.test(String(url || '')) ? 500000 : 4000;
+}
+
+function parseBody(raw, limit) {
+    const cap = limit || 4000;
+    if (typeof Buffer !== 'undefined' && Buffer.isBuffer(raw)) return parseBody(raw.toString('utf8'), cap);
     if (raw && typeof raw === 'object') return raw;
     if (typeof raw !== 'string' || !raw) return {};
-    if (raw.length > 4000) return null;
+    if (raw.length > cap) return null;
     try { return JSON.parse(raw); }
     catch (e) { return null; }
+}
+
+function accountError(e, extra) {
+    const code = e && e.code;
+    if (code === 'no-google') return json(503, { error: e.message, code }, extra);
+    if (code === 'bad-token' || code === 'auth') return json(401, { error: e.message, code }, extra);
+    if (code === 'too-big') return json(413, { error: e.message, code }, extra);
+    if (code === 'missing-gift' || code === 'bad-gift' || code === 'inactive-gift' || code === 'full-gift' || code === 'used-gift' || code === 'bad-code') {
+        return json(400, { error: e.message, code }, extra);
+    }
+    if (code === 'missing-redis' || code === 'redis') return json(503, { error: 'Máy chủ chưa nối Redis.', code }, extra);
+    console.error('[account]', code || 'error');
+    return json(500, { error: 'Không thực hiện được.' }, extra);
 }
 
 async function handleRequest(req, env, body) {
@@ -38,13 +57,33 @@ async function handleRequest(req, env, body) {
     if (origin && sameOrigin(req)) {
         extra['Access-Control-Allow-Origin'] = origin;
         extra.Vary = 'Origin';
-        extra['Access-Control-Allow-Headers'] = 'Content-Type, Accept';
+        extra['Access-Control-Allow-Headers'] = 'Content-Type, Accept, Authorization';
         extra['Access-Control-Allow-Methods'] = 'GET, POST, OPTIONS';
     }
     if (req.method === 'OPTIONS') return new Response(null, { status: 204, headers: extra });
     if (req.method !== 'GET' && req.method !== 'POST') return json(405, { error: 'Chỉ nhận GET hoặc POST.' }, Object.assign({ Allow: 'GET, POST, OPTIONS' }, extra));
     const fromPage = sameOrigin(req) || req.header('sec-fetch-site') === 'same-origin';
     if (!fromPage) return json(403, { error: 'Chỉ dùng quỹ từ chính trang này.' }, extra);
+
+    const queryText = (req.url || '').indexOf('?') >= 0 ? (req.url || '').slice((req.url || '').indexOf('?') + 1) : '';
+    const action = new URLSearchParams(queryText).get('action') || '';
+    if (action === 'config' || action === 'login' || action === 'me' || action === 'redeem') {
+        try {
+            if (action === 'config' && req.method === 'GET') return json(200, authConfig(env), extra);
+            if (action === 'me' && req.method === 'GET') return json(200, await currentAccount(env, req), extra);
+            if (action === 'login' && req.method === 'POST') {
+                if (!body) return json(413, { error: 'Kho từ quá lớn để đồng bộ.' }, extra);
+                return json(200, await loginGoogle(env, body), extra);
+            }
+            if (action === 'redeem' && req.method === 'POST') {
+                if (!body) return json(400, { error: 'Thiếu nội dung yêu cầu.' }, extra);
+                return json(200, await redeemGift(env, req, body), extra);
+            }
+            return json(405, { error: 'Sai phương thức.' }, extra);
+        } catch (e) {
+            return accountError(e, extra);
+        }
+    }
 
     if (req.method === 'POST') {
         if (!body || typeof body !== 'object') return json(400, { error: 'Thiếu nội dung yêu cầu.' }, extra);
@@ -79,7 +118,8 @@ async function handleRequest(req, env, body) {
             aiLimit: state.aiLimit,
             aiCredits: state.aiCredits,
             scans: state.scans,
-            scanGrant: state.scanGrant
+            scanGrant: state.scanGrant,
+            proUntil: state.proUntil || 0
         }, extra);
     } catch (e) {
         console.error('[fund] chưa đọc được sổ', e && e.code ? e.code : 'error');
@@ -99,17 +139,19 @@ function adapt(incoming) {
 
 export async function onRequest(context) {
     const request = context.request;
-    const body = request.method === 'POST' ? parseBody(await request.text()) : null;
+    const raw = request.method === 'POST' ? await request.text() : '';
+    const body = request.method === 'POST' ? parseBody(raw, bodyLimit(request.url)) : null;
     return handleRequest(adapt(request), context.env || {}, body);
 }
 
 async function readBody(req) {
-    if (req.body && typeof req.body === 'object') return req.body;
-    if (typeof req.body === 'string') return parseBody(req.body);
+    const cap = bodyLimit(req.url);
+    if (req.body && typeof req.body === 'object' && !Buffer.isBuffer(req.body)) return req.body;
+    if (typeof req.body === 'string') return parseBody(req.body, cap);
     return new Promise((resolve) => {
         const chunks = [];
         req.on('data', (chunk) => chunks.push(chunk));
-        req.on('end', () => resolve(parseBody(Buffer.concat(chunks).toString('utf8'))));
+        req.on('end', () => resolve(parseBody(Buffer.concat(chunks).toString('utf8'), cap)));
         req.on('error', () => resolve(null));
     });
 }

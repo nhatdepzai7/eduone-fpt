@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <!-- Proxy AI chạy trên domain riêng thì thêm domain đó vào connect-src. -->
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' file: 'unsafe-inline' 'unsafe-eval' https://unpkg.com https://cdn.tailwindcss.com https://cdn.sheetjs.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' file: data: blob: https://img.vietqr.io; media-src 'self' blob:; worker-src blob:; connect-src 'self' https://*.workers.dev https://*.vercel.app https://*.netlify.app https://*.supabase.co http://localhost:* http://127.0.0.1:*; object-src 'none'; base-uri 'none'; form-action 'none'">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' file: 'unsafe-inline' 'unsafe-eval' https://unpkg.com https://cdn.tailwindcss.com https://cdn.sheetjs.com https://accounts.google.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com; font-src https://fonts.gstatic.com; img-src 'self' file: data: blob: https://img.vietqr.io https://accounts.google.com; media-src 'self' blob:; worker-src blob:; frame-src https://accounts.google.com; connect-src 'self' https://accounts.google.com https://*.workers.dev https://*.vercel.app https://*.netlify.app https://*.supabase.co http://localhost:* http://127.0.0.1:*; object-src 'none'; base-uri 'none'; form-action 'none'">
     <meta name="referrer" content="no-referrer">
     <meta name="theme-color" content="#F5F6F8">
     <title>FPass · Học đúng giờ, thi chắc qua</title>
@@ -481,7 +481,11 @@
             );
         };
 
-        const obsidianOf = (fund) => !!fund && (fund.aiCredits || 0) > 0;
+        const proLive = (fund) => {
+            const until = Number(fund && fund.proUntil);
+            return until === -1 || until > Date.now();
+        };
+        const obsidianOf = (fund) => !!fund && ((fund.aiCredits || 0) > 0 || proLive(fund));
         const memberSince = (fund) => {
             const buys = (fund && fund.history || []).filter(ev => ev && ev.kind === 'buy' && ev.pack === 'vocab' && ev.t);
             if (!buys.length) return 0;
@@ -1143,7 +1147,7 @@
                                         <Icon name="gem" size={13} className="text-[#D8C7A0]" />
                                         <span className="font-semibold tracking-wide">PRO MEMBER</span>
                                         <span className="text-[#D8C7A0]">Đang hoạt động</span>
-                                        <span className="tnum">AI {aiLeft}/{aiCap}</span>
+                                        <span className="tnum">{proLive(fund) ? 'AI không giới hạn' : 'AI ' + aiLeft + '/' + aiCap}</span>
                                     </button>
                                 ) : unlimited ? (
                                     <span className="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-1 font-medium text-slate-700">AI tự điền: đang mở</span>
@@ -1838,6 +1842,26 @@
             </button>
         );
 
+        const InsightCard = ({ item }) => {
+            if (!item) return null;
+            const keys = Array.isArray(item.keywords) ? item.keywords.filter(Boolean) : [];
+            const example = item.type === 'mcq' ? '' : (item.explanationOrExample || '');
+            const vi = item.exampleVi || '';
+            const ipa = item.type === 'mcq' ? '' : (item.ipa || '');
+            const word = item.type === 'mcq' ? '' : (item.questionOrWord || '');
+            if (!ipa && !example && !vi && !keys.length && !word) return null;
+            return (
+                <div className="mt-3 rounded-xl border border-line bg-surface px-3 py-2 text-left">
+                    <p className="text-[11px] font-semibold uppercase tracking-wide text-muted">Củng cố trí nhớ</p>
+                    {ipa ? <p className="mt-1 text-sm font-medium">{ipa}</p> : null}
+                    {word ? <button type="button" className="btn btn-secondary btn-sm mt-2" onClick={() => speak(word)}><Icon name="volume" size={14} /> Nghe</button> : null}
+                    {example ? <p className="mt-2 text-sm italic text-ink2 text-flow">{example}</p> : null}
+                    {vi ? <p className="text-sm text-muted text-flow">{vi}</p> : null}
+                    {keys.length ? <p className="mt-1 text-sm text-ink2">Gợi nhớ: {keys.join(', ')}</p> : null}
+                </div>
+            );
+        };
+
         /* ---------------------------------------------------------------
          * BurstSession — Băng đạn 5 câu
          * --------------------------------------------------------------- */
@@ -1882,10 +1906,10 @@
             }, [waiting, now]);
 
             useEffect(() => {
-                if (s.phase !== 'batchDone') return undefined;
-                const t = setTimeout(() => dispatch({ type: 'NEXT_BATCH', skipPreview }), 1400);
-                return () => clearTimeout(t);
-            }, [s.phase, s.b]);
+                if (!fb || !cur || cur.type !== 'vocab') return undefined;
+                speak(cur.questionOrWord);
+                return undefined;
+            }, [fb && fb.id]);
 
             useEffect(() => {
                 if (s.phase === 'done' && !finished.current) {
@@ -1904,20 +1928,21 @@
             }, [s.phase, head.id, waiting]);
 
             const answer = (ok, chosen) => {
-                if (lock.current || !cur || waiting) return;
+                if (lock.current || !cur || waiting || fb) return;
                 lock.current = true;
                 const id = cur.id;
                 setFb({ ok, chosen, id });
                 if (ok) Sfx.correct(); else Sfx.wrong();
                 if (s.firstTry[id] === undefined && onReview) onReview(id, ok);
-                setTimeout(() => {
-                    if (!mounted.current) return;
-                    dispatch({ type: 'ANSWER', id, correct: ok, now: Date.now() });
-                    setNow(Date.now());
-                    setFb(null);
-                    setInput('');
-                    lock.current = false;
-                }, ok ? 200 : 1500);
+                if (inputRef.current) inputRef.current.blur();
+            };
+            const continueResult = () => {
+                if (!fb || !cur) return;
+                dispatch({ type: 'ANSWER', id: fb.id, correct: fb.ok, now: Date.now() });
+                setNow(Date.now());
+                setFb(null);
+                setInput('');
+                lock.current = false;
             };
 
             const pick = (di) => {
@@ -1951,12 +1976,26 @@
                 '1': () => pick(0), '2': () => pick(1), '3': () => pick(2), '4': () => pick(3),
                 a: () => pick(0), b: () => pick(1), c: () => pick(2), d: () => pick(3),
                 h: toggleHl,
-                Enter: () => {
-                    if (s.phase === 'preview') dispatch({ type: 'START_DRILL' });
-                    else if (s.phase === 'batchDone') dispatch({ type: 'NEXT_BATCH', skipPreview });
-                    else return false;
+                Enter: {
+                    allowInInput: !!fb,
+                    overrideButton: true,
+                    run: () => {
+                        if (fb) { continueResult(); return; }
+                        if (s.phase === 'preview') dispatch({ type: 'START_DRILL' });
+                        else if (s.phase === 'batchDone') dispatch({ type: 'NEXT_BATCH', skipPreview });
+                        else return false;
+                    }
                 },
-                Space: () => { if (s.phase === 'preview') dispatch({ type: 'START_DRILL' }); else return false; },
+                Space: {
+                    allowInInput: !!fb,
+                    overrideButton: true,
+                    run: () => {
+                        if (fb) { continueResult(); return; }
+                        if (s.phase === 'preview') dispatch({ type: 'START_DRILL' });
+                        else if (s.phase === 'batchDone') dispatch({ type: 'NEXT_BATCH', skipPreview });
+                        else return false;
+                    }
+                },
                 Escape: () => { if (onExit) onExit(); }
             });
 
@@ -2051,8 +2090,8 @@
                         {header}
                         <div className="mx-auto w-14 h-14 rounded-2xl bg-success text-white flex items-center justify-center mb-3 pop-ok"><Icon name="check" size={28} /></div>
                         <h3 className="text-xl font-bold">Sạch {batch.length}/{batch.length} — mở băng đạn tiếp theo</h3>
-                        <p className="text-muted mt-1">Băng {s.b + 2}/{s.batches.length} sẽ tự mở.</p>
-                        <button type="button" className="btn btn-primary mt-5" onClick={() => dispatch({ type: 'NEXT_BATCH', skipPreview })} autoFocus>Mở ngay <Kbd>Enter</Kbd></button>
+                        <p className="text-muted mt-1">Bấm tiếp khi sẵn sàng mở băng {s.b + 2}/{s.batches.length}.</p>
+                        <button type="button" className="btn btn-primary mt-5" onClick={() => dispatch({ type: 'NEXT_BATCH', skipPreview })} autoFocus>Mở băng tiếp <Kbd>Enter</Kbd> <Kbd>Space</Kbd></button>
                     </div>
                 );
             }
@@ -2101,7 +2140,10 @@
                     {fb && fb.ok && (
                         <div className="callout ok" role="status">
                             <span className="callout-ico">✓</span>
-                            <p className="font-semibold pt-0.5">Chính xác</p>
+                            <div className="min-w-0 flex-1">
+                                <p className="font-semibold pt-0.5">Chính xác</p>
+                                <InsightCard item={cur} />
+                            </div>
                         </div>
                     )}
                             {showAnswer && (
@@ -2110,8 +2152,13 @@
                             <div className="min-w-0">
                                 <p className="font-semibold mb-1">Alo tổng đài cứu nét! Sai rồi, nhai lại câu này ngay!</p>
                                     <ItemAnswer t={cur} hl />
-                                {cur.explanationOrExample && <p className="text-sm mt-1 text-flow">{cur.explanationOrExample}</p>}
+                                <InsightCard item={cur} />
                                 </div>
+                        </div>
+                    )}
+                    {fb && (
+                        <div className="mt-3">
+                            <button type="button" className="btn btn-primary" onClick={continueResult} autoFocus>Tiếp tục <Kbd>Enter</Kbd> <Kbd>Space</Kbd></button>
                         </div>
                     )}
                         {cur.type === 'vocab' && (
@@ -2171,6 +2218,7 @@
             const [mode, setMode] = useState(session.mode === 'test' ? 'test' : session.mode === 'listen' ? 'listen' : 'flash');
             const [typed, setTyped] = useState('');
             const [result, setResult] = useState(null);
+            const [held, setHeld] = useState(false);
             const [hint, setHint] = useState(false);
             const [recording, setRecording] = useState(false);
             const [note, setNote] = useState('');
@@ -2188,6 +2236,7 @@
             useEffect(() => {
                 setTyped('');
                 setResult(null);
+                setHeld(false);
                 setHint(false);
                 setFlipped(false);
             }, [index, mode]);
@@ -2222,10 +2271,14 @@
 
             const next = () => {
                 setNote('');
-                if (index < ids.length - 1) setIndex(index + 1);
-                else if (!isSlot) setDone(true);
-                else if (allGraded(known, forgot)) setDone(true);
-                else setNote('Ca này tính xong khi bạn chấm hết các thẻ.');
+                setHeld(false);
+                if (index < ids.length - 1) { setIndex(index + 1); return; }
+                if (!isSlot || allGraded(known, forgot)) {
+                    setDone(true);
+                    if (onFinish && isSlot) onFinish({ slotId: session.slotId, cardsDone: ids.length, remembered: known.length });
+                    return;
+                }
+                setNote('Ca này tính xong khi bạn chấm hết các thẻ.');
             };
 
             const prev = () => {
@@ -2241,30 +2294,22 @@
                 return { k, f };
             };
 
-            const finishIfComplete = (k, f) => {
-                if (!allGraded(k, f)) return false;
-                setDone(true);
-                if (onFinish && isSlot) onFinish({ slotId: session.slotId, cardsDone: ids.length, remembered: k.length });
-                return true;
-            };
-
             const gradeFlash = (ok) => {
-                if (!t || done) return;
+                if (!t || done || held) return;
                 onReview(t.id, ok);
                 const r = Sch.applyReview(t, ok);
-                const m = mark(t.id, ok);
+                mark(t.id, ok);
                 setNote(ok ? 'Ôn lại sau ' + r.afterDays + ' ngày' : 'Thẻ này vào mục ôn yếu');
-                if (finishIfComplete(m.k, m.f)) return;
-                if (index < ids.length - 1) setIndex(index + 1);
+                setHeld(true);
+                if (t.type !== 'mcq') speak(t.questionOrWord);
             };
 
             const settle = (ok, extra) => {
                 setResult(Object.assign({ ok }, extra || {}));
                 if (ok) Sfx.correct(); else Sfx.wrong();
                 onReview(t.id, ok, extra && extra.kind);
-                const m = mark(t.id, ok);
-                const complete = finishIfComplete(m.k, m.f);
-                if (ok && !complete) setTimeout(() => { if (mounted.current) next(); }, 450);
+                mark(t.id, ok);
+                if (t.type !== 'mcq') speak(t.questionOrWord);
             };
 
             const checkTyped = (value, explicit) => {
@@ -2286,16 +2331,35 @@
             };
 
             useHotkeys('flash', {
-                Space: () => { if (mode === 'flash') setFlipped(v => !v); else return false; },
+                Space: {
+                    allowInInput: !!(result || held),
+                    overrideButton: true,
+                    run: () => {
+                        if (result || held) { next(); return; }
+                        if (mode === 'flash') setFlipped(v => !v);
+                        else return false;
+                    }
+                },
                 ArrowRight: next,
                 ArrowLeft: prev,
                 h: () => setHl(v => !v),
-                Enter: () => { if (result) next(); else if (mode === 'flash') setFlipped(v => !v); else return false; },
-                '1': () => { if (mode === 'flash') { if (flipped) gradeFlash(false); } else pickMcq(0); },
-                '2': () => { if (mode === 'flash') { if (flipped) gradeFlash(true); } else pickMcq(1); },
-                '3': () => pickMcq(2),
-                '4': () => pickMcq(3),
-                a: () => pickMcq(0), b: () => pickMcq(1), c: () => pickMcq(2), d: () => pickMcq(3)
+                Enter: {
+                    allowInInput: !!(result || held),
+                    overrideButton: true,
+                    run: () => {
+                        if (result || held) { next(); return; }
+                        if (mode === 'flash') setFlipped(v => !v);
+                        else return false;
+                    }
+                },
+                '1': () => { if (result || held) return false; if (mode === 'flash') { if (flipped) gradeFlash(false); } else pickMcq(0); },
+                '2': () => { if (result || held) return false; if (mode === 'flash') { if (flipped) gradeFlash(true); } else pickMcq(1); },
+                '3': () => { if (result || held) return false; pickMcq(2); },
+                '4': () => { if (result || held) return false; pickMcq(3); },
+                a: () => { if (result || held) return false; pickMcq(0); },
+                b: () => { if (result || held) return false; pickMcq(1); },
+                c: () => { if (result || held) return false; pickMcq(2); },
+                d: () => { if (result || held) return false; pickMcq(3); }
             });
 
             if (done) {
@@ -2414,14 +2478,20 @@
                                 <button type="button" onClick={prev} disabled={index === 0} className="btn btn-secondary btn-icon" aria-label="Thẻ trước"><Icon name="left" /></button>
                                 {flipped ? (
                                     <>
-                                        <button type="button" onClick={() => gradeFlash(false)} className="btn btn-danger btn-lg">Cần ôn <Kbd>1</Kbd></button>
-                                        <button type="button" onClick={() => gradeFlash(true)} className="btn btn-success btn-lg">Đã nhớ <Kbd>2</Kbd></button>
+                                        <button type="button" onClick={() => gradeFlash(false)} className="btn btn-danger btn-lg" disabled={held}>Cần ôn <Kbd>1</Kbd></button>
+                                        <button type="button" onClick={() => gradeFlash(true)} className="btn btn-success btn-lg" disabled={held}>Đã nhớ <Kbd>2</Kbd></button>
                                     </>
                                 ) : (
                                     <p className="text-sm text-muted px-2 text-center"><Kbd>Space</Kbd> lật · <Kbd>1</Kbd> cần ôn · <Kbd>2</Kbd> đã nhớ · <Kbd>H</Kbd> highlight</p>
                                 )}
                                 <button type="button" onClick={next} className="btn btn-secondary btn-icon" aria-label="Thẻ sau"><Icon name="right" /></button>
                             </div>
+                            {held && (
+                                <div className="max-w-xl mx-auto mt-4">
+                                    <InsightCard item={t} />
+                                    <button type="button" className="btn btn-primary mt-3" onClick={next}>Câu tiếp theo <Kbd>Enter</Kbd> <Kbd>Space</Kbd></button>
+                                </div>
+                            )}
                             {note && <p className="text-center text-sm text-muted mt-3" role="status">{note}</p>}
                         </div>
                     ) : isMcq ? (
@@ -2439,6 +2509,7 @@
                                         <p className="font-semibold">{result.ok ? 'Chính xác' : 'Alo tổng đài cứu nét! Sai rồi, nhai lại câu này ngay!'}</p>
                                         {!result.ok && <div className="mt-1"><ItemAnswer t={t} hl={hl} /></div>}
                                         {!result.ok && t.explanationOrExample && <p className="text-sm mt-1 text-flow">{t.explanationOrExample}</p>}
+                                        <InsightCard item={t} />
                                     </div>
                                 </div>
                             )}
@@ -2458,7 +2529,7 @@
                             </div>
                             <div className="flex justify-between mt-5">
                                 <button type="button" onClick={prev} disabled={index === 0} className="btn btn-secondary">Trước</button>
-                                <button type="button" onClick={next} className="btn btn-secondary">{result ? <>Tiếp <Kbd>Enter</Kbd></> : 'Bỏ qua'}</button>
+                                <button type="button" onClick={next} className="btn btn-primary">{result ? <>Tiếp tục <Kbd>Enter</Kbd> <Kbd>Space</Kbd></> : 'Bỏ qua'}</button>
                             </div>
                         </div>
                     ) : (
@@ -2490,8 +2561,8 @@
                                     }}
                                     placeholder="Gõ từ tiếng Anh… khớp là tự chấm" className="field flex-1 text-lg min-h-[52px]" />
                                 {!result
-                                    ? <button type="button" onClick={() => checkTyped(typed, true)} className="btn btn-success">Kiểm tra</button>
-                                    : <button type="button" onClick={next} className="btn btn-primary">Tiếp</button>}
+                                    ? <button type="button" onClick={() => checkTyped(typed, true)} className="btn btn-success">Kiểm tra <Kbd>Enter</Kbd></button>
+                                    : <button type="button" onClick={next} className="btn btn-primary">Tiếp tục <Kbd>Enter</Kbd> <Kbd>Space</Kbd></button>}
                             </div>
                             <div className="flex flex-wrap gap-2 mb-4">
                                 <button type="button" onClick={() => setHint(v => !v)} className="btn btn-secondary btn-sm">Gợi ý</button>
@@ -2512,8 +2583,7 @@
                                     {result.heard && <p>Bạn nói: {result.heard}</p>}
                                     {!result.ok && <p>Đáp án: <strong>{t.questionOrWord}</strong></p>}
                                     {t.answerOrMeaning && <p className="mt-1">Nghĩa: {t.answerOrMeaning}</p>}
-                                    {t.explanationOrExample && <p className="mt-2 italic text-ink2">{t.explanationOrExample}</p>}
-                                    {t.exampleVi && <p className="text-sm text-muted">{t.exampleVi}</p>}
+                                    <InsightCard item={t} />
                                 </div>
                             )}
                             <div className="flex justify-between">
@@ -4622,7 +4692,132 @@
             );
         };
 
-        const SettingsModal = ({ onClose, toast, muted, setMuted }) => {
+        const googleToken = () => Store.prefs.get('googleToken', '') || '';
+
+        const librarySnapshot = async () => ({
+            fundCode: (E.Quota.read() || {}).code || '',
+            library: {
+                items: (await Store.items.all()).slice(0, 4000),
+                progress: (await Store.progress.all()).slice(0, 8000),
+                votes: (await Store.identityVotes.all()).slice(0, 5000)
+            }
+        });
+
+        const applyCloud = async (data) => {
+            if (data && data.fundCode) {
+                try { E.Quota.setCode(data.fundCode); } catch (e) {}
+            }
+            const until = data && data.proUntil;
+            if (until === -1 || Number(until) > 0) E.Quota.noteAi({ proUntil: until, aiUnlocked: until === -1 || Number(until) > Date.now() });
+            const lib = data && data.library || {};
+            if (Array.isArray(lib.items) && lib.items.length) await Store.items.putMany(lib.items.map((row) => Sch.normalizeItem(row)));
+            if (Array.isArray(lib.progress) && lib.progress.length) await Store.progress.putMany(lib.progress.filter((row) => row && row.id));
+            if (Array.isArray(lib.votes) && lib.votes.length) await Store.identityVotes.putMany(lib.votes.filter((row) => row && row.id && row.sessionId));
+            try { await E.Quota.sync(); } catch (e) {}
+            window.dispatchEvent(new CustomEvent('edu-library'));
+            window.dispatchEvent(new CustomEvent('edu-votes'));
+        };
+
+        const loginWithCredential = async (credential) => {
+            const guest = await librarySnapshot();
+            const res = await fetch('/api/fund?action=login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+                body: JSON.stringify({ credential, guest })
+            });
+            const data = await res.json().catch(() => ({}));
+            if (!res.ok) throw new Error(data.error || 'Chưa đăng nhập được Google.');
+            Store.prefs.set('googleToken', data.token || '');
+            Store.prefs.set('googleUser', data.user || null);
+            await applyCloud(data);
+            return data;
+        };
+
+        const redeemGiftCode = async (code) => {
+            const res = await fetch('/api/fund?action=redeem', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', Accept: 'application/json', Authorization: 'Bearer ' + googleToken() },
+                body: JSON.stringify({ code, fundCode: (E.Quota.read() || {}).code || '' })
+            });
+            const data = await res.json().catch(() => ({}));
+            if (res.status === 401) {
+                const err = new Error(data.error || 'Cần đăng nhập Google.');
+                err.needLogin = true;
+                throw err;
+            }
+            if (!res.ok) throw new Error(data.error || 'Chưa kích hoạt được mã.');
+            Store.prefs.set('googleUser', Object.assign({}, Store.prefs.get('googleUser', {}) || {}, { tier: 'OBSIDIAN_PRO', proUntil: data.proUntil }));
+            if (data.fundCode) { try { E.Quota.setCode(data.fundCode); } catch (e) {} }
+            E.Quota.noteAi({ proUntil: data.proUntil, aiUnlocked: true });
+            try { await E.Quota.sync(); } catch (e) {}
+            return data;
+        };
+
+        const GoogleSaveModal = ({ pendingCode, onClose, toast, onDone }) => {
+            const box = useRef(null);
+            const [note, setNote] = useState('');
+            const [busy, setBusy] = useState(false);
+            useEffect(() => {
+                let alive = true;
+                const run = async () => {
+                    try {
+                        const res = await fetch('/api/fund?action=config', { headers: { Accept: 'application/json' } });
+                        const cfg = await res.json().catch(() => ({}));
+                        if (!alive) return;
+                        if (!cfg.enabled || !cfg.clientId) {
+                            setNote('Máy chủ chưa bật đăng nhập Google. Thêm GOOGLE_CLIENT_ID trên Vercel rồi tải lại trang.');
+                            return;
+                        }
+                        await new Promise((resolve, reject) => {
+                            if (window.google && google.accounts && google.accounts.id) { resolve(); return; }
+                            const script = document.createElement('script');
+                            script.src = 'https://accounts.google.com/gsi/client';
+                            script.async = true;
+                            script.onload = () => resolve();
+                            script.onerror = () => reject(new Error('Không tải được nút Google.'));
+                            document.head.appendChild(script);
+                        });
+                        if (!alive || !box.current) return;
+                        google.accounts.id.initialize({
+                            client_id: cfg.clientId,
+                            callback: async (resp) => {
+                                if (!resp || !resp.credential) return;
+                                setBusy(true);
+                                try {
+                                    const data = await loginWithCredential(resp.credential);
+                                    toast('Đã lưu kho với ' + ((data.user && data.user.email) || 'Google') + '.', 'success');
+                                    if (pendingCode) {
+                                        const gift = await redeemGiftCode(pendingCode);
+                                        toast(gift.proUntil === -1 ? 'Đã mở Obsidian PRO vĩnh viễn.' : 'Đã mở Obsidian PRO.', 'success');
+                                    }
+                                    onDone(data.user || null);
+                                } catch (e) {
+                                    toast(e.message, 'error');
+                                } finally {
+                                    setBusy(false);
+                                }
+                            }
+                        });
+                        google.accounts.id.renderButton(box.current, { theme: 'outline', size: 'large', text: 'continue_with', width: 320 });
+                    } catch (e) {
+                        if (alive) setNote(e.message || 'Chưa mở được đăng nhập Google.');
+                    }
+                };
+                run();
+                return () => { alive = false; };
+            }, []);
+            return (
+                <Modal title="Lưu kho từ với Google" onClose={onClose}>
+                    <p className="text-sm text-ink2">Đăng nhập 1 chạm để bảo toàn vĩnh viễn kho từ vựng, chuỗi lá phiếu và kích hoạt thẻ Obsidian PRO trên mọi thiết bị.</p>
+                    <p className="mt-2 text-xs text-muted">Dữ liệu đang có trên máy này được gộp với bản trên mây. Không xóa thẻ đang học dở.</p>
+                    <div ref={box} className="mt-4 min-h-[44px]" />
+                    {busy && <p className="mt-3 text-sm text-muted">Đang gộp kho…</p>}
+                    {note && <p className="mt-3 text-sm text-warn">{note}</p>}
+                </Modal>
+            );
+        };
+
+        const SettingsModal = ({ onClose, toast, muted, setMuted, onGoogle, onRedeem }) => {
             const [usage, setUsage] = useState(null);
             const [studentName, setStudentName] = useState(Store.prefs.get('student', '') || '');
             useEffect(() => { Store.estimate().then(setUsage); }, []);
@@ -4632,6 +4827,10 @@
                 onClose();
             };
             const [perm, setPerm] = useState(window.Notification ? Notification.permission : 'unsupported');
+            const [fundCode, setFundCode] = useState((E.Quota.read() || {}).code || '');
+            const [shared, setShared] = useState('');
+            const [gift, setGift] = useState('');
+            const account = Store.prefs.get('googleUser', null);
             const permLabel = perm === 'granted' ? 'Đã bật' : perm === 'denied' ? 'Bị chặn' : perm === 'unsupported' ? 'Không hỗ trợ' : 'Bật';
             return (
                 <Modal title="Cài đặt" onClose={onClose} footer={<><button type="button" className="btn btn-secondary" onClick={onClose}>Hủy</button><button type="button" className="btn btn-primary" onClick={save}>Lưu</button></>}>
@@ -4646,6 +4845,37 @@
                         <div className="flex items-center justify-between gap-3">
                             <span><span className="font-semibold text-sm block">Thông báo khi đến giờ</span><span className="text-xs text-ink2">{perm === 'denied' ? 'Bị chặn trong cài đặt trình duyệt' : 'Báo khi một ca học bắt đầu'}</span></span>
                             <button type="button" className="btn btn-secondary btn-sm" disabled={perm !== 'default'} onClick={() => Notification.requestPermission().then(setPerm)}><Icon name="bell" size={14} /> {permLabel}</button>
+                        </div>
+                        <div className="rounded-xl border border-line p-3">
+                            <p className="text-sm font-semibold">Mã Obsidian PRO</p>
+                            <p className="text-xs text-ink2 mt-1">{account && account.email ? 'Đang đăng nhập ' + account.email + '.' : 'Cần đăng nhập Google trước khi nhập mã.'}</p>
+                            {!account && <button type="button" className="btn btn-secondary btn-sm mt-2" onClick={onGoogle}>Lưu kho từ với Google</button>}
+                            <div className="mt-2 flex gap-2">
+                                <input value={gift} onChange={(e) => setGift(e.target.value.toUpperCase())} maxLength={24} className="field uppercase" placeholder="EARLYBIRD" aria-label="Mã giftcode" />
+                                <button type="button" className="btn btn-secondary btn-sm" disabled={!gift.trim()} onClick={() => onRedeem(gift.trim())}>Kích hoạt</button>
+                            </div>
+                        </div>
+                        <div className="rounded-xl border border-line p-3">
+                            <p className="text-sm font-semibold">Mã quỹ cũ</p>
+                            <p className="text-xs text-ink2 mt-1">Dùng khi cần dán mã lượt từ máy khác. Kho từ thì lưu bằng Google ở trên.</p>
+                            <label className="mt-2 block text-sm"><span className="label">Mã quỹ</span>
+                                <span className="flex gap-2">
+                                    <input value={fundCode} onChange={(e) => setFundCode(e.target.value.toUpperCase())} maxLength={12} className="field uppercase" aria-label="Mã quỹ lượt" />
+                                    <button type="button" className="btn btn-secondary btn-sm" onClick={() => { try { const saved = E.Quota.setCode(fundCode); setFundCode(saved.code); E.Quota.sync(); toast('Đã lưu mã quỹ ' + saved.code, 'success'); } catch (e) { toast(e.message, 'error'); } }}>Lưu</button>
+                                </span>
+                            </label>
+                            <label className="mt-2 block text-sm"><span className="label">Dán mã quỹ hoặc EDUF1</span>
+                                <textarea value={shared} onChange={(e) => setShared(e.target.value)} rows={2} className="field text-xs" />
+                            </label>
+                            <button type="button" className="btn btn-secondary btn-sm mt-2" disabled={!shared.trim()} onClick={() => {
+                                try {
+                                    const saved = /^EDUF1\./i.test(shared.trim()) ? E.Quota.importCode(shared.trim()) : E.Quota.setCode(shared.trim());
+                                    setFundCode(saved.code);
+                                    setShared('');
+                                    E.Quota.sync();
+                                    toast('Máy này đang dùng mã ' + saved.code + '.', 'success');
+                                } catch (e) { toast(e.message || 'Mã quỹ không hợp lệ.', 'error'); }
+                            }}>Dùng mã này</button>
                         </div>
                         <p className="text-xs text-muted tnum">Dung lượng bộ nhớ trình duyệt: {usage && usage.quota ? (usage.usage / 1048576).toFixed(1) + ' MB / ' + (usage.quota / 1048576).toFixed(0) + ' MB' : 'trình duyệt không báo số liệu'}</p>
                     </div>
@@ -4673,6 +4903,9 @@
             const [exams, setExams] = useState(() => Store.prefs.get('exams', {}) || {});
             const [milestones, setMilestones] = useState(() => Store.prefs.get('milestones', {}) || {});
             const [settingsOpen, setSettingsOpen] = useState(false);
+            const [googleOpen, setGoogleOpen] = useState(false);
+            const [pendingGift, setPendingGift] = useState('');
+            const [googleAccount, setGoogleAccount] = useState(() => Store.prefs.get('googleUser', null));
             const [fundShop, setFundShop] = useState(false);
             const [upgradeOpen, setUpgradeOpen] = useState(false);
             const [legalTab, setLegalTab] = useState(null);
@@ -4822,8 +5055,22 @@
                     } catch (e) {
                         toast('Không mở được kho dữ liệu: ' + e.message, 'error');
                     }
-                    setLoaded(true);
-                })();
+                        setLoaded(true);
+                    })();
+                const reloadLibrary = () => {
+                    Store.items.all().then((rows) => {
+                        const next = rows.map((row) => Sch.normalizeItem(row));
+                        savedItems.current = next;
+                        setItems(next);
+                    }).catch(() => {});
+                    Store.progress.all().then((rows) => {
+                        const prog = {};
+                        rows.forEach((row) => { prog[row.id] = row; });
+                        progressRef.current = prog;
+                        setProgress(prog);
+                    }).catch(() => {});
+                };
+                window.addEventListener('edu-library', reloadLibrary);
 
                 const today = Plan.dayKeyOf(new Date());
                 const dayKey = Plan.weekdayOf(new Date());
@@ -4856,6 +5103,7 @@
                     }
                 }
                 setPlanReady(true);
+                return () => window.removeEventListener('edu-library', reloadLibrary);
             }, []);
 
             /* ---------- Persist: items (diff → IndexedDB), plan, mode ---------- */
@@ -5187,6 +5435,7 @@
                                     </button>
                                 )}
                                 <button type="button" className="btn btn-ghost btn-icon" onClick={() => setMuted(!muted)} aria-pressed={!muted} aria-label={muted ? 'Bật âm thanh' : 'Tắt âm thanh'}><Icon name={muted ? 'mute' : 'volume'} /></button>
+                                <button type="button" className={'btn btn-sm ' + (googleAccount && googleAccount.email ? 'btn-secondary' : 'btn-primary')} onClick={() => { setPendingGift(''); setGoogleOpen(true); }}>{googleAccount && googleAccount.email ? googleAccount.email : 'Lưu kho từ với Google'}</button>
                                 <button type="button" className="btn btn-ghost btn-icon" onClick={() => setSettingsOpen(true)} aria-label="Cài đặt"><Icon name="sliders" /></button>
                             </div>
                         </div>
@@ -5260,7 +5509,17 @@
                             </div>
                         </div>
                     </footer>
-                    {settingsOpen && <SettingsModal onClose={() => setSettingsOpen(false)} toast={toast} muted={muted} setMuted={setMuted} />}
+                    {settingsOpen && <SettingsModal onClose={() => setSettingsOpen(false)} toast={toast} muted={muted} setMuted={setMuted} onGoogle={() => { setSettingsOpen(false); setPendingGift(''); setGoogleOpen(true); }} onRedeem={(code) => {
+                        redeemGiftCode(code).then((gift) => {
+                            setGoogleAccount(Store.prefs.get('googleUser', null));
+                            toast(gift.proUntil === -1 ? 'Đã mở Obsidian PRO vĩnh viễn.' : 'Đã mở Obsidian PRO.', 'success');
+                            setSettingsOpen(false);
+                        }).catch((e) => {
+                            if (e.needLogin) { setPendingGift(code); setSettingsOpen(false); setGoogleOpen(true); return; }
+                            toast(e.message, 'error');
+                        });
+                    }} />}
+                    {googleOpen && <GoogleSaveModal pendingCode={pendingGift} toast={toast} onClose={() => { setGoogleOpen(false); setPendingGift(''); }} onDone={(user) => { setGoogleAccount(user); setGoogleOpen(false); setPendingGift(''); }} />}
                     {fundShop && <FundShop toast={toast} onClose={() => setFundShop(false)} />}
                     {upgradeOpen && <AiUnlockModal toast={toast} onClose={() => setUpgradeOpen(false)} />}
                     {legalTab && <LegalModal tab={legalTab} onClose={() => setLegalTab(null)} onSupport={openSupport} />}

@@ -320,12 +320,25 @@ export async function fundState(env, code) {
         balance: Math.max(0, granted - spent),
         events: readFundRows(rows),
         aiCredits: Math.max(0, Math.floor(Number(hash.aiCredits) || 0)),
-        aiUnlocked: String(hash.ai) === '1' && !(Number(hash.aiCredits) > 0),
+        aiUnlocked: (String(hash.ai) === '1' && !(Number(hash.aiCredits) > 0)) || proStill(hash),
+        proUntil: proStill(hash) ? proUntilOf(hash) : 0,
         aiUsed: Math.max(0, Math.floor(Number(hash.aiUsed) || 0)),
         aiLimit: AI_FREE + Math.max(0, Math.floor(Number(hash.aiCredits) || 0)),
         scans: Math.max(0, Math.floor(Number(hash.scans) || 0)),
         scanGrant: Math.max(0, Math.floor(Number(hash.scanGrant) || 0))
     };
+}
+
+function proUntilOf(hash) {
+    const until = Number(hash && hash.proUntil);
+    return until === -1 ? -1 : Math.floor(until);
+}
+
+function proStill(hash) {
+    if (!hash || String(hash.pro) !== '1') return false;
+    const until = Number(hash.proUntil);
+    if (until === -1) return true;
+    return until > Date.now();
 }
 
 export async function reserveAiFill(env, code) {
@@ -334,6 +347,10 @@ export async function reserveAiFill(env, code) {
         const err = new Error('bad-code');
         err.code = 'bad-code';
         throw err;
+    }
+    const hash = hashObject(await redisCommand(env, ['HGETALL', 'fpass:quota:' + clean]));
+    if (proStill(hash)) {
+        return { ok: true, busy: false, used: Math.max(0, Math.floor(Number(hash.aiUsed) || 0)), unlocked: true, limit: AI_FREE, pro: true };
     }
     const row = await redisCommand(env, [
         'EVAL', TAKE_AI, 2,
@@ -380,6 +397,21 @@ export async function reservePassage(env, code) {
         const err = new Error('bad-code');
         err.code = 'bad-code';
         throw err;
+    }
+    const hash = hashObject(await redisCommand(env, ['HGETALL', 'fpass:quota:' + clean]));
+    if (proStill(hash)) {
+        return {
+            ok: true,
+            preview: false,
+            daily: false,
+            busy: false,
+            used: Math.max(0, Math.floor(Number(hash.aiUsed) || 0)),
+            unlocked: true,
+            scans: Math.max(0, Math.floor(Number(hash.scans) || 0)),
+            prev: Math.max(0, Math.floor(Number(hash.scans) || 0)),
+            limit: AI_FREE,
+            pro: true
+        };
     }
     const row = await redisCommand(env, [
         'EVAL', TAKE_PASSAGE, 2,

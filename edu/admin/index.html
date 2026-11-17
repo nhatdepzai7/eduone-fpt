@@ -525,6 +525,87 @@
             );
         };
 
+        const GiftTab = ({ token, onAuth }) => {
+            const [rows, setRows] = useState([]);
+            const [error, setError] = useState('');
+            const [info, setInfo] = useState('');
+            const [form, setForm] = useState({ code: '', days: '', maxUses: '20', lifetime: true });
+            const load = () => api(token, '/api/desk?action=giftcodes').then((data) => setRows(data.gifts || [])).catch((e) => { if (e.auth) onAuth(); else setError(e.message); });
+            useEffect(() => { load(); }, []);
+            const create = async () => {
+                setError('');
+                setInfo('');
+                try {
+                    const made = await api(token, '/api/desk?action=giftcodes', {
+                        op: 'create',
+                        code: form.code,
+                        lifetime: form.lifetime,
+                        durationDays: form.lifetime ? -1 : form.days,
+                        maxUses: form.maxUses
+                    });
+                    setInfo('Đã tạo mã ' + made.code + '.');
+                    setForm({ code: '', days: '', maxUses: '20', lifetime: true });
+                    load();
+                } catch (e) {
+                    if (e.auth) onAuth(); else setError(e.message);
+                }
+            };
+            const toggle = async (row) => {
+                try {
+                    await api(token, '/api/desk?action=giftcodes', { op: 'toggle', code: row.code, active: !row.active });
+                    load();
+                } catch (e) {
+                    if (e.auth) onAuth(); else setError(e.message);
+                }
+            };
+            return (
+                <div className="space-y-4">
+                    <div className="bg-white rounded-2xl border border-slate-200 p-4">
+                        <h2 className="font-semibold">Tạo giftcode Obsidian PRO</h2>
+                        <p className="text-sm text-slate-500 mt-1">Mặc định vĩnh viễn. Một tài khoản Google chỉ dùng một mã một lần.</p>
+                        <div className="grid sm:grid-cols-2 gap-3 mt-3">
+                            <label className="text-sm font-medium">Mã
+                                <input value={form.code} onChange={(e) => setForm(Object.assign({}, form, { code: e.target.value.toUpperCase() }))} className="field mt-1 uppercase" placeholder="Để trống để tạo ngẫu nhiên" />
+                            </label>
+                            <label className="text-sm font-medium">Số người tối đa
+                                <input value={form.maxUses} onChange={(e) => setForm(Object.assign({}, form, { maxUses: e.target.value }))} className="field mt-1" inputMode="numeric" />
+                            </label>
+                            <label className="text-sm font-medium flex items-center gap-2 mt-6">
+                                <input type="checkbox" checked={form.lifetime} onChange={(e) => setForm(Object.assign({}, form, { lifetime: e.target.checked }))} />
+                                Vĩnh viễn
+                            </label>
+                            {!form.lifetime && (
+                                <label className="text-sm font-medium">Số ngày
+                                    <input value={form.days} onChange={(e) => setForm(Object.assign({}, form, { days: e.target.value }))} className="field mt-1" inputMode="numeric" />
+                                </label>
+                            )}
+                        </div>
+                        <button type="button" className="mt-3 min-h-[44px] px-4 rounded-xl bg-indigo-700 text-white font-semibold" onClick={create}>Tạo mã</button>
+                        {error && <p className="text-sm text-red-700 mt-2">{error}</p>}
+                        {info && <p className="text-sm text-indigo-700 mt-2">{info}</p>}
+                    </div>
+                    <div className="bg-white rounded-2xl border border-slate-200 overflow-x-auto">
+                        <table className="w-full text-sm">
+                            <thead className="bg-slate-50 text-left">
+                                <tr><th className="px-4 py-2">Mã</th><th className="px-4 py-2">Hạn</th><th className="px-4 py-2">Đã dùng</th><th className="px-4 py-2">Email</th><th className="px-4 py-2">Trạng thái</th></tr>
+                            </thead>
+                            <tbody>
+                                {rows.map((row) => (
+                                    <tr key={row.code} className="border-t border-slate-100 align-top">
+                                        <td className="px-4 py-2 font-semibold">{row.code}</td>
+                                        <td className="px-4 py-2">{row.durationDays < 0 ? 'Vĩnh viễn' : row.durationDays + ' ngày'}</td>
+                                        <td className="px-4 py-2 tnum">{row.usedCount}/{row.maxUses}</td>
+                                        <td className="px-4 py-2">{(row.emails || []).join(', ') || '—'}</td>
+                                        <td className="px-4 py-2"><button type="button" className="underline" onClick={() => toggle(row)}>{row.active ? 'Đang bật' : 'Đang tắt'}</button></td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            );
+        };
+
         const Shell = ({ token, onLogout }) => {
             const [tab, setTab] = useState('quota');
             const leave = async () => {
@@ -550,8 +631,9 @@
                         <button type="button" role="tab" aria-selected={tab === 'visits'} className={tabClass('visits')} onClick={() => setTab('visits')}>Lượt truy cập</button>
                         <button type="button" role="tab" aria-selected={tab === 'feedback'} className={tabClass('feedback')} onClick={() => setTab('feedback')}>Phản hồi người dùng</button>
                         <button type="button" role="tab" aria-selected={tab === 'exams'} className={tabClass('exams')} onClick={() => setTab('exams')}>Kho Đề Hệ Thống</button>
+                        <button type="button" role="tab" aria-selected={tab === 'gifts'} className={tabClass('gifts')} onClick={() => setTab('gifts')}>Giftcode PRO</button>
                     </div>
-                    {tab === 'quota' ? <QuotaTab token={token} onAuth={onLogout} /> : tab === 'visits' ? <VisitsTab token={token} onAuth={onLogout} /> : tab === 'feedback' ? <FeedbackTab token={token} onAuth={onLogout} /> : <ExamTab token={token} onAuth={onLogout} />}
+                    {tab === 'quota' ? <QuotaTab token={token} onAuth={onLogout} /> : tab === 'visits' ? <VisitsTab token={token} onAuth={onLogout} /> : tab === 'feedback' ? <FeedbackTab token={token} onAuth={onLogout} /> : tab === 'gifts' ? <GiftTab token={token} onAuth={onLogout} /> : <ExamTab token={token} onAuth={onLogout} />}
                 </main>
             );
         };
