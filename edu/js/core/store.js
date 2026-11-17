@@ -2,11 +2,13 @@
     'use strict';
 
     const DB_NAME = 'fpass';
-    const DB_VERSION = 1;
+    /* v2 thêm identityVotes. Lần nâng chỉ tạo store còn thiếu, không xóa items, progress hay packs. */
+    const DB_VERSION = 2;
     const STORES = {
         items: { keyPath: 'id', indexes: [['group', 'group'], ['type', 'type']] },
         progress: { keyPath: 'id', indexes: [['packId', 'packId']] },
-        packs: { keyPath: 'id', indexes: [] }
+        packs: { keyPath: 'id', indexes: [] },
+        identityVotes: { keyPath: 'id', indexes: [['sessionId', 'sessionId', true], ['date', 'date']] }
     };
     const PREFIX = 'edu.';
 
@@ -111,7 +113,7 @@
                 Object.keys(STORES).forEach((name) => {
                     if (db.objectStoreNames.contains(name)) return;
                     const os = db.createObjectStore(name, { keyPath: STORES[name].keyPath });
-                    STORES[name].indexes.forEach(([n, k]) => os.createIndex(n, k, { unique: false }));
+                    STORES[name].indexes.forEach((spec) => os.createIndex(spec[0], spec[1], { unique: !!spec[2] }));
                 });
             };
             req.onsuccess = () => {
@@ -221,6 +223,44 @@
     const items = table('items');
     const progress = table('progress');
     const packs = table('packs');
+    const identityVotes = table('identityVotes');
+
+    /* Một sessionId chỉ một phiếu. Ghi trùng trả về phiếu cũ, không đổi createdAt. */
+    const addIdentityVote = async (vote) => {
+        const allowed = (EDU.Identity && EDU.Identity.VOTE_TYPES) || null;
+        const valid = vote && typeof vote.id === 'string' && vote.id
+            && typeof vote.sessionId === 'string' && vote.sessionId
+            && typeof vote.date === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(vote.date)
+            && typeof vote.type === 'string' && vote.type
+            && (!allowed || allowed.indexOf(vote.type) >= 0)
+            && typeof vote.createdAt === 'number';
+        if (!valid) return { saved: false, reason: 'invalid' };
+        const db = await open();
+        if (!db) {
+            const mem = fallback.mem.identityVotes;
+            const dup = Array.from(mem.values()).find((row) => row.sessionId === vote.sessionId);
+            if (dup) return { saved: false, reason: 'duplicate', vote: dup };
+            mem.set(vote.id, vote);
+            fallback.save('identityVotes');
+            return { saved: true, vote: vote };
+        }
+        return new Promise((resolve, reject) => {
+            const tx = db.transaction('identityVotes', 'readwrite');
+            const os = tx.objectStore('identityVotes');
+            const lookup = os.index('sessionId').get(vote.sessionId);
+            lookup.onerror = () => reject(lookup.error);
+            lookup.onsuccess = () => {
+                if (lookup.result) { resolve({ saved: false, reason: 'duplicate', vote: lookup.result }); return; }
+                const put = os.put(vote);
+                put.onerror = (event) => {
+                    if (event && event.preventDefault) event.preventDefault();
+                    if (put.error && put.error.name === 'ConstraintError') resolve({ saved: false, reason: 'duplicate' });
+                    else reject(put.error);
+                };
+                put.onsuccess = () => resolve({ saved: true, vote: vote });
+            };
+        });
+    };
 
     /* ---------- Migration từ bản cũ (localStorage 'tuVung', ids số) ---------- */
     const migrateLegacy = async () => {
@@ -265,5 +305,5 @@
         return false;
     };
 
-    EDU.Store = { prefs, scrubSecrets, items, progress, packs, syncDiff, migrateLegacy, estimate, requestPersist, open };
+    EDU.Store = { prefs, scrubSecrets, items, progress, packs, identityVotes, addIdentityVote, syncDiff, migrateLegacy, estimate, requestPersist, open };
 })(window.EDU = window.EDU || {});

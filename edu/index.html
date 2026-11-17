@@ -215,6 +215,15 @@
         .obsidian-dialog .btn-ghost:hover:not(:disabled) { background: #202637; }
         .obsidian-rise { animation: obsidian-rise 1.2s ease; }
         @keyframes obsidian-rise { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+        @keyframes identity-cue {
+            0% { box-shadow: 0 0 0 0 rgba(231, 197, 106, .55); }
+            70% { box-shadow: 0 0 0 8px rgba(231, 197, 106, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(231, 197, 106, 0); }
+        }
+        .identity-cue { animation: identity-cue 1.4s ease-out 3; }
+        @media (prefers-reduced-motion: reduce) {
+            .identity-cue { animation: none !important; }
+        }
     </style>
     <style type="text/tailwindcss">
         @layer components {
@@ -251,7 +260,7 @@
 
     <script src="js/core/security.js"></script>
     <script src="js/core/schema.js"></script>
-    <script src="js/core/store.js"></script>
+    <script src="js/core/store.js?v=votes"></script>
     <script src="js/core/quota.js?v=plan"></script>
     <script src="js/core/audio-keys.js"></script>
     <script src="js/core/engine.js?v=clock"></script>
@@ -260,7 +269,8 @@
     <script src="js/data/catalog.js"></script>
 
     <!-- ===================== UI KIT ===================== -->
-    <script type="text/babel" data-presets="react">
+    <script type="text/babel" data-presets="react" data-type="module">
+        import { dayKey, planVote, summarize } from './js/core/identity.js';
         const { useState, useEffect, useRef, useMemo, useReducer } = React;
         const E = window.EDU;
         const Sec = E.Security;
@@ -477,11 +487,12 @@
             'Chinh phục IELTS',
             'Chiến thần Học bổng / Qua môn'
         ];
-        const IDENTITY_VOTES = [
-            'Đã ghi nhận! Thêm 1 lá phiếu khẳng định bạn là người làm chủ kiến thức.',
-            'Hoàn thành xuất sắc. Kỷ luật mỗi ngày đang tạo nên sự khác biệt của một Obsidian Member.',
-            '1% tốt hơn mỗi ngày — Kho tài sản tri thức của bạn vừa được nâng cấp.'
-        ];
+        const IDENTITY_LINES = {
+            'Học giả Obsidian Kỷ luật': 'Tôi là người học mỗi ngày, kể cả hôm nay.',
+            'Chinh phục IELTS': 'Tôi là người luyện tiếng Anh mỗi ngày, kể cả hôm nay.',
+            'Chiến thần Học bổng / Qua môn': 'Tôi là người tiến gần mục tiêu mỗi ngày, kể cả hôm nay.'
+        };
+        const identityLine = (name) => IDENTITY_LINES[name] || 'Tôi là người học mỗi ngày, kể cả hôm nay.';
         const readIdentity = () => {
             const raw = Store.prefs.get('identity', '');
             if (typeof raw !== 'string') return '';
@@ -514,46 +525,73 @@
             if (days.indexOf(today) < 0) Store.prefs.set('habitDays', days.concat(today).slice(-400));
             window.dispatchEvent(new CustomEvent('edu-habit'));
         };
-        const identityVote = () => IDENTITY_VOTES[Math.floor(Math.random() * IDENTITY_VOTES.length)];
-        const affirmStudy = (toast) => {
-            noteStudyDay();
-            if (toast) toast(identityVote(), 'success', 4800);
+        const affirmStudy = () => { noteStudyDay(); };
+        const habitPulse = (summary) => {
+            if (!summary) return { studiedToday: false, streak: 0, startCue: false, neverMiss: false };
+            return {
+                studiedToday: !!summary.confirmedToday,
+                streak: summary.streak || 0,
+                startCue: !summary.confirmedToday,
+                neverMiss: !!summary.missedOnce
+            };
         };
-        const habitPulse = (items) => {
-            const set = {};
-            readHabitDays().forEach(d => { set[d] = true; });
-            (items || []).forEach(t => {
-                if (!t || !t.lastReview) return;
-                const at = new Date(t.lastReview);
-                if (!isNaN(at.getTime())) set[Plan.dayKeyOf(at)] = true;
-            });
-            const today = Plan.dayKeyOf(new Date());
-            const yest = new Date();
-            yest.setDate(yest.getDate() - 1);
-            const yesterday = Plan.dayKeyOf(yest);
-            let earlier = false;
-            Object.keys(set).forEach(d => { if (d < yesterday) earlier = true; });
-            const studiedToday = !!set[today];
-            const cursor = new Date();
-            if (!studiedToday) cursor.setDate(cursor.getDate() - 1);
-            let streak = 0;
-            if (set[Plan.dayKeyOf(cursor)]) {
-                while (set[Plan.dayKeyOf(cursor)]) {
-                    streak += 1;
-                    cursor.setDate(cursor.getDate() - 1);
-                }
-            }
-            return { studiedToday, streak, startCue: !studiedToday, neverMiss: !studiedToday && !set[yesterday] && earlier };
-        };
-        const LivingIdentityBadge = ({ items }) => {
-            const label = useIdentity();
-            const [open, setOpen] = useState(false);
-            const [tick, setTick] = useState(0);
-            const box = useRef(null);
+        const useVoteSummary = () => {
+            const [votes, setVotes] = useState(null);
             useEffect(() => {
-                const sync = () => setTick(n => n + 1);
-                window.addEventListener('edu-habit', sync);
-                return () => window.removeEventListener('edu-habit', sync);
+                let live = true;
+                const load = () => {
+                    Store.identityVotes.all().then((rows) => {
+                        if (live) setVotes(Array.isArray(rows) ? rows : []);
+                    }).catch(() => { if (live) setVotes([]); });
+                };
+                load();
+                window.addEventListener('edu-votes', load);
+                return () => { live = false; window.removeEventListener('edu-votes', load); };
+            }, []);
+            if (!votes) return null;
+            return summarize(votes, dayKey(new Date()));
+        };
+        const castSessionVote = (session, answered, toast) => {
+            if (!session) return;
+            const vote = planVote({ sessionId: session.id, type: session.voteType, answered: answered }, new Date());
+            if (!vote) return;
+            Store.addIdentityVote(vote).then((res) => {
+                if (!res || !res.saved) return;
+                try { sessionStorage.setItem('edu.ringAnim', 'pending'); } catch (e) {}
+                window.dispatchEvent(new CustomEvent('edu-votes'));
+                window.dispatchEvent(new CustomEvent('edu-study-start'));
+                const name = readIdentity() || 'người học mỗi ngày';
+                Store.identityVotes.all().then((rows) => {
+                    const summary = summarize(Array.isArray(rows) ? rows : [], dayKey(new Date()));
+                    const goal = summary.rank.next == null ? String(summary.total) : (summary.total + '/' + summary.rank.next);
+                    if (toast) toast('+1 phiếu · Bạn vừa làm đúng việc của một ' + name + ' · ' + goal, 'success', 2800);
+                }).catch(() => { if (toast) toast('+1 phiếu · Bạn vừa làm đúng việc của một ' + name, 'success', 2800); });
+            }).catch(() => {});
+        };
+        const voteTypeFor = (mode) => (mode === 'burst' ? 'quiz5' : mode === 'test' ? 'testAll' : (mode === 'flash' || mode === 'listen' ? 'flashcard' : ''));
+        const VoteRing = ({ filled, animate }) => {
+            const radius = 7;
+            const turn = 2 * Math.PI * radius;
+            return (
+                <svg width="22" height="22" viewBox="0 0 22 22" aria-hidden="true" className="shrink-0">
+                    <circle cx="11" cy="11" r={radius} fill="none" stroke="#D8C7A0" strokeOpacity="0.45" strokeWidth="2" />
+                    <circle cx="11" cy="11" r={radius} fill="none" stroke="#E7C56A" strokeWidth="2.5" strokeLinecap="round"
+                        strokeDasharray={turn} strokeDashoffset={filled ? 0 : turn} transform="rotate(-90 11 11)"
+                        style={{ transition: animate ? 'stroke-dashoffset 400ms ease' : 'none' }} />
+                </svg>
+            );
+        };
+        const LivingIdentityBadge = () => {
+            const label = useIdentity();
+            const summary = useVoteSummary();
+            const [open, setOpen] = useState(false);
+            const [cue, setCue] = useState(false);
+            const [drawn, setDrawn] = useState(false);
+            const [animateRing, setAnimateRing] = useState(false);
+            const box = useRef(null);
+            const pendingRing = useRef(false);
+            useEffect(() => {
+                try { pendingRing.current = sessionStorage.getItem('edu.ringAnim') === 'pending'; } catch (e) { pendingRing.current = false; }
             }, []);
             useEffect(() => {
                 if (!open) return undefined;
@@ -566,40 +604,118 @@
                     document.removeEventListener('keydown', onKey);
                 };
             }, [open]);
-            const pulse = habitPulse(items);
-            void tick;
+            useEffect(() => {
+                const stop = () => setCue(false);
+                window.addEventListener('edu-study-start', stop);
+                return () => window.removeEventListener('edu-study-start', stop);
+            }, []);
+            useEffect(() => {
+                if (!summary || summary.confirmedToday) { setCue(false); return undefined; }
+                const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+                if (reduce) return undefined;
+                const today = dayKey(new Date());
+                let seen = '';
+                try { seen = sessionStorage.getItem('edu.identityCue') || ''; } catch (e) { seen = today; }
+                if (seen === today) return undefined;
+                try { sessionStorage.setItem('edu.identityCue', today); } catch (e) {}
+                setCue(true);
+                return undefined;
+            }, [summary]);
+            useEffect(() => {
+                if (!summary) return undefined;
+                if (summary.confirmedToday && pendingRing.current) {
+                    setAnimateRing(true);
+                    const id = requestAnimationFrame(() => setDrawn(true));
+                    pendingRing.current = false;
+                    try { sessionStorage.removeItem('edu.ringAnim'); } catch (e) {}
+                    return () => cancelAnimationFrame(id);
+                }
+                setDrawn(!!summary.confirmedToday);
+                return undefined;
+            }, [summary]);
+            const pulse = habitPulse(summary);
             const name = label || 'Chọn bản sắc';
-            const units = (items || []).filter(Sch.isFilled).length;
             const choose = (text) => { saveIdentity(text); setOpen(false); };
+            const confirmed = !!(summary && summary.confirmedToday);
+            const rank = summary ? summary.rank : null;
+            const goal = !rank ? '' : (rank.next == null ? (summary.total + ' phiếu') : (summary.total + '/' + rank.next));
+            const openBadge = () => { setCue(false); setOpen(v => !v); };
             return (
                 <div className="relative max-w-full" ref={box}>
-                    <button type="button" onClick={() => setOpen(v => !v)} aria-expanded={open} aria-haspopup="dialog" className="inline-flex max-w-full cursor-pointer items-center gap-1.5 rounded-full border border-[#D8C7A0]/50 bg-[#161B2B] px-3 py-1 text-left text-[11px] font-semibold leading-snug text-[#D8C7A0] transition-all hover:border-[#D8C7A0]">
-                        {pulse.studiedToday ? (
+                    <button type="button" onClick={openBadge} aria-expanded={open} aria-haspopup="dialog" className={'inline-flex max-w-full cursor-pointer items-center gap-1.5 rounded-full border bg-[#161B2B] px-2.5 py-1 text-left text-[13px] font-semibold leading-snug text-[#F8F4EA] ' + (confirmed ? 'border-[#E7C56A]' : 'border-[#D8C7A0]/45') + (cue ? ' identity-cue' : '')}>
+                        <VoteRing filled={drawn && confirmed} animate={animateRing} />
+                        {!summary ? <span>Bản sắc</span> : confirmed ? (
                             <>
-                                <Icon name="shield" size={13} className="shrink-0 text-[#D8C7A0]" />
-                                <span>{name} · Đã xác nhận hôm nay</span>
-                                <Icon name="flame" size={13} className="shrink-0 text-[#D8C7A0]" />
-                                <span className="tnum">{pulse.streak} ngày</span>
+                                <Icon name="check" size={14} className="shrink-0 text-[#E7C56A]" />
+                                <span>Đã bỏ phiếu hôm nay</span>
                             </>
                         ) : (
                             <>
-                                <Icon name="target" size={13} className="shrink-0 animate-pulse text-[#D8C7A0]" />
-                                <span>{name} · Bỏ phiếu kỷ luật hôm nay (60s)</span>
+                                <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-[#E7C56A]" aria-hidden="true" />
+                                <span>Còn 1 phiếu hôm nay</span>
                             </>
                         )}
                     </button>
                     {open && (
-                        <div role="dialog" aria-label="Hồ sơ bản sắc" className="absolute left-0 z-40 mt-2 w-80 max-w-[calc(100vw-2rem)] rounded-2xl border border-[#D8C7A0]/40 bg-[#161B2B] p-4 text-left shadow-xl">
-                            <p className="text-[11px] font-semibold tracking-[0.14em] text-[#D8C7A0]">HỒ SƠ BẢN SẮC</p>
-                            <p className="mt-2 text-sm leading-6 text-[#C6CBD4]">Bạn đã tích lũy <b className="tnum font-semibold text-[#D8C7A0]">{units}</b> đơn vị kiến thức và duy trì chuỗi <b className="tnum font-semibold text-[#F8F9FC]">{pulse.streak}</b> ngày học chủ động. Mỗi hành động nhỏ là 1 lá phiếu khẳng định con người bạn.</p>
+                        <div role="dialog" aria-label="Hồ sơ bản sắc" className="absolute left-0 z-40 mt-2 w-[min(20rem,calc(100vw-2rem))] rounded-2xl border border-[#E7C56A]/50 bg-[#161B2B] p-4 text-left shadow-xl">
+                            <p className="text-[11px] font-semibold tracking-[0.14em] text-[#E7C56A]">HỒ SƠ BẢN SẮC</p>
+                            <p className="mt-2 text-base font-semibold leading-snug text-[#F8F9FC]">{name}</p>
+                            {summary ? (
+                                <p className="mt-2 text-sm leading-6 text-[#E6E1D6]">Tổng <b className="tnum font-semibold text-[#F8F9FC]">{summary.total}</b> phiếu · chuỗi <b className="tnum font-semibold text-[#F8F9FC]">{pulse.streak}</b> ngày · cấp <b className="tnum font-semibold text-[#F8F9FC]">{rank.level}</b>{goal ? <span className="tnum"> · {goal}</span> : null}</p>
+                            ) : <p className="mt-2 text-sm text-[#E6E1D6]">Đang mở phiếu…</p>}
                             <div className="mt-3 space-y-1">
                                 {IDENTITY_PRESETS.map(option => (
-                                    <button key={option} type="button" className={'block w-full rounded-xl border px-2.5 py-2 text-left text-sm transition-all ' + (option === label ? 'border-[#D8C7A0] bg-[#10141F] font-semibold text-[#D8C7A0]' : 'border-transparent text-[#C6CBD4] hover:border-[#D8C7A0]/50')} onClick={() => choose(option)}>{option}</button>
+                                    <button key={option} type="button" className={'block w-full rounded-xl border px-2.5 py-2 text-left text-sm transition-colors ' + (option === label ? 'border-[#E7C56A] bg-[#10141F] font-semibold text-[#F8F4EA]' : 'border-transparent text-[#E6E1D6] hover:border-[#E7C56A]/60')} onClick={() => choose(option)}>{option}</button>
                                 ))}
                             </div>
                         </div>
                     )}
                 </div>
+            );
+        };
+        const IdentityToday = ({ canBurst, onBurst }) => {
+            const label = useIdentity();
+            const summary = useVoteSummary();
+            const name = label || 'Chọn bản sắc';
+            const pulse = habitPulse(summary);
+            const rank = summary ? summary.rank : null;
+            const progress = rank ? Math.max(0, Math.min(1, rank.progress)) : 0;
+            const lit = summary ? summary.last7.filter(d => d.on).length : 0;
+            return (
+                <section className="card mb-4 p-4 text-left sm:p-5" aria-label="Bản sắc hôm nay">
+                    <p className="text-xs font-semibold tracking-[0.14em] text-ink2">BẢN SẮC</p>
+                    <h2 className="mt-1 text-xl font-bold leading-tight text-ink sm:text-2xl">{name}</h2>
+                    <p className="mt-2 text-base leading-6 text-ink2">{identityLine(label)}</p>
+                    {summary && rank ? (
+                        <>
+                            <div className="mt-4 flex flex-wrap gap-x-4 gap-y-1 text-sm font-semibold text-ink">
+                                <span className="tnum">{summary.total} phiếu</span>
+                                <span className="tnum">{summary.todayCount} phiếu hôm nay</span>
+                            </div>
+                            <div className="mt-3">
+                                <div className="mb-1 flex flex-wrap items-baseline justify-between gap-2 text-sm text-ink2">
+                                    <span>Cấp {rank.level}</span>
+                                    <span className="tnum">{rank.next == null ? 'Đã tới mốc cao nhất' : (summary.total + '/' + rank.next)}</span>
+                                </div>
+                                <div className="h-2.5 overflow-hidden rounded-full bg-[#E2E8F0]" role="progressbar" aria-valuemin={0} aria-valuemax={rank.next == null ? summary.total : rank.next} aria-valuenow={summary.total} aria-label="Tiến độ tới cấp kế">
+                                    <div className="h-full rounded-full bg-[#4338CA]" style={{ width: (progress * 100) + '%' }} />
+                                </div>
+                            </div>
+                            <div className="mt-4 flex gap-2" role="img" aria-label={'7 ngày gần nhất, ' + lit + ' ngày có phiếu'}>
+                                {summary.last7.map(day => (
+                                    <span key={day.date} className={'h-3.5 w-3.5 rounded-full ' + (day.on ? 'bg-[#4338CA]' : 'border-2 border-[#64748B] bg-white')} />
+                                ))}
+                            </div>
+                        </>
+                    ) : <p className="mt-3 text-sm text-ink2">Đang mở phiếu…</p>}
+                    {summary && !summary.confirmedToday && (
+                        <div className="mt-4">
+                            <p className="text-sm font-medium text-ink">Chỉ cần 1 phiên 5 câu là bạn có phiếu hôm nay</p>
+                            {pulse.neverMiss ? <p className="mt-1 text-sm font-medium text-ink">Không sao, đừng bỏ lỡ hai ngày liên tiếp.</p> : null}
+                            <button type="button" className="btn btn-primary mt-3" onClick={onBurst} disabled={!canBurst}>{canBurst ? 'Bắt đầu Băng đạn 5 câu' : 'Cần đủ 5 mục trong kho'}</button>
+                        </div>
+                    )}
+                </section>
             );
         };
 
@@ -1497,10 +1613,7 @@
                 </div>
             </>
         );
-    </script>
-
-    <!-- ===================== PRACTICE ENGINES: Flashcard · Băng đạn 5 câu · EOS ===================== -->
-    <script type="text/babel" data-presets="react">
+        /* ===================== PRACTICE ENGINES: Flashcard · Băng đạn 5 câu · EOS ===================== */
         const ItemPrompt = ({ t, hl, big }) => {
             if (!t) return null;
             const text = t.type === 'mcq' ? t.questionOrWord : Sch.recallPromptOf(t);
@@ -1675,7 +1788,7 @@
         /* ---------------------------------------------------------------
          * BurstSession — Băng đạn 5 câu
          * --------------------------------------------------------------- */
-        const BurstSession = ({ itemsById, ids, title, subtitle, canHighlight = true, highlightLockedMsg, onReview, onFinish, onExit, canExplain, toast, timerMin, renderDone, skipPreview }) => {
+        const BurstSession = ({ itemsById, ids, title, subtitle, canHighlight = true, highlightLockedMsg, onReview, onFinish, onExit, canExplain, toast, timerMin, renderDone, skipPreview, sessionId, voteType }) => {
             const [s, dispatch] = useReducer(Burst.reduce, ids, (x) => Burst.init(x.filter(id => itemsById.has(id)), { skipPreview }));
             const [fb, setFb] = useState(null);
             const [input, setInput] = useState('');
@@ -1724,8 +1837,10 @@
             useEffect(() => {
                 if (s.phase === 'done' && !finished.current) {
                     finished.current = true;
-                    affirmStudy(toast);
-                    if (onFinish) onFinish(Burst.stats(s));
+                    const st = Burst.stats(s);
+                    affirmStudy();
+                    castSessionVote({ id: sessionId, voteType: voteType }, st.answered, toast);
+                    if (onFinish) onFinish(st);
                 }
             }, [s.phase]);
 
@@ -2031,7 +2146,8 @@
             useEffect(() => {
                 if (!done || voted.current) return;
                 voted.current = true;
-                affirmStudy(toast);
+                affirmStudy();
+                castSessionVote(session, known.length + forgot.length, toast);
             }, [done]);
 
             useEffect(() => {
@@ -2147,8 +2263,8 @@
                         )}
                         {!isSlot && (
                             <div className="flex flex-wrap gap-2">
-                                {forgot.length > 0 && <button type="button" className="btn btn-danger" onClick={() => onRestart(forgot.slice(), 'flash', session.title.replace(/ · ôn lại$/, '') + ' · ôn lại')}><Icon name="rotate" /> Ôn lại thẻ chưa nhớ</button>}
-                                <button type="button" className="btn btn-primary" onClick={() => onRestart(Sch.shuffle(ids), mode, session.title.replace(/ · ôn lại$/, ''))}><Icon name="shuffle" /> Làm lại</button>
+                                {forgot.length > 0 && <button type="button" className="btn btn-danger" onClick={() => onRestart(forgot.slice(), 'flash', session.title.replace(/ · ôn lại$/, '') + ' · ôn lại', session.voteType === 'reviewWeak' ? 'reviewWeak' : 'flashcard')}><Icon name="rotate" /> Ôn lại thẻ chưa nhớ</button>}
+                                <button type="button" className="btn btn-primary" onClick={() => onRestart(Sch.shuffle(ids), mode, session.title.replace(/ · ôn lại$/, ''), session.voteType || voteTypeFor(mode))}><Icon name="shuffle" /> Làm lại</button>
                                 <button type="button" className="btn btn-secondary" onClick={onClose}>Đóng</button>
                             </div>
                         )}
@@ -2636,10 +2752,7 @@
                 </Modal>
             );
         };
-    </script>
-
-    <!-- ===================== MODE 1 · Sổ tay & Lịch học ===================== -->
-    <script type="text/babel" data-presets="react">
+        /* ===================== MODE 1 · Sổ tay & Lịch học ===================== */
         const sessionModeOf = (m) => (m === 'test' ? 'test' : m === 'burst' ? 'burst' : 'flash');
 
         const b64EncodeUtf8 = (str) => {
@@ -2868,7 +2981,7 @@
 
         /* ---------- Hôm nay ---------- */
         const TodayView = (p) => {
-            const { plan, planReady, week, nextWeek, now, items, itemsById, groups, session, cur, minimal, setMinimal, saveWeek, addItems, finishGate, snooze, enterEarly, askNotify, bonus, closeSession, startSession, review, patch, toast, finishSlot, openLibrary } = p;
+            const { plan, planReady, week, nextWeek, now, items, itemsById, groups, session, cur, minimal, setMinimal, saveWeek, addItems, finishGate, snooze, enterEarly, askNotify, bonus, closeSession, startSession, review, patch, toast, finishSlot, openLibrary, onBurst } = p;
             const [editOpen, setEditOpen] = useState(false);
             if (!planReady || !plan) return <p className="text-center text-muted py-16">Đang mở ngày hôm nay…</p>;
 
@@ -2884,11 +2997,12 @@
                     {editOpen && <PlanEditor week={week} nextWeek={nextWeek} groups={groups} onSave={saveWeek} toast={toast} />}
                 </div>
             );
+            const hero = <IdentityToday canBurst={items.filter(Sch.isFilled).length >= 5} onBurst={onBurst} />;
 
             const renderSession = () => {
                 if (session.mode === 'burst') {
                     return (
-                        <BurstSession key={session.id} itemsById={itemsById} ids={session.ids} title={session.title} subtitle={session.slotId ? 'Pha 1 · Băng đạn 5 câu' : 'Băng đạn 5 câu'}
+                        <BurstSession key={session.id} itemsById={itemsById} ids={session.ids} title={session.title} subtitle={session.slotId ? 'Pha 1 · Băng đạn 5 câu' : 'Băng đạn 5 câu'} sessionId={session.id} voteType={session.voteType}
                             onReview={(id, ok) => review(id, ok)} toast={toast}
                             onFinish={(st) => { if (session.slotId) finishSlot({ slotId: session.slotId, cardsDone: st.total, remembered: st.firstTryCorrect }); }}
                             renderDone={session.slotId ? () => null : undefined} onExit={session.slotId ? undefined : closeSession} />
@@ -2913,6 +3027,7 @@
                 ].join('\n');
                 return (
                     <div className="max-w-xl mx-auto text-center">
+                        <IdentityToday canBurst={items.filter(Sch.isFilled).length >= 5} onBurst={onBurst} />
                         <DayStrip dayKey={plan.dayKey} />
                         <div className="card p-6 sm:p-8 enter">
                             <div className="mx-auto w-14 h-14 rounded-2xl bg-success text-white flex items-center justify-center mb-4"><Icon name="check" size={28} /></div>
@@ -2940,6 +3055,7 @@
             if (cur.kind === 'GATE') {
                 return (
                     <div className="max-w-xl mx-auto">
+                        {hero}
                         <DayStrip dayKey={plan.dayKey} />
                         <SlotTrack slots={plan.slots} activeId={slot.id} />
                         <FlowBridge slot={slot} items={items} addItems={addItems} finishGate={finishGate} toast={toast} now={now} />
@@ -2951,6 +3067,7 @@
             if (inSession) {
                 return (
                     <div className="max-w-3xl mx-auto">
+                        {hero}
                         <SlotTrack slots={plan.slots} activeId={slot.id} />
                         <div className="flex flex-wrap items-center justify-center gap-2 mb-4">
                             <span className="chip bg-surface2 text-ink2">Pha 1 · {session.ids.length} thẻ · {Sch.groupLabel(slot.group)}</span>
@@ -2966,6 +3083,7 @@
             if (cur.kind === 'ON_TIME_ACTIVE' || cur.kind === 'LATE_RECOVERY') {
                 return (
                     <div className="max-w-xl mx-auto text-center py-8">
+                        {hero}
                         <DayStrip dayKey={plan.dayKey} />
                         {statusLine}
                         <Empty icon="layers" title={'Ca ' + slot.id + ' · ' + slot.anchorLabel + ' chưa có thẻ'}>Nhóm "{Sch.groupLabel(slot.group)}" đang trống.</Empty>
@@ -2978,6 +3096,7 @@
             const perm = window.Notification ? Notification.permission : 'denied';
             return (
                 <div className="max-w-xl mx-auto text-center py-4">
+                    {hero}
                     <DayStrip dayKey={plan.dayKey} />
                     {plan.slots.some(s => s.dienTam) && <p className="text-sm text-warn mb-4 text-flow">Một vài phần sách hôm nay đang là buổi ôn tạm. Sửa lịch ngày mai nếu khác.</p>}
                     <SlotTrack slots={plan.slots} activeId={slot.id} />
@@ -3587,7 +3706,7 @@
             const [tease, setTease] = useState(null);
             const [paywall, setPaywall] = useState(false);
             const [passage, setPassage] = useState(false);
-            const [habitTick, setHabitTick] = useState(0);
+            const voteSummary = useVoteSummary();
             const fund = useFund();
             const obsidian = obsidianOf(fund);
             const teaseTimer = useRef(0);
@@ -3601,14 +3720,8 @@
                 return () => { window.removeEventListener('mouseup', up); window.clearTimeout(teaseTimer.current); };
             }, []);
             useEffect(() => { setSel(new Set()); setShown(150); }, [groupFilter, typeFilter, search]);
-            useEffect(() => {
-                const sync = () => setHabitTick(n => n + 1);
-                window.addEventListener('edu-habit', sync);
-                return () => window.removeEventListener('edu-habit', sync);
-            }, []);
 
-            const pulse = habitPulse(items);
-            void habitTick;
+            const pulse = habitPulse(voteSummary);
 
             const q = search.trim().toLowerCase();
             const rows = items.filter(t => Sch.inGroup(t, groupFilter) && (typeFilter === 'all' || t.type === typeFilter) &&
@@ -3775,13 +3888,13 @@
                         </div>
                         <div className="p-3 sm:p-4 flex flex-wrap gap-2">
                             <button type="button" onClick={() => onPractice(studyable, 'flash', Sch.groupLabel(groupFilter))} disabled={!studyable.length} className="btn btn-primary"><Icon name="layers" /> Flashcard</button>
-                            <button type="button" onClick={() => onPractice(studyable, 'burst', 'Băng đạn · ' + Sch.groupLabel(groupFilter))} disabled={!studyable.length} className="btn btn-secondary"><Icon name="zap" /> Băng đạn 5 câu{pulse.startCue && studyable.length ? <span className="ml-1 inline-flex items-center rounded-full bg-[#D8C7A0] px-1.5 py-0.5 text-[10px] font-semibold leading-none text-[#161B2B]">Khởi động 60s</span> : null}</button>
+                            <button type="button" onClick={() => onPractice(studyable, 'burst', 'Băng đạn · ' + Sch.groupLabel(groupFilter))} disabled={!studyable.length} className="btn btn-secondary"><Icon name="zap" /> Băng đạn 5 câu</button>
                             <button type="button" onClick={() => onPractice(studyable, 'test', Sch.groupLabel(groupFilter))} disabled={!studyable.length} className="btn btn-secondary"><Icon name="pen" /> Test {groupFilter === 'all' ? 'tất cả' : 'nhóm này'}</button>
                             <button type="button" onClick={onWeak} className="btn btn-secondary"><Icon name="flame" /> Ôn từ yếu ({weakCount})</button>
                             <button type="button" onClick={() => { if (!requireTurns(toast)) return; onPractice(mcqPool, 'eos', 'EOS · ' + Sch.groupLabel(groupFilter)); }} disabled={mcqPool.length < 5} className="btn btn-secondary"><Icon name="monitor" /> Thi thử EOS</button>
                         </div>
                         {pulse.neverMiss && (
-                            <p className="-mt-1 px-3 pb-3 text-xs leading-5 text-slate-500 sm:px-4">Một người kỷ luật có thể gián đoạn 1 ngày, nhưng không bao giờ bỏ lỡ 2 ngày liên tiếp. Hoàn thành 5 câu ngay để khẳng định bản lĩnh của bạn!</p>
+                            <p className="-mt-1 px-3 pb-3 text-sm leading-5 text-ink2 sm:px-4">Không sao, đừng bỏ lỡ hai ngày liên tiếp.</p>
                         )}
                         <div className="px-3 sm:px-4 pb-3 sm:pb-4 flex flex-wrap gap-2">
                             <button type="button" onClick={() => setPassage(true)} className={'inline-flex items-center gap-2 rounded-xl border px-3 min-h-[36px] text-sm font-medium text-[#4338CA] hover:bg-[#4338CA]/20 ' + (obsidian ? 'border-[#D8C7A0] bg-[#F8F9FC] shadow-sm' : 'border-[#4338CA]/20 bg-[#4338CA]/10')}><Icon name="sparkles" size={14} /> AI Quét bài đọc / Đề thi</button>
@@ -3933,12 +4046,12 @@
                             r.wrong.forEach(w => review(w.id, false));
                             return true;
                         }}
-                        onDrillWrong={(ids) => startSession(ids, 'burst', 'Nhồi lại câu sai EOS')}
+                        onDrillWrong={(ids) => startSession(ids, 'burst', 'Nhồi lại câu sai EOS', '')}
                         onExit={closeSession} />
                 );
             }
             if (session && session.mode === 'burst') {
-                return <BurstSession key={session.id} itemsById={itemsById} ids={session.ids} title={session.title} onReview={(id, ok) => review(id, ok)} onExit={closeSession} toast={toast} canExplain={AI.ready()} />;
+                return <BurstSession key={session.id} itemsById={itemsById} ids={session.ids} title={session.title} sessionId={session.id} voteType={session.voteType} onReview={(id, ok) => review(id, ok)} onExit={closeSession} toast={toast} canExplain={AI.ready()} />;
             }
             if (session) {
                 return <FlashSession key={session.id} items={items} session={session} onReview={review} onPatch={patch} onClose={closeSession} onRestart={startSession} toast={toast} />;
@@ -3975,10 +4088,7 @@
                 </div>
             );
         };
-    </script>
-
-    <!-- ===================== MODE 2 · Kho Src Qua Môn ===================== -->
-    <script type="text/babel" data-presets="react">
+        /* ===================== MODE 2 · Kho Src Qua Môn ===================== */
         const progKey = (packId, itemId) => packId + '|' + itemId;
         const isMastered = (rec) => !!(rec && rec.correctCount > 0);
         const isPackWeak = (rec, now) => !!(rec && rec.wrongCount > 0 && (rec.srsStage === 0 || Sch.isDue(rec, now)));
@@ -4418,10 +4528,7 @@
                 </div>
             );
         };
-    </script>
-
-    <!-- ===================== APP ROOT ===================== -->
-    <script type="text/babel" data-presets="react">
+        /* ===================== APP ROOT ===================== */
         const BASE_TITLE = 'FPass · Học đúng giờ, thi chắc qua';
 
         const promptOf = (t) => {
@@ -4778,30 +4885,42 @@
             const addItems = (raws) => mergeItems(raws.map(r => Sch.normalizeItem(Object.assign({}, r, { id: undefined }))), 'append');
 
             /* ---------- Phiên học Mode 1 ---------- */
+            const noteStudyStart = () => window.dispatchEvent(new CustomEvent('edu-study-start'));
             const startPractice = (list, mode, title, opts) => {
                 const pool = (list || []).filter(Sch.isFilled);
                 if (!pool.length) { toast('Không có mục để luyện', 'error'); return; }
                 if (mode === 'eos') {
                     if (!requireTurns(toast, true)) return;
+                    noteStudyStart();
                     const n = (opts && opts.count) || Math.min(40, pool.length);
                     setSession({ id: Date.now(), title, mode: 'eos', pool, count: n, minutes: (opts && opts.minutes) || Math.max(5, Math.round(n * 1.2)), ids: [] });
                 } else {
-                    setSession({ id: Date.now(), title, mode, ids: Sch.shuffle(pool.map(t => t.id)) });
+                    noteStudyStart();
+                    setSession({ id: Date.now(), title, mode, ids: Sch.shuffle(pool.map(t => t.id)), voteType: voteTypeFor(mode) });
                 }
                 dispatch({ type: 'TAB', tab: 'practice' });
             };
-            const restartSession = (ids, mode, title) => setSession(s => ({ id: Date.now(), title, mode, ids, slotId: null }));
+            const startQuickBurst = () => {
+                const pool = Sch.shuffle(items.filter(Sch.isFilled)).slice(0, 5);
+                if (pool.length < 5) return;
+                noteStudyStart();
+                setSession({ id: Date.now(), title: 'Băng đạn 5 câu', mode: 'burst', voteType: 'quiz5', ids: pool.map(t => t.id), slotId: null });
+                dispatch({ type: 'TAB', tab: 'practice' });
+            };
+            const restartSession = (ids, mode, title, voteType) => { noteStudyStart(); setSession({ id: Date.now(), title, mode, ids, slotId: null, voteType: voteType === undefined ? voteTypeFor(mode) : voteType }); };
             const studyFrom = (t) => {
                 const g = Sch.groupKey(t);
                 const same = items.filter(x => Sch.groupKey(x) === g && Sch.isFilled(x));
                 const i = Math.max(0, same.findIndex(x => x.id === t.id));
-                setSession({ id: Date.now(), title: Sch.groupLabel(g), mode: 'flash', ids: same.slice(i).concat(same.slice(0, i)).map(x => x.id) });
+                noteStudyStart();
+                setSession({ id: Date.now(), title: Sch.groupLabel(g), mode: 'flash', voteType: 'flashcard', ids: same.slice(i).concat(same.slice(0, i)).map(x => x.id) });
                 dispatch({ type: 'TAB', tab: 'practice' });
             };
             const startWeak = () => {
                 const weak = Sch.byGroup(items, groupFilter).filter(t => Sch.isWeak(t)).sort((a, b) => Sch.weakScore(b) - Sch.weakScore(a)).slice(0, 20);
                 if (!weak.length) { toast('Không có mục yếu hoặc đến hạn trong nhóm này', 'info'); return; }
-                setSession({ id: Date.now(), title: 'Ôn từ yếu', mode: 'flash', ids: weak.map(t => t.id) });
+                noteStudyStart();
+                setSession({ id: Date.now(), title: 'Ôn từ yếu', mode: 'flash', voteType: 'reviewWeak', ids: weak.map(t => t.id) });
                 dispatch({ type: 'TAB', tab: 'practice' });
             };
 
@@ -4852,12 +4971,15 @@
             const enterEarly = (slot) => {
                 const ids = deckFor(slot, Plan.cardLimit(slot, 'ON_TIME_ACTIVE', false));
                 if (!ids.length) { toast('Nhóm này chưa có thẻ', 'error'); return; }
-                setSession({ id: Date.now(), title: 'Ca ' + slot.id + ' · ' + slot.anchorLabel, mode: sessionModeOf(slot.mode), ids, slotId: slot.id });
+                const mode = sessionModeOf(slot.mode);
+                noteStudyStart();
+                setSession({ id: Date.now(), title: 'Ca ' + slot.id + ' · ' + slot.anchorLabel, mode: mode, voteType: voteTypeFor(mode), ids, slotId: slot.id });
             };
             const bonus = () => {
                 const ids = Sch.shuffle(items.filter(Sch.isFilled)).slice(0, 5).map(t => t.id);
                 if (!ids.length) { toast('Chưa có thẻ để học thêm', 'error'); return; }
-                setSession({ id: Date.now(), title: 'Thêm 5 thẻ', mode: 'flash', ids, slotId: null });
+                noteStudyStart();
+                setSession({ id: Date.now(), title: 'Thêm 5 thẻ', mode: 'flash', voteType: 'flashcard', ids, slotId: null });
             };
             const askNotify = () => {
                 if (!window.Notification) { toast('Trình duyệt này không có thông báo', 'error'); return; }
@@ -4888,7 +5010,9 @@
                 if (!ids.length) return;
                 const same = session && session.slotId === slot.id && session.ids.length === ids.length && session.ids[0] === ids[0];
                 if (same) return;
-                setSession({ id: Date.now(), title: 'Ca ' + slot.id + ' · ' + slot.anchorLabel, mode: sessionModeOf(slot.mode), ids, slotId: slot.id });
+                const mode = sessionModeOf(slot.mode);
+                noteStudyStart();
+                setSession({ id: Date.now(), title: 'Ca ' + slot.id + ' · ' + slot.anchorLabel, mode: mode, voteType: voteTypeFor(mode), ids, slotId: slot.id });
                 dispatch({ type: 'ZERO_CLICK' });
             }, [now, plan, items, minimal, session, loaded]);
 
@@ -5032,7 +5156,7 @@
                             nav.tab === 'today' ? (
                                 <TodayView plan={plan} planReady={planReady} week={week} nextWeek={nextWeek} now={now} items={items} itemsById={itemsById} groups={groups}
                                     session={session} cur={cur} minimal={minimal} setMinimal={setMinimal} saveWeek={saveWeek} addItems={addItems} finishGate={finishGate}
-                                    snooze={snooze} enterEarly={enterEarly} askNotify={askNotify} bonus={bonus} closeSession={() => setSession(null)} startSession={restartSession}
+                                    snooze={snooze} enterEarly={enterEarly} askNotify={askNotify} bonus={bonus} closeSession={() => setSession(null)} startSession={restartSession} onBurst={startQuickBurst}
                                     review={review} patch={patch} toast={toast} finishSlot={finishSlot} openLibrary={() => dispatch({ type: 'TAB', tab: 'library' })} />
                             ) : nav.tab === 'library' ? (
                                 <LibraryView items={items} setItems={setItems} groups={groups} groupFilter={groupFilter} setGroupFilter={setGroupFilter}
