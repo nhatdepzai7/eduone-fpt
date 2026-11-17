@@ -925,13 +925,47 @@
             </div>
         );
 
+        let heldUtterance = null;
+        if (window.speechSynthesis) {
+            try { window.speechSynthesis.getVoices(); } catch (e) {}
+            try {
+                window.speechSynthesis.addEventListener('voiceschanged', () => {
+                    try { window.speechSynthesis.getVoices(); } catch (err) {}
+                });
+            } catch (e) {}
+        }
+        const englishVoice = () => {
+            const list = (window.speechSynthesis && window.speechSynthesis.getVoices()) || [];
+            return list.filter(v => /^en-GB/i.test(v.lang))[0]
+                || list.filter(v => /^en-US/i.test(v.lang))[0]
+                || list.filter(v => /^en/i.test(v.lang))[0]
+                || null;
+        };
         const speak = (text, rate) => {
-            if (!text || !window.speechSynthesis) return;
-            const u = new SpeechSynthesisUtterance(text);
-            u.lang = 'en-GB';
-            u.rate = rate || 0.8;
-            speechSynthesis.cancel();
-            speechSynthesis.speak(u);
+            const synth = window.speechSynthesis;
+            if (!text || !synth) return;
+            const run = () => {
+                const u = new SpeechSynthesisUtterance(String(text));
+                const voice = englishVoice();
+                if (voice) {
+                    u.voice = voice;
+                    u.lang = voice.lang;
+                } else {
+                    u.lang = 'en-US';
+                }
+                u.rate = rate || 0.8;
+                u.volume = 1;
+                heldUtterance = u;
+                try { synth.resume(); } catch (e) {}
+                try { synth.speak(u); } catch (e) {}
+            };
+            try { synth.resume(); } catch (e) {}
+            if (synth.speaking || synth.pending) {
+                try { synth.cancel(); } catch (e) {}
+                setTimeout(run, 80);
+                return;
+            }
+            run();
         };
 
         const downloadBlob = (blob, filename) => {
@@ -1939,10 +1973,10 @@
             const continueResult = () => {
                 if (!fb || !cur) return;
                 dispatch({ type: 'ANSWER', id: fb.id, correct: fb.ok, now: Date.now() });
-                setNow(Date.now());
-                setFb(null);
-                setInput('');
-                lock.current = false;
+                    setNow(Date.now());
+                    setFb(null);
+                    setInput('');
+                    lock.current = false;
             };
 
             const pick = (di) => {
@@ -1981,9 +2015,9 @@
                     overrideButton: true,
                     run: () => {
                         if (fb) { continueResult(); return; }
-                        if (s.phase === 'preview') dispatch({ type: 'START_DRILL' });
-                        else if (s.phase === 'batchDone') dispatch({ type: 'NEXT_BATCH', skipPreview });
-                        else return false;
+                    if (s.phase === 'preview') dispatch({ type: 'START_DRILL' });
+                    else if (s.phase === 'batchDone') dispatch({ type: 'NEXT_BATCH', skipPreview });
+                    else return false;
                     }
                 },
                 Space: {
@@ -2154,8 +2188,8 @@
                                     <ItemAnswer t={cur} hl />
                                 <InsightCard item={cur} />
                                 </div>
-                        </div>
-                    )}
+                                </div>
+                            )}
                     {fb && (
                         <div className="mt-3">
                             <button type="button" className="btn btn-primary" onClick={continueResult} autoFocus>Tiếp tục <Kbd>Enter</Kbd> <Kbd>Space</Kbd></button>
@@ -5055,8 +5089,8 @@
                     } catch (e) {
                         toast('Không mở được kho dữ liệu: ' + e.message, 'error');
                     }
-                        setLoaded(true);
-                    })();
+                    setLoaded(true);
+                })();
                 const reloadLibrary = () => {
                     Store.items.all().then((rows) => {
                         const next = rows.map((row) => Sch.normalizeItem(row));
