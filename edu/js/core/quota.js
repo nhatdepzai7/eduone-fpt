@@ -116,7 +116,8 @@
             aiCredits: fund.aiCredits || 0,
             aiLimit: fund.aiLimit || AI_FREE,
             scans: fund.scans || 0,
-            scanGrant: fund.scanGrant || 0
+            scanGrant: fund.scanGrant || 0,
+            proUntil: fund.proUntil === -1 ? -1 : Math.max(0, Math.floor(Number(fund.proUntil)) || 0)
         };
     };
 
@@ -141,6 +142,7 @@
             fund.aiLimit = AI_FREE;
             fund.scans = 0;
             fund.scanGrant = 0;
+            fund.proUntil = 0;
         }
         return save(fund);
     };
