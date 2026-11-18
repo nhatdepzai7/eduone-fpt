@@ -1099,8 +1099,57 @@
             const copyFund = () => {
                 copyText(fund.code).then(() => toast('Đã copy mã ' + fund.code + '. Máy khác dán mã này để dùng chung quỹ.', 'success')).catch(() => toast('Không copy được. Hãy chọn mã và copy tay.', 'error'));
             };
-            const useSharedCode = () => {
+            const [giftCode, setGiftCode] = useState('');
+            const [giftBusy, setGiftBusy] = useState(false);
+            const askGift = (code) => {
+                window.dispatchEvent(new CustomEvent('edu-gift', { detail: { code: String(code || '').toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 24) } }));
+            };
+            const activateGift = async (raw) => {
+                const code = String(raw || '').toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 24);
+                if (code.length < 4) { toast('Mã Obsidian PRO cần từ 4 ký tự.', 'error'); return; }
+                if (!googleToken()) { askGift(code); return; }
+                setGiftBusy(true);
+                try {
+                    const gift = await redeemGiftCode(code);
+                    setGiftCode('');
+                    toast(gift.proUntil === -1 ? 'Đã mở Obsidian PRO vĩnh viễn.' : 'Đã mở Obsidian PRO.', 'success');
+                } catch (e) {
+                    if (e.needLogin) askGift(code);
+                    else toast(e.message, 'error');
+                } finally {
+                    setGiftBusy(false);
+                }
+            };
+            const useSharedCode = async () => {
                 const text = incoming.trim();
+                if (!text) return;
+                const cleaned = text.toUpperCase().replace(/[^A-Z0-9]/g, '');
+                if (!/^EDUF1\./i.test(text) && cleaned.length >= 4) {
+                    if (!googleToken()) {
+                        if (cleaned.length > 12) {
+                            setIncoming('');
+                            askGift(cleaned);
+                            return;
+                        }
+                        toast('Nếu đây là mã Obsidian PRO do admin cấp, dán vào ô Mã Obsidian PRO bên dưới. Ô này chỉ nhận mã quỹ lượt.', 'info');
+                    } else {
+                        setGiftBusy(true);
+                        try {
+                            const gift = await redeemGiftCode(cleaned);
+                            setIncoming('');
+                            toast(gift.proUntil === -1 ? 'Đã mở Obsidian PRO vĩnh viễn.' : 'Đã mở Obsidian PRO.', 'success');
+                            return;
+                        } catch (e) {
+                            if (e.needLogin) { setIncoming(''); askGift(cleaned); return; }
+                            if (!/Không có mã này/.test(e.message || '')) {
+                                toast(e.message, 'error');
+                                return;
+                            }
+                        } finally {
+                            setGiftBusy(false);
+                        }
+                    }
+                }
                 let saved;
                 try {
                     saved = /^EDUF1\./i.test(text) ? E.Quota.importCode(text) : E.Quota.setCode(text);
@@ -1224,11 +1273,19 @@
                                     </div>
                                     <div>
                                         <p className="mb-2 text-sm font-semibold">Dùng chung mã này</p>
-                                        <p className="mb-2 text-xs text-muted">Máy khác dán đúng mã này. Hai máy trừ chung một số lượt trên server. Mã dài EDUF1 cũ vẫn dán được.</p>
+                                        <p className="mb-2 text-xs text-muted">Chỉ dán mã quỹ lượt EOS. Mã admin cấp PRO không dán vào đây.</p>
                                         <label className="block"><span className="label">Dán mã quỹ</span>
                                             <textarea value={incoming} onChange={(e) => setIncoming(e.target.value)} rows={2} className="field text-xs" placeholder="Dán mã ngắn hoặc EDUF1...." />
                                         </label>
                                         <button type="button" className="btn btn-secondary btn-sm mt-2" disabled={!incoming.trim()} onClick={useSharedCode}>Dùng mã này</button>
+                                    </div>
+                                </div>
+                                <div className="mt-4 rounded-xl border border-[#D8C7A0]/50 bg-[#10141F] p-3 text-white">
+                                    <p className="text-sm font-semibold text-[#D8C7A0]">Mã Obsidian PRO</p>
+                                    <p className="mt-1 text-xs text-slate-300">Dán mã admin cấp vào đây. Cần đăng nhập Google trước khi kích hoạt.</p>
+                                    <div className="mt-2 flex gap-2">
+                                        <input value={giftCode} onChange={(e) => setGiftCode(e.target.value.toUpperCase())} maxLength={24} className="field uppercase bg-white text-ink" placeholder="EARLYBIRD" aria-label="Mã Obsidian PRO" />
+                                        <button type="button" className="btn btn-secondary btn-sm shrink-0" disabled={!giftCode.trim() || giftBusy} onClick={() => activateGift(giftCode)}>{giftBusy ? '…' : 'Kích hoạt'}</button>
                                     </div>
                                 </div>
                             </div>
@@ -1339,7 +1396,7 @@
                         </div>
                         <div>
                             <p className="text-sm font-semibold mb-2">Dùng chung mã này</p>
-                            <p className="text-xs text-muted mb-2">Copy mã ngắn bên dưới. Máy khác dán đúng mã đó vào ô phía dưới. Hai máy trừ chung một số lượt trên server. Mã dài EDUF1 cũ vẫn dán được.</p>
+                            <p className="text-xs text-muted mb-2">Chỉ dán mã quỹ lượt EOS. Mã admin cấp PRO không dán vào đây.</p>
                             <div className="flex flex-wrap gap-2">
                                 <button type="button" className="btn btn-secondary btn-sm" onClick={copyFund}>Copy mã {fund.code}</button>
                             </div>
@@ -1347,6 +1404,14 @@
                                 <textarea value={incoming} onChange={(e) => setIncoming(e.target.value)} rows={2} className="field text-xs" placeholder="Dán mã ngắn hoặc EDUF1...." />
                             </label>
                             <button type="button" className="btn btn-secondary btn-sm mt-2" disabled={!incoming.trim()} onClick={useSharedCode}>Dùng mã này</button>
+                            <div className="mt-4 rounded-xl border border-[#D8C7A0]/50 bg-[#10141F] p-3 text-white">
+                                <p className="text-sm font-semibold text-[#D8C7A0]">Mã Obsidian PRO</p>
+                                <p className="mt-1 text-xs text-slate-300">Dán mã admin cấp vào đây. Cần đăng nhập Google trước khi kích hoạt.</p>
+                                <div className="mt-2 flex gap-2">
+                                    <input value={giftCode} onChange={(e) => setGiftCode(e.target.value.toUpperCase())} maxLength={24} className="field uppercase bg-white text-ink" placeholder="EARLYBIRD" aria-label="Mã Obsidian PRO" />
+                                    <button type="button" className="btn btn-secondary btn-sm shrink-0" disabled={!giftCode.trim() || giftBusy} onClick={() => activateGift(giftCode)}>{giftBusy ? '…' : 'Kích hoạt'}</button>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -4973,15 +5038,39 @@
                     setFeedbackOpen(false);
                     setSupportOpen(true);
                 };
+                const redeemFromEvent = (e) => {
+                    const code = e && e.detail && e.detail.code ? String(e.detail.code) : '';
+                    if (!code) return;
+                    if (!googleToken()) {
+                        setPendingGift(code);
+                        setSettingsOpen(false);
+                        setGoogleOpen(true);
+                        return;
+                    }
+                    redeemGiftCode(code).then((gift) => {
+                        setGoogleAccount(Store.prefs.get('googleUser', null));
+                        toast(gift.proUntil === -1 ? 'Đã mở Obsidian PRO vĩnh viễn.' : 'Đã mở Obsidian PRO.', 'success');
+                    }).catch((err) => {
+                        if (err.needLogin) {
+                            setPendingGift(code);
+                            setSettingsOpen(false);
+                            setGoogleOpen(true);
+                            return;
+                        }
+                        toast(err.message, 'error');
+                    });
+                };
                 window.addEventListener('edu-fund-shop', open);
                 window.addEventListener('edu-upgrade', openUpgrade);
                 window.addEventListener('edu-membership', showMember);
+                window.addEventListener('edu-gift', redeemFromEvent);
                 window.addEventListener('fpass-legal', showLegal);
                 window.addEventListener('fpass-support', showSupport);
                 return () => {
                     window.removeEventListener('edu-fund-shop', open);
                     window.removeEventListener('edu-upgrade', openUpgrade);
                     window.removeEventListener('edu-membership', showMember);
+                    window.removeEventListener('edu-gift', redeemFromEvent);
                     window.removeEventListener('fpass-legal', showLegal);
                     window.removeEventListener('fpass-support', showSupport);
                 };
