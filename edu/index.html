@@ -2303,13 +2303,15 @@
 
             const allGraded = (k, f) => ids.length > 0 && ids.every(id => k.indexOf(id) >= 0 || f.indexOf(id) >= 0);
 
-            const next = () => {
+            const next = (counts) => {
                 setNote('');
                 setHeld(false);
+                const knownNow = counts && Array.isArray(counts.k) ? counts.k : known;
+                const forgotNow = counts && Array.isArray(counts.f) ? counts.f : forgot;
                 if (index < ids.length - 1) { setIndex(index + 1); return; }
-                if (!isSlot || allGraded(known, forgot)) {
+                if (!isSlot || allGraded(knownNow, forgotNow)) {
                     setDone(true);
-                    if (onFinish && isSlot) onFinish({ slotId: session.slotId, cardsDone: ids.length, remembered: known.length });
+                    if (onFinish && isSlot) onFinish({ slotId: session.slotId, cardsDone: ids.length, remembered: knownNow.length });
                     return;
                 }
                 setNote('Ca này tính xong khi bạn chấm hết các thẻ.');
@@ -2331,9 +2333,12 @@
             const gradeFlash = (ok) => {
                 if (!t || done || held) return;
                 onReview(t.id, ok);
-                const r = Sch.applyReview(t, ok);
-                mark(t.id, ok);
-                setNote(ok ? 'Ôn lại sau ' + r.afterDays + ' ngày' : 'Thẻ này vào mục ôn yếu');
+                const counts = mark(t.id, ok);
+                if (ok) {
+                    next(counts);
+                    return;
+                }
+                setNote('Thẻ này vào mục ôn yếu');
                 setHeld(true);
                 if (t.type !== 'mcq') speak(t.questionOrWord);
             };
