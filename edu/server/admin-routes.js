@@ -1,6 +1,6 @@
 import { createGift, listGifts, toggleGift } from './account.js';
 import { clearCookie, loginAdmin, logoutAdmin, requireAdmin, sessionCookie, sessionToken, trustedWrite } from './admin-auth.js';
-import { deleteOfficial, listOfficial, listPending, publishPending, rejectPending, saveOfficial, takePending } from './exams-store.js';
+import { OFFICIAL_BODY, deleteOfficial, listOfficial, listPending, publishPending, rejectPending, saveOfficial, takePending } from './exams-store.js';
 import { clientIp, fail, json, mount, sameOrigin } from './http.js';
 import { adjustAiGrant, adjustQuota, listQuotas, listTransactions } from './ledger.js';
 import { recordVisit, visitHistory } from './visits.js';
@@ -78,7 +78,7 @@ export async function handleExams(req, env) {
             const pending = await listPending(env);
             return json(200, { exams, pending });
         }
-        const body = await req.json(400000);
+        const body = await req.json(OFFICIAL_BODY);
         const op = body && body.op;
         if (req.method === 'DELETE' || op === 'delete') {
             await deleteOfficial(env, (body && body.id) || '');

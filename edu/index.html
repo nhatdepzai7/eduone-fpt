@@ -437,6 +437,25 @@
 
         const Kbd = ({ children }) => <kbd className="kbd">{children}</kbd>;
 
+        /* Ngôn ngữ hiển thị câu hỏi song ngữ: nhớ trên máy, đổi ở một màn hình thì mọi màn hình theo. */
+        const QLANG_EVENT = 'edu-qlang';
+        const readQLang = () => (Store.prefs.get('qlang', 'en') === 'vi' ? 'vi' : 'en');
+        const useQLang = () => {
+            const [lang, setLang] = useState(readQLang);
+            useEffect(() => {
+                const sync = () => setLang(readQLang());
+                window.addEventListener(QLANG_EVENT, sync);
+                return () => window.removeEventListener(QLANG_EVENT, sync);
+            }, []);
+            const choose = (next) => {
+                Store.prefs.set('qlang', next === 'vi' ? 'vi' : 'en');
+                window.dispatchEvent(new Event(QLANG_EVENT));
+            };
+            return [lang, choose];
+        };
+        const langMap = (byId, lang) => (lang === 'vi' ? new Map(Array.from(byId, ([k, t]) => [k, Sch.inLang(t, lang)])) : byId);
+        const langList = (items, lang) => (lang === 'vi' ? items.map(t => Sch.inLang(t, lang)) : items);
+
         const Modal = ({ title, onClose, children, size = 'md', footer, badge, tone }) => {
             const box = useRef(null);
             const titleId = useMemo(() => 'dlg-' + Math.random().toString(36).slice(2, 8), []);
@@ -1935,15 +1954,37 @@
             );
         };
 
-        const HighlightButton = ({ on, onToggle, locked }) => (
-            <button type="button" onClick={onToggle} aria-pressed={on} className={'btn btn-sm ' + (on ? 'btn-primary' : 'btn-secondary')} title="Highlight từ khóa ăn điểm (phím H)">
-                <Icon name={locked ? 'lock' : 'highlighter'} size={14} /> Highlight <Kbd>H</Kbd>
-            </button>
-        );
+        /* Ba chế độ xem câu hỏi: Tiếng Việt / English (khi đề song ngữ) và Keyword (nhấn mạnh từ khóa, phím H). */
+        const HighlightButton = ({ on, onToggle, locked, bilingual }) => {
+            const [lang, setLang] = useQLang();
+            const tone = (active) => 'btn btn-sm ' + (active ? 'btn-primary' : 'btn-secondary');
+            return (
+                <div className="inline-flex flex-wrap items-center gap-1" role="group" aria-label="Chế độ xem câu hỏi">
+                    {bilingual ? (
+                        <>
+                            <button type="button" onClick={() => setLang('vi')} aria-pressed={lang === 'vi'} className={tone(lang === 'vi')} title="Xem câu hỏi, lựa chọn và lời giải bằng tiếng Việt">Tiếng Việt</button>
+                            <button type="button" onClick={() => setLang('en')} aria-pressed={lang === 'en'} className={tone(lang === 'en')} title="Xem câu hỏi, lựa chọn và lời giải bằng tiếng Anh">English</button>
+                        </>
+                    ) : null}
+                    <button type="button" onClick={onToggle} aria-pressed={on} className={tone(on)} title="Nhấn mạnh từ khóa ăn điểm (phím H)">
+                        <Icon name={locked ? 'lock' : 'highlighter'} size={14} /> Keyword <Kbd>H</Kbd>
+                    </button>
+                </div>
+            );
+        };
+
+        /* Lời giải của câu trắc nghiệm, hiện ngay sau khi chọn đáp án. */
+        const Explain = ({ t, hl }) => (t && t.type === 'mcq' && t.explanationOrExample
+            ? <p className="mt-2 text-sm text-ink2 text-flow reading"><b className="text-ink">Giải thích: </b><Hl text={t.explanationOrExample} keywords={t.keywords} on={hl} /></p>
+            : null);
 
         const InsightCard = ({ item }) => {
             if (!item) return null;
-            const keys = Array.isArray(item.keywords) ? item.keywords.filter(Boolean) : [];
+            const all = Array.isArray(item.keywords) ? item.keywords.filter(Boolean) : [];
+            /* Đề song ngữ: chỉ nhắc từ khóa có trong chữ đang hiện (tiếng Việt hoặc tiếng Anh). */
+            const shown = item.type === 'mcq' ? [item.questionOrWord, item.explanationOrExample].concat(item.options || []).join(' ').toLowerCase() : '';
+            const inText = shown ? all.filter(k => shown.indexOf(k.toLowerCase()) >= 0) : all;
+            const keys = inText.length ? inText : all;
             const example = item.type === 'mcq' ? '' : (item.explanationOrExample || '');
             const vi = item.exampleVi || '';
             const ipa = item.type === 'mcq' ? '' : (item.ipa || '');
@@ -1964,7 +2005,10 @@
         /* ---------------------------------------------------------------
          * BurstSession — Băng đạn 5 câu
          * --------------------------------------------------------------- */
-        const BurstSession = ({ itemsById, ids, title, subtitle, canHighlight = true, highlightLockedMsg, onReview, onFinish, onExit, canExplain, toast, timerMin, renderDone, skipPreview, sessionId, voteType }) => {
+        const BurstSession = ({ itemsById: rawById, ids, title, subtitle, canHighlight = true, highlightLockedMsg, onReview, onFinish, onExit, canExplain, toast, timerMin, renderDone, skipPreview, sessionId, voteType }) => {
+            const [qlang] = useQLang();
+            const itemsById = useMemo(() => langMap(rawById, qlang), [rawById, qlang]);
+            const bilingual = useMemo(() => ids.some(id => Sch.hasVi(rawById.get(id))), [rawById]);
             const [s, dispatch] = useReducer(Burst.reduce, ids, (x) => Burst.init(x.filter(id => itemsById.has(id)), { skipPreview }));
             const [fb, setFb] = useState(null);
             const [input, setInput] = useState('');
@@ -2109,7 +2153,7 @@
                     </div>
                     <div className="flex flex-wrap items-center gap-2">
                         {timerMin ? <Elapsed startedAt={s.startedAt} limitMin={timerMin} /> : null}
-                        <HighlightButton on={hl} onToggle={toggleHl} locked={!canHighlight} />
+                        <HighlightButton on={hl} onToggle={toggleHl} locked={!canHighlight} bilingual={bilingual} />
                         {onExit && <button type="button" className="btn btn-ghost btn-sm" onClick={onExit}><Icon name="x" size={14} /> Thoát <Kbd>Esc</Kbd></button>}
                     </div>
                 </div>
@@ -2241,6 +2285,7 @@
                             <span className="callout-ico">✓</span>
                             <div className="min-w-0 flex-1">
                                 <p className="font-semibold pt-0.5">Chính xác</p>
+                                <Explain t={cur} hl={hl} />
                                 <InsightCard item={cur} />
                             </div>
                         </div>
@@ -2251,6 +2296,7 @@
                             <div className="min-w-0">
                                 <p className="font-semibold mb-1">Alo tổng đài cứu nét! Sai rồi, nhai lại câu này ngay!</p>
                                     <ItemAnswer t={cur} hl />
+                                <Explain t={cur} hl />
                                 <InsightCard item={cur} />
                                 </div>
                                 </div>
@@ -2304,7 +2350,10 @@
         /* ---------------------------------------------------------------
          * FlashSession — Flashcard / Điền từ / Nghe viết / Ghi âm (giữ nguyên tính năng bản cũ)
          * --------------------------------------------------------------- */
-        const FlashSession = ({ items, session, onReview, onPatch, onFinish, onClose, onRestart, toast }) => {
+        const FlashSession = ({ items: rawItems, session, onReview, onPatch, onFinish, onClose, onRestart, toast }) => {
+            const [qlang] = useQLang();
+            const items = useMemo(() => langList(rawItems, qlang), [rawItems, qlang]);
+            const bilingual = useMemo(() => rawItems.some(t => session.ids.indexOf(t.id) >= 0 && Sch.hasVi(t)), [rawItems]);
             const byId = useMemo(() => new Map(items.map(t => [t.id, t])), [items]);
             const ids = session.ids;
             const isSlot = !!session.slotId;
@@ -2512,7 +2561,7 @@
                                     ))}
                                 </div>
                             )}
-                            <HighlightButton on={hl} onToggle={() => setHl(v => !v)} />
+                            <HighlightButton on={hl} onToggle={() => setHl(v => !v)} bilingual={bilingual} />
                             {!isSlot && <button type="button" className="btn btn-ghost btn-sm" onClick={onClose}><Icon name="x" size={14} /> Kết thúc</button>}
                         </div>
                     </div>
@@ -2713,7 +2762,10 @@
             return /FE$/.test(base) ? base : base + '_FE';
         };
 
-        const EOSSimulator = ({ title, items, count, minutes, onSubmit, onExit, onDrillWrong, canExplain, toast }) => {
+        const EOSSimulator = ({ title, items: rawItems, count, minutes, onSubmit, onExit, onDrillWrong, canExplain, toast }) => {
+            const [qlang, setQLang] = useQLang();
+            const items = useMemo(() => langList(rawItems, qlang), [rawItems, qlang]);
+            const bilingual = useMemo(() => rawItems.some(Sch.hasVi), [rawItems]);
             const byId = useMemo(() => new Map(items.map(t => [t.id, t])), [items]);
             const [paper] = useState(() => EOS.build(items, count));
             const [answers, setAnswers] = useState({});
@@ -2836,6 +2888,12 @@
                                 <input className="eos-field" type="number" min="8" max="28" value={fontSize} style={{ width: 56 }}
                                     onChange={(e) => setSize(parseInt(e.target.value, 10) || 10)} aria-label="Font Size" />
                             </label>
+                            {bilingual ? (
+                                <span role="group" aria-label="Ngôn ngữ câu hỏi" style={{ display: 'inline-flex', gap: 4 }}>
+                                    <button type="button" className="eos-btn" aria-pressed={qlang === 'vi'} style={qlang === 'vi' ? { fontWeight: 700 } : null} onClick={() => setQLang('vi')}>Tiếng Việt</button>
+                                    <button type="button" className="eos-btn" aria-pressed={qlang === 'en'} style={qlang === 'en' ? { fontWeight: 700 } : null} onClick={() => setQLang('en')}>English</button>
+                                </span>
+                            ) : null}
                             {result
                                 ? <b className="eos-val" style={{ fontSize: 16 }}>{timeUp ? 'Time is up. ' : ''}Examination Over!</b>
                                 : null}

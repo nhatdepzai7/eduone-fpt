@@ -14,6 +14,7 @@
     <script crossorigin="anonymous" src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js" integrity="sha384-gTGxhz21lVGYNMcdJOyq01Edg0jhn/c22nsx0kyqP0TxaV5WVdsSH1fSDUf5YJj1"></script>
     <script crossorigin="anonymous" src="https://unpkg.com/@babel/standalone@7.26.4/babel.min.js" integrity="sha384-x/ilTFv/u/eu6YSmkFDZl5V5Mm/pkxxcVv2cVJOrr1J0rvILhMvRBCy6yA75wYBj"></script>
     <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+    <script src="/admin/word-import.js"></script>
     <style>
         :root { color-scheme: light; }
         body { font-family: "Be Vietnam Pro", system-ui, sans-serif; background: #E2E8F0; color: #111827; }
@@ -276,6 +277,7 @@
             const [info, setInfo] = useState('');
             const [busy, setBusy] = useState(false);
             const [rewards, setRewards] = useState({});
+            const [report, setReport] = useState(null);
             const load = () => api(token, '/api/desk?action=exams').then((data) => {
                 setExams(data.exams || []);
                 setPending(data.pending || []);
@@ -284,7 +286,29 @@
             const setField = (key, value) => setForm((prev) => Object.assign({}, prev, { [key]: value }));
             const readFile = async (file) => {
                 if (!file) return;
-                if (file.size > 400000) { setError('File lớn hơn 400KB.'); return; }
+                setError('');
+                setReport(null);
+                if (/\.docx$/i.test(file.name)) {
+                    if (file.size > 8000000) { setError('File Word lớn hơn 8MB.'); return; }
+                    try {
+                        const parsed = await window.FPassWord.parseDocx(await file.arrayBuffer());
+                        setReport(Object.assign({ file: file.name }, parsed));
+                        if (!parsed.items.length) {
+                            setError('Không đọc được câu nào. Xem mẫu Word và kiểm tra mỗi câu có A. B. C. D. và Đáp án.');
+                            return;
+                        }
+                        setForm((prev) => Object.assign({}, prev, {
+                            text: JSON.stringify({ items: parsed.items }),
+                            name: prev.name || [parsed.course, parsed.examName].filter(Boolean).join(' · ') || file.name.replace(/\.docx$/i, '').slice(0, 80),
+                            code: prev.code || String(parsed.course || '').toUpperCase().slice(0, 16)
+                        }));
+                    } catch (err) {
+                        setError(err.message || 'Không đọc được file Word.');
+                    }
+                    return;
+                }
+                if (/\.doc$/i.test(file.name)) { setError('File .doc cũ: mở bằng Word rồi Lưu thành .docx.'); return; }
+                if (file.size > 1000000) { setError('File lớn hơn 1MB.'); return; }
                 setField('text', await file.text());
             };
             const save = async (e) => {
@@ -295,6 +319,7 @@
                 try {
                     await api(token, '/api/desk?action=exams', { op: 'save', id: form.id, name: form.name, code: form.code, subject: form.subject, text: form.text });
                     setForm(blankExam);
+                    setReport(null);
                     setInfo(form.id ? 'Đã lưu đề.' : 'Đã đăng đề. Sinh viên mở lại trang sẽ thấy trong Đề hệ thống.');
                     await load();
                 } catch (err) {
@@ -336,17 +361,19 @@
                                 </select>
                             </label>
                         </div>
-                        <label className="text-sm font-medium block">File JSON hoặc TXT
-                            <input type="file" accept=".json,.txt,application/json,text/plain" className="block mt-1 text-sm" onChange={(e) => readFile(e.target.files && e.target.files[0])} />
+                        <label className="text-sm font-medium block">File Word (.docx), JSON hoặc TXT
+                            <input type="file" accept=".docx,.json,.txt,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/json,text/plain" className="block mt-1 text-sm" onChange={(e) => { readFile(e.target.files && e.target.files[0]); e.target.value = ''; }} />
                         </label>
+                        <WordGuide />
+                        {report && <WordReport report={report} />}
                         <label className="text-sm font-medium block">Hoặc dán nội dung
                             <textarea value={form.text} onChange={(e) => setField('text', e.target.value)} rows={8} className="field mt-1 font-mono text-xs" placeholder={'{"items":[{"type":"mcq","question":"...","options":["A","B","C","D"],"answer":"B"}]}'} required />
                         </label>
                         <div className="flex flex-wrap gap-2">
                             <button type="submit" disabled={busy} className="min-h-[44px] px-4 rounded-xl bg-indigo-700 text-white font-semibold">{busy ? 'Đang lưu…' : (form.id ? 'Lưu sửa' : 'Đăng đề')}</button>
-                            {form.id && <button type="button" className="min-h-[44px] px-4 rounded-xl border border-slate-300 font-semibold" onClick={() => setForm(blankExam)}>Hủy sửa</button>}
+                            {form.id && <button type="button" className="min-h-[44px] px-4 rounded-xl border border-slate-300 font-semibold" onClick={() => { setForm(blankExam); setReport(null); }}>Hủy sửa</button>}
                         </div>
-                        <p className="text-xs text-slate-500">Đề đăng lên mở cho mọi sinh viên, không khóa bằng mã kích hoạt. Tối đa 120 câu mỗi đề và 25 bộ.</p>
+                        <p className="text-xs text-slate-500">Đề đăng lên mở cho mọi sinh viên, không khóa bằng mã kích hoạt. Tối đa 400 câu mỗi đề và 25 bộ.</p>
                     </form>
                     {error && <p className="text-sm text-rose-700" role="alert">{error}</p>}
                     {info && <p className="text-sm text-emerald-800" role="status">{info}</p>}
@@ -380,6 +407,48 @@
                             </tbody>
                         </table>
                     </div>
+                </div>
+            );
+        };
+
+        /* Hướng dẫn trình bày file Word. Đề song ngữ hiện nút Tiếng Việt / English cho sinh viên; chữ tô màu thành Keyword. */
+        const WordGuide = () => (
+            <details className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm">
+                <summary className="cursor-pointer font-medium">Cách trình bày file Word</summary>
+                <div className="mt-2 space-y-2 text-slate-700">
+                    <p><a href="/admin/mau-de-word.docx" download className="font-semibold text-indigo-700 underline">Tải file Word mẫu</a> rồi chép câu hỏi theo đúng mẫu là chắc chắn đọc được.</p>
+                    <ul className="list-disc pl-5 space-y-1">
+                        <li><b>Mỗi câu</b> bắt đầu bằng <code>Mã câu: …</code> hoặc <code>Câu 1:</code>. Các dòng <code>A.</code> <code>B.</code> <code>C.</code> <code>D.</code> là lựa chọn.</li>
+                        <li><b>Đáp án:</b> dòng <code>Đáp án: B</code>. Hoặc in đậm/tô màu cả lựa chọn đúng, hoặc đặt dấu <code>*</code> trước chữ cái.</li>
+                        <li><b>Song ngữ:</b> <code>Câu hỏi EN:</code> và <code>Câu hỏi VI:</code>; lựa chọn viết <code>A. EN: … | VI: …</code>; <code>Giải thích EN:</code> và <code>Giải thích VI:</code>.</li>
+                        <li><b>Keyword:</b> tô màu chữ (đỏ, xanh…), highlight hoặc gạch chân từ khóa trong câu hỏi và lời giải. Hoặc thêm dòng <code>Từ khóa: a, b, c</code>.</li>
+                        <li><b>Phân loại:</b> dòng <code>Chủ đề: …</code> trong từng câu, hoặc một dòng Heading trước nhóm câu.</li>
+                        <li><b>Dạng bảng</b> cũng được: dòng đầu ghi tên cột Câu hỏi, A, B, C, D, Đáp án, Giải thích, Chủ đề, Từ khóa.</li>
+                    </ul>
+                </div>
+            </details>
+        );
+
+        const WordReport = ({ report }) => {
+            const st = report.stats || {};
+            const topics = Object.entries(st.topics || {});
+            const problems = report.problems || [];
+            return (
+                <div className="rounded-xl border border-indigo-200 bg-indigo-50 px-3 py-2 text-sm space-y-2" role="status">
+                    <p className="font-semibold">{report.file}: đọc được {st.kept || 0}/{st.found || 0} câu</p>
+                    <p className="text-slate-700">Song ngữ {st.bilingual || 0} · Có keyword {st.withKeywords || 0} · Có giải thích {st.withExplanation || 0}</p>
+                    {topics.length > 0 && (
+                        <div className="flex flex-wrap gap-1">
+                            {topics.map(([name, n]) => <span key={name} className="rounded-full bg-white border border-indigo-200 px-2 py-0.5">{name} · {n}</span>)}
+                        </div>
+                    )}
+                    {problems.length > 0 && (
+                        <div className="text-rose-800">
+                            <p className="font-semibold">Cần sửa trong file ({problems.length}):</p>
+                            <ul className="list-disc pl-5 max-h-40 overflow-auto">{problems.slice(0, 50).map((p, i) => <li key={i}>{p}</li>)}</ul>
+                        </div>
+                    )}
+                    <p className="text-slate-600">Kiểm tra số câu rồi bấm Đăng đề. Câu thiếu đáp án không được đăng.</p>
                 </div>
             );
         };
