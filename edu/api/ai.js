@@ -7,7 +7,7 @@
  * Client không được chọn model, max_tokens, hay system prompt.
  */
 
-import { chargeAiWords, readPassageCache, releaseAiFill, releasePassage, reserveAiFill, reservePassage, writePassageCache } from '../server/ledger.js';
+import { chargeAiWords, readPassageCache, redisCommand, releaseAiFill, releasePassage, reserveAiFill, reservePassage, writePassageCache } from '../server/ledger.js';
 
 const MODEL = 'gpt-4o-mini';
 const MAX_TOKENS = 1500;
@@ -17,6 +17,8 @@ const PASSAGE_CHARS = 2500;
 const MAX_BODY = 12000;
 const FREE_PER_DAY = 5;
 const LICENSED_PER_DAY = 30;
+/* Mỗi mã quỹ mới có 100 lượt AI miễn phí; giới hạn số mã mới một IP được mở mỗi ngày để không ai tự bịa mã vô hạn. */
+const NEW_CODES_PER_IP = 20;
 
 const TASKS = {
     enrich: 0.3,
@@ -52,7 +54,7 @@ function json(status, obj, extra) {
 
 function sameOrigin(req) {
     const origin = req.header('origin');
-    if (!origin) return true;
+    if (!origin) return req.header('sec-fetch-site') === 'same-origin';
     const hosts = (req.header('host') + ',' + req.header('x-forwarded-host'))
         .split(',')
         .map((s) => s.trim())
@@ -76,9 +78,12 @@ function cors(req) {
     return headers;
 }
 
+/* cf-connecting-ip chỉ đáng tin trên Cloudflare. Trên Vercel người gọi tự đặt được, nên dùng x-real-ip do Vercel ghi. */
 function clientIp(req) {
-    const cf = req.header('cf-connecting-ip');
-    if (cf) return cf.trim().slice(0, 64);
+    if (req.edge) {
+        const cf = req.header('cf-connecting-ip');
+        if (cf) return cf.trim().slice(0, 64);
+    }
     const real = req.header('x-real-ip');
     if (real) return real.trim().slice(0, 64);
     const fwd = req.header('x-forwarded-for');
@@ -107,7 +112,15 @@ function dayStamp() {
     return new Date().toISOString().slice(0, 10);
 }
 
-async function takeSlot(bucket, limit) {
+async function takeSlot(env, bucket, limit) {
+    try {
+        const key = 'fpass:ai:free:' + bucket;
+        const n = Number(await redisCommand(env, ['INCR', key]));
+        if (n === 1) await redisCommand(env, ['EXPIRE', key, 90000]);
+        return n <= limit;
+    } catch (e) {
+        /* Chưa nối Redis: dùng bộ đếm tạm trong bộ nhớ như trước. */
+    }
     let used = buckets.get(bucket) || 0;
     const cacheUrl = 'https://quota.fpass.local/' + encodeURIComponent(bucket);
     try {
@@ -131,6 +144,16 @@ async function takeSlot(bucket, limit) {
         }
     } catch (e) {}
     return true;
+}
+
+async function allowNewCode(env, code, ip) {
+    const known = Number(await redisCommand(env, ['EXISTS', 'fpass:quota:' + code])) === 1;
+    if (known) return true;
+    const key = 'fpass:ai:newcodes:' + dayStamp() + ':' + ip;
+    await redisCommand(env, ['SADD', key, code]);
+    await redisCommand(env, ['EXPIRE', key, 90000]);
+    const count = Number(await redisCommand(env, ['SCARD', key])) || 0;
+    return count <= NEW_CODES_PER_IP;
 }
 
 function countItems(task, body) {
@@ -264,17 +287,18 @@ function safeUpstream(status, text) {
         .trim() || 'AI không trả lời được.';
 }
 
-function adapt(incoming) {
+function adapt(incoming, edge) {
     if (incoming && typeof incoming.header === 'function') return incoming;
     return {
+        edge: !!edge,
         method: incoming.method,
         header(name) { return (incoming.headers && incoming.headers.get(name)) || ''; },
         text() { return incoming.text(); }
     };
 }
 
-async function handleRequest(incoming, env) {
-    const req = adapt(incoming);
+async function handleRequest(incoming, env, edge) {
+    const req = adapt(incoming, edge);
     const extra = cors(req);
     if (req.method === 'OPTIONS') return new Response(null, { status: 204, headers: extra });
     if (req.method !== 'POST') return json(405, { error: 'Chỉ nhận POST.' }, extra);
@@ -329,6 +353,9 @@ async function handleRequest(incoming, env) {
             return json(200, { content: cached, preview: false, cached: true }, extra);
         }
         try {
+            if (!(await allowNewCode(env, code, clientIp(req)))) {
+                return json(429, { error: 'Mạng này đã mở quá nhiều mã quỹ mới hôm nay. Dùng lại mã cũ hoặc thử lại ngày mai.' }, extra);
+            }
             aiGate = await reservePassage(env, code);
         } catch (e) {
             return json(503, { error: 'Máy chủ chưa kiểm tra được hạn mức AI.' }, extra);
@@ -368,6 +395,9 @@ async function handleRequest(incoming, env) {
         const code = fundCode(body.code);
         if (!code) return json(400, { error: 'Thiếu mã quỹ.' }, extra);
         try {
+            if (!(await allowNewCode(env, code, clientIp(req)))) {
+                return json(429, { error: 'Mạng này đã mở quá nhiều mã quỹ mới hôm nay. Dùng lại mã cũ hoặc thử lại ngày mai.' }, extra);
+            }
             aiGate = await reserveAiFill(env, code);
         } catch (e) {
             return json(503, { error: 'Máy chủ chưa kiểm tra được hạn mức AI.' }, extra);
@@ -386,7 +416,7 @@ async function handleRequest(incoming, env) {
     } else {
         const limit = hasLicense(body.licenseKey, env) ? LICENSED_PER_DAY : FREE_PER_DAY;
         const bucket = dayStamp() + ':' + clientIp(req);
-        if (!(await takeSlot(bucket, limit))) {
+        if (!(await takeSlot(env, bucket, limit))) {
             return json(429, { error: 'Đã hết ' + limit + ' lượt AI hôm nay. Mai dùng tiếp.' }, extra);
         }
     }
@@ -470,7 +500,7 @@ async function nodeRequest(req) {
 }
 
 export async function onRequest(context) {
-    return handleRequest(context.request, context.env || {});
+    return handleRequest(context.request, context.env || {}, true);
 }
 
 export default async function handler(req, res) {

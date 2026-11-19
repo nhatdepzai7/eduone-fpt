@@ -4,7 +4,10 @@
  */
 
 import { authConfig, currentAccount, loginGoogle, redeemGift } from '../server/account.js';
-import { fundState, spendTurn } from '../server/ledger.js';
+import { fundState, redisCommand, spendTurn } from '../server/ledger.js';
+
+const LOOKUPS_PER_WINDOW = 600;
+const LOOKUP_WINDOW = 600;
 
 function json(status, obj, extra) {
     const headers = Object.assign({
@@ -24,6 +27,27 @@ function sameOrigin(req) {
     }
 }
 
+function clientIp(req) {
+    if (req.edge) {
+        const cf = String(req.header('cf-connecting-ip') || '').trim();
+        if (cf) return cf.slice(0, 64);
+    }
+    const fwd = String(req.header('x-forwarded-for') || '').split(',')[0].trim();
+    return (fwd || String(req.header('x-real-ip') || '').trim() || 'unknown').slice(0, 64);
+}
+
+/* Đếm số lần tra mã quỹ theo IP để không dò hết các mã ngắn. Redis lỗi thì không chặn. */
+async function lookupAllowed(env, req) {
+    try {
+        const key = 'fpass:fund:look:' + clientIp(req);
+        const n = Number(await redisCommand(env, ['INCR', key]));
+        if (n === 1) await redisCommand(env, ['EXPIRE', key, LOOKUP_WINDOW]);
+        return n <= LOOKUPS_PER_WINDOW;
+    } catch (e) {
+        return true;
+    }
+}
+
 function bodyLimit(url) {
     return /(?:\?|&)action=login(?:&|$)/.test(String(url || '')) ? 500000 : 4000;
 }
@@ -40,6 +64,7 @@ function parseBody(raw, limit) {
 
 function accountError(e, extra) {
     const code = e && e.code;
+    if (code === 'rate') return json(429, { error: e.message, code }, extra);
     if (code === 'no-google') return json(503, { error: e.message, code }, extra);
     if (code === 'bad-token' || code === 'auth') return json(401, { error: e.message, code }, extra);
     if (code === 'too-big') return json(413, { error: e.message, code }, extra);
@@ -77,7 +102,7 @@ async function handleRequest(req, env, body) {
             }
             if (action === 'redeem' && req.method === 'POST') {
                 if (!body) return json(400, { error: 'Thiếu nội dung yêu cầu.' }, extra);
-                return json(200, await redeemGift(env, req, body), extra);
+                return json(200, await redeemGift(env, req, body, clientIp(req)), extra);
             }
             return json(405, { error: 'Sai phương thức.' }, extra);
         } catch (e) {
@@ -102,6 +127,7 @@ async function handleRequest(req, env, body) {
     const query = url.indexOf('?') >= 0 ? url.slice(url.indexOf('?') + 1) : '';
     const code = String(new URLSearchParams(query).get('code') || '').toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 12);
     if (code.length < 4) return json(400, { error: 'Mã quỹ cần 4–12 chữ hoặc số.' }, extra);
+    if (!(await lookupAllowed(env, req))) return json(429, { error: 'Tra mã quá nhiều lần. Thử lại sau ít phút.' }, extra);
 
     try {
         const state = await fundState(env, code);
@@ -127,10 +153,11 @@ async function handleRequest(req, env, body) {
     }
 }
 
-function adapt(incoming) {
+function adapt(incoming, edge) {
     if (incoming && typeof incoming.header === 'function' && incoming.url) return incoming;
     if (incoming && typeof incoming.header === 'function') return incoming;
     return {
+        edge: !!edge,
         method: incoming.method,
         url: incoming.url || '',
         header(name) { return (incoming.headers && incoming.headers.get(name)) || ''; }
@@ -141,7 +168,7 @@ export async function onRequest(context) {
     const request = context.request;
     const raw = request.method === 'POST' ? await request.text() : '';
     const body = request.method === 'POST' ? parseBody(raw, bodyLimit(request.url)) : null;
-    return handleRequest(adapt(request), context.env || {}, body);
+    return handleRequest(adapt(request, true), context.env || {}, body);
 }
 
 async function readBody(req) {

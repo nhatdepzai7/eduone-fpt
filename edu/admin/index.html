@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="referrer" content="no-referrer">
     <meta name="robots" content="noindex">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://unpkg.com https://cdn.tailwindcss.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'">
     <title>FPass · Quản trị</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -12,7 +13,7 @@
     <script crossorigin="anonymous" src="https://unpkg.com/react@18.3.1/umd/react.production.min.js" integrity="sha384-DGyLxAyjq0f9SPpVevD6IgztCFlnMF6oW/XQGmfe+IsZ8TqEiDrcHkMLKI6fiB/Z"></script>
     <script crossorigin="anonymous" src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js" integrity="sha384-gTGxhz21lVGYNMcdJOyq01Edg0jhn/c22nsx0kyqP0TxaV5WVdsSH1fSDUf5YJj1"></script>
     <script crossorigin="anonymous" src="https://unpkg.com/@babel/standalone@7.26.4/babel.min.js" integrity="sha384-x/ilTFv/u/eu6YSmkFDZl5V5Mm/pkxxcVv2cVJOrr1J0rvILhMvRBCy6yA75wYBj"></script>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.tailwindcss.com/3.4.17"></script>
     <style>
         :root { color-scheme: light; }
         body { font-family: "Be Vietnam Pro", system-ui, sans-serif; background: #E2E8F0; color: #111827; }
@@ -26,7 +27,6 @@
     <div id="root"></div>
     <script type="text/babel" data-presets="react">
         const { useEffect, useState } = React;
-        const TOKEN_KEY = 'fpass-admin-token';
         const SUBJECTS = [
             ['eos', 'EOS'],
             ['fe', 'FE'],
@@ -45,14 +45,14 @@
             return '';
         };
 
-        const api = async (token, path, body, method) => {
+        /* Phiên admin nằm trong cookie HttpOnly do server cấp; trang không giữ token nào. */
+        const ADMIN_HEADERS = { Accept: 'application/json', 'Content-Type': 'application/json', 'X-FPass-Admin': '1' };
+
+        const api = async (_session, path, body, method) => {
             const res = await fetch(path, {
                 method: method || (body ? 'POST' : 'GET'),
-                headers: {
-                    Accept: 'application/json',
-                    'Content-Type': 'application/json',
-                    Authorization: 'Bearer ' + token
-                },
+                credentials: 'same-origin',
+                headers: ADMIN_HEADERS,
                 body: body ? JSON.stringify(body) : undefined
             });
             let data = {};
@@ -77,13 +77,14 @@
                 try {
                     const res = await fetch('/api/desk?action=login', {
                         method: 'POST',
-                        headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+                        credentials: 'same-origin',
+                        headers: ADMIN_HEADERS,
                         body: JSON.stringify({ password })
                     });
                     const data = await res.json().catch(() => ({}));
-                    if (!res.ok || !data.token) throw new Error(errorText(data) || 'Không đăng nhập được.');
-                    sessionStorage.setItem(TOKEN_KEY, data.token);
-                    onOk(data.token);
+                    if (!res.ok || !data.ok) throw new Error(errorText(data) || 'Không đăng nhập được.');
+                    setPassword('');
+                    onOk(true);
                 } catch (err) {
                     setError(err.message || 'Không đăng nhập được.');
                 } finally {
@@ -610,7 +611,6 @@
             const [tab, setTab] = useState('quota');
             const leave = async () => {
                 try { await api(token, '/api/desk?action=login', {}, 'DELETE'); } catch (e) {}
-                sessionStorage.removeItem(TOKEN_KEY);
                 onLogout();
             };
             const tabClass = (id) => 'min-h-[44px] px-4 rounded-xl font-semibold ' + (tab === id ? 'bg-indigo-700 text-white' : 'bg-white border border-slate-200');
@@ -639,9 +639,16 @@
         };
 
         const App = () => {
-            const [token, setToken] = useState(() => sessionStorage.getItem(TOKEN_KEY) || '');
+            const [token, setToken] = useState(null);
+            useEffect(() => {
+                try { sessionStorage.removeItem('fpass-admin-token'); } catch (e) {}
+                api(true, '/api/desk?action=login')
+                    .then((data) => setToken(!!data.admin))
+                    .catch(() => setToken(false));
+            }, []);
+            if (token === null) return <main className="min-h-screen flex items-center justify-center text-slate-600">Đang kiểm tra phiên…</main>;
             if (!token) return <Login onOk={setToken} />;
-            return <Shell token={token} onLogout={() => setToken('')} />;
+            return <Shell token={token} onLogout={() => setToken(false)} />;
         };
 
         ReactDOM.createRoot(document.getElementById('root')).render(<App />);

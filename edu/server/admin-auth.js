@@ -1,12 +1,16 @@
 /**
  * Phiên admin nằm trên Redis, hết hạn sau 12 giờ.
- * ADMIN_PASSWORD trên Vercel thay mật khẩu tạm dùng khi biến chưa được đặt.
+ * Trình duyệt chỉ giữ mã phiên trong cookie HttpOnly, JavaScript trên trang không đọc được.
+ * Không có mật khẩu dự phòng: thiếu ADMIN_PASSWORD (hoặc quá ngắn) thì trang quản trị đóng.
  */
 
 import { envGet, redisCommand } from './ledger.js';
+import { sameOrigin } from './http.js';
 
-const FALLBACK_PASSWORD = 'nhatadmin2026';
 const SESSION_TTL = 60 * 60 * 12;
+const MIN_PASSWORD = 12;
+export const ADMIN_COOKIE = 'fpass_admin';
+export const ADMIN_HEADER = 'x-fpass-admin';
 
 function safeEqual(a, b) {
     const left = String(a || '');
@@ -19,16 +23,50 @@ function safeEqual(a, b) {
 
 export function expectedPassword(env) {
     const set = envGet(env, 'ADMIN_PASSWORD').trim();
-    return set || FALLBACK_PASSWORD;
+    return set.length >= MIN_PASSWORD ? set : '';
 }
 
-export function bearer(req) {
-    const header = String(req.header('authorization') || '');
-    const match = header.match(/^Bearer\s+([A-Za-z0-9]{32,80})$/);
-    return match ? match[1] : '';
+function cookieValue(req, name) {
+    const raw = String(req.header('cookie') || '');
+    const parts = raw.split(';');
+    for (let i = 0; i < parts.length; i++) {
+        const eq = parts[i].indexOf('=');
+        if (eq < 0) continue;
+        if (parts[i].slice(0, eq).trim() === name) return parts[i].slice(eq + 1).trim();
+    }
+    return '';
+}
+
+export function sessionToken(req) {
+    const token = cookieValue(req, ADMIN_COOKIE);
+    return /^[a-f0-9]{48}$/.test(token) ? token : '';
+}
+
+function secureFlag(req) {
+    const url = String(req.url || '');
+    return /^http:\/\/(localhost|127\.0\.0\.1)(:|\/)/i.test(url) ? '' : '; Secure';
+}
+
+export function sessionCookie(req, token) {
+    return ADMIN_COOKIE + '=' + token + '; HttpOnly' + secureFlag(req) + '; SameSite=Strict; Path=/api; Max-Age=' + SESSION_TTL;
+}
+
+export function clearCookie(req) {
+    return ADMIN_COOKIE + '=; HttpOnly' + secureFlag(req) + '; SameSite=Strict; Path=/api; Max-Age=0';
+}
+
+/* Request đổi dữ liệu phải đến từ chính trang và mang header riêng (trình duyệt lạ không tự gắn được). */
+export function trustedWrite(req) {
+    return sameOrigin(req) && req.header(ADMIN_HEADER) === '1';
 }
 
 export async function loginAdmin(env, password, ip) {
+    const expected = expectedPassword(env);
+    if (!expected) {
+        const err = new Error('no-admin');
+        err.code = 'no-admin';
+        throw err;
+    }
     const failKey = 'fpass:admin:fail:' + (ip || 'unknown');
     const prev = Number(await redisCommand(env, ['GET', failKey])) || 0;
     if (prev >= 8) {
@@ -37,7 +75,7 @@ export async function loginAdmin(env, password, ip) {
         throw err;
     }
     const given = String(password || '').slice(0, 200);
-    if (!safeEqual(given, expectedPassword(env))) {
+    if (!safeEqual(given, expected)) {
         const n = Number(await redisCommand(env, ['INCR', failKey]));
         if (n === 1) await redisCommand(env, ['EXPIRE', failKey, 900]);
         const err = new Error('bad-password');
@@ -53,7 +91,7 @@ export async function loginAdmin(env, password, ip) {
 }
 
 export async function requireAdmin(req, env) {
-    const token = bearer(req);
+    const token = sessionToken(req);
     if (!token) return '';
     const hit = await redisCommand(env, ['GET', 'fpass:admin:sess:' + token]);
     return hit ? token : '';

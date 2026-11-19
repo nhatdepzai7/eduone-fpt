@@ -2,13 +2,13 @@
  * Khung chung cho API Node (Vercel) và onRequest (Cloudflare).
  */
 
-export function json(status, obj) {
+export function json(status, obj, extra) {
     return new Response(JSON.stringify(obj), {
         status,
-        headers: {
+        headers: Object.assign({
             'Content-Type': 'application/json; charset=utf-8',
             'Cache-Control': 'no-store'
-        }
+        }, extra || {})
     });
 }
 
@@ -18,7 +18,12 @@ function tooBig() {
     return err;
 }
 
+/* cf-connecting-ip chỉ đáng tin khi chạy trên Cloudflare; trên Vercel ai cũng tự đặt được header này. */
 export function clientIp(req) {
+    if (req.edge) {
+        const cf = String(req.header('cf-connecting-ip') || '').replace(/[^0-9a-fA-F:.]/g, '').slice(0, 64);
+        if (cf) return cf;
+    }
     const fwd = String(req.header('x-forwarded-for') || '').split(',')[0].trim();
     const raw = fwd || String(req.header('x-real-ip') || '');
     return raw.replace(/[^0-9a-fA-F:.]/g, '').slice(0, 64) || 'unknown';
@@ -40,6 +45,8 @@ export function fail(e, tag) {
     if (e && e.code === 'bad-exam') return json(400, { error: e.message || 'Đề không hợp lệ.' });
     if (e && e.code === 'bad-code') return json(400, { error: 'Mã quỹ cần 4–12 chữ hoặc số.' });
     if (e && e.code === 'bad-turns') return json(400, { error: 'Số lượt không hợp lệ.' });
+    if (e && e.code === 'no-admin') return json(503, { error: 'Máy chủ chưa đặt ADMIN_PASSWORD (tối thiểu 12 ký tự).' });
+    if (e && e.code === 'rate') return json(429, { error: e.message || 'Thao tác quá nhiều lần. Thử lại sau.' });
     if (e && e.code === 'locked') return json(429, { error: 'Đăng nhập sai quá nhiều lần. Thử lại sau 15 phút.' });
     if (e && e.code === 'full') return json(400, { error: e.message || 'Danh sách đã đầy.' });
     if (e && e.code === 'missing') return json(404, { error: 'Không tìm thấy đề.' });
@@ -57,8 +64,9 @@ function headerMap(headers) {
     return out;
 }
 
-export function fromWeb(request) {
+export function fromWeb(request, edge) {
     return {
+        edge: !!edge,
         method: request.method || 'GET',
         url: request.url || '',
         header(name) { return request.headers.get(name) || ''; },
@@ -111,7 +119,8 @@ export function mount(handle) {
             const nodeRes = res && typeof res.status === 'function' ? res : null;
             const incoming = webRequest(req) || webRequest(req && req.request);
             const env = (req && req.env) || (typeof process !== 'undefined' ? process.env : {});
-            const response = await handle(incoming ? fromWeb(incoming) : fromNode(req && req.request ? req.request : req), env);
+            const edge = !!(req && req.request && incoming === req.request);
+            const response = await handle(incoming ? fromWeb(incoming, edge) : fromNode(req && req.request ? req.request : req), env);
             if (nodeRes) {
                 await send(nodeRes, response);
                 return;
