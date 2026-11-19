@@ -4,7 +4,7 @@
 
     const MAX = {
         id: 80, group: 80, word: 400, question: 1500, wordType: 24, ipa: 80, option: 500,
-        answer: 1500, explanation: 2500, keyword: 80, keywords: 20, exampleVi: 1500, vietSub: 120, recall: 400
+        answer: 1500, explanation: 2500, keyword: 80, keywords: 24, exampleVi: 1500, vietSub: 120, recall: 400
     };
     const SRS_STEPS = [1, 3, 7, 14];
     const LETTERS = ['A', 'B', 'C', 'D'];
@@ -62,6 +62,12 @@
         return out;
     };
 
+    /* Bản tiếng Việt của 4 lựa chọn (đề song ngữ). Không có thì để rỗng. */
+    const cleanVi = (raw) => {
+        if (!Array.isArray(raw) || !raw.some(Boolean)) return [];
+        return cleanOptions(raw);
+    };
+
     const answerLetter = (raw, options) => {
         if (raw == null || raw === '') return '';
         if (typeof raw === 'number' && raw >= 0 && raw < 4) return LETTERS[raw];
@@ -103,6 +109,9 @@
             answerOrMeaning: answerOrMeaning,
             explanationOrExample: S.cleanText(pick(d, ['explanationOrExample', 'explanation', 'example', 'nguCanh', 'e']), MAX.explanation),
             keywords: cleanKeywords(pick(d, ['keywords', 'k'])),
+            questionVi: type === 'mcq' ? S.cleanText(d.questionVi, MAX.question) : '',
+            optionsVi: type === 'mcq' ? cleanVi(d.optionsVi) : [],
+            explanationVi: S.cleanText(d.explanationVi, MAX.explanation),
             srsStage: toInt(pick(d, ['srsStage', 'bacOn']), 0, SRS_STEPS.length),
             wrongCount: toInt(pick(d, ['wrongCount', 'testSai']), 0, 1e6),
             nextReview: toIso(pick(d, ['nextReview', 'ngayOnTiep'])),
@@ -118,12 +127,14 @@
         };
     };
 
-    const CONTENT_FIELDS = ['type', 'group', 'checkpoint', 'questionOrWord', 'wordType', 'ipa', 'options', 'answerOrMeaning', 'explanationOrExample', 'keywords', 'exampleVi', 'vietSub', 'recallPrompt'];
+    const CONTENT_FIELDS = ['type', 'group', 'checkpoint', 'questionOrWord', 'wordType', 'ipa', 'options', 'answerOrMeaning', 'explanationOrExample', 'keywords', 'questionVi', 'optionsVi', 'explanationVi', 'exampleVi', 'vietSub', 'recallPrompt'];
 
     const toShareable = (item) => {
         const out = {};
         CONTENT_FIELDS.forEach((k) => { out[k] = item[k]; });
         if (out.type !== 'mcq') delete out.options;
+        ['questionVi', 'explanationVi'].forEach((k) => { if (!out[k]) delete out[k]; });
+        if (!out.optionsVi || !out.optionsVi.length) delete out.optionsVi;
         return out;
     };
 
@@ -183,6 +194,18 @@
         const diff = new Date(t.nextReview).getTime() - Date.now();
         if (diff <= 0) return 'đến hạn';
         return 'sau ' + Math.ceil(diff / DAY) + ' ngày';
+    };
+
+    /* Đề song ngữ: lang 'vi' đổi câu hỏi, lựa chọn, lời giải sang tiếng Việt; thứ tự lựa chọn và đáp án giữ nguyên. */
+    const hasVi = (t) => !!(t && t.type === 'mcq' && (t.questionVi || (t.optionsVi && t.optionsVi.some(Boolean))));
+    const inLang = (t, lang) => {
+        if (lang !== 'vi' || !hasVi(t)) return t;
+        const vi = t.optionsVi || [];
+        return Object.assign({}, t, {
+            questionOrWord: t.questionVi || t.questionOrWord,
+            options: (t.options || []).map((o, i) => vi[i] || o),
+            explanationOrExample: t.explanationVi || t.explanationOrExample
+        });
     };
 
     const groupKey = (t) => ((t && t.group) || '').trim() || '__none';
@@ -426,6 +449,7 @@
         MAX, SRS_STEPS, LETTERS, WORD_TYPES,
         newId, normalizeItem, toShareable, isFilled, correctText,
         weakScore, isWeak, isDue, applyReview, reviewNote,
+        hasVi, inLang,
         groupKey, groupLabel, inGroup, byGroup, matchGroup, groupColor,
         shuffle, normAnswer, blankOut, recallPromptOf,
         ipaToVi, readingOf,

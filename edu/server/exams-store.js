@@ -14,10 +14,14 @@ const SUBJECTS = {
     other: { label: 'Khác', type: 'mcq' }
 };
 
-const MAX_ITEMS = 120;
+/* Đề admin đăng (kể cả từ file Word song ngữ) được lớn hơn đề sinh viên gửi chờ duyệt. */
+const LIMITS = {
+    official: { items: 400, json: 1000000 },
+    pending: { items: 120, json: 350000 }
+};
 const MAX_OFFICIAL = 25;
 const MAX_PENDING = 40;
-const MAX_JSON = 350000;
+export const OFFICIAL_BODY = 1200000;
 
 export function subjectOf(value) {
     const key = String(value || '').toLowerCase();
@@ -34,14 +38,30 @@ function bad(message) {
     return err;
 }
 
+function cleanOptions(raw) {
+    if (Array.isArray(raw)) return raw.slice(0, 4).map((o) => clip(o, 500));
+    if (raw && typeof raw === 'object') return ['A', 'B', 'C', 'D'].map((letter) => clip(raw[letter] || raw[letter.toLowerCase()], 500));
+    return [];
+}
+
+/* Bỏ trường rỗng để bộ đề song ngữ nhỏ gọn khi lưu và tải về. */
+function compact(item) {
+    const out = {};
+    Object.keys(item).forEach((key) => {
+        const v = item[key];
+        if (v === '' || v == null) return;
+        if (Array.isArray(v) && (!v.length || (key === 'optionsVi' && !v.some(Boolean)))) {
+            if (key === 'options' || key === 'keywords') out[key] = v;
+            return;
+        }
+        out[key] = v;
+    });
+    return out;
+}
+
 function cleanItem(raw, group) {
     const d = raw && typeof raw === 'object' ? raw : {};
-    const optionsRaw = d.options || d.o || d.choices;
-    let options = [];
-    if (Array.isArray(optionsRaw)) options = optionsRaw.slice(0, 4).map((o) => clip(o, 500));
-    else if (optionsRaw && typeof optionsRaw === 'object') {
-        options = ['A', 'B', 'C', 'D'].map((letter) => clip(optionsRaw[letter] || optionsRaw[letter.toLowerCase()], 500));
-    }
+    let options = cleanOptions(d.options || d.o || d.choices);
     const filled = options.filter(Boolean).length;
     let type = d.type === 'vocab' || d.type === 'mcq' ? d.type : (filled >= 2 ? 'mcq' : 'vocab');
     if (type === 'mcq' && filled < 2) type = 'vocab';
@@ -59,6 +79,7 @@ function cleanItem(raw, group) {
         if (!answer) return null;
         while (options.length < 4) options.push('');
         options = options.slice(0, 4);
+        if (!options['ABCD'.indexOf(answer)]) return null;
     } else {
         answer = clip(answer, 1500);
         if (!answer) return null;
@@ -67,18 +88,24 @@ function cleanItem(raw, group) {
     let keywords = d.keywords || d.k || [];
     if (typeof keywords === 'string') keywords = keywords.split(/[,;|\n]/);
     if (!Array.isArray(keywords)) keywords = [];
-    return {
+    let optionsVi = type === 'mcq' ? cleanOptions(d.optionsVi) : [];
+    if (optionsVi.some(Boolean)) { while (optionsVi.length < 4) optionsVi.push(''); } else optionsVi = [];
+    return compact({
         type,
+        ref: clip(d.ref, 40),
         group: clip(d.group || group, 80),
         questionOrWord: question,
         options,
         answerOrMeaning: answer,
         explanationOrExample: clip(d.explanationOrExample || d.explanation || d.example || d.e, 2500),
-        keywords: keywords.map((k) => clip(k, 80)).filter((k) => k.length >= 2).slice(0, 12),
+        keywords: keywords.map((k) => clip(k, 80)).filter((k) => k.length >= 2).slice(0, 24),
+        questionVi: clip(d.questionVi, 1500),
+        optionsVi,
+        explanationVi: clip(d.explanationVi, 2500),
         wordType: clip(d.wordType, 24),
         ipa: clip(d.ipa, 80),
         exampleVi: clip(d.exampleVi, 1500)
-    };
+    });
 }
 
 function itemsFromStages(stages, group) {
@@ -158,10 +185,11 @@ function itemsFromText(text, subject) {
     return out;
 }
 
-export function parseExamInput(text, subject, group) {
+export function parseExamInput(text, subject, group, kind) {
+    const limit = LIMITS[kind] || LIMITS.pending;
     const raw = String(text || '').replace(/^\uFEFF/, '').trim();
     if (!raw) throw bad('Chưa có nội dung đề.');
-    if (raw.length > MAX_JSON) throw bad('Nội dung đề quá lớn.');
+    if (raw.length > limit.json) throw bad('Nội dung đề quá lớn.');
     let items = [];
     if (raw.charAt(0) === '{' || raw.charAt(0) === '[') {
         let data;
@@ -170,7 +198,7 @@ export function parseExamInput(text, subject, group) {
     } else {
         items = itemsFromText(raw, subject);
     }
-    items = items.slice(0, MAX_ITEMS);
+    items = items.slice(0, limit.items);
     if (!items.length) throw bad('Không đọc được câu hỏi. Dùng JSON có items, file mẫu stages, hoặc mỗi câu có A. B. C. D. và Đáp án.');
     return items;
 }
@@ -191,7 +219,7 @@ function courseCode(value, fallback) {
     return code.length >= 2 ? code : fallback;
 }
 
-function packRecord(input, items, id) {
+function packRecord(input, items, id, kind) {
     const subject = subjectOf(input.subject);
     const type = subject === 'vocab' ? 'vocab' : (items.some((item) => item.type === 'mcq') ? 'mcq' : 'vocab');
     const record = {
@@ -206,7 +234,7 @@ function packRecord(input, items, id) {
         items
     };
     const json = JSON.stringify(record);
-    if (json.length > MAX_JSON) throw bad('Bộ đề quá lớn.');
+    if (json.length > (LIMITS[kind] || LIMITS.pending).json) throw bad('Bộ đề quá lớn.');
     return { record, json };
 }
 
@@ -264,8 +292,8 @@ export async function saveOfficial(env, input) {
             throw err;
         }
     }
-    const items = parseExamInput(input.text, subjectOf(input.subject), courseCode(input.code, ''));
-    const built = packRecord(input, items, id);
+    const items = parseExamInput(input.text, subjectOf(input.subject), courseCode(input.code, ''), 'official');
+    const built = packRecord(input, items, id, 'official');
     await call(env, ['SET', 'fpass:exam:' + id, built.json]);
     await call(env, ['SADD', 'fpass:exams', id]);
     return built.record;
@@ -286,12 +314,12 @@ export async function submitPending(env, input) {
         throw err;
     }
     const id = examId();
-    const items = parseExamInput(input.text, subjectOf(input.subject), courseCode(input.code, ''));
-    const built = packRecord(input, items, id);
+    const items = parseExamInput(input.text, subjectOf(input.subject), courseCode(input.code, ''), 'pending');
+    const built = packRecord(input, items, id, 'pending');
     built.record.quotaId = cleanCode(input.quotaId);
     built.record.note = clip(input.note, 160);
     const json = JSON.stringify(built.record);
-    if (json.length > MAX_JSON) throw bad('Bộ đề quá lớn.');
+    if (json.length > LIMITS.pending.json) throw bad('Bộ đề quá lớn.');
     await call(env, ['SET', 'fpass:pending:' + id, json]);
     await call(env, ['SADD', 'fpass:pending', id]);
     return { id, count: items.length };
