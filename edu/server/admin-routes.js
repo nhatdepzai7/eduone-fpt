@@ -1,5 +1,5 @@
 import { createGift, listGifts, toggleGift } from './account.js';
-import { bearer, loginAdmin, logoutAdmin, requireAdmin } from './admin-auth.js';
+import { clearCookie, loginAdmin, logoutAdmin, requireAdmin, sessionCookie, sessionToken, trustedWrite } from './admin-auth.js';
 import { deleteOfficial, listOfficial, listPending, publishPending, rejectPending, saveOfficial, takePending } from './exams-store.js';
 import { clientIp, fail, json, mount, sameOrigin } from './http.js';
 import { adjustAiGrant, adjustQuota, listQuotas, listTransactions } from './ledger.js';
@@ -7,28 +7,40 @@ import { recordVisit, visitHistory } from './visits.js';
 
 export async function handleLogin(req, env) {
     try {
+        if (req.method === 'GET') {
+            const token = await requireAdmin(req, env);
+            return json(200, { admin: !!token });
+        }
         if (req.method === 'POST') {
+            if (!trustedWrite(req)) return json(403, { error: 'Chỉ đăng nhập từ trang quản trị.' });
             const body = await req.json(4000);
             const session = await loginAdmin(env, body && body.password, clientIp(req));
-            return json(200, session);
+            return json(200, { ok: true, expiresIn: session.expiresIn }, { 'Set-Cookie': sessionCookie(req, session.token) });
         }
         if (req.method === 'DELETE') {
-            const token = await requireAdmin(req, env);
-            if (!token) return json(401, { error: 'Cần đăng nhập quản trị.' });
-            await logoutAdmin(env, bearer(req));
-            return json(200, { ok: true });
+            if (!trustedWrite(req)) return json(403, { error: 'Chỉ đăng xuất từ trang quản trị.' });
+            await logoutAdmin(env, sessionToken(req));
+            return json(200, { ok: true }, { 'Set-Cookie': clearCookie(req) });
         }
-        return json(405, { error: 'Chỉ nhận POST hoặc DELETE.' });
+        return json(405, { error: 'Chỉ nhận GET, POST hoặc DELETE.' });
     } catch (e) {
         if (e && e.code === 'bad-password') return json(401, { error: 'Sai mật khẩu quản trị.' });
         return fail(e, 'admin-login');
     }
 }
 
+/* Đã đăng nhập chưa, và với thao tác ghi thì request có đến từ trang quản trị không. */
+async function gate(req, env) {
+    const token = await requireAdmin(req, env);
+    if (!token) return json(401, { error: 'Cần đăng nhập quản trị.' });
+    if (req.method !== 'GET' && !trustedWrite(req)) return json(403, { error: 'Chỉ thao tác từ trang quản trị.' });
+    return null;
+}
+
 export async function handleQuotas(req, env) {
     try {
-        const token = await requireAdmin(req, env);
-        if (!token) return json(401, { error: 'Cần đăng nhập quản trị.' });
+        const denied = await gate(req, env);
+        if (denied) return denied;
         if (req.method === 'GET') {
             const quotas = await listQuotas(env);
             const transactions = await listTransactions(env);
@@ -59,8 +71,8 @@ export async function handleQuotas(req, env) {
 
 export async function handleExams(req, env) {
     try {
-        const token = await requireAdmin(req, env);
-        if (!token) return json(401, { error: 'Cần đăng nhập quản trị.' });
+        const denied = await gate(req, env);
+        if (denied) return denied;
         if (req.method === 'GET') {
             const exams = await listOfficial(env);
             const pending = await listPending(env);
@@ -122,8 +134,8 @@ export async function handleVisits(req, env) {
             return json(200, { ok: true });
         }
         if (req.method === 'GET') {
-            const token = await requireAdmin(req, env);
-            if (!token) return json(401, { error: 'Cần đăng nhập quản trị.' });
+            const denied = await gate(req, env);
+            if (denied) return denied;
             return json(200, await visitHistory(env));
         }
         return json(405, { error: 'Chỉ nhận GET hoặc POST.' });
@@ -134,8 +146,8 @@ export async function handleVisits(req, env) {
 
 export async function handleGiftcodes(req, env) {
     try {
-        const token = await requireAdmin(req, env);
-        if (!token) return json(401, { error: 'Cần đăng nhập quản trị.' });
+        const denied = await gate(req, env);
+        if (denied) return denied;
         if (req.method === 'GET') return json(200, { gifts: await listGifts(env) });
         if (req.method !== 'POST') return json(405, { error: 'Chỉ nhận GET hoặc POST.' });
         const body = await req.json(8000);

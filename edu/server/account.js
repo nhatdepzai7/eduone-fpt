@@ -335,9 +335,19 @@ if quotaKey ~= '' then redis.call('HSET', quotaKey, 'pro', '1', 'proUntil', tost
 return 'ok:' .. tostring(untilAt)
 `;
 
-export async function redeemGift(env, req, body) {
+async function redeemAllowed(env, key, limit) {
+    const n = Number(await redisCommand(env, ['INCR', key]));
+    if (n === 1) await redisCommand(env, ['EXPIRE', key, 900]);
+    return n <= limit;
+}
+
+export async function redeemGift(env, req, body, ip) {
     const user = await userFromSession(env, req);
     if (!user) bad('auth', 'Cần đăng nhập Google trước khi nhập mã.');
+    /* Chặn dò mã quà: tối đa 10 lần thử mỗi tài khoản và 30 lần mỗi IP trong 15 phút. */
+    const userOk = await redeemAllowed(env, 'fpass:redeem:user:' + user.sub, 10);
+    const ipOk = await redeemAllowed(env, 'fpass:redeem:ip:' + String(ip || 'unknown').slice(0, 64), 30);
+    if (!userOk || !ipOk) bad('rate', 'Nhập mã quá nhiều lần. Chờ 15 phút rồi thử lại.');
     const code = giftCodeOf(body && body.code);
     if (code.length < 4) bad('bad-gift', 'Mã không hợp lệ.');
     user.fundCode = await pickFund(env, user.fundCode, body && body.fundCode);
