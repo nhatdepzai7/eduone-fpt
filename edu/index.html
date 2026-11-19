@@ -2763,8 +2763,9 @@
         };
 
         const EOSSimulator = ({ title, items: rawItems, count, minutes, onSubmit, onExit, onDrillWrong, canExplain, toast }) => {
-            const [qlang] = useQLang();
+            const [qlang, setQLang] = useQLang();
             const items = useMemo(() => langList(rawItems, qlang), [rawItems, qlang]);
+            const bilingual = useMemo(() => rawItems.some(Sch.hasVi), [rawItems]);
             const byId = useMemo(() => new Map(items.map(t => [t.id, t])), [items]);
             const [paper] = useState(() => EOS.build(items, count));
             const [answers, setAnswers] = useState({});
@@ -2887,6 +2888,12 @@
                                 <input className="eos-field" type="number" min="8" max="28" value={fontSize} style={{ width: 56 }}
                                     onChange={(e) => setSize(parseInt(e.target.value, 10) || 10)} aria-label="Font Size" />
                             </label>
+                            {bilingual ? (
+                                <span role="group" aria-label="Ngôn ngữ câu hỏi" style={{ display: 'inline-flex', gap: 4 }}>
+                                    <button type="button" className="eos-btn" aria-pressed={qlang === 'vi'} style={qlang === 'vi' ? { fontWeight: 700 } : null} onClick={() => setQLang('vi')}>Tiếng Việt</button>
+                                    <button type="button" className="eos-btn" aria-pressed={qlang === 'en'} style={qlang === 'en' ? { fontWeight: 700 } : null} onClick={() => setQLang('en')}>English</button>
+                                </span>
+                            ) : null}
                             {result
                                 ? <b className="eos-val" style={{ fontSize: 16 }}>{timeUp ? 'Time is up. ' : ''}Examination Over!</b>
                                 : null}
