@@ -83,9 +83,33 @@
         .side-link { position: relative; display: flex; align-items: center; gap: 10px; width: 100%; min-height: 44px; padding: 0 12px; border-radius: 12px; font-size: 14px; font-weight: 600; color: var(--ink-2); transition: background .15s ease, color .15s ease; }
         .side-link svg { color: var(--muted); flex-shrink: 0; }
         .side-link:hover:not([aria-current="page"]) { background: rgba(255, 255, 255, .55); color: var(--ink); }
-        .side-link[aria-current="page"] { background: var(--surface); color: var(--ink); box-shadow: 0 1px 3px rgba(15, 23, 42, .12); }
-        .side-link[aria-current="page"] svg { color: var(--primary); }
-        .side-link[aria-current="page"]::before { content: ""; position: absolute; left: -12px; top: 10px; bottom: 10px; width: 3px; border-radius: 0 3px 3px 0; background: var(--primary); }
+        /* Mục đang chọn: nền trắng đổ bóng nhẹ + vạch tím mảnh bên trái, không viền dày. */
+        .side-link[aria-current="page"] { background: #FFFFFF; color: #4F46E5; box-shadow: 0 1px 3px rgba(15, 23, 42, .08); }
+        .side-link[aria-current="page"] svg { color: #4F46E5; }
+        .side-link[aria-current="page"]::before { content: ""; position: absolute; left: 0; top: 10px; bottom: 10px; width: 3px; border-radius: 3px; background: #4F46E5; }
+        .side-link:focus { outline: none; }
+        .side-link:focus-visible { outline: none; box-shadow: 0 0 0 2px rgba(79, 70, 229, .35); }
+        .side-link[aria-current="page"]:focus-visible { box-shadow: 0 1px 3px rgba(15, 23, 42, .08), 0 0 0 2px rgba(79, 70, 229, .35); }
+        /* Obsidian: menu dọc tối liền với topbar, vùng nội dung bên phải vẫn sáng. */
+        @media (min-width: 1024px) {
+            .app-side[data-tier="obsidian"] { background: #0E1018; border-right: 1px solid rgba(255, 255, 255, .06); color-scheme: dark; }
+        }
+        .app-side[data-tier="obsidian"] .side-link { color: #94A3B8; }
+        .app-side[data-tier="obsidian"] .side-link svg { color: #94A3B8; }
+        .app-side[data-tier="obsidian"] .side-link:hover:not([aria-current="page"]) { background: rgba(255, 255, 255, .05); color: #F1F5F9; }
+        .app-side[data-tier="obsidian"] .side-link:hover:not([aria-current="page"]) svg { color: #F1F5F9; }
+        .app-side[data-tier="obsidian"] .side-link[aria-current="page"] { background: rgba(255, 255, 255, .1); color: #FFFFFF; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .12); }
+        .app-side[data-tier="obsidian"] .side-link[aria-current="page"] svg { color: #FFFFFF; }
+        .app-side[data-tier="obsidian"] .side-link[aria-current="page"]::before { background: #818CF8; }
+        .app-side[data-tier="obsidian"] .side-link:focus-visible { box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .12), 0 0 0 2px rgba(129, 140, 248, .55); }
+        .app-side[data-tier="obsidian"] .side-head, .app-side[data-tier="obsidian"] .text-muted { color: #64748B; }
+        .app-side[data-tier="obsidian"] .side-ai, .app-side[data-tier="obsidian"] .side-ai svg { color: #C084FC !important; }
+        .app-side[data-tier="obsidian"] .side-ai:hover { color: #D8B4FE !important; }
+        .app-side[data-tier="obsidian"] .side-gem svg { color: #FBBF24 !important; }
+        .app-side[data-tier="obsidian"] .side-code { background: rgba(129, 140, 248, .16); color: #A5B4FC; }
+        .app-side[data-tier="obsidian"] .side-sub[aria-current="page"] .side-code { background: #818CF8; color: #0E1018; }
+        .app-side[data-tier="obsidian"] .side-dot { box-shadow: 0 0 0 2px #0E1018; }
+        .app-side[data-tier="obsidian"]::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, .12); }
         .side-sub { min-height: 38px; gap: 8px; font-weight: 500; font-size: 13px; }
         .side-code { flex-shrink: 0; padding: 2px 6px; border-radius: 6px; background: var(--primary-soft); color: var(--primary); font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 11px; font-weight: 700; }
         .side-sub[aria-current="page"] .side-code { background: var(--primary); color: #fff; }
@@ -105,6 +129,12 @@
         .bnav button[aria-current="page"] { color: var(--primary); }
         .bnav button[aria-current="page"]::before { content: ""; position: absolute; top: 0; left: 28%; right: 28%; height: 3px; border-radius: 0 0 3px 3px; background: var(--primary); }
         .bnav .nav-dot { top: 8px; right: calc(50% - 18px); box-shadow: 0 0 0 2px #fff; }
+        .bnav[data-tier="obsidian"] { background: rgba(14, 16, 24, .97); border-top-color: rgba(255, 255, 255, .07); }
+        .bnav[data-tier="obsidian"] button { color: #94A3B8; }
+        .bnav[data-tier="obsidian"] button[aria-current="page"] { color: #FFFFFF; }
+        .bnav[data-tier="obsidian"] button[aria-current="page"] svg { color: #A5B4FC; }
+        .bnav[data-tier="obsidian"] button[aria-current="page"]::before { background: #818CF8; }
+        .bnav[data-tier="obsidian"] .nav-dot { box-shadow: 0 0 0 2px #0E1018; }
         @media (min-width: 1024px) { .bnav { display: none; } }
         @media (max-width: 1023px) { body .help-dock { bottom: calc(70px + env(safe-area-inset-bottom)); } }
         body:has(.eos-shell) .bnav { display: none; }
@@ -698,7 +728,7 @@
             .eos-shell button.eos-hit { padding: 6px 4px; }
         }
 
-        .obsidian-head { background: #10141F; border-bottom-color: #202637; color: #F8F9FC; }
+        .obsidian-head { background: #0E1018; border-bottom-color: rgba(255, 255, 255, .07) !important; color: #F8F9FC; }
         .obsidian-head .btn-ghost { color: #C6CBD4; }
         .obsidian-head .btn-ghost:hover:not(:disabled) { background: #202637; }
         .obsidian-head .tab { color: #C6CBD4; }
@@ -8109,7 +8139,7 @@
                     </header>
 
                     <div className="flex w-full flex-1">
-                    <aside className="app-side" aria-label="Điều hướng">
+                    <aside className="app-side" data-tier={obsidian ? 'obsidian' : 'eco'} aria-label="Điều hướng">
                         <nav aria-label="Mục chính" className="flex flex-col gap-1">
                             {navItems.map(it => (
                                 <button key={it.k} type="button" className="side-link" aria-current={navNow === it.k ? 'page' : undefined} onClick={() => goNav(it.k)}>
@@ -8133,7 +8163,7 @@
                         ) : <p className="px-3 text-xs leading-5 text-muted">Môn bạn thi thử sẽ hiện ở đây để mở lại nhanh.</p>}
                         <p className="side-head">Khác</p>
                         <div className="flex flex-col gap-1">
-                            <button type="button" className="side-link" onClick={() => setBilling('ai')}><Icon name="gem" size={18} /> Gói & Nhập mã</button>
+                            <button type="button" className="side-link side-gem" onClick={() => setBilling('ai')}><Icon name="gem" size={18} /> Gói & Nhập mã</button>
                             <button type="button" className="side-link" onClick={() => setGuideOpen(true)}><Icon name="play" size={18} /> Video hướng dẫn</button>
                             <button type="button" className="side-link" onClick={openSupport}><Icon name="headset" size={18} /> Hỗ trợ & FAQ</button>
                             <button type="button" className="side-link" onClick={openFeedback}><Icon name="bulb" size={18} /> Góp ý</button>
@@ -8186,7 +8216,7 @@
                     </main>
                     </div>
 
-                    <nav aria-label="Mục chính" className="bnav">
+                    <nav aria-label="Mục chính" className="bnav" data-tier={obsidian ? 'obsidian' : 'eco'}>
                         {navItems.map(it => (
                             <button key={it.k} type="button" aria-current={navNow === it.k ? 'page' : undefined} onClick={() => goNav(it.k)}>
                                 <Icon name={it.icon} size={20} /> {it.short}
