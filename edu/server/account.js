@@ -425,6 +425,23 @@ export async function redeemGift(env, req, body, ip) {
     return { ok: true, tier: 'OBSIDIAN_PRO', proUntil: Number.isFinite(until) ? until : -1, fundCode: user.fundCode };
 }
 
+/* Ô nhập mã thông minh: cho biết mã thuộc loại nào trước khi cần đăng nhập.
+   Chỉ trả về loại mã (pro / fund / new / unknown), không lộ trạng thái hay số người của mã quà.
+   Chặn dò mã: tối đa 40 lần mỗi IP trong 15 phút. */
+export async function classifyCode(env, body, ip) {
+    const ok = await redeemAllowed(env, 'fpass:classify:ip:' + String(ip || 'unknown').slice(0, 64), 40);
+    if (!ok) bad('rate', 'Nhập mã quá nhiều lần. Chờ 15 phút rồi thử lại.');
+    const code = giftCodeOf(body && body.code);
+    if (code.length < 4) bad('bad-gift', 'Mã cần từ 4 chữ hoặc số.');
+    const gift = Number(await redisCommand(env, ['HEXISTS', 'fpass:gift:' + code, 'code'])) === 1;
+    if (gift) return { kind: 'pro' };
+    const fundCode = cleanCode(code);
+    if (!fundCode || fundCode !== code) return { kind: 'unknown' };
+    const state = await fundState(env, fundCode);
+    const used = state.granted > 0 || state.events.length > 0 || state.aiCredits > 0 || state.aiUnlocked;
+    return { kind: used ? 'fund' : 'new' };
+}
+
 export async function listGifts(env) {
     const codes = await redisCommand(env, ['SMEMBERS', 'fpass:gifts']);
     const list = Array.isArray(codes) ? codes : [];
