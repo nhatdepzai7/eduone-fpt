@@ -855,6 +855,160 @@
         @keyframes dial-spin { to { transform: rotate(360deg); } }
         @media (prefers-reduced-motion: reduce) { .app-root[data-tier="obsidian"] .cmd-dial { animation: none; } .app-root[data-tier="obsidian"] .cmd-spot { transition: none; } }
         @media (prefers-reduced-motion: reduce) { .ob-chip, .app-side[data-tier="obsidian"] .side-link svg { transition: none; } }
+        /* ===== Obsidian Sáng (bản sáng của hội viên PRO): nền trắng ngọc trai thân thiện như Eco, thêm điểm nhấn vàng champagne và cực quang pastel. ===== */
+        .app-root { --ob-ink: #08080A; --ob-panel: #0C0C0F; --ob-line: rgba(232, 205, 150, .12); --ob-line-2: rgba(232, 205, 150, .22); --ob-gold: #D9B871; --ob-gold-hi: #F2DDA4; --ob-gold-lo: #A8884A; --ob-text: #EFEBE2; --ob-soft: #A39D90; --ob-mute: #6E695F; }
+        .app-root[data-tier="ivory"] { --ob-text: #0F172A; --pl-ink: #1E1B4B; --pl-soft: #4C4F7A; --pl-mute: #6B7094; --pl-line: #E3E6F2; }
+        body:has(.app-root[data-tier="ivory"]) { background: radial-gradient(900px 500px at 15% -10%, rgba(224, 231, 255, .9) 0%, rgba(224, 231, 255, 0) 60%), radial-gradient(800px 480px at 95% 0%, rgba(253, 242, 248, .9) 0%, rgba(253, 242, 248, 0) 55%), #EEF2F8; }
+        .app-root[data-tier="ivory"] ::selection { background: rgba(165, 180, 252, .45); }
+        /* Topbar trắng mờ kính, đường chỉ chuyển sắc chàm → vàng → hồng */
+        .ivory-head { position: relative; background: rgba(255, 255, 255, .9); -webkit-backdrop-filter: saturate(1.4) blur(12px); backdrop-filter: saturate(1.4) blur(12px); border-bottom-color: transparent !important; color: #0F172A; }
+        .ivory-head::after { content: ""; position: absolute; left: 0; right: 0; bottom: -1px; height: 1px; background: linear-gradient(90deg, rgba(129, 140, 248, 0) 0%, rgba(129, 140, 248, .55) 25%, rgba(217, 184, 113, .9) 50%, rgba(244, 114, 182, .45) 75%, rgba(244, 114, 182, 0) 100%); pointer-events: none; }
+        .ivory-head .btn-ghost { color: #475569; }
+        .ivory-head .btn-ghost:hover:not(:disabled) { background: #EEF2FF; color: #4338CA; }
+        .ivory-head .btn-primary { background: linear-gradient(135deg, #6366F1, #4F46E5); color: #fff; box-shadow: 0 6px 16px -8px rgba(79, 70, 229, .7); }
+        .ivory-head .top-contact { background: #FFFFFF; border-color: var(--pl-line); }
+        .app-root[data-tier="ivory"] .ob-logo, .app-root[data-tier="eco"] .ob-logo { background: #FFFFFF; box-shadow: 0 0 0 1px rgba(217, 184, 113, .55), 0 4px 12px -6px rgba(99, 102, 241, .35); }
+        .app-root[data-tier="ivory"] .ob-chip, .app-root[data-tier="eco"] .ob-chip { color: #7A5A1E; background: linear-gradient(180deg, #FFFBEB, #FDF0CC); box-shadow: inset 0 0 0 1px rgba(201, 162, 74, .55), 0 2px 8px -4px rgba(201, 162, 74, .5); }
+        .app-root[data-tier="ivory"] .ob-chip svg, .app-root[data-tier="eco"] .ob-chip svg { color: #C9A24A; }
+        /* Sidebar + menu trượt: trắng, mục đang chọn là thẻ trắng nổi với vạch vàng → chàm */
+        @media (min-width: 1024px) {
+            .app-side[data-tier="ivory"] { background: linear-gradient(180deg, rgba(255, 255, 255, .92) 0%, rgba(248, 250, 255, .9) 100%); border-right: 1px solid var(--pl-line); }
+        }
+        .app-side.is-drawer[data-tier="ivory"] { background: linear-gradient(180deg, #FFFFFF 0%, #F6F7FF 100%); border-right: 1px solid var(--pl-line); }
+        .app-side[data-tier="ivory"] .side-link { color: #475569; }
+        .app-side[data-tier="ivory"] .side-link svg { color: #94A3B8; transition: color .15s ease; }
+        .app-side[data-tier="ivory"] .side-link:hover:not([aria-current="page"]) { background: #F1F4FF; color: #1E293B; }
+        .app-side[data-tier="ivory"] .side-link:hover:not([aria-current="page"]) svg { color: #6366F1; }
+        .app-side[data-tier="ivory"] .side-link[aria-current="page"] { background: linear-gradient(90deg, #EEF2FF 0%, #FFFFFF 85%); color: #4338CA; box-shadow: 0 1px 3px rgba(15, 23, 42, .08), inset 0 0 0 1px rgba(199, 210, 254, .7); }
+        .app-side[data-tier="ivory"] .side-link[aria-current="page"] svg { color: #4F46E5; }
+        .app-side[data-tier="ivory"] .side-link[aria-current="page"]::before { background: linear-gradient(180deg, #F2C66D, #6366F1); }
+        .app-side[data-tier="ivory"] .side-head { display: flex; align-items: center; gap: 8px; color: #94A3B8; }
+        .app-side[data-tier="ivory"] .side-head::after { content: ""; flex: 1; height: 1px; background: linear-gradient(90deg, var(--pl-line), transparent); }
+        .app-side[data-tier="ivory"] .side-ai, .app-side[data-tier="ivory"] .side-ai svg { color: #7C3AED !important; }
+        .app-side[data-tier="ivory"] .side-gem svg { color: #C9A24A !important; }
+        .app-side[data-tier="ivory"] .side-close:hover { background: #EEF2FF; }
+        .bnav[data-tier="ivory"] { background: rgba(255, 255, 255, .96); border-top-color: var(--pl-line); }
+        .bnav[data-tier="ivory"] button[aria-current="page"] { color: #4338CA; }
+        .bnav[data-tier="ivory"] button[aria-current="page"]::before { background: linear-gradient(90deg, #F2C66D, #6366F1); }
+        /* Thẻ đếm ngược: cực quang pastel chàm · tím · hồng · đào, đốm sáng trôi chậm, chữ mực chàm đậm */
+        .app-root[data-tier="ivory"] .cmd-card { color: var(--pl-ink); background: linear-gradient(140deg, #EEF2FF 0%, #F5F3FF 36%, #FDF2F8 70%, #FFF7ED 100%); box-shadow: 0 24px 44px -28px rgba(79, 70, 229, .45), inset 0 0 0 1px rgba(165, 180, 252, .55), inset 0 1px 0 #FFFFFF; }
+        .app-root[data-tier="ivory"] .cmd-card::after { background: radial-gradient(closest-side, rgba(255, 255, 255, .75), transparent 70%); }
+        .app-root[data-tier="ivory"] .cmd-card .text-indigo-100 { color: var(--pl-soft); }
+        .app-root[data-tier="ivory"] .cmd-card .text-indigo-200 { color: var(--pl-mute); }
+        .app-root[data-tier="ivory"] .cmd-card .text-white { color: var(--pl-ink); }
+        .app-root[data-tier="ivory"] .cmd-card .cmd-pill.bg-white\/15 { background: rgba(255, 255, 255, .8); color: #4338CA; box-shadow: inset 0 0 0 1px #C7D2FE; }
+        .app-root[data-tier="ivory"] .cmd-card [role="timer"] { color: var(--pl-ink); }
+        .app-root[data-tier="ivory"] .cmd-go { color: #fff; background: linear-gradient(135deg, #6366F1 0%, #4F46E5 60%, #4338CA 100%); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .25), 0 12px 24px -12px rgba(79, 70, 229, .7); }
+        .app-root[data-tier="ivory"] .cmd-go:hover:not(:disabled) { background: linear-gradient(135deg, #6D70F3 0%, #5850EC 60%, #4C40D8 100%); }
+        .app-root[data-tier="ivory"] .cmd-go.is-first { box-shadow: 0 0 0 4px rgba(129, 140, 248, .25), inset 0 1px 0 rgba(255, 255, 255, .25), 0 12px 24px -12px rgba(79, 70, 229, .7); }
+        .app-root[data-tier="ivory"] .cmd-alt { color: #312E81; background: rgba(255, 255, 255, .75); border-color: #C7D2FE; }
+        .app-root[data-tier="ivory"] .cmd-alt:hover { background: #FFFFFF; }
+        .app-root[data-tier="ivory"] .cmd-link { color: var(--pl-soft); }
+        .app-root[data-tier="ivory"] .cmd-link:hover { background: rgba(255, 255, 255, .7); color: #4338CA; }
+        .app-root[data-tier="ivory"] .slot-path::before { background: linear-gradient(90deg, #C7D2FE, #F5D0FE, #FED7AA); }
+        .app-root[data-tier="ivory"] .slot-dot { background: #FFFFFF; color: #6366F1; box-shadow: 0 0 0 1px #C7D2FE, 0 2px 6px -2px rgba(79, 70, 229, .3); }
+        .app-root[data-tier="ivory"] .slot-node.is-now .slot-dot { background: linear-gradient(135deg, #6366F1, #4338CA); color: #fff; animation-name: nowRingPearl; }
+        .app-root[data-tier="ivory"] .slot-node.is-done .slot-dot { background: linear-gradient(180deg, #FDE68A, #F2C66D); color: #5B3F0A; }
+        .app-root[data-tier="ivory"] .slot-time { color: var(--pl-ink); }
+        .app-root[data-tier="ivory"] .slot-name { color: var(--pl-mute); }
+        @keyframes nowRingPearl { 0%, 100% { box-shadow: 0 0 0 4px rgba(99, 102, 241, .3); } 50% { box-shadow: 0 0 0 9px rgba(99, 102, 241, .04); } }
+        .app-root[data-tier="ivory"] .cmd-sum { background: rgba(165, 180, 252, .35); }
+        .app-root[data-tier="ivory"] .cmd-sum > div { background: rgba(255, 255, 255, .72); }
+        .app-root[data-tier="ivory"] .cmd-sum dt { color: var(--pl-mute); }
+        .app-root[data-tier="ivory"] .cmd-sum dd { color: #312E81; }
+        .cmd-flow { display: none; }
+        .app-root[data-tier="ivory"] .cmd-flow { display: block; position: absolute; z-index: 0; inset: -10% -5%; width: 110%; height: 120%; stroke: #6366F1; pointer-events: none; -webkit-mask-image: radial-gradient(120% 90% at 85% 15%, #000 0%, rgba(0, 0, 0, .65) 45%, transparent 85%); mask-image: radial-gradient(120% 90% at 85% 15%, #000 0%, rgba(0, 0, 0, .65) 45%, transparent 85%); }
+        .app-root[data-tier="ivory"] .cmd-flow-a { opacity: .12; animation: flow-drift 48s linear infinite; }
+        .app-root[data-tier="ivory"] .cmd-flow-b { opacity: .08; animation: flow-drift 72s linear infinite reverse; }
+        .app-root[data-tier="ivory"] .cmd-flow-orb { stroke: none; filter: blur(26px); }
+        .app-root[data-tier="ivory"] .cmd-flow-orb.is-a { fill: rgba(129, 140, 248, .55); transform-origin: 470px 70px; animation: orb-a 16s ease-in-out infinite; }
+        .app-root[data-tier="ivory"] .cmd-flow-orb.is-b { fill: rgba(244, 114, 182, .4); transform-origin: 360px 220px; animation: orb-b 21s ease-in-out infinite; }
+        .app-root[data-tier="ivory"] .cmd-flow-orb.is-c { fill: rgba(251, 191, 36, .38); transform-origin: 560px 240px; animation: orb-c 18s ease-in-out infinite; }
+        @keyframes flow-drift { from { transform: translateX(0); } to { transform: translateX(-600px); } }
+        @keyframes orb-a { 0%, 100% { transform: translate(0, 0) scale(1); } 50% { transform: translate(-40px, 30px) scale(1.2); } }
+        @keyframes orb-b { 0%, 100% { transform: translate(0, 0) scale(1); } 50% { transform: translate(50px, -30px) scale(.85); } }
+        @keyframes orb-c { 0%, 100% { transform: translate(0, 0) scale(.9); } 50% { transform: translate(-30px, -40px) scale(1.15); } }
+        @media (hover: hover) and (pointer: fine) {
+            .app-root[data-tier="ivory"] .cmd-spot { display: block; position: absolute; inset: 0; z-index: 0; pointer-events: none; opacity: 0; background: radial-gradient(420px circle at var(--mx, 70%) var(--my, 20%), rgba(255, 255, 255, .6), transparent 60%); transition: opacity .5s ease; }
+            .app-root[data-tier="ivory"] .cmd-card:hover .cmd-spot { opacity: 1; }
+        }
+        @media (prefers-reduced-motion: reduce) { .app-root[data-tier="ivory"] .cmd-flow-a, .app-root[data-tier="ivory"] .cmd-flow-b, .app-root[data-tier="ivory"] .cmd-flow-orb { animation: none; } }
+        .app-root[data-tier="ivory"] .id-invite { color: #4338CA; background: #FFFFFF; border: 1px dashed #A5B4FC; }
+        .app-root[data-tier="ivory"] .id-invite:hover { color: #fff; background: linear-gradient(135deg, #6366F1, #4F46E5); border-color: transparent; }
+        .app-root[data-tier="ivory"] .sched-card .btn-primary { background: linear-gradient(135deg, #6366F1, #4F46E5); }
+        /* Banner phiếu bản sắc & thanh đã đóng dấu */
+        .mission[data-tier="ivory"] { background: linear-gradient(135deg, #FFFFFF 0%, #F5F3FF 55%, #FFF7ED 100%); border-color: #DDD6FE; box-shadow: 0 6px 18px -8px rgba(124, 58, 237, .18); }
+        .mission[data-tier="ivory"] .mission-badge { color: #5B3F0A; background: linear-gradient(180deg, #FDE68A, #F2C66D); }
+        .mission[data-tier="ivory"] .mission-cta { background: linear-gradient(135deg, #6366F1, #4F46E5); }
+        .fund-strip[data-tier="ivory"] { background: linear-gradient(135deg, #FFFFFF 0%, #F5F3FF 100%); border-color: #DDD6FE; }
+        /* Chọn giao diện trong Cài đặt */
+        .skin-pick { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+        .skin-opt { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; min-width: 0; padding: 8px; border-radius: 14px; text-align: left; background: var(--surface); border: 1px solid var(--border); transition: border-color .15s ease, box-shadow .15s ease; }
+        .skin-opt:hover { border-color: #C9B27A; }
+        .skin-opt.is-on { border-color: #B8913F; box-shadow: 0 0 0 3px rgba(217, 184, 113, .25); }
+        .skin-opt b { margin-top: 6px; font-size: 13px; line-height: 1.2; color: var(--ink); }
+        .skin-opt small { font-size: 11px; line-height: 1.3; color: var(--ink-2); }
+        .skin-swatch { display: grid; grid-template-columns: 30% 1fr; grid-template-rows: 30% 1fr; width: 100%; height: 44px; overflow: hidden; border-radius: 9px; box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .08); }
+        .skin-swatch i { display: block; }
+        .skin-swatch i:nth-child(1) { grid-column: 1 / 3; }
+        .skin-swatch.is-dark i:nth-child(1) { background: #0B0B0E; box-shadow: inset 0 -1px 0 #D9B871; }
+        .skin-swatch.is-dark i:nth-child(2) { background: #0C0C0F; }
+        .skin-swatch.is-dark i:nth-child(3) { background: linear-gradient(135deg, #EFEDE7, #EFEDE7 55%, #141317 55%); }
+        .skin-swatch.is-light i:nth-child(1) { background: #FFFFFF; box-shadow: inset 0 -1px 0 #D9B871; }
+        .skin-swatch.is-light i:nth-child(2) { background: #F6F7FF; }
+        .skin-swatch.is-light i:nth-child(3) { background: linear-gradient(135deg, #EEF2F8, #EEF2F8 52%, #E0E7FF 52%, #FCE7F3 78%, #FFEDD5 100%); }
+        .skin-swatch.is-classic i:nth-child(1) { background: #E2E8F0; }
+        .skin-swatch.is-classic i:nth-child(2) { background: #EEF2F7; }
+        /* Ảnh nền riêng cho thẻ đếm ngược (như màn hình khóa). Màu chữ tự đổi theo độ sáng ảnh: ảnh tối → chữ trắng, ảnh sáng → chữ mực. Đặt cuối để thắng mọi giao diện. */
+        .cmd-photo-btns { position: absolute; z-index: 20; top: 12px; right: 12px; display: flex; gap: 6px; }
+        .cmd-photo-btn { display: inline-flex; align-items: center; justify-content: center; width: 34px; height: 34px; border-radius: 999px; color: #fff; background: rgba(15, 23, 42, .28); -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .25); opacity: .8; transition: opacity .15s ease, background .15s ease; }
+        .cmd-photo-btn:hover, .cmd-photo-btn:focus-visible { opacity: 1; background: rgba(15, 23, 42, .45); }
+        .app-root[data-tier="ivory"] .cmd-card:not(.has-photo) .cmd-photo-btn { color: #4338CA; background: rgba(255, 255, 255, .7); box-shadow: inset 0 0 0 1px #C7D2FE; }
+        .cmd-card.photo-light .cmd-photo-btn { color: #0F172A; background: rgba(255, 255, 255, .6); box-shadow: inset 0 0 0 1px rgba(15, 23, 42, .12); }
+        .cmd-card.has-photo { background-size: cover !important; background-position: center !important; }
+        .cmd-card.has-photo::after, .cmd-card.has-photo .cmd-dial, .cmd-card.has-photo .cmd-flow { display: none !important; }
+        .cmd-photo-scrim { position: absolute; inset: 0; z-index: 0; pointer-events: none; }
+        .cmd-card.photo-dark .cmd-photo-scrim { background: linear-gradient(100deg, rgba(2, 6, 23, .62) 0%, rgba(2, 6, 23, .38) 50%, rgba(2, 6, 23, .14) 100%), linear-gradient(0deg, rgba(2, 6, 23, .45), rgba(2, 6, 23, 0) 45%); }
+        .cmd-card.photo-light .cmd-photo-scrim { background: linear-gradient(100deg, rgba(255, 255, 255, .78) 0%, rgba(255, 255, 255, .5) 50%, rgba(255, 255, 255, .18) 100%), linear-gradient(0deg, rgba(255, 255, 255, .6), rgba(255, 255, 255, 0) 45%); }
+        /* Ảnh tối: chữ trắng */
+        .app-root .cmd-card.photo-dark { color: #FFFFFF; box-shadow: 0 24px 44px -26px rgba(2, 6, 23, .7); }
+        .app-root .cmd-card.photo-dark .text-indigo-100 { color: rgba(255, 255, 255, .9); }
+        .app-root .cmd-card.photo-dark .text-indigo-200 { color: rgba(255, 255, 255, .78); }
+        .app-root .cmd-card.photo-dark .text-white, .app-root .cmd-card.photo-dark [role="timer"] { color: #FFFFFF; text-shadow: 0 2px 18px rgba(0, 0, 0, .45); }
+        .app-root .cmd-card.photo-dark .cmd-pill.bg-white\/15 { background: rgba(255, 255, 255, .18); color: #fff; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .3); }
+        .app-root .cmd-card.photo-dark .cmd-go { color: #0F172A; background: #FFFFFF; box-shadow: 0 12px 24px -12px rgba(0, 0, 0, .6); }
+        .app-root .cmd-card.photo-dark .cmd-go svg { color: #4F46E5; }
+        .app-root .cmd-card.photo-dark .cmd-alt { color: #fff; background: rgba(255, 255, 255, .14); border-color: rgba(255, 255, 255, .4); }
+        .app-root .cmd-card.photo-dark .cmd-link { color: rgba(255, 255, 255, .9); }
+        .app-root .cmd-card.photo-dark .slot-path::before { background: rgba(255, 255, 255, .35); }
+        .app-root .cmd-card.photo-dark .slot-dot { background: rgba(255, 255, 255, .16); color: #fff; box-shadow: 0 0 0 1px rgba(255, 255, 255, .45); }
+        .app-root .cmd-card.photo-dark .slot-node.is-now .slot-dot { background: #fff; color: #0F172A; animation-name: nowRing; }
+        .app-root .cmd-card.photo-dark .slot-time { color: #fff; }
+        .app-root .cmd-card.photo-dark .slot-name { color: rgba(255, 255, 255, .78); }
+        .app-root .cmd-card.photo-dark .cmd-sum { background: rgba(255, 255, 255, .2); }
+        .app-root .cmd-card.photo-dark .cmd-sum > div { background: rgba(2, 6, 23, .35); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); }
+        .app-root .cmd-card.photo-dark .cmd-sum dt { color: rgba(255, 255, 255, .75); }
+        .app-root .cmd-card.photo-dark .cmd-sum dd { color: #fff; }
+        /* Ảnh sáng: chữ mực */
+        .app-root .cmd-card.photo-light { color: #0F172A; box-shadow: 0 24px 44px -28px rgba(15, 23, 42, .45), inset 0 0 0 1px rgba(15, 23, 42, .08); }
+        .app-root .cmd-card.photo-light .text-indigo-100 { color: #1E293B; }
+        .app-root .cmd-card.photo-light .text-indigo-200 { color: #334155; }
+        .app-root .cmd-card.photo-light .text-white, .app-root .cmd-card.photo-light [role="timer"] { color: #0F172A; text-shadow: 0 1px 14px rgba(255, 255, 255, .7); }
+        .app-root .cmd-card.photo-light .cmd-pill.bg-white\/15 { background: rgba(255, 255, 255, .75); color: #0F172A; box-shadow: inset 0 0 0 1px rgba(15, 23, 42, .12); }
+        .app-root .cmd-card.photo-light .cmd-go { color: #fff; background: #0F172A; box-shadow: 0 12px 24px -12px rgba(15, 23, 42, .6); }
+        .app-root .cmd-card.photo-light .cmd-go svg { color: #fff; }
+        .app-root .cmd-card.photo-light .cmd-alt { color: #0F172A; background: rgba(255, 255, 255, .7); border-color: rgba(15, 23, 42, .18); }
+        .app-root .cmd-card.photo-light .cmd-link { color: #1E293B; }
+        .app-root .cmd-card.photo-light .slot-path::before { background: rgba(15, 23, 42, .2); }
+        .app-root .cmd-card.photo-light .slot-dot { background: rgba(255, 255, 255, .85); color: #0F172A; box-shadow: 0 0 0 1px rgba(15, 23, 42, .18); }
+        .app-root .cmd-card.photo-light .slot-node.is-now .slot-dot { background: #0F172A; color: #fff; animation-name: nowRingPearl; }
+        .app-root .cmd-card.photo-light .slot-time { color: #0F172A; }
+        .app-root .cmd-card.photo-light .slot-name { color: #334155; }
+        .app-root .cmd-card.photo-light .cmd-sum { background: rgba(15, 23, 42, .1); }
+        .app-root .cmd-card.photo-light .cmd-sum > div { background: rgba(255, 255, 255, .7); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); }
+        .app-root .cmd-card.photo-light .cmd-sum dt { color: #475569; }
+        .app-root .cmd-card.photo-light .cmd-sum dd { color: #0F172A; }
+        .skin-swatch.is-classic i:nth-child(3) { background: linear-gradient(135deg, #E2E8F0, #E2E8F0 55%, #4338CA 55%); }
         @keyframes identity-cue {
             0% { box-shadow: 0 0 0 0 rgba(231, 197, 106, .55); }
             70% { box-shadow: 0 0 0 8px rgba(231, 197, 106, 0); }
@@ -940,6 +1094,7 @@
         const ICONS = {
             check: <path d="M20 6 9 17l-5-5" />,
             x: <><path d="M18 6 6 18" /><path d="m6 6 12 12" /></>,
+            image: <><rect x="3" y="4" width="18" height="16" rx="3" /><circle cx="9" cy="10" r="1.8" /><path d="m21 16-4.5-4.5L8 20" /></>,
             menu: <><path d="M4 7h16" /><path d="M4 12h16" /><path d="M4 17h10" /></>,
             left: <path d="m15 18-6-6 6-6" />,
             right: <path d="m9 18 6-6-6-6" />,
@@ -1156,6 +1311,23 @@
             return until === -1 || until > Date.now();
         };
         const obsidianOf = (fund) => !!fund && ((fund.aiCredits || 0) > 0 || proLive(fund));
+        /* Giao diện của hội viên PRO: mặc định Obsidian Đen (hiệu ứng "wow" khi vừa lên gói),
+           tự chọn được Obsidian Ngà (sáng, hợp học ngoài trời) hoặc Cổ điển (tím). Người chưa có gói luôn là Eco. */
+        const SKIN_KEY = 'skin';
+        const SKINS = ['dark', 'light', 'classic'];
+        const skinOf = (fund, pref) => !obsidianOf(fund) ? 'eco' : pref === 'light' ? 'ivory' : pref === 'classic' ? 'eco' : 'obsidian';
+        const readSkin = () => { const v = Store.prefs.get(SKIN_KEY, 'dark'); return SKINS.indexOf(v) >= 0 ? v : 'dark'; };
+        const setSkinPref = (v) => { Store.prefs.set(SKIN_KEY, v); window.dispatchEvent(new CustomEvent('edu-skin')); window.dispatchEvent(new CustomEvent('edu-identity')); };
+        const useSkinPref = () => {
+            const [v, setV] = useState(readSkin);
+            useEffect(() => {
+                const on = () => setV(readSkin());
+                window.addEventListener('edu-skin', on);
+                window.addEventListener('edu-account', on);
+                return () => { window.removeEventListener('edu-skin', on); window.removeEventListener('edu-account', on); };
+            }, []);
+            return v;
+        };
         const memberSince = (fund) => {
             const buys = (fund && fund.history || []).filter(ev => ev && ev.kind === 'buy' && ev.pack === 'vocab' && ev.t);
             if (!buys.length) return 0;
@@ -2058,6 +2230,7 @@
            - Phiếu hôm nay (hiệu ứng Zeigarnik): chưa chốt thì pill sáng, có sóng radar và vệt sáng, bấm là vào học 30s; chốt rồi thì xanh lá, đứng yên.
            - Lượt AI (khan hiếm tăng dần): còn nhiều thì chỉ hiện "Gói AI 29k"; còn <= 15 lượt thì hiện cảnh báo cam cạnh nút Nâng cấp. */
         const FundStrip = ({ onOpen, onQuickVote }) => {
+            const skinPref = useSkinPref();
             const fund = useFund();
             const ai = useAiLeft();
             const votes = useVoteSummary();
@@ -2087,13 +2260,13 @@
                 wasDue.current = !votes.confirmedToday;
                 return undefined;
             }, [votes && votes.confirmedToday]);
-            const tier = obsidianOf(fund) ? 'obsidian' : 'eco';
+            const tier = skinOf(fund, skinPref);
             if (due) {
                 const late = day.hour >= 21;
                 return (
                     <section className={'mission' + (late ? ' is-late' : '')} data-tier={tier} aria-label="Phiếu bản sắc hôm nay">
                         <div className="mission-head">
-                            <span className="mission-label">{tier === 'obsidian'
+                            <span className="mission-label">{tier !== 'eco'
                                 ? <><i className="mission-star" aria-hidden="true">✦</i>Obsidian Pass · chưa đóng dấu</>
                                 : <><i className="mission-dot" aria-hidden="true" />Phiếu bản sắc · chưa đóng dấu</>}</span>
                             <MissionClock />
@@ -4576,6 +4749,69 @@
             </ol>
         );
 
+        /* Ảnh nền riêng cho thẻ đếm ngược, như hình nền màn hình khóa. Thu nhỏ trên máy, đo độ sáng vùng chữ (bên trái)
+           để chọn chữ trắng hay chữ mực. Chỉ lưu trên máy này (không gửi lên tài khoản vì ảnh nặng). */
+        const PHOTO_KEY = 'heroPhoto';
+        const readPhoto = () => { const v = Store.prefs.get(PHOTO_KEY, null); return v && v.src ? v : null; };
+        const useHeroPhoto = () => {
+            const [v, setV] = useState(readPhoto);
+            useEffect(() => {
+                const on = () => setV(readPhoto());
+                window.addEventListener('edu-photo', on);
+                return () => window.removeEventListener('edu-photo', on);
+            }, []);
+            return v;
+        };
+        const loadImage = (src) => new Promise((resolve, reject) => { const img = new Image(); img.onload = () => resolve(img); img.onerror = () => reject(new Error('Không đọc được ảnh này.')); img.src = src; });
+        const preparePhoto = async (file) => {
+            if (!file || !/^image\//.test(file.type)) throw new Error('Chọn một tệp ảnh (JPG, PNG, WebP).');
+            if (file.size > 25 * 1024 * 1024) throw new Error('Ảnh quá lớn (tối đa 25 MB).');
+            const url = URL.createObjectURL(file);
+            try {
+                const img = await loadImage(url);
+                const encode = (max, q) => {
+                    const k = Math.min(1, max / Math.max(img.naturalWidth, img.naturalHeight));
+                    const c = document.createElement('canvas');
+                    c.width = Math.max(1, Math.round(img.naturalWidth * k));
+                    c.height = Math.max(1, Math.round(img.naturalHeight * k));
+                    c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+                    return c.toDataURL('image/jpeg', q);
+                };
+                let src = encode(1400, 0.82);
+                if (src.length > 1400000) src = encode(1100, 0.72);
+                if (src.length > 1400000) src = encode(900, 0.65);
+                /* Độ sáng cảm nhận ở vùng có chữ: 62% bên trái ảnh, có trọng số cho vùng giữa-dưới (đồng hồ, nút). */
+                const W = 48, H = 32;
+                const sc = document.createElement('canvas');
+                sc.width = W; sc.height = H;
+                const g = sc.getContext('2d');
+                g.drawImage(img, 0, 0, W, H);
+                const d = g.getImageData(0, 0, W, H).data;
+                const lin = (v) => { v /= 255; return v <= 0.04045 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); };
+                let sum = 0, wsum = 0, bright = 0;
+                for (let y = 0; y < H; y++) {
+                    for (let x = 0; x < Math.round(W * 0.62); x++) {
+                        const i = (y * W + x) * 4;
+                        const L = 0.2126 * lin(d[i]) + 0.7152 * lin(d[i + 1]) + 0.0722 * lin(d[i + 2]);
+                        const w = 0.6 + 0.4 * (y / H);
+                        sum += L * w; wsum += w;
+                        if (L > 0.5) bright += w;
+                    }
+                }
+                const lum = sum / wsum;
+                /* Ngưỡng theo độ sáng tuyến tính (~0.36 ≈ xám 63%), và nếu phần lớn vùng chữ là mảng rất sáng thì cũng dùng chữ mực. */
+                const tone = lum > 0.36 || bright / wsum > 0.55 ? 'light' : 'dark';
+                return { src, tone, lum: Math.round(lum * 1000) / 1000, at: Date.now() };
+            } finally {
+                URL.revokeObjectURL(url);
+            }
+        };
+        const savePhoto = (v) => {
+            if (v) Store.prefs.set(PHOTO_KEY, v); else Store.prefs.remove(PHOTO_KEY);
+            if (v && !readPhoto()) throw new Error('Bộ nhớ trình duyệt đầy, chưa lưu được ảnh.');
+            window.dispatchEvent(new CustomEvent('edu-photo'));
+        };
+
         /* Mặt đồng hồ khắc chìm cho thẻ Obsidian: 2 vòng mảnh + 60 vạch giây, vạch 5 giây dài hơn. Bản Eco ẩn bằng CSS. */
         const DIAL_TICKS = Array.from({ length: 60 }, (_, i) => {
             const a = (i * 6 - 90) * Math.PI / 180;
@@ -4591,6 +4827,21 @@
                 {DIAL_TICKS.map((t, i) => <line key={i} x1={t.x1.toFixed(2)} y1={t.y1.toFixed(2)} x2={t.x2.toFixed(2)} y2={t.y2.toFixed(2)} strokeWidth={t.w} strokeLinecap="round" />)}
             </svg>
         ));
+        /* Obsidian Ngà: các dải sóng mảnh trôi chậm phía sau đồng hồ, gợi trạng thái "dòng chảy" (flow) khi học. Chỉ hiện ở bản Ngà. */
+        const FLOW_PATHS = Array.from({ length: 9 }, (_, i) => {
+            const y = 40 + i * 26;
+            const a = 10 + (i % 3) * 6;
+            return 'M0 ' + y + ' C 100 ' + (y - a) + ', 200 ' + (y + a) + ', 300 ' + y + ' S 500 ' + (y - a) + ', 600 ' + y + ' S 800 ' + (y + a) + ', 900 ' + y + ' S 1100 ' + (y - a) + ', 1200 ' + y;
+        });
+        const FlowLines = React.memo(() => (
+            <svg className="cmd-flow" viewBox="0 0 600 300" preserveAspectRatio="xMidYMid slice" aria-hidden="true" focusable="false">
+                <g className="cmd-flow-a">{FLOW_PATHS.map((d, i) => <path key={i} d={d} fill="none" strokeWidth={i % 3 === 0 ? 1.1 : 0.6} />)}</g>
+                <g className="cmd-flow-b">{FLOW_PATHS.slice(0, 5).map((d, i) => <path key={i} d={d} fill="none" strokeWidth="0.5" transform={'translate(0 ' + (13 + i * 2) + ')'} />)}</g>
+                <circle className="cmd-flow-orb is-a" cx="470" cy="70" r="70" />
+                <circle className="cmd-flow-orb is-b" cx="360" cy="220" r="60" />
+                <circle className="cmd-flow-orb is-c" cx="560" cy="240" r="56" />
+            </svg>
+        ));
         /* Vầng sáng theo chuột: chỉ đổi biến CSS trên thẻ, không render lại React. */
         const moveSpot = (e) => {
             const el = e.currentTarget;
@@ -4599,7 +4850,25 @@
             el.style.setProperty('--my', ((e.clientY - r.top) / r.height * 100).toFixed(1) + '%');
         };
 
-        const FocusCard = ({ plan, cur, now, cardCount, onAddFirst, onStart, onStudyNow, onSnooze, onBonus, onReceipt, onGate }) => {
+        const FocusCard = ({ plan, cur, now, cardCount, onAddFirst, onStart, onStudyNow, onSnooze, onBonus, onReceipt, onGate, toast }) => {
+            const photo = useHeroPhoto();
+            const photoInput = useRef(null);
+            const [photoBusy, setPhotoBusy] = useState(false);
+            const pickPhoto = async (e) => {
+                const file = e.target.files && e.target.files[0];
+                e.target.value = '';
+                if (!file) return;
+                setPhotoBusy(true);
+                try {
+                    const next = await preparePhoto(file);
+                    savePhoto(next);
+                    if (toast) toast(next.tone === 'dark' ? 'Đã đặt ảnh nền · ảnh tối nên dùng chữ trắng' : 'Đã đặt ảnh nền · ảnh sáng nên dùng chữ đậm', 'success');
+                } catch (err) {
+                    if (toast) toast((err && err.message) || 'Chưa đặt được ảnh nền.', 'error');
+                } finally {
+                    setPhotoBusy(false);
+                }
+            };
             const slot = cur.slot;
             const nowD = new Date(now);
             const msUntil = (s) => { const d = new Date(nowD); d.setHours(0, 0, 0, 0); return Math.max(0, d.getTime() + Plan.triggerMin(s) * 60000 - nowD.getTime()); };
@@ -4636,12 +4905,23 @@
             const lateText = lateBy >= 60 ? Math.floor(lateBy / 60) + ' giờ' + (lateBy % 60 ? ' ' + (lateBy % 60) + ' phút' : '') : lateBy + ' phút';
             const onTimeLeft = live && !late ? Math.max(0, (startMin + 30) * 60000 - (nowD.getTime() - new Date(nowD).setHours(0, 0, 0, 0))) : 0;
             return (
-                <section className="cmd-card flex flex-col p-5 text-left sm:p-7" aria-label="Ca học hôm nay" onPointerMove={moveSpot}>
+                <section className={'cmd-card flex flex-col p-5 text-left sm:p-7' + (photo ? ' has-photo photo-' + photo.tone : '')} aria-label="Ca học hôm nay" onPointerMove={moveSpot}
+                    style={photo ? { backgroundImage: 'url("' + photo.src + '")' } : undefined}>
                     <ChronoDial />
+                    <FlowLines />
+                    {photo && <span className="cmd-photo-scrim" aria-hidden="true" />}
+                    <div className="cmd-photo-btns">
+                        <button type="button" className="cmd-photo-btn" onClick={() => photoInput.current && photoInput.current.click()} disabled={photoBusy}
+                            aria-label={photo ? 'Đổi ảnh nền đồng hồ' : 'Đặt ảnh nền cho đồng hồ'} title={photo ? 'Đổi ảnh nền' : 'Đặt ảnh nền (như màn hình khóa)'}>
+                            <Icon name={photoBusy ? 'loader' : 'image'} size={16} className={photoBusy ? 'animate-spin' : ''} />
+                        </button>
+                        {photo && <button type="button" className="cmd-photo-btn" onClick={() => { savePhoto(null); if (toast) toast('Đã bỏ ảnh nền', 'info'); }} aria-label="Bỏ ảnh nền đồng hồ" title="Bỏ ảnh nền"><Icon name="x" size={16} /></button>}
+                        <input ref={photoInput} type="file" accept="image/*" className="sr-only" tabIndex={-1} aria-hidden="true" onChange={pickPhoto} />
+                    </div>
                     <span className="cmd-grain" aria-hidden="true" />
                     <span className="cmd-spot" aria-hidden="true" />
                     <div className="relative z-10 flex flex-1 flex-col">
-                        <div className="flex flex-wrap items-center gap-2">
+                        <div className={'flex flex-wrap items-center gap-2 ' + (photo ? 'pr-20' : 'pr-10')}>
                             <span className="cmd-pill bg-white/15 text-white"><Icon name="lock" size={13} /> Lịch hôm nay đã khóa</span>
                             <span className="text-xs text-indigo-200">Sửa lịch chỉ áp dụng từ 00:00 ngày mai</span>
                         </div>
@@ -4923,7 +5203,7 @@
                     {/* Màn đầu (above the fold): ca học bên trái, Bản sắc + Lịch học bên phải. */}
                     <div className="grid gap-4 lg:grid-cols-12">
                         <div className="lg:col-span-7 [&>section]:h-full">
-                            <FocusCard plan={plan} cur={cur} now={now} cardCount={filled} onAddFirst={onAddFirst} onStart={onStart} onStudyNow={onStudyNow} onSnooze={snooze} onBonus={bonus} onReceipt={receipt}
+                            <FocusCard plan={plan} cur={cur} now={now} cardCount={filled} toast={toast} onAddFirst={onAddFirst} onStart={onStart} onStudyNow={onStudyNow} onSnooze={snooze} onBonus={bonus} onReceipt={receipt}
                                 onGate={() => { const el = document.getElementById('flow-bridge'); if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' }); }} />
                         </div>
                         <div className="flex flex-col gap-4 lg:col-span-5">
@@ -7137,8 +7417,8 @@
 
         /* Mỗi email Google một kho riêng trên máy: sổ từ, tiến độ, phiếu bản sắc và cài đặt học không lẫn giữa các tài khoản.
            'dataOwner' ghi email đang sở hữu dữ liệu trên máy; rỗng là khách chưa đăng nhập. */
-        const PROFILE_KEYS = ['identity', 'student', 'habitDays', 'milestones', 'exams', 'weeklyPlan', 'nextWeeklyPlan', 'setupDone', 'recentPacks', 'eosTried', 'licenses', 'slotSource', 'qlang'];
-        const LOCAL_KEYS = ['mission', 'libDrafts', 'hybridToday', 'goneItems'];
+        const PROFILE_KEYS = ['identity', 'student', 'habitDays', 'milestones', 'exams', 'weeklyPlan', 'nextWeeklyPlan', 'setupDone', 'recentPacks', 'eosTried', 'licenses', 'slotSource', 'qlang', 'skin'];
+        const LOCAL_KEYS = ['mission', 'libDrafts', 'hybridToday', 'goneItems', 'heroPhoto'];
         const dataOwner = () => String(Store.prefs.get('dataOwner', '') || '').toLowerCase();
         const profileSnapshot = () => {
             const out = {};
@@ -7340,7 +7620,31 @@
             );
         };
 
+        const SKIN_CHOICES = [
+            { key: 'dark', label: 'Obsidian Đen', note: 'Mặc định PRO' },
+            { key: 'light', label: 'Obsidian Sáng', note: 'Sáng, dịu mắt ngoài trời' },
+            { key: 'classic', label: 'Cổ điển', note: 'Tím quen thuộc' }
+        ];
+        const SkinPicker = () => {
+            const pref = useSkinPref();
+            return (
+                <div>
+                    <span className="font-semibold text-sm block">Giao diện hội viên</span>
+                    <span className="text-xs text-ink2">Đặc quyền PRO: đổi lúc nào cũng được, áp dụng ngay.</span>
+                    <div className="skin-pick mt-2" role="radiogroup" aria-label="Giao diện hội viên">
+                        {SKIN_CHOICES.map(c => (
+                            <button key={c.key} type="button" role="radio" aria-checked={pref === c.key} className={'skin-opt' + (pref === c.key ? ' is-on' : '')} onClick={() => setSkinPref(c.key)}>
+                                <span className={'skin-swatch is-' + c.key} aria-hidden="true"><i /><i /><i /></span>
+                                <b>{c.label}</b>
+                                <small>{c.note}</small>
+                            </button>
+                        ))}
+                    </div>
+                </div>
+            );
+        };
         const SettingsModal = ({ onClose, toast, muted, setMuted, onGoogle }) => {
+            const settingsFund = useFund();
             const [usage, setUsage] = useState(null);
             const [studentName, setStudentName] = useState(Store.prefs.get('student', '') || '');
             useEffect(() => { Store.estimate().then(setUsage); }, []);
@@ -7367,6 +7671,7 @@
                             <span><span className="font-semibold text-sm block">Thông báo khi đến giờ</span><span className="text-xs text-ink2">{perm === 'denied' ? 'Bị chặn trong cài đặt trình duyệt' : 'Báo khi một ca học bắt đầu'}</span></span>
                             <button type="button" className="btn btn-secondary btn-sm" disabled={perm !== 'default'} onClick={() => Notification.requestPermission().then(setPerm)}><Icon name="bell" size={14} /> {permLabel}</button>
                         </div>
+                        {obsidianOf(settingsFund) && <SkinPicker />}
                         <button type="button" className="hub-row" onClick={() => { onClose(); openBilling('code'); }}>
                             <span className="bill-stat-ic"><Icon name="gem" size={18} /></span>
                             <span className="min-w-0 flex-1 text-left">
@@ -7489,6 +7794,10 @@
             const [contribOpen, setContribOpen] = useState(false);
             const fund = useFund();
             const obsidian = obsidianOf(fund);
+            const skinPref = useSkinPref();
+            const tierAttr = skinOf(fund, skinPref);
+            const darkSkin = tierAttr === 'obsidian';
+            const luxSkin = tierAttr !== 'eco';
             const [memberOpen, setMemberOpen] = useState(false);
             const [welcome, setWelcome] = useState(false);
             const [welcomeHold, setWelcomeHold] = useState(false);
@@ -8315,20 +8624,20 @@
             };
 
             return (
-                <div className="app-root min-h-screen flex flex-col" data-tier={obsidian ? 'obsidian' : 'eco'}>
+                <div className="app-root min-h-screen flex flex-col" data-tier={tierAttr}>
                     <a href="#main" className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[70] btn btn-primary">Bỏ qua tới nội dung</a>
-                    <header className={'sticky top-0 z-50 border-b ' + (obsidian ? 'obsidian-head' : 'border-line')} style={obsidian ? undefined : { background: '#E2E8F0' }}>
+                    <header className={'sticky top-0 z-50 border-b ' + (darkSkin ? 'obsidian-head' : luxSkin ? 'ivory-head' : 'border-line')} style={luxSkin ? undefined : { background: '#E2E8F0' }}>
                         <div className="flex h-16 w-full items-center gap-2 px-4 sm:gap-3 lg:px-6">
                             <button type="button" className="btn btn-ghost btn-icon -ml-2 lg:hidden" onClick={() => setDrawer(true)} aria-label="Mở menu" aria-expanded={drawer} aria-controls="side-drawer"><Icon name="menu" /></button>
                             <button type="button" onClick={goHome} aria-label="Về Tổng quan" className="flex shrink-0 items-center gap-2.5 border-0 bg-transparent p-0 text-left cursor-pointer">
-                                <span className={obsidian ? 'ob-logo' : ''}>
+                                <span className={luxSkin ? 'ob-logo' : ''}>
                                     <img src="/public/stickers/logo.png" alt="" className="h-9 w-auto object-contain sm:h-10" />
                                 </span>
-                                <span className={'text-xl font-extrabold leading-none sm:text-2xl ' + (obsidian ? 'ob-word' : 'text-[#0B192C]')}>FPass</span>
+                                <span className={'text-xl font-extrabold leading-none sm:text-2xl ' + (luxSkin ? 'ob-word' : 'text-[#0B192C]')}>FPass</span>
                             </button>
                             <div className="ml-auto flex min-w-0 items-center gap-1">
                                 {/* Liên hệ: Zalo + hotline trên màn rộng, một nút mở khung Hỗ trợ trên điện thoại. */}
-                                <div className={'top-contact mr-1 hidden md:flex' + (obsidian ? ' is-dark' : '')}>
+                                <div className={'top-contact mr-1 hidden md:flex' + (darkSkin ? ' is-dark' : '')}>
                                     <a href={SUPPORT.zalo} target="_blank" rel="noopener noreferrer" aria-label="Nhắn Zalo hỗ trợ"><Icon name="chat" size={15} /> Zalo</a>
                                     <a href={'tel:' + SUPPORT.phone} aria-label={'Gọi hỗ trợ ' + SUPPORT.phoneDisplay}><Icon name="headset" size={15} /> <span className="tnum">{SUPPORT.phoneDisplay}</span></a>
                                 </div>
@@ -8350,17 +8659,17 @@
                     </header>
 
                     <div className="flex w-full flex-1">
-                    <aside className="app-side" data-tier={obsidian ? 'obsidian' : 'eco'} aria-label="Điều hướng">
+                    <aside className="app-side" data-tier={tierAttr} aria-label="Điều hướng">
                         {sideBody()}
                     </aside>
                     {drawer && (
                         <div className="side-scrim lg:hidden" onMouseDown={(e) => { if (e.target === e.currentTarget) setDrawer(false); }}>
-                            <div id="side-drawer" ref={drawerRef} role="dialog" aria-modal="true" aria-label="Menu" className="app-side is-drawer" data-tier={obsidian ? 'obsidian' : 'eco'}
+                            <div id="side-drawer" ref={drawerRef} role="dialog" aria-modal="true" aria-label="Menu" className="app-side is-drawer" data-tier={tierAttr}
                                 onClick={(e) => { if (e.target.closest && e.target.closest('button')) setDrawer(false); }}>
                                 <div className="side-drawer-head">
                                     <span className="flex items-center gap-2">
-                                        <span className={obsidian ? 'ob-logo' : ''}><img src="/public/stickers/logo.png" alt="" className="h-8 w-auto object-contain" /></span>
-                                        <b className={'text-lg font-extrabold leading-none ' + (obsidian ? 'ob-word' : 'text-[#0B192C]')}>FPass</b>
+                                        <span className={luxSkin ? 'ob-logo' : ''}><img src="/public/stickers/logo.png" alt="" className="h-8 w-auto object-contain" /></span>
+                                        <b className={'text-lg font-extrabold leading-none ' + (luxSkin ? 'ob-word' : 'text-[#0B192C]')}>FPass</b>
                                     </span>
                                     <button type="button" className="side-close" aria-label="Đóng menu"><Icon name="x" size={18} /></button>
                                 </div>
@@ -8416,7 +8725,7 @@
                     </main>
                     </div>
 
-                    <nav aria-label="Mục chính" className="bnav" data-tier={obsidian ? 'obsidian' : 'eco'}>
+                    <nav aria-label="Mục chính" className="bnav" data-tier={tierAttr}>
                         {navItems.map(it => (
                             <button key={it.k} type="button" aria-current={navNow === it.k ? 'page' : undefined} onClick={() => goNav(it.k)}>
                                 <Icon name={it.icon} size={20} /> {it.short}
