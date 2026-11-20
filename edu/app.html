@@ -373,6 +373,24 @@
             72% { transform: translateY(-74%) scale(.96); }
             100% { transform: translateY(-88%) scale(1); }
         }
+        .flash-actions { position: sticky; bottom: 12px; z-index: 6; display: flex; align-items: center; justify-content: center; gap: 12px; width: fit-content; max-width: 100%; margin: 16px auto 0; padding: 8px; border-radius: 20px; background: rgba(255, 255, 255, .86); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); box-shadow: 0 8px 24px rgba(15, 23, 42, .10), 0 0 0 1px rgba(15, 23, 42, .05); }
+        .flash-actions .btn-lg { white-space: nowrap; }
+        @media (max-width: 1023px) { .flash-actions { bottom: calc(66px + env(safe-area-inset-bottom)); } }
+        @media (max-width: 480px) { .flash-actions { gap: 6px; padding: 6px; } .flash-actions .btn-lg { padding: 0 14px; min-height: 48px; } }
+        /* Màn thấp (laptop, cửa sổ nhỏ): thu gọn mèo Jack và khoảng trắng của thẻ để cả thẻ lẫn nút vừa một màn. */
+        @media (max-height: 900px) {
+            .jack-track { margin-top: 72px; }
+            .jack-runner, .jack-runner .jack-sticker, .jack-runner .jack-sticker img, .jack-runner .jack-face { width: 72px; height: 72px; }
+            .jack-runner { margin-left: -36px; }
+            .scene .face > div:last-child { padding-top: 24px; padding-bottom: 20px; }
+            .scene .face .mt-8 { margin-top: 16px; }
+        }
+        @media (max-height: 720px) {
+            .jack-track { margin-top: 52px; }
+            .jack-runner, .jack-runner .jack-sticker, .jack-runner .jack-sticker img, .jack-runner .jack-face { width: 52px; height: 52px; }
+            .jack-runner { margin-left: -26px; }
+            .scene .face .text-4xl { font-size: 1.875rem; }
+        }
         .jack-labels { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; }
         .jack-labels span { font-size: 11px; line-height: 1.3; color: #64748B; text-align: center; }
         .jack-labels span.is-now { color: #312E81; font-weight: 700; }
@@ -3316,7 +3334,7 @@
                                     </div>
                                 </div>
                             </div>
-                            <div className="flex items-center justify-center gap-3 mt-5">
+                            <div className="flash-actions">
                                 <button type="button" onClick={prev} disabled={index === 0} className="btn btn-secondary btn-icon" aria-label="Thẻ trước"><Icon name="left" /></button>
                                 {flipped ? (
                                     <>
