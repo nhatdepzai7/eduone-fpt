@@ -86,6 +86,11 @@
         .side-link[aria-current="page"] { background: var(--surface); color: var(--ink); box-shadow: 0 1px 3px rgba(15, 23, 42, .12); }
         .side-link[aria-current="page"] svg { color: var(--primary); }
         .side-link[aria-current="page"]::before { content: ""; position: absolute; left: -12px; top: 10px; bottom: 10px; width: 3px; border-radius: 0 3px 3px 0; background: var(--primary); }
+        .side-sub { min-height: 38px; gap: 8px; font-weight: 500; font-size: 13px; }
+        .side-code { flex-shrink: 0; padding: 2px 6px; border-radius: 6px; background: var(--primary-soft); color: var(--primary); font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 11px; font-weight: 700; }
+        .side-sub[aria-current="page"] .side-code { background: var(--primary); color: #fff; }
+        .my-pack { display: inline-flex; align-items: center; gap: 6px; flex-shrink: 0; min-height: 40px; padding: 0 12px 0 8px; border-radius: 12px; background: var(--surface); border: 1px solid var(--border); font-size: 13px; font-weight: 600; color: var(--ink); }
+        .my-pack:hover { border-color: var(--primary); }
         .side-dot { width: 8px; height: 8px; border-radius: 999px; background: #EF4444; flex-shrink: 0; }
         .side-head { margin: 20px 12px 6px; font-size: 11px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
         .top-contact { align-items: center; gap: 2px; padding: 3px; border-radius: 12px; background: var(--surface-2); border: 1px solid var(--border); }
@@ -6219,6 +6224,23 @@
                 return out;
             }, [systemPacks]);
             const packById = useMemo(() => new Map(packs.map(p => [p.id, p])), [packs]);
+            /* Kho đề của tôi: môn vừa mở gần nhất lên đầu, rồi các môn đã có tiến độ hoặc đã đặt ngày thi. */
+            const [recentPacks, setRecentPacks] = useState(() => { const v = Store.prefs.get('recentPacks', []); return Array.isArray(v) ? v.filter(x => typeof x === 'string') : []; });
+            useEffect(() => {
+                if (!nav.packId) return;
+                setRecentPacks(prev => {
+                    const next = [nav.packId].concat(prev.filter(x => x !== nav.packId)).slice(0, 12);
+                    Store.prefs.set('recentPacks', next);
+                    return next;
+                });
+            }, [nav.packId]);
+            const myPacks = useMemo(() => {
+                const touched = [];
+                Object.keys(progress).forEach(k => { const r = progress[k]; if (r && r.packId && touched.indexOf(r.packId) < 0) touched.push(r.packId); });
+                Object.keys(exams || {}).forEach(id => { if (touched.indexOf(id) < 0) touched.push(id); });
+                const order = recentPacks.concat(touched.filter(id => recentPacks.indexOf(id) < 0));
+                return order.map(id => packById.get(id)).filter(pk => pk && pk.status === 'ready');
+            }, [recentPacks, progress, exams, packById]);
             const itemsById = useMemo(() => new Map(items.map(t => [t.id, t])), [items]);
 
             /* ---------- Boot: migration → IndexedDB → plan ---------- */
@@ -6755,6 +6777,12 @@
                 }
                 window.scrollTo(0, 0);
             };
+            const openMyPack = (id) => {
+                if (nav.busy && !confirm('Bạn đang giữa một ca / phòng thi. Thoát ra?')) return;
+                setSession(s => (s && s.slotId ? s : null));
+                dispatch({ type: 'OPEN_PACK', id, force: true });
+                window.scrollTo(0, 0);
+            };
             /* Lối vào 4 trụ cột từ Tổng quan. */
             const openPillar = (key) => {
                 if (key === 'video') { setGuideOpen(true); return; }
@@ -6836,6 +6864,16 @@
                                 </button>
                             ))}
                         </nav>
+                        <p className="side-head">Kho đề của tôi</p>
+                        {myPacks.length ? (
+                            <div className="flex flex-col gap-0.5">
+                                {myPacks.map(pk => (
+                                    <button key={pk.id} type="button" className="side-link side-sub" title={pk.name} aria-current={nav.mode === 'bank' && nav.packId === pk.id ? 'page' : undefined} onClick={() => openMyPack(pk.id)}>
+                                        <span className="side-code">{pk.code}</span><span className="min-w-0 flex-1 truncate text-left">{pk.name}</span>
+                                    </button>
+                                ))}
+                            </div>
+                        ) : <p className="px-3 text-xs leading-5 text-muted">Môn bạn thi thử sẽ hiện ở đây để mở lại nhanh.</p>}
                         <p className="side-head">Khác</p>
                         <div className="flex flex-col gap-1">
                             <button type="button" className="side-link" onClick={() => setGuideOpen(true)}><Icon name="play" size={18} /> Video hướng dẫn</button>
@@ -6871,8 +6909,22 @@
                                     milestoneShown={!!milestones[pack.id]} markMilestone={markMilestone} toast={toast} now={now} queueEos={queueEos} onOpenSlots={openSlots} />
                             </div>
                         ) : (
+                            <>
+                            {myPacks.length > 0 && (
+                                <div className="mb-4 lg:hidden">
+                                    <p className="mb-2 text-xs font-semibold uppercase tracking-[0.12em] text-muted">Kho đề của tôi</p>
+                                    <div className="flex gap-2 overflow-x-auto pb-1">
+                                        {myPacks.map(pk => (
+                                            <button key={pk.id} type="button" className="my-pack" onClick={() => openMyPack(pk.id)} title={pk.name}>
+                                                <span className="side-code">{pk.code}</span><span className="max-w-[10rem] truncate">{pk.name}</span>
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
                             <StorefrontHost packs={packs} block={nav.block} setBlock={(b) => dispatch({ type: 'BLOCK', block: b })} statsOf={statsOf}
                                 unlockedIds={Object.keys(unlocked)} exams={exams} openPack={(id) => dispatch({ type: 'OPEN_PACK', id })} toast={toast} now={now} />
+                            </>
                         )}
                     </main>
                     </div>
