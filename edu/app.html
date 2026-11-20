@@ -129,7 +129,30 @@
         .ticket.is-done { position: relative; gap: 8px; padding: 3px 4px 3px 4px; color: #064E3B; font-weight: 600; background: linear-gradient(135deg, #ECFDF5 0%, #D1FAE5 100%); border-color: #A7F3D0; box-shadow: 0 1px 2px rgba(5, 150, 105, .10), inset 0 1px 0 rgba(255, 255, 255, .7); }
         .ticket-check { position: relative; display: inline-flex; width: 22px; height: 22px; flex-shrink: 0; align-items: center; justify-content: center; border-radius: 999px; background: #fff; box-shadow: 0 0 0 3px rgba(16, 185, 129, .16), 0 1px 3px rgba(5, 150, 105, .35); }
         .ticket-check svg { width: 16px; height: 16px; }
-        .ticket-label { white-space: nowrap; }
+        .fund-strip .ticket { flex: 0 1 auto; max-width: 100%; }
+        @media (max-width: 639px) { .ticket.is-due { padding: 4px 10px; gap: 6px; } .ticket.is-due .ticket-chev { display: none; } }
+        .ticket-text { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .ticket-text b { font-weight: 700; }
+        .ticket.is-due .ticket-text b { color: #4338CA; }
+        .ticket-go { flex-shrink: 0; margin-left: -3px; color: #4F46E5; font-weight: 600; white-space: nowrap; }
+        .ticket.is-due:not(.is-slipped) { animation: ticket-breathe 2.8s ease-in-out infinite; }
+        .ticket.is-due.is-slipped { background: #FFFBF5; border-color: #FDBA74; box-shadow: 0 1px 2px rgba(234, 88, 12, .08); }
+        .ticket.is-due.is-slipped:hover { border-color: #FB923C; }
+        .ticket.is-due.is-slipped .ticket-ic, .ticket.is-due.is-slipped .ticket-go, .ticket.is-due.is-slipped:hover .ticket-chev { color: #EA580C; }
+        .ticket.is-done .ticket-text { color: #064E3B; }
+        @keyframes ticket-breathe { 0%, 100% { box-shadow: 0 1px 2px rgba(0, 0, 0, .04), 0 0 0 0 rgba(79, 70, 229, 0); } 50% { box-shadow: 0 1px 2px rgba(0, 0, 0, .04), 0 0 0 4px rgba(79, 70, 229, .12); border-color: #A5B4FC; } }
+        .reward-wrap { position: fixed; z-index: 70; top: 14px; left: 0; right: 0; display: flex; justify-content: center; padding: 0 16px; pointer-events: none; }
+        .reward-toast { position: relative; display: flex; align-items: center; gap: 12px; width: 100%; max-width: 420px; padding: 12px 14px 14px; overflow: hidden; border-radius: 16px; background: #fff; border: 1px solid #A7F3D0; box-shadow: 0 12px 32px rgba(15, 23, 42, .14), 0 2px 6px rgba(5, 150, 105, .10); pointer-events: auto; animation: reward-in .45s cubic-bezier(.34, 1.4, .64, 1), reward-out .35s ease-in 3.15s forwards; }
+        .reward-badge { display: inline-flex; width: 36px; height: 36px; flex-shrink: 0; align-items: center; justify-content: center; border-radius: 999px; background: #ECFDF5; box-shadow: 0 0 0 4px rgba(16, 185, 129, .12); animation: ticket-glow 1.6s ease-out; }
+        .reward-badge svg { width: 24px; height: 24px; }
+        .reward-title { display: block; font-size: 14px; font-weight: 700; color: #0F172A; line-height: 1.35; }
+        .reward-body { display: block; margin-top: 2px; font-size: 12.5px; color: #475569; line-height: 1.45; }
+        .reward-streak { flex-shrink: 0; height: 26px; font-size: 13px; }
+        .reward-bar { position: absolute; left: 0; bottom: 0; height: 3px; width: 100%; background: linear-gradient(90deg, #34D399, #059669); transform-origin: left; animation: reward-bar 3.5s linear forwards; }
+        @keyframes reward-in { from { opacity: 0; transform: translateY(-16px) scale(.96); } to { opacity: 1; transform: none; } }
+        @keyframes reward-out { to { opacity: 0; transform: translateY(-10px); } }
+        @keyframes reward-bar { from { transform: scaleX(1); } to { transform: scaleX(0); } }
+        @media (prefers-reduced-motion: reduce) { .ticket.is-due:not(.is-slipped), .reward-badge { animation: none; } .reward-toast { animation: reward-out .2s ease-in 3.3s forwards; } .reward-bar { animation: none; } }
         .ticket-streak { display: inline-flex; align-items: center; gap: 3px; height: 22px; padding: 0 8px 0 6px; border-radius: 999px; background: #fff; color: #C2410C; font-size: 12px; font-weight: 600; box-shadow: 0 0 0 1px #FED7AA; }
         .ticket-streak svg { width: 13px; height: 13px; color: #F97316; }
         .ticket-streak b { font-weight: 700; }
@@ -847,6 +870,19 @@
             else Store.prefs.remove('identity');
             window.dispatchEvent(new CustomEvent('edu-identity'));
         };
+        const DEFAULT_IDENTITY_NAME = 'Người học kỷ luật';
+        const identityName = (label) => String(label || '').trim() || DEFAULT_IDENTITY_NAME;
+        /* 3 thông điệp củng cố bản sắc, chọn ngẫu nhiên mỗi lần chốt phiếu (thưởng biến thiên). */
+        const REWARD_LINES = [
+            (name, n) => ({ title: 'Thêm một phiếu cho ' + name, body: 'Chuỗi ' + n + ' ngày. Không cần hoàn hảo, chỉ cần có mặt.' }),
+            (name, n) => ({ title: name + ' đã có mặt hôm nay', body: 'Ngày thứ ' + n + ' liên tiếp. Bạn đang trở thành đúng người mình chọn.' }),
+            (name, n) => ({ title: 'Lại một bằng chứng bạn là ' + name, body: n + ' ngày giữ nhịp. Mai chỉ cần 30 giây nữa.' })
+        ];
+        const showReward = (streak) => {
+            const name = identityName(readIdentity());
+            const pick = REWARD_LINES[Math.floor(Math.random() * REWARD_LINES.length)](name, Math.max(1, streak || 1));
+            window.dispatchEvent(new CustomEvent('edu-reward', { detail: Object.assign({ streak: Math.max(1, streak || 1) }, pick) }));
+        };
         const useIdentity = () => {
             const [label, setLabel] = useState(readIdentity);
             useEffect(() => {
@@ -904,6 +940,7 @@
                 const line = identityLine(readIdentity());
                 Store.identityVotes.all().then((rows) => {
                     const summary = summarize(Array.isArray(rows) ? rows : [], dayKey(new Date()));
+                    if (summary.todayCount === 1) { showReward(summary.streak); return; }
                     const goal = summary.rank.next == null ? String(summary.total) : (summary.total + '/' + summary.rank.next);
                     if (toast) toast('+1 phiếu · ' + line + ' · ' + goal, 'success', 2800);
                 }).catch(() => { if (toast) toast('+1 phiếu · ' + line, 'success', 2800); });
@@ -1228,7 +1265,39 @@
             );
         };
 
+        const RewardToast = () => {
+            const [msg, setMsg] = useState(null);
+            useEffect(() => {
+                let timer = 0;
+                const on = (e) => {
+                    window.clearTimeout(timer);
+                    setMsg(Object.assign({ id: Date.now() }, e.detail || {}));
+                    timer = window.setTimeout(() => setMsg(null), 3500);
+                };
+                window.addEventListener('edu-reward', on);
+                return () => { window.removeEventListener('edu-reward', on); window.clearTimeout(timer); };
+            }, []);
+            if (!msg) return null;
+            return (
+                <div className="reward-wrap" role="status" aria-live="polite">
+                    <div key={msg.id} className="reward-toast">
+                        <span className="reward-badge" aria-hidden="true">
+                            <svg viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="8" fill="url(#reward-g)" /><path d="M4.8 8.3 7 10.4 11.2 6" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" /><defs><linearGradient id="reward-g" x1="0" y1="0" x2="16" y2="16"><stop stopColor="#34D399" /><stop offset="1" stopColor="#059669" /></linearGradient></defs></svg>
+                        </span>
+                        <span className="min-w-0 flex-1">
+                            <b className="reward-title">{msg.title}</b>
+                            <span className="reward-body">{msg.body}</span>
+                        </span>
+                        <span className="ticket-streak reward-streak" aria-label={'Chuỗi ' + msg.streak + ' ngày'}>{FLAME}<b className="tnum">{msg.streak}</b></span>
+                        <span className="reward-bar" aria-hidden="true" />
+                    </div>
+                </div>
+            );
+        };
+        const FLAME = <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8.6 1.2c.3 2.1-.6 3.3-1.6 4.4C6 6.7 5 7.8 5 9.6 5 11.5 6.4 13 8 13c1.7 0 3-1.4 3-3.2 0-.9-.3-1.6-.7-2.2.9.3 1.6 1 2 1.9.3-.6.5-1.3.5-2C12.8 4.8 11 2.6 8.6 1.2Z" fill="currentColor" /><path d="M8 13c-1 0-1.8-.8-1.8-1.9 0-1 .7-1.6 1.3-2.2.3.7.9 1 1.4 1.2.5.2.9.6.9 1.1C9.8 12.2 9 13 8 13Z" fill="#FDE68A" /></svg>;
         const Toasts = ({ list }) => (
+            <>
+            <RewardToast />
             <div className="fixed z-[60] bottom-4 inset-x-4 sm:inset-x-auto sm:right-4 flex flex-col items-stretch sm:items-end gap-2 pointer-events-none" aria-live="polite" role="status">
                 {list.map(t => (
                     <div key={t.id} className={'enter pointer-events-auto max-w-md rounded-xl px-4 py-3 text-sm font-medium shadow-lg flex items-start gap-2 text-flow ' +
@@ -1238,6 +1307,7 @@
                     </div>
                 ))}
             </div>
+            </>
         );
 
         const Progress = ({ value, max, tone = 'primary', label }) => {
@@ -1970,6 +2040,8 @@
             const due = !!votes && !votes.confirmedToday;
             const scarce = !ai.on && ai.left <= AI_SCARCE;
             const streak = votes ? Math.max(1, votes.streak || 0) : 0;
+            const name = identityName(useIdentity());
+            const slipped = !!votes && votes.missedOnce;
             /* Vừa chốt phiếu (đang "Còn 1 phiếu" chuyển sang "Đã chốt"): chạy hiệu ứng mừng một lần. */
             const wasDue = useRef(false);
             const [fresh, setFresh] = useState(false);
@@ -1995,18 +2067,24 @@
                             <span>Phiếu hôm nay</span>
                         </span>
                     ) : due ? (
-                        <button type="button" className="ticket is-due" onClick={onQuickVote} aria-label="Còn 1 phiếu hôm nay. Bấm để học nhanh 30 giây và chốt phiếu" title="Học nhanh 30 giây để chốt phiếu">
+                        <button type="button" className={'ticket is-due' + (slipped ? ' is-slipped' : '')} onClick={onQuickVote}
+                            aria-label={slipped ? 'Hôm qua lỡ nhịp. Bấm để học nhanh 30 giây, chốt phiếu và quay lại chuỗi' : 'Giữ chất ' + name + '. Bấm để học nhanh 30 giây và chốt phiếu hôm nay'}
+                            title="Học nhanh 30 giây để chốt phiếu hôm nay">
                             <svg className="ticket-ic" viewBox="0 0 16 16" fill="none" aria-hidden="true">
                                 <circle cx="8" cy="8" r="6.5" stroke="currentColor" strokeWidth="1.5" />
                                 <circle className="ticket-pulse" cx="8" cy="8" r="2.5" fill="currentColor" />
                                 <circle cx="8" cy="8" r="2.5" fill="currentColor" />
                             </svg>
-                            <span className="truncate">Còn 1 phiếu<span className="hidden sm:inline"> hôm nay</span></span>
+                            {slipped ? (
+                                <><span className="ticket-text">Hôm qua lỡ nhịp</span><span className="ticket-go">· <span className="sm:hidden">Quay lại</span><span className="hidden sm:inline">Chốt để quay lại</span></span></>
+                            ) : (
+                                <><span className="ticket-text">Giữ chất <b>{name}</b></span><span className="ticket-go">· Chốt<span className="hidden sm:inline"> phiếu</span></span></>
+                            )}
                             <svg className="ticket-chev" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M6 3.5 10.5 8 6 12.5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" /></svg>
                         </button>
                     ) : (
                         <span className={'ticket is-done' + (fresh ? ' is-fresh' : '')} role="status"
-                            title={'Đã chốt phiếu hôm nay · chuỗi ' + streak + ' ngày. Mai quay lại để giữ chuỗi.'}>
+                            title={'+1 phiếu cho ' + name + ' hôm nay · chuỗi ' + streak + ' ngày. Mai quay lại để giữ chuỗi.'}>
                             <span className="ticket-check" aria-hidden="true">
                                 <svg viewBox="0 0 16 16" fill="none">
                                     <circle cx="8" cy="8" r="8" fill="url(#ticket-g)" />
@@ -2014,9 +2092,9 @@
                                     <defs><linearGradient id="ticket-g" x1="0" y1="0" x2="16" y2="16"><stop stopColor="#34D399" /><stop offset="1" stopColor="#059669" /></linearGradient></defs>
                                 </svg>
                             </span>
-                            <span className="ticket-label">Đã chốt phiếu<span className="hidden sm:inline"> hôm nay</span></span>
+                            <span className="ticket-text">+1 phiếu: <b>{name}</b></span>
                             <span className="ticket-streak" aria-label={'Chuỗi ' + streak + ' ngày'}>
-                                <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8.6 1.2c.3 2.1-.6 3.3-1.6 4.4C6 6.7 5 7.8 5 9.6 5 11.5 6.4 13 8 13c1.7 0 3-1.4 3-3.2 0-.9-.3-1.6-.7-2.2.9.3 1.6 1 2 1.9.3-.6.5-1.3.5-2C12.8 4.8 11 2.6 8.6 1.2Z" fill="currentColor" /><path d="M8 13c-1 0-1.8-.8-1.8-1.9 0-1 .7-1.6 1.3-2.2.3.7.9 1 1.4 1.2.5.2.9.6.9 1.1C9.8 12.2 9 13 8 13Z" fill="#FDE68A" /></svg>
+                                {FLAME}
                                 <b className="tnum">{streak}</b><span className="hidden sm:inline">&nbsp;ngày</span>
                             </span>
                         </span>
@@ -5822,10 +5900,7 @@
                             </div>
                         )}
                     </div>}
-                    {(pulse.neverMiss || importHint) && <div className="card mb-3">
-                        {pulse.neverMiss && (
-                            <p className="px-3 py-3 text-sm leading-5 text-ink2 sm:px-4">Không sao, đừng bỏ lỡ hai ngày liên tiếp.</p>
-                        )}
+                    {importHint && <div className="card mb-3">
                         {importHint && (
                             <div className="m-3 rounded-2xl border-2 border-primary/30 bg-primary-soft p-4 sm:mx-4" role="region" aria-label="Nhập từ vựng từ Excel">
                                 <p className="font-semibold text-ink">Nhập từ vựng từ file Excel</p>
