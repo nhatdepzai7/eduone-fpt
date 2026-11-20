@@ -91,25 +91,6 @@
         .side-link:focus-visible { outline: none; box-shadow: 0 0 0 2px rgba(79, 70, 229, .35); }
         .side-link[aria-current="page"]:focus-visible { box-shadow: 0 1px 3px rgba(15, 23, 42, .08), 0 0 0 2px rgba(79, 70, 229, .35); }
         /* Obsidian: menu dọc tối liền với topbar, vùng nội dung bên phải vẫn sáng. */
-        @media (min-width: 1024px) {
-            .app-side[data-tier="obsidian"] { background: #0E1018; border-right: 1px solid rgba(255, 255, 255, .06); color-scheme: dark; }
-        }
-        .app-side[data-tier="obsidian"] .side-link { color: #94A3B8; }
-        .app-side[data-tier="obsidian"] .side-link svg { color: #94A3B8; }
-        .app-side[data-tier="obsidian"] .side-link:hover:not([aria-current="page"]) { background: rgba(255, 255, 255, .05); color: #F1F5F9; }
-        .app-side[data-tier="obsidian"] .side-link:hover:not([aria-current="page"]) svg { color: #F1F5F9; }
-        .app-side[data-tier="obsidian"] .side-link[aria-current="page"] { background: rgba(255, 255, 255, .1); color: #FFFFFF; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .12); }
-        .app-side[data-tier="obsidian"] .side-link[aria-current="page"] svg { color: #FFFFFF; }
-        .app-side[data-tier="obsidian"] .side-link[aria-current="page"]::before { background: #818CF8; }
-        .app-side[data-tier="obsidian"] .side-link:focus-visible { box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .12), 0 0 0 2px rgba(129, 140, 248, .55); }
-        .app-side[data-tier="obsidian"] .side-head, .app-side[data-tier="obsidian"] .text-muted { color: #64748B; }
-        .app-side[data-tier="obsidian"] .side-ai, .app-side[data-tier="obsidian"] .side-ai svg { color: #C084FC !important; }
-        .app-side[data-tier="obsidian"] .side-ai:hover { color: #D8B4FE !important; }
-        .app-side[data-tier="obsidian"] .side-gem svg { color: #FBBF24 !important; }
-        .app-side[data-tier="obsidian"] .side-code { background: rgba(129, 140, 248, .16); color: #A5B4FC; }
-        .app-side[data-tier="obsidian"] .side-sub[aria-current="page"] .side-code { background: #818CF8; color: #0E1018; }
-        .app-side[data-tier="obsidian"] .side-dot { box-shadow: 0 0 0 2px #0E1018; }
-        .app-side[data-tier="obsidian"]::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, .12); }
         .side-sub { min-height: 38px; gap: 8px; font-weight: 500; font-size: 13px; }
         .side-code { flex-shrink: 0; padding: 2px 6px; border-radius: 6px; background: var(--primary-soft); color: var(--primary); font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 11px; font-weight: 700; }
         .side-sub[aria-current="page"] .side-code { background: var(--primary); color: #fff; }
@@ -129,12 +110,6 @@
         .bnav button[aria-current="page"] { color: var(--primary); }
         .bnav button[aria-current="page"]::before { content: ""; position: absolute; top: 0; left: 28%; right: 28%; height: 3px; border-radius: 0 0 3px 3px; background: var(--primary); }
         .bnav .nav-dot { top: 8px; right: calc(50% - 18px); box-shadow: 0 0 0 2px #fff; }
-        .bnav[data-tier="obsidian"] { background: rgba(14, 16, 24, .97); border-top-color: rgba(255, 255, 255, .07); }
-        .bnav[data-tier="obsidian"] button { color: #94A3B8; }
-        .bnav[data-tier="obsidian"] button[aria-current="page"] { color: #FFFFFF; }
-        .bnav[data-tier="obsidian"] button[aria-current="page"] svg { color: #A5B4FC; }
-        .bnav[data-tier="obsidian"] button[aria-current="page"]::before { background: #818CF8; }
-        .bnav[data-tier="obsidian"] .nav-dot { box-shadow: 0 0 0 2px #0E1018; }
         @media (min-width: 1024px) { .bnav { display: none; } }
         @media (max-width: 1023px) { body .help-dock { bottom: calc(70px + env(safe-area-inset-bottom)); } }
         body:has(.eos-shell) .bnav { display: none; }
@@ -728,19 +703,94 @@
             .eos-shell button.eos-hit { padding: 6px 4px; }
         }
 
-        .obsidian-head { background: #0E1018; border-bottom-color: rgba(255, 255, 255, .07) !important; color: #F8F9FC; }
-        .obsidian-head .btn-ghost { color: #C6CBD4; }
-        .obsidian-head .btn-ghost:hover:not(:disabled) { background: #202637; }
-        .obsidian-head .tab { color: #C6CBD4; }
-        .obsidian-head .tab[aria-selected="true"] { background: #F8F9FC; color: #10141F; }
-        .obsidian-head .tab:hover:not([aria-selected="true"]) { background: #202637; color: #F8F9FC; }
         .obsidian-card { position: relative; overflow: hidden; border-radius: 18px; border: 1px solid rgba(216, 199, 160, .6); background: linear-gradient(145deg, #202637 0%, #10141F 58%, #161b28 100%); color: #F8F9FC; box-shadow: 0 16px 36px rgba(16, 20, 31, .18); }
         .obsidian-card::after { content: ""; position: absolute; inset: 0; background: linear-gradient(115deg, transparent 42%, rgba(216, 199, 160, .1) 50%, transparent 58%); pointer-events: none; }
-        .obsidian-dialog { background: #10141F; color: #F8F9FC; border: 1px solid #202637; box-shadow: 0 24px 60px rgba(0, 0, 0, .4); }
-        .obsidian-dialog .btn-ghost { color: #C6CBD4; }
-        .obsidian-dialog .btn-ghost:hover:not(:disabled) { background: #202637; }
         .obsidian-rise { animation: obsidian-rise 1.2s ease; }
         @keyframes obsidian-rise { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+        /* ===== Obsidian Noir: đen quyền lực + vàng champagne. Chỉ khung điều hướng tối; vùng học vẫn sáng (giấy ngà) để đọc lâu không mỏi. ===== */
+        .app-root[data-tier="obsidian"] { --ob-ink: #08080A; --ob-panel: #0C0C0F; --ob-line: rgba(232, 205, 150, .12); --ob-line-2: rgba(232, 205, 150, .22); --ob-gold: #D9B871; --ob-gold-hi: #F2DDA4; --ob-gold-lo: #A8884A; --ob-text: #EFEBE2; --ob-soft: #A39D90; --ob-mute: #6E695F; }
+        body:has(.app-root[data-tier="obsidian"]) { background: radial-gradient(1100px 520px at 50% -8%, #FBFAF7 0%, rgba(251, 250, 247, 0) 60%), #EFEDE7; }
+        .app-root[data-tier="obsidian"] ::selection { background: rgba(217, 184, 113, .35); }
+        .app-root[data-tier="obsidian"] :focus-visible { outline-color: var(--ob-gold); }
+        /* Topbar */
+        .obsidian-head { position: relative; background: linear-gradient(180deg, #0B0B0E 0%, var(--ob-ink) 100%); border-bottom-color: transparent !important; color: var(--ob-text); }
+        .obsidian-head::after { content: ""; position: absolute; left: 0; right: 0; bottom: -1px; height: 1px; background: linear-gradient(90deg, rgba(217, 184, 113, 0) 0%, rgba(217, 184, 113, .55) 22%, rgba(242, 221, 164, .8) 50%, rgba(217, 184, 113, .55) 78%, rgba(217, 184, 113, 0) 100%); pointer-events: none; }
+        .obsidian-head .btn-ghost { color: var(--ob-soft); }
+        .obsidian-head .btn-ghost:hover:not(:disabled) { background: rgba(255, 255, 255, .05); color: var(--ob-gold-hi); }
+        .obsidian-head .btn-secondary { background: rgba(255, 255, 255, .04); color: var(--ob-text); border-color: var(--ob-line-2); box-shadow: none; }
+        .obsidian-head .btn-secondary:hover:not(:disabled) { background: rgba(217, 184, 113, .08); border-color: rgba(217, 184, 113, .4); }
+        .obsidian-head .btn-primary { background: linear-gradient(180deg, var(--ob-gold-hi), var(--ob-gold)); color: #1A1408; box-shadow: 0 6px 16px -8px rgba(217, 184, 113, .7); }
+        .obsidian-head .tab { color: var(--ob-soft); }
+        .obsidian-head .tab[aria-selected="true"] { background: var(--ob-text); color: var(--ob-ink); }
+        .obsidian-head .tab:hover:not([aria-selected="true"]) { background: rgba(255, 255, 255, .05); color: var(--ob-text); }
+        .obsidian-head .top-contact.is-dark { background: rgba(255, 255, 255, .03); border-color: var(--ob-line); }
+        .obsidian-head .top-contact.is-dark a { color: var(--ob-soft); }
+        .obsidian-head .top-contact.is-dark a:hover { background: rgba(255, 255, 255, .05); color: var(--ob-gold-hi); }
+        .ob-logo { display: inline-flex; padding: 4px 6px; border-radius: 12px; background: linear-gradient(160deg, #FBF7EE, #EDE4D0); box-shadow: 0 0 0 1px rgba(217, 184, 113, .45), 0 4px 14px -6px rgba(217, 184, 113, .5); }
+        .ob-word { color: var(--ob-text); letter-spacing: -.01em; }
+        .ob-chip { display: none; align-items: center; gap: 6px; margin-right: 4px; padding: 5px 12px 5px 10px; border-radius: 999px; font-size: 11px; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; color: var(--ob-gold-hi); background: linear-gradient(180deg, rgba(217, 184, 113, .12), rgba(217, 184, 113, .04)); box-shadow: inset 0 0 0 1px rgba(217, 184, 113, .38); transition: box-shadow .2s ease, background .2s ease; }
+        .ob-chip svg { color: var(--ob-gold); }
+        .ob-chip:hover { background: linear-gradient(180deg, rgba(217, 184, 113, .2), rgba(217, 184, 113, .06)); box-shadow: inset 0 0 0 1px rgba(242, 221, 164, .6), 0 0 18px -6px rgba(217, 184, 113, .6); }
+        @media (min-width: 640px) { .ob-chip { display: inline-flex; } }
+        /* Sidebar */
+        @media (min-width: 1024px) {
+            .app-side[data-tier="obsidian"] { background: linear-gradient(180deg, #0B0B0E 0%, var(--ob-panel) 40%, #09090B 100%); border-right: 1px solid var(--ob-line); color-scheme: dark; }
+        }
+        .app-side[data-tier="obsidian"] .side-link { color: var(--ob-soft); font-weight: 500; letter-spacing: .005em; }
+        .app-side[data-tier="obsidian"] .side-link svg { color: var(--ob-mute); transition: color .15s ease; }
+        .app-side[data-tier="obsidian"] .side-link:hover:not([aria-current="page"]) { background: rgba(255, 255, 255, .035); color: var(--ob-text); }
+        .app-side[data-tier="obsidian"] .side-link:hover:not([aria-current="page"]) svg { color: var(--ob-gold); }
+        .app-side[data-tier="obsidian"] .side-link[aria-current="page"] { background: linear-gradient(90deg, rgba(217, 184, 113, .16) 0%, rgba(217, 184, 113, .04) 70%, rgba(217, 184, 113, 0) 100%); color: var(--ob-gold-hi); font-weight: 600; box-shadow: inset 0 0 0 1px rgba(217, 184, 113, .2); }
+        .app-side[data-tier="obsidian"] .side-link[aria-current="page"] svg { color: var(--ob-gold); }
+        .app-side[data-tier="obsidian"] .side-link[aria-current="page"]::before { background: linear-gradient(180deg, var(--ob-gold-hi), var(--ob-gold-lo)); box-shadow: 0 0 10px rgba(217, 184, 113, .55); }
+        .app-side[data-tier="obsidian"] .side-link:focus-visible { box-shadow: inset 0 0 0 1px rgba(217, 184, 113, .2), 0 0 0 2px rgba(217, 184, 113, .55); }
+        .app-side[data-tier="obsidian"] .side-head { display: flex; align-items: center; gap: 8px; font-size: 10.5px; font-weight: 600; letter-spacing: .2em; color: var(--ob-mute); }
+        .app-side[data-tier="obsidian"] .side-head::after { content: ""; flex: 1; height: 1px; background: linear-gradient(90deg, var(--ob-line-2), transparent); }
+        .app-side[data-tier="obsidian"] .text-muted { color: var(--ob-mute); }
+        .app-side[data-tier="obsidian"] .side-ai, .app-side[data-tier="obsidian"] .side-ai svg { color: #C9B6F2 !important; }
+        .app-side[data-tier="obsidian"] .side-ai:hover { color: #E2D6FA !important; }
+        .app-side[data-tier="obsidian"] .side-new { background: linear-gradient(135deg, #8B6CD9, #B85C9E); }
+        .app-side[data-tier="obsidian"] .side-gem svg { color: var(--ob-gold) !important; }
+        .app-side[data-tier="obsidian"] .side-code { background: rgba(217, 184, 113, .1); color: var(--ob-gold); box-shadow: inset 0 0 0 1px rgba(217, 184, 113, .18); }
+        .app-side[data-tier="obsidian"] .side-sub[aria-current="page"] .side-code { background: var(--ob-gold); color: var(--ob-ink); }
+        .app-side[data-tier="obsidian"] .side-dot { box-shadow: 0 0 0 2px var(--ob-panel); }
+        .app-side[data-tier="obsidian"]::-webkit-scrollbar-thumb { background: rgba(217, 184, 113, .18); }
+        /* Thanh đáy điện thoại */
+        .bnav[data-tier="obsidian"] { background: rgba(8, 8, 10, .96); border-top-color: transparent; box-shadow: 0 -1px 0 rgba(217, 184, 113, .22); }
+        .bnav[data-tier="obsidian"] button { color: #8C8678; }
+        .bnav[data-tier="obsidian"] button[aria-current="page"] { color: #F2DDA4; }
+        .bnav[data-tier="obsidian"] button[aria-current="page"] svg { color: #D9B871; filter: drop-shadow(0 0 6px rgba(217, 184, 113, .45)); }
+        .bnav[data-tier="obsidian"] button[aria-current="page"]::before { background: linear-gradient(90deg, #A8884A, #F2DDA4, #A8884A); box-shadow: 0 0 10px rgba(217, 184, 113, .6); }
+        .bnav[data-tier="obsidian"] .nav-dot { box-shadow: 0 0 0 2px #08080A; }
+        /* Hộp thoại & thẻ hội viên */
+        .obsidian-dialog { background: linear-gradient(180deg, #111114 0%, #0B0B0D 100%); color: #EFEBE2; border: 1px solid rgba(232, 205, 150, .18); box-shadow: 0 30px 80px rgba(0, 0, 0, .55), inset 0 1px 0 rgba(242, 221, 164, .08); }
+        .obsidian-dialog .btn-ghost { color: #A39D90; }
+        .obsidian-dialog .btn-ghost:hover:not(:disabled) { background: rgba(255, 255, 255, .05); color: #F2DDA4; }
+        .obsidian-dialog [class*="border-[#202637]"] { border-color: rgba(232, 205, 150, .12) !important; }
+        .obsidian-card { border-color: rgba(217, 184, 113, .45); background: radial-gradient(120% 90% at 100% 0%, rgba(217, 184, 113, .14) 0%, rgba(217, 184, 113, 0) 55%), linear-gradient(150deg, #17161A 0%, #0B0B0D 60%, #121114 100%); box-shadow: 0 20px 44px -12px rgba(8, 8, 10, .45), inset 0 1px 0 rgba(242, 221, 164, .12); }
+        .obsidian-card::after { background: linear-gradient(115deg, transparent 40%, rgba(242, 221, 164, .09) 50%, transparent 60%); }
+        /* Banner phiếu bản sắc & thanh đã đóng dấu */
+        .mission[data-tier="obsidian"] { color: #EFEBE2; background: radial-gradient(90% 140% at 100% 0%, rgba(217, 184, 113, .13) 0%, rgba(217, 184, 113, 0) 60%), linear-gradient(160deg, #141317 0%, #09090B 100%); border-color: rgba(217, 184, 113, .26); box-shadow: 0 14px 34px -14px rgba(8, 8, 10, .55), inset 0 1px 0 rgba(242, 221, 164, .1); }
+        .mission[data-tier="obsidian"]::before { background: radial-gradient(closest-side, rgba(217, 184, 113, .12), transparent 75%); }
+        .mission[data-tier="obsidian"].is-late { border-color: rgba(242, 221, 164, .5); }
+        .mission[data-tier="obsidian"] .mission-label { color: #A39D90; letter-spacing: .16em; }
+        .mission[data-tier="obsidian"] .mission-clock { color: #F2DDA4; }
+        .mission[data-tier="obsidian"] .mission-face { border-color: rgba(217, 184, 113, .4); background: #141417; }
+        .mission[data-tier="obsidian"] .mission-badge { color: #1A1408; background: linear-gradient(180deg, #F2DDA4, #D9B871); border-color: #09090B; }
+        .mission[data-tier="obsidian"] .mission-name { color: #F6F2E8; }
+        .mission[data-tier="obsidian"] .mission-sub { color: #A39D90; }
+        .mission[data-tier="obsidian"] .mission-cta { color: #1A1408; background: linear-gradient(180deg, #F6E6B8 0%, #D9B871 100%); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .55), 0 8px 20px -8px rgba(217, 184, 113, .65); }
+        .mission[data-tier="obsidian"] .mission-cta:hover { background: linear-gradient(180deg, #FAEDC6 0%, #E2C27E 100%); }
+        .mission[data-tier="obsidian"] .mission-cta svg { color: #6B4E14; }
+        .mission[data-tier="obsidian"] .mission-cta::after { background: linear-gradient(100deg, transparent, rgba(255, 252, 240, .85), transparent); }
+        .fund-strip[data-tier="obsidian"] { color: #CFC9BC; background: linear-gradient(160deg, #141317 0%, #09090B 100%); border-color: rgba(217, 184, 113, .22); }
+        .fund-strip[data-tier="obsidian"] .ticket.is-done { color: #EFEBE2; background: rgba(217, 184, 113, .05); border-color: rgba(217, 184, 113, .3); }
+        .fund-strip[data-tier="obsidian"] .ticket.is-done .ticket-text { color: #EFEBE2; }
+        .fund-strip[data-tier="obsidian"] .ticket.is-done .ticket-text b { color: #F2DDA4; }
+        .fund-strip[data-tier="obsidian"] .ticket-streak { color: #F2DDA4; background: rgba(217, 184, 113, .1); box-shadow: 0 0 0 1px rgba(217, 184, 113, .35); }
+        .fund-strip[data-tier="obsidian"] .fund-cta { color: #EFEBE2; background: rgba(255, 255, 255, .04); border-color: rgba(217, 184, 113, .25); }
+        .fund-strip[data-tier="obsidian"] svg { color: #A39D90; }
+        @media (prefers-reduced-motion: reduce) { .ob-chip, .app-side[data-tier="obsidian"] .side-link svg { transition: none; } }
         @keyframes identity-cue {
             0% { box-shadow: 0 0 0 0 rgba(231, 197, 106, .55); }
             70% { box-shadow: 0 0 0 8px rgba(231, 197, 106, 0); }
@@ -8105,15 +8155,15 @@
             };
 
             return (
-                <div className="min-h-screen flex flex-col">
+                <div className="app-root min-h-screen flex flex-col" data-tier={obsidian ? 'obsidian' : 'eco'}>
                     <a href="#main" className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[70] btn btn-primary">Bỏ qua tới nội dung</a>
-                    <header className={'sticky top-0 z-50 border-b ' + (obsidian ? 'obsidian-head border-[#202637]' : 'border-line')} style={obsidian ? undefined : { background: '#E2E8F0' }}>
+                    <header className={'sticky top-0 z-50 border-b ' + (obsidian ? 'obsidian-head' : 'border-line')} style={obsidian ? undefined : { background: '#E2E8F0' }}>
                         <div className="flex h-16 w-full items-center gap-2 px-4 sm:gap-3 lg:px-6">
                             <button type="button" onClick={goHome} aria-label="Về Tổng quan" className="flex shrink-0 items-center gap-2.5 border-0 bg-transparent p-0 text-left cursor-pointer">
-                                <span className={obsidian ? 'inline-flex rounded-xl bg-[#F8F9FC] px-1.5 py-1' : ''}>
+                                <span className={obsidian ? 'ob-logo' : ''}>
                                     <img src="/public/stickers/logo.png" alt="" className="h-9 w-auto object-contain sm:h-10" />
                                 </span>
-                                <span className={'text-xl font-extrabold leading-none sm:text-2xl ' + (obsidian ? 'text-[#F8F9FC]' : 'text-[#0B192C]')}>FPass</span>
+                                <span className={'text-xl font-extrabold leading-none sm:text-2xl ' + (obsidian ? 'ob-word' : 'text-[#0B192C]')}>FPass</span>
                             </button>
                             <div className="ml-auto flex min-w-0 items-center gap-1">
                                 {/* Liên hệ: Zalo + hotline trên màn rộng, một nút mở khung Hỗ trợ trên điện thoại. */}
@@ -8123,8 +8173,8 @@
                                 </div>
                                 <button type="button" className="btn btn-ghost btn-icon md:hidden" onClick={openSupport} aria-label="Liên hệ hỗ trợ"><Icon name="headset" /></button>
                                 {obsidian && (
-                                    <button type="button" onClick={() => setMemberOpen(true)} className="mr-1 hidden items-center gap-1.5 rounded-full border border-[#D8C7A0]/70 bg-[#202637] px-3 py-1.5 text-xs font-semibold tracking-wide text-[#F8F9FC] sm:inline-flex">
-                                        <Icon name="gem" size={14} className="text-[#D8C7A0]" /> Obsidian
+                                    <button type="button" onClick={() => setMemberOpen(true)} className="ob-chip">
+                                        <Icon name="gem" size={13} /> Obsidian
                                     </button>
                                 )}
                                 <button type="button" className="btn btn-ghost btn-icon hidden sm:inline-flex lg:hidden" onClick={() => setGuideOpen(true)} aria-label="Video hướng dẫn"><Icon name="play" size={16} /></button>
