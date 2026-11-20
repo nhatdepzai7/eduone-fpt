@@ -75,11 +75,25 @@
         .pillar:hover { transform: translateY(-2px); box-shadow: 0 16px 30px -20px rgba(15, 23, 42, .4); border-color: #C7D2FE; }
         .pillar-ic { width: 44px; height: 44px; border-radius: 14px; display: flex; align-items: center; justify-content: center; }
         .pillar-go { margin-top: auto; display: inline-flex; align-items: center; gap: 4px; font-size: 13px; font-weight: 700; }
-        .app-nav { display: flex; gap: 2px; padding: 4px; border-radius: 16px; background: var(--surface-2); border: 1px solid var(--border); }
-        .app-nav button { position: relative; display: inline-flex; align-items: center; gap: 8px; min-height: 40px; padding: 0 14px; border-radius: 12px; font-size: 14px; font-weight: 600; color: var(--ink-2); }
-        .app-nav button[aria-current="page"] { background: var(--surface); color: var(--ink); box-shadow: 0 1px 3px rgba(15, 23, 42, .14); }
-        .app-nav button[aria-current="page"] svg { color: var(--primary); }
-        .app-nav button:hover:not([aria-current="page"]) { color: var(--ink); }
+        .app-side { display: none; }
+        @media (min-width: 1024px) {
+            .app-side { position: sticky; top: 65px; display: flex; flex-direction: column; flex-shrink: 0; width: 232px; height: calc(100vh - 65px); padding: 20px 12px 16px; border-right: 1px solid var(--border); overflow-y: auto; }
+        }
+        body:has(.eos-shell) .app-side { display: none; }
+        .side-link { position: relative; display: flex; align-items: center; gap: 10px; width: 100%; min-height: 44px; padding: 0 12px; border-radius: 12px; font-size: 14px; font-weight: 600; color: var(--ink-2); transition: background .15s ease, color .15s ease; }
+        .side-link svg { color: var(--muted); flex-shrink: 0; }
+        .side-link:hover:not([aria-current="page"]) { background: rgba(255, 255, 255, .55); color: var(--ink); }
+        .side-link[aria-current="page"] { background: var(--surface); color: var(--ink); box-shadow: 0 1px 3px rgba(15, 23, 42, .12); }
+        .side-link[aria-current="page"] svg { color: var(--primary); }
+        .side-link[aria-current="page"]::before { content: ""; position: absolute; left: -12px; top: 10px; bottom: 10px; width: 3px; border-radius: 0 3px 3px 0; background: var(--primary); }
+        .side-dot { width: 8px; height: 8px; border-radius: 999px; background: #EF4444; flex-shrink: 0; }
+        .side-head { margin: 20px 12px 6px; font-size: 11px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+        .top-contact { align-items: center; gap: 2px; padding: 3px; border-radius: 12px; background: var(--surface-2); border: 1px solid var(--border); }
+        .top-contact a { display: inline-flex; align-items: center; gap: 6px; min-height: 32px; padding: 0 10px; border-radius: 9px; font-size: 13px; font-weight: 600; color: var(--ink-2); white-space: nowrap; }
+        .top-contact a:hover { background: var(--surface); color: var(--primary); }
+        .top-contact.is-dark { background: #202637; border-color: #2A3142; }
+        .top-contact.is-dark a { color: #C6CBD4; }
+        .top-contact.is-dark a:hover { background: #F8F9FC; color: #0B192C; }
         .nav-dot { position: absolute; top: 6px; right: 6px; width: 8px; height: 8px; border-radius: 999px; background: #EF4444; box-shadow: 0 0 0 2px var(--surface-2); }
         .bnav { position: fixed; left: 0; right: 0; bottom: 0; z-index: 40; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); background: rgba(255, 255, 255, .96); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); border-top: 1px solid var(--border); padding-bottom: env(safe-area-inset-bottom); }
         .bnav button { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; min-height: 58px; font-size: 11px; font-weight: 600; color: var(--muted); }
@@ -352,9 +366,6 @@
         .obsidian-head .btn-ghost { color: #C6CBD4; }
         .obsidian-head .btn-ghost:hover:not(:disabled) { background: #202637; }
         .obsidian-head .tab { color: #C6CBD4; }
-        .obsidian-head .app-nav { background: #202637; border-color: #2A3142; }
-        .obsidian-head .app-nav button { color: #C6CBD4; }
-        .obsidian-head .app-nav button[aria-current="page"] { background: #F8F9FC; color: #0B192C; }
         .obsidian-head .tab[aria-selected="true"] { background: #F8F9FC; color: #10141F; }
         .obsidian-head .tab:hover:not([aria-selected="true"]) { background: #202637; color: #F8F9FC; }
         .obsidian-card { position: relative; overflow: hidden; border-radius: 18px; border: 1px solid rgba(216, 199, 160, .6); background: linear-gradient(145deg, #202637 0%, #10141F 58%, #161b28 100%); color: #F8F9FC; box-shadow: 0 16px 36px rgba(16, 20, 31, .18); }
@@ -6783,7 +6794,7 @@
                 <div className="min-h-screen flex flex-col">
                     <a href="#main" className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[70] btn btn-primary">Bỏ qua tới nội dung</a>
                     <header className={'sticky top-0 z-30 border-b ' + (obsidian ? 'obsidian-head border-[#202637]' : 'border-line')} style={obsidian ? undefined : { background: 'rgba(226,232,240,.9)', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)' }}>
-                        <div className="max-w-7xl mx-auto flex items-center gap-2 px-4 py-2.5 sm:gap-3">
+                        <div className="flex h-16 w-full items-center gap-2 px-4 sm:gap-3 lg:px-6">
                             <button type="button" onClick={goHome} aria-label="Về Tổng quan" className="flex shrink-0 items-center gap-2.5 border-0 bg-transparent p-0 text-left cursor-pointer">
                                 <span className={obsidian ? 'inline-flex rounded-xl bg-[#F8F9FC] px-1.5 py-1' : ''}>
                                     <img src="/public/stickers/logo.png" alt="" className="h-9 w-auto object-contain sm:h-10" />
@@ -6793,21 +6804,19 @@
                                     <span className={'mt-1 hidden text-xs font-medium leading-none tracking-wide xl:block ' + (obsidian ? 'text-[#C6CBD4]' : 'text-slate-500')}>Học đúng giờ · thi chắc qua</span>
                                 </span>
                             </button>
-                            <nav aria-label="Mục chính" className="app-nav mx-auto hidden lg:flex">
-                                {navItems.map(it => (
-                                    <button key={it.k} type="button" aria-current={navNow === it.k ? 'page' : undefined} onClick={() => goNav(it.k)}>
-                                        <Icon name={it.icon} size={16} /> {it.label}
-                                        {it.k === 'today' && slotDue && <><span className="nav-dot" aria-hidden="true" /><span className="sr-only">, có ca học đến giờ</span></>}
-                                    </button>
-                                ))}
-                            </nav>
-                            <div className="ml-auto flex min-w-0 items-center gap-1 lg:ml-0">
+                            <div className="ml-auto flex min-w-0 items-center gap-1">
+                                {/* Liên hệ: Zalo + hotline trên màn rộng, một nút mở khung Hỗ trợ trên điện thoại. */}
+                                <div className={'top-contact mr-1 hidden md:flex' + (obsidian ? ' is-dark' : '')}>
+                                    <a href={SUPPORT.zalo} target="_blank" rel="noopener noreferrer" aria-label="Nhắn Zalo hỗ trợ"><Icon name="chat" size={15} /> Zalo</a>
+                                    <a href={'tel:' + SUPPORT.phone} aria-label={'Gọi hỗ trợ ' + SUPPORT.phoneDisplay}><Icon name="headset" size={15} /> <span className="tnum">{SUPPORT.phoneDisplay}</span></a>
+                                </div>
+                                <button type="button" className="btn btn-ghost btn-icon md:hidden" onClick={openSupport} aria-label="Liên hệ hỗ trợ"><Icon name="headset" /></button>
                                 {obsidian && (
                                     <button type="button" onClick={() => setMemberOpen(true)} className="mr-1 hidden items-center gap-1.5 rounded-full border border-[#D8C7A0]/70 bg-[#202637] px-3 py-1.5 text-xs font-semibold tracking-wide text-[#F8F9FC] sm:inline-flex">
                                         <Icon name="gem" size={14} className="text-[#D8C7A0]" /> Obsidian
                                     </button>
                                 )}
-                                <button type="button" className="btn btn-ghost btn-sm hidden sm:inline-flex" onClick={() => setGuideOpen(true)} aria-label="Video hướng dẫn"><Icon name="play" size={16} /><span className="hidden xl:inline">Hướng dẫn</span></button>
+                                <button type="button" className="btn btn-ghost btn-icon hidden sm:inline-flex lg:hidden" onClick={() => setGuideOpen(true)} aria-label="Video hướng dẫn"><Icon name="play" size={16} /></button>
                                 <button type="button" className="btn btn-ghost btn-icon hidden sm:inline-flex" onClick={() => setMuted(!muted)} aria-pressed={!muted} aria-label={muted ? 'Bật âm thanh' : 'Tắt âm thanh'}><Icon name={muted ? 'mute' : 'volume'} /></button>
                                 <button type="button" className={'btn btn-sm min-w-0 ' + (googleAccount && googleAccount.email ? 'btn-secondary' : 'btn-primary')} onClick={() => { setPendingGift(''); setGoogleReason('save'); setGoogleOpen(true); }}>
                                     <span className="block max-w-[150px] truncate sm:max-w-[200px]">{googleAccount && googleAccount.email ? googleAccount.email : 'Đăng nhập'}</span>
@@ -6817,7 +6826,25 @@
                         </div>
                     </header>
 
-                    <main id="main" className="flex-1 w-full max-w-7xl mx-auto px-4 py-6">
+                    <div className="flex w-full flex-1">
+                    <aside className="app-side" aria-label="Điều hướng">
+                        <nav aria-label="Mục chính" className="flex flex-col gap-1">
+                            {navItems.map(it => (
+                                <button key={it.k} type="button" className="side-link" aria-current={navNow === it.k ? 'page' : undefined} onClick={() => goNav(it.k)}>
+                                    <Icon name={it.icon} size={18} /> <span className="min-w-0 flex-1 truncate text-left">{it.label}</span>
+                                    {it.k === 'today' && slotDue && <><span className="side-dot" aria-hidden="true" /><span className="sr-only">, có ca học đến giờ</span></>}
+                                </button>
+                            ))}
+                        </nav>
+                        <p className="side-head">Khác</p>
+                        <div className="flex flex-col gap-1">
+                            <button type="button" className="side-link" onClick={() => setGuideOpen(true)}><Icon name="play" size={18} /> Video hướng dẫn</button>
+                            <button type="button" className="side-link" onClick={openSupport}><Icon name="headset" size={18} /> Hỗ trợ & FAQ</button>
+                            <button type="button" className="side-link" onClick={openFeedback}><Icon name="bulb" size={18} /> Góp ý</button>
+                        </div>
+                        <p className="mt-auto px-3 pt-6 text-xs leading-5 text-muted">Học đúng giờ · thi chắc qua</p>
+                    </aside>
+                    <main id="main" className="min-w-0 flex-1 px-4 py-6 lg:px-8">
                         {!loaded ? (
                             <p className="text-center text-muted py-16">Đang mở kho dữ liệu…</p>
                         ) : nav.mode === 'self' ? (
@@ -6848,6 +6875,7 @@
                                 unlockedIds={Object.keys(unlocked)} exams={exams} openPack={(id) => dispatch({ type: 'OPEN_PACK', id })} toast={toast} now={now} />
                         )}
                     </main>
+                    </div>
 
                     <nav aria-label="Mục chính" className="bnav">
                         {navItems.map(it => (
