@@ -16,6 +16,9 @@
     };
 
     let seq = 0;
+    /* createdAt tăng dần kể cả khi tạo nhiều mục trong cùng 1ms (dán nhanh, nhập Excel): giữ đúng mạch bài học khi sắp xếp. */
+    let lastStamp = 0;
+    const stamp = () => { let t = Date.now(); if (t <= lastStamp) t = lastStamp + 1; lastStamp = t; return new Date(t).toISOString(); };
     const newId = (prefix) => (prefix || 'it') + '-' + Date.now().toString(36) + '-' + (seq++).toString(36) + Math.random().toString(36).slice(2, 6);
 
     const pick = (o, keys) => {
@@ -122,7 +125,7 @@
             correctCount: toInt(pick(d, ['correctCount', 'testDung']), 0, 1e6),
             pronounceCount: toInt(pick(d, ['pronounceCount', 'phatAmDung']), 0, 1e6),
             lastReview: toIso(pick(d, ['lastReview', 'ngayOnCuoi'])),
-            createdAt: toIso(pick(d, ['createdAt', 'ngayThem'])) || new Date().toISOString(),
+            createdAt: toIso(pick(d, ['createdAt', 'ngayThem'])) || stamp(),
             source: def.source || (typeof d.source === 'string' ? S.cleanText(d.source, 60) : 'user')
         };
     };
