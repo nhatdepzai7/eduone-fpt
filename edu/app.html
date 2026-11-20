@@ -113,12 +113,23 @@
         .fund-strip { display: flex; align-items: center; gap: 8px; width: 100%; min-height: 40px; margin-bottom: 12px; padding: 0 12px; border-radius: 12px; background: var(--surface); border: 1px solid var(--border); font-size: 13px; color: var(--ink-2); text-align: left; white-space: nowrap; overflow: hidden; }
         .fund-strip:hover { border-color: var(--primary); }
         .fund-strip svg { color: var(--muted); flex-shrink: 0; }
+        /* CTA gói AI: pill nhạt khi còn nhiều lượt, nút tím đậm khi còn <= 20 lượt. */
+        .fund-cta { margin-left: auto; flex-shrink: 0; display: inline-flex; align-items: center; gap: 4px; min-height: 26px; padding: 0 10px; border-radius: 999px; font-size: 12px; font-weight: 700; transition: background .15s ease, transform .15s ease; }
+        .fund-cta.is-soft { background: rgba(124, 58, 237, .08); border: 1px solid rgba(124, 58, 237, .28); color: var(--primary); }
+        .fund-cta.is-soft svg { color: var(--primary); }
+        .fund-strip:hover .fund-cta.is-soft { background: rgba(124, 58, 237, .14); }
+        .fund-cta.is-hot { background: var(--primary); border: 1px solid var(--primary); color: #fff; box-shadow: 0 2px 8px rgba(124, 58, 237, .35); }
+        .fund-cta.is-hot svg { color: #fff; }
+        .fund-strip:hover .fund-cta.is-hot { transform: translateY(-1px); }
         .lib-menu { position: absolute; right: 0; top: calc(100% + 6px); z-index: 45; width: min(19rem, calc(100vw - 2rem)); padding: 6px; border-radius: 16px; background: var(--surface); border: 1px solid var(--border); box-shadow: 0 12px 32px rgba(15, 23, 42, .18); }
         .lib-menu button { display: flex; align-items: flex-start; gap: 10px; width: 100%; padding: 10px; border-radius: 10px; text-align: left; color: var(--ink); }
         .lib-menu button:hover:not(:disabled) { background: var(--surface-2); }
         .lib-menu button:disabled { opacity: .45; }
         .lib-menu svg { margin-top: 2px; color: var(--primary); flex-shrink: 0; }
         .lib-menu b { display: block; font-size: 14px; font-weight: 600; }
+        .lib-menu button.is-danger { margin-top: 4px; border-top: 1px solid var(--border); border-radius: 0 0 10px 10px; color: #B91C1C; }
+        .lib-menu button.is-danger svg { color: #DC2626; }
+        .lib-menu button.is-danger:hover:not(:disabled) { background: #FEF2F2; }
         .lib-menu small { display: block; margin-top: 1px; font-size: 12px; line-height: 1.4; color: var(--muted); }
         .lib-row { display: flex; gap: 10px; padding: 10px 12px 10px 0; }
         .lib-bar { width: 3px; flex-shrink: 0; border-radius: 0 3px 3px 0; }
@@ -1828,6 +1839,7 @@
                 </div>
             );
         };
+        const WORD_TYPES = ['n', 'v', 'adj', 'adv', 'prep', 'conj', 'pron', 'phr', 'idiom'];
         /* Thanh trạng thái quỹ 1 dòng cho Sổ từ: bấm vào mới mở chi tiết đổi mã / nâng cấp. */
         const FundStrip = ({ onOpen }) => {
             const fund = useFund();
@@ -1841,7 +1853,8 @@
                     <span className="inline-flex min-w-0 items-center gap-1.5 truncate"><Icon name="sparkles" size={14} /> {aiOn ? 'AI đang mở' : 'AI ' + aiLeft + '/' + aiCap}</span>
                     <span className="opacity-40 hidden sm:inline" aria-hidden="true">·</span>
                     <span className="hidden items-center gap-1.5 sm:inline-flex"><Icon name="monitor" size={14} /> EOS <b className="tnum">{fund.balance}</b> lượt</span>
-                    <span className="ml-auto shrink-0 font-semibold text-primary">{aiOn ? 'Chi tiết' : 'Gói AI 29k'} ›</span>
+                    {aiOn ? <span className="ml-auto shrink-0 font-semibold text-primary">Chi tiết ›</span>
+                        : <span className={'fund-cta ' + (aiLeft <= 20 ? 'is-hot' : 'is-soft')}><Icon name="zap" size={12} /> {aiLeft <= 20 ? 'Nâng cấp 29k' : 'Gói AI 29k'}</span>}
                 </button>
             );
         };
@@ -4977,6 +4990,12 @@
                 setItems(prev => prev.concat(Sch.normalizeItem({ type: typeFilter === 'mcq' ? 'mcq' : 'vocab', group: g, options: typeFilter === 'mcq' ? ['', '', '', ''] : [] })));
             };
             const removeRow = (id) => { if (confirm('Xóa mục này?')) setItems(prev => prev.filter(t => t.id !== id)); };
+            const removeAll = () => {
+                if (!items.length) return;
+                if (!confirm('Xóa hết ' + items.length + ' mục trong Sổ từ? Không hoàn tác được. Nên "Tải kho về Excel" trước để sao lưu.')) return;
+                setItems([]); setSel(new Set());
+                toast('Đã xóa hết Sổ từ', 'success');
+            };
             const removeSelected = () => { if (sel.size && confirm('Xóa ' + sel.size + ' mục đã chọn?')) { setItems(prev => prev.filter(t => !sel.has(t.id))); setSel(new Set()); } };
 
             const applyEnrich = (map) => setItems(prev => prev.map(t => {
@@ -5130,6 +5149,7 @@
                                             <button type="button" role="menuitem" disabled={!!aiAll || !items.length} onClick={() => runMenu(aiEverything)}><Icon name="sparkles" size={16} /><span><b>{aiAll ? 'AI ' + aiAll.done + '/' + aiAll.total : 'AI bổ sung tất cả'}</b><small>Điền nghĩa, IPA, ví dụ còn thiếu</small></span></button>
                                             <button type="button" role="menuitem" disabled={!items.length} onClick={() => runMenu(exportExcel)}><Icon name="sheet" size={16} /><span><b>Tải kho về Excel</b><small>Sao lưu toàn bộ kho</small></span></button>
                                             <button type="button" role="menuitem" onClick={() => runMenu(() => window.dispatchEvent(new CustomEvent('edu-contribute')))}><Icon name="share" size={16} /><span><b>Gửi đề cho admin</b><small>Góp đề để mọi người cùng ôn</small></span></button>
+                                            <button type="button" role="menuitem" className="is-danger" disabled={!items.length} onClick={() => runMenu(removeAll)}><Icon name="trash" size={16} /><span><b>Xóa hết từ trong bảng</b><small>Xóa toàn bộ {items.length} mục, không hoàn tác</small></span></button>
                                         </>
                                     )}
                                 </div>
@@ -5261,15 +5281,23 @@
                                                     </div>
                                                 </td>
                                                 <td className="w-auto whitespace-nowrap p-2">
-                                                    <select aria-label="Loại" className="field !min-h-[36px] text-xs px-2" value={t.type}
-                                                        onChange={(e) => update(t.id, e.target.value === 'mcq' ? { type: 'mcq', options: t.options.length ? t.options : ['', '', '', ''], answerOrMeaning: 'A' } : { type: 'vocab', options: [], answerOrMeaning: '' })}>
-                                                        <option value="vocab">Từ</option><option value="mcq">MCQ</option>
+                                                    {/* Một ô chọn cho cả từ loại (n, v, adj…) và câu trắc nghiệm. */}
+                                                    <select aria-label="Loại" className="field !min-h-[36px] min-w-[84px] text-xs px-2" value={mcq ? 'mcq' : (t.wordType || '')}
+                                                        onChange={(e) => {
+                                                            const v = e.target.value;
+                                                            if (v === 'mcq') { if (!mcq) update(t.id, { type: 'mcq', options: t.options.length ? t.options : ['', '', '', ''], answerOrMeaning: 'A' }); }
+                                                            else if (mcq) update(t.id, { type: 'vocab', options: [], answerOrMeaning: '', wordType: v });
+                                                            else update(t.id, { wordType: v });
+                                                        }}>
+                                                        <option value="">Từ (—)</option>
+                                                        {WORD_TYPES.map(w => <option key={w} value={w}>{w}</option>)}
+                                                        {!mcq && t.wordType && WORD_TYPES.indexOf(t.wordType) < 0 && <option value={t.wordType}>{t.wordType}</option>}
+                                                        <option value="mcq">MCQ</option>
                                                     </select>
                                                 </td>
                                                 <td className="p-0">
                                                     <textarea rows={1} className="cell-ta font-semibold text-primary" value={t.questionOrWord} maxLength={mcq ? 1500 : 400} aria-label={mcq ? 'Câu hỏi' : 'Từ vựng'} placeholder={mcq ? 'Câu hỏi…' : 'Nhập từ…'}
                                                         onChange={(e) => update(t.id, { questionOrWord: e.target.value })} onDoubleClick={() => setEditing(t)} />
-                                                    {!mcq && <input className="cell-ta !min-h-[32px] text-xs text-ink2 !py-1" value={t.wordType} maxLength={24} placeholder="từ loại: n / v…" aria-label="Từ loại" onChange={(e) => update(t.id, { wordType: e.target.value })} />}
                                                 </td>
                                                 <td className="p-0">
                                                     {mcq ? (
