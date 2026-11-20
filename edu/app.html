@@ -1008,6 +1008,69 @@
         .app-root .cmd-card.photo-light .cmd-sum > div { background: rgba(255, 255, 255, .7); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); }
         .app-root .cmd-card.photo-light .cmd-sum dt { color: #475569; }
         .app-root .cmd-card.photo-light .cmd-sum dd { color: #0F172A; }
+        /* ===== Kiểu số & màu số đồng hồ (người dùng tự chọn) ===== */
+        .cmd-photo-btn.is-label { width: auto; gap: 6px; padding: 0 12px 0 10px; font-size: 12.5px; font-weight: 600; }
+        @media (max-width: 639px) { .cmd-photo-btn.is-label { width: 34px; padding: 0; } .cmd-photo-btn.is-label span { display: none; } }
+        .ck { display: inline-flex; align-items: baseline; color: var(--ck) !important; font-variant-numeric: tabular-nums; line-height: 1.05; }
+        .ck-word { font-family: 'Be Vietnam Pro', system-ui, sans-serif; font-weight: 700; letter-spacing: -.02em; }
+        .ck-sep { display: inline-block; padding: 0 .04em; }
+        /* Lót kính mờ khi màu số quá gần màu nền */
+        .ck.has-plate { padding: .08em .3em .12em; border-radius: .32em; -webkit-backdrop-filter: blur(10px) saturate(1.3); backdrop-filter: blur(10px) saturate(1.3); }
+        .ck.has-plate.fg-light { background: rgba(15, 23, 42, .5); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .12); }
+        .ck.has-plate.fg-dark { background: rgba(255, 255, 255, .72); box-shadow: inset 0 0 0 1px rgba(15, 23, 42, .08); }
+        /* Gọn gàng: số mảnh như hiện tại */
+        .ck[data-face="mono"] { font-family: 'JetBrains Mono', ui-monospace, monospace; }
+        /* Bong bóng: số tròn mập, dấu hai chấm là hai chấm tròn nhịp thở */
+        .ck[data-face="bubble"] { font-family: 'Be Vietnam Pro', system-ui, sans-serif; font-weight: 800; letter-spacing: .01em; }
+        .ck[data-face="bubble"] .ck-d { display: inline-block; text-shadow: 0 .06em 0 rgba(0, 0, 0, .12); }
+        .ck[data-face="bubble"].fg-dark .ck-d { text-shadow: 0 .06em 0 rgba(255, 255, 255, .5); }
+        .ck[data-face="bubble"] .ck-sep { animation: ck-blink 2s ease-in-out infinite; }
+        /* Lật số: mỗi chữ số một ô bo góc có đường gập */
+        .ck[data-face="flip"] { gap: .08em; font-family: 'Be Vietnam Pro', system-ui, sans-serif; font-weight: 700; }
+        .ck[data-face="flip"] .ck-d { position: relative; display: inline-flex; justify-content: center; width: .78em; padding: .06em 0 .1em; border-radius: .16em; font-size: .86em; line-height: 1.1; }
+        .ck[data-face="flip"].fg-light .ck-d { background: linear-gradient(180deg, rgba(15, 23, 42, .55) 0 50%, rgba(15, 23, 42, .68) 50% 100%); box-shadow: 0 .06em .14em rgba(0, 0, 0, .25), inset 0 0 0 1px rgba(255, 255, 255, .08); }
+        .ck[data-face="flip"].fg-dark .ck-d { background: linear-gradient(180deg, rgba(255, 255, 255, .85) 0 50%, rgba(241, 245, 249, .92) 50% 100%); box-shadow: 0 .06em .14em rgba(15, 23, 42, .15), inset 0 0 0 1px rgba(15, 23, 42, .06); }
+        .ck[data-face="flip"] .ck-d::after { content: ""; position: absolute; left: 0; right: 0; top: 50%; height: 1px; background: rgba(0, 0, 0, .22); }
+        .ck[data-face="flip"].has-plate { background: none; box-shadow: none; padding: 0; -webkit-backdrop-filter: none; backdrop-filter: none; }
+        .ck[data-face="flip"] .ck-sep { padding: 0 .02em; opacity: .8; }
+        /* Viền nét: số rỗng ruột, viền dày, bóng nhẹ */
+        .ck[data-face="outline"] { font-family: 'Be Vietnam Pro', system-ui, sans-serif; font-weight: 800; letter-spacing: .02em; color: transparent !important; -webkit-text-stroke: .045em var(--ck); paint-order: stroke fill; }
+        .ck[data-face="outline"].fg-light { text-shadow: 0 0 .2em rgba(0, 0, 0, .25); }
+        .ck[data-face="outline"].fg-dark { text-shadow: 0 0 .2em rgba(255, 255, 255, .5); }
+        /* Kẹo ngọt: dải màu hồng đào → bơ → bạc hà, có viền sáng nhẹ để nổi trên mọi nền */
+        .ck[data-face="candy"] { font-family: 'Be Vietnam Pro', system-ui, sans-serif; font-weight: 800; letter-spacing: .01em; background: linear-gradient(100deg, #FF8FB1 0%, #FDBA74 30%, #FDE68A 55%, #5EEAD4 80%, #A78BFA 100%); background-size: 200% 100%; -webkit-background-clip: text; background-clip: text; color: transparent !important; filter: drop-shadow(0 .04em 0 rgba(15, 23, 42, .25)); animation: ck-candy 8s ease-in-out infinite; }
+        .ck[data-face="candy"].has-plate { background: linear-gradient(100deg, #FF8FB1 0%, #FDBA74 30%, #FDE68A 55%, #5EEAD4 80%, #A78BFA 100%); background-size: 200% 100%; -webkit-background-clip: text; background-clip: text; filter: drop-shadow(0 0 .06em rgba(15, 23, 42, .9)) drop-shadow(0 .04em 0 rgba(15, 23, 42, .5)); -webkit-backdrop-filter: none; backdrop-filter: none; padding: 0; box-shadow: none; }
+        /* Phát sáng: số tròn, quầng sáng cùng màu */
+        .ck[data-face="glow"] { font-family: 'Be Vietnam Pro', system-ui, sans-serif; font-weight: 600; letter-spacing: .02em; text-shadow: 0 0 .18em var(--ck), 0 0 .5em color-mix(in srgb, var(--ck) 55%, transparent); }
+        .ck[data-face="glow"].fg-dark { text-shadow: 0 0 .25em rgba(255, 255, 255, .9), 0 .03em 0 rgba(255, 255, 255, .6); }
+        @keyframes ck-blink { 0%, 100% { opacity: 1; } 50% { opacity: .35; } }
+        @keyframes ck-candy { 0%, 100% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } }
+        @media (prefers-reduced-motion: reduce) { .ck[data-face="bubble"] .ck-sep, .ck[data-face="candy"] { animation: none; } }
+        /* Bảng tùy chỉnh */
+        .ck-mini { min-height: 132px; padding: 16px 18px; border-radius: 18px; }
+        .ck-mini .ck { margin-top: 6px; font-size: 44px; }
+        .ck-head { margin: 18px 0 8px; font-size: 11px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+        .ck-drop { display: flex; align-items: center; gap: 12px; padding: 12px; border-radius: 14px; border: 1.5px dashed #C7D2FE; background: #F8FAFF; color: #4F46E5; transition: border-color .15s ease, background .15s ease; }
+        .ck-drop.is-drag { border-color: #4F46E5; background: #EEF2FF; }
+        @media (max-width: 479px) { .ck-drop { flex-wrap: wrap; } .ck-drop .btn { width: 100%; justify-content: center; } }
+        .ck-faces { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+        .ck-face-opt { display: flex; flex-direction: column; gap: 4px; padding: 4px 4px 6px; border-radius: 14px; border: 1px solid var(--border); background: var(--surface); text-align: center; }
+        .ck-face-opt:hover { border-color: #A5B4FC; }
+        .ck-face-opt.is-on { border-color: #4F46E5; box-shadow: 0 0 0 3px rgba(99, 102, 241, .2); }
+        .ck-face-opt small { font-size: 12px; font-weight: 600; color: var(--ink-2); }
+        .ck-face-demo { position: relative; display: flex; align-items: center; justify-content: center; height: 54px; overflow: hidden; border-radius: 10px; background-size: cover; background-position: center; }
+        .ck-face-demo .ck { font-size: 24px; position: relative; z-index: 1; }
+        .ck-face-demo.tier-eco { background-image: linear-gradient(135deg, #312E81 0%, #4338CA 55%, #6366F1 100%); }
+        .ck-face-demo.tier-obsidian { background-image: linear-gradient(155deg, #18171B 0%, #08080A 100%); }
+        .ck-face-demo.tier-ivory { background-image: linear-gradient(140deg, #EEF2FF 0%, #F5F3FF 36%, #FDF2F8 70%, #FFF7ED 100%); }
+        .ck-face-demo.has-photo.photo-dark::before { content: ""; position: absolute; inset: 0; background: rgba(2, 6, 23, .4); }
+        .ck-face-demo.has-photo.photo-light::before { content: ""; position: absolute; inset: 0; background: rgba(255, 255, 255, .45); }
+        .ck-colors { display: flex; flex-wrap: wrap; gap: 8px; }
+        .ck-color { display: inline-flex; align-items: center; justify-content: center; width: 34px; height: 34px; border-radius: 999px; background: var(--sw, #fff); box-shadow: inset 0 0 0 1px rgba(15, 23, 42, .15); transition: transform .12s ease; }
+        .ck-color:hover { transform: scale(1.08); }
+        .ck-color.is-on { box-shadow: inset 0 0 0 1px rgba(15, 23, 42, .15), 0 0 0 2px #fff, 0 0 0 4px #4F46E5; }
+        .ck-color.is-auto { background: conic-gradient(#FFFFFF 0 50%, #0F172A 50% 100%); }
+        .ck-color.is-auto span { display: inline-flex; align-items: center; justify-content: center; width: 20px; height: 20px; border-radius: 999px; background: #fff; color: #4F46E5; font-size: 11px; font-weight: 800; box-shadow: 0 1px 2px rgba(15, 23, 42, .2); }
         .skin-swatch.is-classic i:nth-child(3) { background: linear-gradient(135deg, #E2E8F0, #E2E8F0 55%, #4338CA 55%); }
         @keyframes identity-cue {
             0% { box-shadow: 0 0 0 0 rgba(231, 197, 106, .55); }
@@ -4812,6 +4875,135 @@
             window.dispatchEvent(new CustomEvent('edu-photo'));
         };
 
+        /* Kiểu số đồng hồ và màu số do người dùng tự chọn. Màu nào cũng không bị chìm: đo tương phản với nền (ảnh hoặc giao diện),
+           thiếu tương phản thì tự lót một tấm kính mờ ngược màu phía sau số. */
+        const CLOCK_KEY = 'clockStyle';
+        const CLOCK_FACES = [
+            { key: 'mono', label: 'Gọn gàng' },
+            { key: 'bubble', label: 'Bong bóng' },
+            { key: 'flip', label: 'Lật số' },
+            { key: 'outline', label: 'Viền nét' },
+            { key: 'candy', label: 'Kẹo ngọt' },
+            { key: 'glow', label: 'Phát sáng' }
+        ];
+        const CLOCK_COLORS = [
+            { key: 'auto', label: 'Tự động', hex: '' },
+            { key: 'white', label: 'Trắng', hex: '#FFFFFF' },
+            { key: 'ink', label: 'Mực', hex: '#0F172A' },
+            { key: 'pink', label: 'Hồng đào', hex: '#FF8FB1' },
+            { key: 'coral', label: 'San hô', hex: '#FB7185' },
+            { key: 'butter', label: 'Bơ', hex: '#FDE68A' },
+            { key: 'mint', label: 'Bạc hà', hex: '#5EEAD4' },
+            { key: 'sky', label: 'Trời', hex: '#7DD3FC' },
+            { key: 'lilac', label: 'Oải hương', hex: '#C4B5FD' },
+            { key: 'grape', label: 'Nho', hex: '#7C3AED' },
+            { key: 'gold', label: 'Champagne', hex: '#E7C56A' }
+        ];
+        const readClock = () => {
+            const v = Store.prefs.get(CLOCK_KEY, null) || {};
+            const face = CLOCK_FACES.some(f => f.key === v.face) ? v.face : 'mono';
+            const color = CLOCK_COLORS.some(c => c.key === v.color) ? v.color : 'auto';
+            return { face, color };
+        };
+        const useClockStyle = () => {
+            const [v, setV] = useState(readClock);
+            useEffect(() => {
+                const on = () => setV(readClock());
+                window.addEventListener('edu-clock', on);
+                window.addEventListener('edu-identity', on);
+                return () => { window.removeEventListener('edu-clock', on); window.removeEventListener('edu-identity', on); };
+            }, []);
+            return v;
+        };
+        const saveClock = (patch) => { Store.prefs.set(CLOCK_KEY, Object.assign(readClock(), patch)); window.dispatchEvent(new CustomEvent('edu-clock')); };
+        const hexLum = (hex) => {
+            const n = parseInt(String(hex).replace('#', ''), 16);
+            const ch = (v) => { v /= 255; return v <= 0.04045 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); };
+            return 0.2126 * ch((n >> 16) & 255) + 0.7152 * ch((n >> 8) & 255) + 0.0722 * ch(n & 255);
+        };
+        /* Độ sáng nền phía sau số: ảnh thì dùng số đo lúc tải ảnh; không ảnh thì theo giao diện (Eco tím, Obsidian đen, Obsidian Sáng pastel). */
+        const SKIN_BG_LUM = { eco: 0.06, obsidian: 0.012, ivory: 0.84 };
+        const clockLook = (style, tier, photo) => {
+            const bgLum = photo ? (typeof photo.lum === 'number' ? photo.lum : (photo.tone === 'light' ? 0.7 : 0.03)) : (SKIN_BG_LUM[tier] != null ? SKIN_BG_LUM[tier] : 0.06);
+            const darkBg = photo ? photo.tone !== 'light' : tier !== 'ivory';
+            const pick = CLOCK_COLORS.find(c => c.key === style.color) || CLOCK_COLORS[0];
+            const autoHex = photo ? (darkBg ? '#FFFFFF' : '#0F172A') : tier === 'obsidian' ? '#F6EBD0' : tier === 'ivory' ? '#1E1B4B' : '#FFFFFF';
+            const hex = pick.hex || autoHex;
+            /* Kẹo ngọt là dải màu sáng: coi như màu sáng khi đo tương phản. */
+            const fgLum = style.face === 'candy' ? 0.55 : hexLum(hex);
+            const ratio = (Math.max(fgLum, bgLum) + 0.05) / (Math.min(fgLum, bgLum) + 0.05);
+            const plate = ratio < 3.2;
+            const lightFg = fgLum > 0.4;
+            return { hex, plate, lightFg, ratio: Math.round(ratio * 10) / 10 };
+        };
+        const ClockFace = ({ text, face, look, big }) => !/\d/.test(String(text))
+            ? <span className={'ck ck-word' + (look.plate ? ' has-plate' : '') + (look.lightFg ? ' fg-light' : ' fg-dark')} data-face={face} style={{ '--ck': look.hex }}>{text}</span>
+            : (
+            <span className={'ck' + (big ? ' is-big' : '') + (look.plate ? ' has-plate' : '') + (look.lightFg ? ' fg-light' : ' fg-dark')} data-face={face} style={{ '--ck': look.hex }}>
+                {String(text).split('').map((ch, i) => ch === ':'
+                    ? <span key={i} className="ck-sep" aria-hidden="true">:</span>
+                    : <span key={i} className="ck-d">{ch}</span>)}
+            </span>
+        );
+        const ClockStudio = ({ photo, tier, busy, onPick, onRemove, onClose, sample }) => {
+            const style = useClockStyle();
+            const look = clockLook(style, tier, photo);
+            const [drag, setDrag] = useState(false);
+            const input = useRef(null);
+            const onDrop = (e) => { e.preventDefault(); setDrag(false); const f = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0]; if (f) onPick(f); };
+            return (
+                <Modal title="Tùy chỉnh đồng hồ" onClose={onClose} size="md" footer={<button type="button" className="btn btn-primary" onClick={onClose}>Xong</button>}>
+                    <div className={'cmd-card ck-mini' + (photo ? ' has-photo photo-' + photo.tone : '')} style={photo ? { backgroundImage: 'url("' + photo.src + '")' } : undefined}>
+                        {photo && <span className="cmd-photo-scrim" aria-hidden="true" />}
+                        <div className="relative z-10">
+                            <p className="text-xs font-semibold text-indigo-100">Xem trước</p>
+                            <ClockFace text={sample} face={style.face} look={look} big />
+                        </div>
+                    </div>
+                    {look.plate && <p className="mt-2 text-xs text-ink2">Màu này gần với nền nên app tự lót tấm kính mờ sau số để vẫn đọc rõ.</p>}
+
+                    <p className="ck-head">Ảnh nền</p>
+                    <div className={'ck-drop' + (drag ? ' is-drag' : '')} onDragOver={(e) => { e.preventDefault(); setDrag(true); }} onDragLeave={() => setDrag(false)} onDrop={onDrop}>
+                        <Icon name="image" size={22} />
+                        <span className="min-w-0 flex-1 text-left">
+                            <b className="block text-sm text-ink">{photo ? 'Đổi ảnh khác' : 'Thêm ảnh của bạn'}</b>
+                            <span className="text-xs text-ink2">Chọn từ máy tính hoặc thư viện ảnh điện thoại. Trên máy tính có thể kéo thả ảnh vào đây.</span>
+                        </span>
+                        <button type="button" className="btn btn-secondary btn-sm shrink-0" disabled={busy} onClick={() => input.current && input.current.click()}>
+                            {busy ? <Icon name="loader" size={14} className="animate-spin" /> : <Icon name="upload" size={14} />} Chọn ảnh
+                        </button>
+                        <input ref={input} type="file" accept="image/*" className="sr-only" tabIndex={-1} aria-hidden="true"
+                            onChange={(e) => { const f = e.target.files && e.target.files[0]; e.target.value = ''; if (f) onPick(f); }} />
+                    </div>
+                    {photo && <button type="button" className="mt-2 text-sm font-medium text-muted underline-offset-2 hover:underline" onClick={onRemove}>Bỏ ảnh, dùng nền mặc định</button>}
+
+                    <p className="ck-head">Kiểu số</p>
+                    <div className="ck-faces" role="radiogroup" aria-label="Kiểu số đồng hồ">
+                        {CLOCK_FACES.map(f => (
+                            <button key={f.key} type="button" role="radio" aria-checked={style.face === f.key} className={'ck-face-opt' + (style.face === f.key ? ' is-on' : '')} onClick={() => saveClock({ face: f.key })}>
+                                <span className={'ck-face-demo' + (photo ? ' has-photo photo-' + photo.tone : '') + ' tier-' + tier} style={photo ? { backgroundImage: 'url("' + photo.src + '")' } : undefined}>
+                                    <ClockFace text="12:34" face={f.key} look={clockLook({ face: f.key, color: style.color }, tier, photo)} />
+                                </span>
+                                <small>{f.label}</small>
+                            </button>
+                        ))}
+                    </div>
+
+                    <p className="ck-head">Màu số</p>
+                    <div className="ck-colors" role="radiogroup" aria-label="Màu số đồng hồ">
+                        {CLOCK_COLORS.map(c => (
+                            <button key={c.key} type="button" role="radio" aria-checked={style.color === c.key} title={c.label} aria-label={c.label}
+                                className={'ck-color' + (style.color === c.key ? ' is-on' : '') + (c.key === 'auto' ? ' is-auto' : '')} style={c.hex ? { '--sw': c.hex } : undefined}
+                                onClick={() => saveClock({ color: c.key })}>
+                                {c.key === 'auto' ? <span>A</span> : null}
+                            </button>
+                        ))}
+                    </div>
+                    <p className="mt-2 text-xs text-ink2">Tự động: chữ trắng trên nền tối, chữ đậm trên nền sáng.</p>
+                </Modal>
+            );
+        };
+
         /* Mặt đồng hồ khắc chìm cho thẻ Obsidian: 2 vòng mảnh + 60 vạch giây, vạch 5 giây dài hơn. Bản Eco ẩn bằng CSS. */
         const DIAL_TICKS = Array.from({ length: 60 }, (_, i) => {
             const a = (i * 6 - 90) * Math.PI / 180;
@@ -4852,11 +5044,12 @@
 
         const FocusCard = ({ plan, cur, now, cardCount, onAddFirst, onStart, onStudyNow, onSnooze, onBonus, onReceipt, onGate, toast }) => {
             const photo = useHeroPhoto();
-            const photoInput = useRef(null);
+            const clockStyle = useClockStyle();
+            const tierNow = skinOf(useFund(), useSkinPref());
+            const look = clockLook(clockStyle, tierNow, photo);
+            const [studio, setStudio] = useState(false);
             const [photoBusy, setPhotoBusy] = useState(false);
-            const pickPhoto = async (e) => {
-                const file = e.target.files && e.target.files[0];
-                e.target.value = '';
+            const pickPhoto = async (file) => {
                 if (!file) return;
                 setPhotoBusy(true);
                 try {
@@ -4905,23 +5098,21 @@
             const lateText = lateBy >= 60 ? Math.floor(lateBy / 60) + ' giờ' + (lateBy % 60 ? ' ' + (lateBy % 60) + ' phút' : '') : lateBy + ' phút';
             const onTimeLeft = live && !late ? Math.max(0, (startMin + 30) * 60000 - (nowD.getTime() - new Date(nowD).setHours(0, 0, 0, 0))) : 0;
             return (
+                <>
                 <section className={'cmd-card flex flex-col p-5 text-left sm:p-7' + (photo ? ' has-photo photo-' + photo.tone : '')} aria-label="Ca học hôm nay" onPointerMove={moveSpot}
                     style={photo ? { backgroundImage: 'url("' + photo.src + '")' } : undefined}>
                     <ChronoDial />
                     <FlowLines />
                     {photo && <span className="cmd-photo-scrim" aria-hidden="true" />}
                     <div className="cmd-photo-btns">
-                        <button type="button" className="cmd-photo-btn" onClick={() => photoInput.current && photoInput.current.click()} disabled={photoBusy}
-                            aria-label={photo ? 'Đổi ảnh nền đồng hồ' : 'Đặt ảnh nền cho đồng hồ'} title={photo ? 'Đổi ảnh nền' : 'Đặt ảnh nền (như màn hình khóa)'}>
-                            <Icon name={photoBusy ? 'loader' : 'image'} size={16} className={photoBusy ? 'animate-spin' : ''} />
+                        <button type="button" className="cmd-photo-btn is-label" onClick={() => setStudio(true)} aria-label="Tùy chỉnh đồng hồ: ảnh nền, kiểu số, màu số" title="Ảnh nền, kiểu số, màu số">
+                            <Icon name="image" size={15} /> <span>Tùy chỉnh</span>
                         </button>
-                        {photo && <button type="button" className="cmd-photo-btn" onClick={() => { savePhoto(null); if (toast) toast('Đã bỏ ảnh nền', 'info'); }} aria-label="Bỏ ảnh nền đồng hồ" title="Bỏ ảnh nền"><Icon name="x" size={16} /></button>}
-                        <input ref={photoInput} type="file" accept="image/*" className="sr-only" tabIndex={-1} aria-hidden="true" onChange={pickPhoto} />
                     </div>
                     <span className="cmd-grain" aria-hidden="true" />
                     <span className="cmd-spot" aria-hidden="true" />
                     <div className="relative z-10 flex flex-1 flex-col">
-                        <div className={'flex flex-wrap items-center gap-2 ' + (photo ? 'pr-20' : 'pr-10')}>
+                        <div className="flex flex-wrap items-center gap-2 pr-12 sm:pr-28">
                             <span className="cmd-pill bg-white/15 text-white"><Icon name="lock" size={13} /> Lịch hôm nay đã khóa</span>
                             <span className="text-xs text-indigo-200">Sửa lịch chỉ áp dụng từ 00:00 ngày mai</span>
                         </div>
@@ -4940,7 +5131,7 @@
                                 </p>
                             </>
                         ) : (
-                            <p className="tnum mt-1 text-5xl font-semibold tracking-tight sm:text-6xl" role="timer" aria-live="off">{big}</p>
+                            <p className="tnum mt-1 text-5xl font-semibold tracking-tight sm:text-6xl" role="timer" aria-live="off" aria-label={big}><ClockFace text={big} face={clockStyle.face} look={look} big /></p>
                         )}
                         {cur.kind === 'ALL_DONE' && firstSlot && <p className="mt-1 text-sm text-indigo-100">Ca đầu tiên ngày mai lúc {firstSlot.time}. Không nợ thẻ sang mai.</p>}
                         <div className="mt-6 lg:mt-auto lg:pt-6"><SlotPath slots={plan.slots} activeId={slot && slot.id} /></div>
@@ -4985,6 +5176,9 @@
                         </dl></div>
                     </div>
                 </section>
+                {studio && <ClockStudio photo={photo} tier={tierNow} busy={photoBusy} sample={big && /\d/.test(big) ? big : '12:34:56'} onPick={pickPhoto}
+                    onRemove={() => { savePhoto(null); if (toast) toast('Đã bỏ ảnh nền', 'info'); }} onClose={() => setStudio(false)} />}
+                </>
             );
         };
 
@@ -7417,7 +7611,7 @@
 
         /* Mỗi email Google một kho riêng trên máy: sổ từ, tiến độ, phiếu bản sắc và cài đặt học không lẫn giữa các tài khoản.
            'dataOwner' ghi email đang sở hữu dữ liệu trên máy; rỗng là khách chưa đăng nhập. */
-        const PROFILE_KEYS = ['identity', 'student', 'habitDays', 'milestones', 'exams', 'weeklyPlan', 'nextWeeklyPlan', 'setupDone', 'recentPacks', 'eosTried', 'licenses', 'slotSource', 'qlang', 'skin'];
+        const PROFILE_KEYS = ['identity', 'student', 'habitDays', 'milestones', 'exams', 'weeklyPlan', 'nextWeeklyPlan', 'setupDone', 'recentPacks', 'eosTried', 'licenses', 'slotSource', 'qlang', 'skin', 'clockStyle'];
         const LOCAL_KEYS = ['mission', 'libDrafts', 'hybridToday', 'goneItems', 'heroPhoto'];
         const dataOwner = () => String(Store.prefs.get('dataOwner', '') || '').toLowerCase();
         const profileSnapshot = () => {
