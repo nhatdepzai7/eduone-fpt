@@ -84,7 +84,22 @@
         @media (min-width: 1024px) {
             .app-side { position: sticky; top: 65px; display: flex; flex-direction: column; flex-shrink: 0; width: 232px; height: calc(100vh - 65px); padding: 20px 12px 16px; border-right: 1px solid var(--border); overflow-y: auto; }
         }
-        body:has(.eos-shell) .app-side { display: none; }
+        body:has(.eos-shell) .app-side:not(.is-drawer) { display: none; }
+        /* Menu trượt trên điện thoại: cùng nội dung sidebar, phủ trên nội dung. */
+        .side-scrim { position: fixed; inset: 0; z-index: 66; background: rgba(15, 23, 42, .45); animation: scrim-in .2s ease-out; }
+        .app-side.is-drawer { display: flex; flex-direction: column; position: absolute; top: 0; bottom: 0; left: 0; width: min(300px, 86vw); padding: 12px 12px calc(16px + env(safe-area-inset-bottom)); overflow-y: auto; background: #EEF2F7; border-right: 1px solid var(--border); box-shadow: 18px 0 40px -18px rgba(15, 23, 42, .45); animation: drawer-in .24s cubic-bezier(.2, .8, .2, 1); }
+        .app-side.is-drawer[data-tier="obsidian"] { background: linear-gradient(180deg, #0B0B0E 0%, #0C0C0F 40%, #09090B 100%); border-right: 1px solid rgba(232, 205, 150, .12); box-shadow: 18px 0 50px -16px rgba(0, 0, 0, .7); color-scheme: dark; }
+        .side-drawer-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-height: 52px; margin-bottom: 8px; padding: 0 4px 0 6px; }
+        .side-close { display: inline-flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 12px; color: var(--ink-2); }
+        .side-close:hover { background: rgba(255, 255, 255, .6); }
+        .app-side.is-drawer[data-tier="obsidian"] .side-close { color: #A39D90; }
+        .app-side.is-drawer[data-tier="obsidian"] .side-close:hover { background: rgba(255, 255, 255, .05); color: #F2DDA4; }
+        .ob-chip.is-wide { display: inline-flex; justify-content: center; margin: 0 0 12px; min-height: 40px; --ob-gold: #D9B871; --ob-gold-hi: #F2DDA4; }
+        .top-plan { display: inline-flex; align-items: center; gap: 5px; min-height: 34px; padding: 0 11px 0 9px; border-radius: 999px; font-size: 12.5px; font-weight: 700; color: #4F46E5; background: #EEF2FF; box-shadow: inset 0 0 0 1px #C7D2FE; white-space: nowrap; }
+        .top-plan:hover { background: #E0E7FF; }
+        @keyframes drawer-in { from { transform: translateX(-100%); } to { transform: none; } }
+        @keyframes scrim-in { from { opacity: 0; } to { opacity: 1; } }
+        @media (prefers-reduced-motion: reduce) { .side-scrim, .app-side.is-drawer { animation: none; } }
         .side-link { position: relative; display: flex; align-items: center; gap: 10px; width: 100%; min-height: 44px; padding: 0 12px; border-radius: 12px; font-size: 14px; font-weight: 600; color: var(--ink-2); transition: background .15s ease, color .15s ease; }
         .side-link svg { color: var(--muted); flex-shrink: 0; }
         .side-link:hover:not([aria-current="page"]) { background: rgba(255, 255, 255, .55); color: var(--ink); }
@@ -736,7 +751,8 @@
         .ob-chip { display: none; align-items: center; gap: 6px; margin-right: 4px; padding: 5px 12px 5px 10px; border-radius: 999px; font-size: 11px; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; color: var(--ob-gold-hi); background: linear-gradient(180deg, rgba(217, 184, 113, .12), rgba(217, 184, 113, .04)); box-shadow: inset 0 0 0 1px rgba(217, 184, 113, .38); transition: box-shadow .2s ease, background .2s ease; }
         .ob-chip svg { color: var(--ob-gold); }
         .ob-chip:hover { background: linear-gradient(180deg, rgba(217, 184, 113, .2), rgba(217, 184, 113, .06)); box-shadow: inset 0 0 0 1px rgba(242, 221, 164, .6), 0 0 18px -6px rgba(217, 184, 113, .6); }
-        @media (min-width: 640px) { .ob-chip { display: inline-flex; } }
+        .ob-chip { display: inline-flex; }
+        @media (max-width: 420px) { .ob-chip:not(.is-wide) { flex-shrink: 0; gap: 4px; margin-right: 0; padding: 4px 8px 4px 7px; font-size: 10px; letter-spacing: .05em; } .obsidian-head .ob-logo { padding: 3px 4px; border-radius: 10px; } .obsidian-head .ob-logo img { height: 30px; } }
         /* Sidebar */
         @media (min-width: 1024px) {
             .app-side[data-tier="obsidian"] { background: linear-gradient(180deg, #0B0B0E 0%, var(--ob-panel) 40%, #09090B 100%); border-right: 1px solid var(--ob-line); color-scheme: dark; }
@@ -924,6 +940,7 @@
         const ICONS = {
             check: <path d="M20 6 9 17l-5-5" />,
             x: <><path d="M18 6 6 18" /><path d="m6 6 12 12" /></>,
+            menu: <><path d="M4 7h16" /><path d="M4 12h16" /><path d="M4 17h10" /></>,
             left: <path d="m15 18-6-6 6-6" />,
             right: <path d="m9 18 6-6-6-6" />,
             chevronDown: <path d="m6 9 6 6 6-6" />,
@@ -7440,6 +7457,26 @@
             }, [googleAccount && googleAccount.email]);
             const [googleReason, setGoogleReason] = useState('');
             const [guideOpen, setGuideOpen] = useState(false);
+            /* Menu dọc trên điện thoại / máy tính bảng: cùng nội dung với sidebar máy tính. */
+            const [drawer, setDrawer] = useState(false);
+            const drawerRef = useRef(null);
+            useEffect(() => {
+                if (!drawer) return undefined;
+                const prev = document.activeElement;
+                const onKey = (e) => { if (e.key === 'Escape') setDrawer(false); };
+                const onWide = () => { if (window.innerWidth >= 1024) setDrawer(false); };
+                document.addEventListener('keydown', onKey);
+                window.addEventListener('resize', onWide);
+                document.body.style.overflow = 'hidden';
+                const first = drawerRef.current && drawerRef.current.querySelector('button');
+                if (first) first.focus();
+                return () => {
+                    document.removeEventListener('keydown', onKey);
+                    window.removeEventListener('resize', onWide);
+                    document.body.style.overflow = '';
+                    if (prev && prev.focus) prev.focus();
+                };
+            }, [drawer]);
             const [setupOpen, setSetupOpen] = useState(false);
             const [setupDone, setSetupDone] = useState(() => !!Store.prefs.get('setupDone', false));
             const account = useAccount();
@@ -8203,6 +8240,39 @@
                 dispatch({ type: 'TAB', tab: 'practice', force: true });
                 window.scrollTo(0, 0);
             };
+            /* Nội dung menu dọc: dùng chung cho sidebar máy tính và menu trượt trên điện thoại. */
+            const sideBody = () => (
+                <>
+                    <nav aria-label="Mục chính" className="flex flex-col gap-1">
+                        {navItems.map(it => (
+                            <button key={it.k} type="button" className="side-link" aria-current={navNow === it.k ? 'page' : undefined} onClick={() => goNav(it.k)}>
+                                <Icon name={it.icon} size={18} /> <span className="min-w-0 flex-1 truncate text-left">{it.label}</span>
+                                {it.k === 'today' && slotDue && <><span className="side-dot" aria-hidden="true" /><span className="sr-only">, có ca học đến giờ</span></>}
+                            </button>
+                        ))}
+                        <button type="button" className="side-link side-ai" onClick={openReading}>
+                            <Icon name="sparkles" size={18} /> <span className="min-w-0 flex-1 truncate text-left">AI quét bài đọc</span><span className="side-new">AI</span>
+                        </button>
+                    </nav>
+                    <p className="side-head">Kho đề của tôi</p>
+                    {myPacks.length ? (
+                        <div className="flex flex-col gap-0.5">
+                            {myPacks.map(pk => (
+                                <button key={pk.id} type="button" className="side-link side-sub" title={pk.name} aria-current={nav.mode === 'bank' && nav.packId === pk.id ? 'page' : undefined} onClick={() => openMyPack(pk.id)}>
+                                    <span className="side-code">{pk.code}</span><span className="min-w-0 flex-1 truncate text-left">{pk.name}</span>
+                                </button>
+                            ))}
+                        </div>
+                    ) : <p className="px-3 text-xs leading-5 text-muted">Môn bạn thi thử sẽ hiện ở đây để mở lại nhanh.</p>}
+                    <p className="side-head">Khác</p>
+                    <div className="flex flex-col gap-1">
+                        <button type="button" className="side-link side-gem" onClick={() => setBilling('ai')}><Icon name="gem" size={18} /> Gói & Nhập mã</button>
+                        <button type="button" className="side-link" onClick={() => setGuideOpen(true)}><Icon name="play" size={18} /> Video hướng dẫn</button>
+                        <button type="button" className="side-link" onClick={openSupport}><Icon name="headset" size={18} /> Hỗ trợ & FAQ</button>
+                        <button type="button" className="side-link" onClick={openFeedback}><Icon name="bulb" size={18} /> Góp ý</button>
+                    </div>
+                </>
+            );
             const openMyPack = (id) => {
                 if (nav.busy && !confirm('Bạn đang giữa một ca / phòng thi. Thoát ra?')) return;
                 setSession(s => (s && s.slotId ? s : null));
@@ -8249,6 +8319,7 @@
                     <a href="#main" className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[70] btn btn-primary">Bỏ qua tới nội dung</a>
                     <header className={'sticky top-0 z-50 border-b ' + (obsidian ? 'obsidian-head' : 'border-line')} style={obsidian ? undefined : { background: '#E2E8F0' }}>
                         <div className="flex h-16 w-full items-center gap-2 px-4 sm:gap-3 lg:px-6">
+                            <button type="button" className="btn btn-ghost btn-icon -ml-2 lg:hidden" onClick={() => setDrawer(true)} aria-label="Mở menu" aria-expanded={drawer} aria-controls="side-drawer"><Icon name="menu" /></button>
                             <button type="button" onClick={goHome} aria-label="Về Tổng quan" className="flex shrink-0 items-center gap-2.5 border-0 bg-transparent p-0 text-left cursor-pointer">
                                 <span className={obsidian ? 'ob-logo' : ''}>
                                     <img src="/public/stickers/logo.png" alt="" className="h-9 w-auto object-contain sm:h-10" />
@@ -8261,14 +8332,14 @@
                                     <a href={SUPPORT.zalo} target="_blank" rel="noopener noreferrer" aria-label="Nhắn Zalo hỗ trợ"><Icon name="chat" size={15} /> Zalo</a>
                                     <a href={'tel:' + SUPPORT.phone} aria-label={'Gọi hỗ trợ ' + SUPPORT.phoneDisplay}><Icon name="headset" size={15} /> <span className="tnum">{SUPPORT.phoneDisplay}</span></a>
                                 </div>
-                                <button type="button" className="btn btn-ghost btn-icon md:hidden" onClick={openSupport} aria-label="Liên hệ hỗ trợ"><Icon name="headset" /></button>
+                                <button type="button" className="btn btn-ghost btn-icon hidden sm:inline-flex md:hidden" onClick={openSupport} aria-label="Liên hệ hỗ trợ"><Icon name="headset" /></button>
                                 {obsidian && (
                                     <button type="button" onClick={() => setMemberOpen(true)} className="ob-chip">
                                         <Icon name="gem" size={13} /> Obsidian
                                     </button>
                                 )}
                                 <button type="button" className="btn btn-ghost btn-icon hidden sm:inline-flex lg:hidden" onClick={() => setGuideOpen(true)} aria-label="Video hướng dẫn"><Icon name="play" size={16} /></button>
-                                <button type="button" className="btn btn-ghost btn-icon lg:hidden" onClick={() => setBilling('ai')} aria-label="Gói & Nhập mã" title="Gói & Nhập mã"><Icon name="gem" size={16} /></button>
+                                {!obsidian && <button type="button" className="top-plan lg:hidden" onClick={() => setBilling('ai')} aria-label="Gói & Nhập mã" title="Gói & Nhập mã"><Icon name="gem" size={15} /> <span>Gói</span></button>}
                                 <button type="button" className="btn btn-ghost btn-icon hidden sm:inline-flex" onClick={() => setMuted(!muted)} aria-pressed={!muted} aria-label={muted ? 'Bật âm thanh' : 'Tắt âm thanh'}><Icon name={muted ? 'mute' : 'volume'} /></button>
                                 <button type="button" className={'btn btn-sm ' + (googleAccount && googleAccount.email ? 'min-w-0 btn-secondary' : 'shrink-0 whitespace-nowrap btn-primary')} onClick={() => { setPendingGift(''); setGoogleReason('save'); setGoogleOpen(true); }}>
                                     <span className="block max-w-[150px] truncate sm:max-w-[200px]">{googleAccount && googleAccount.email ? googleAccount.email : 'Đăng nhập'}</span>
@@ -8280,35 +8351,24 @@
 
                     <div className="flex w-full flex-1">
                     <aside className="app-side" data-tier={obsidian ? 'obsidian' : 'eco'} aria-label="Điều hướng">
-                        <nav aria-label="Mục chính" className="flex flex-col gap-1">
-                            {navItems.map(it => (
-                                <button key={it.k} type="button" className="side-link" aria-current={navNow === it.k ? 'page' : undefined} onClick={() => goNav(it.k)}>
-                                    <Icon name={it.icon} size={18} /> <span className="min-w-0 flex-1 truncate text-left">{it.label}</span>
-                                    {it.k === 'today' && slotDue && <><span className="side-dot" aria-hidden="true" /><span className="sr-only">, có ca học đến giờ</span></>}
-                                </button>
-                            ))}
-                            <button type="button" className="side-link side-ai" onClick={openReading}>
-                                <Icon name="sparkles" size={18} /> <span className="min-w-0 flex-1 truncate text-left">AI quét bài đọc</span><span className="side-new">AI</span>
-                            </button>
-                        </nav>
-                        <p className="side-head">Kho đề của tôi</p>
-                        {myPacks.length ? (
-                            <div className="flex flex-col gap-0.5">
-                                {myPacks.map(pk => (
-                                    <button key={pk.id} type="button" className="side-link side-sub" title={pk.name} aria-current={nav.mode === 'bank' && nav.packId === pk.id ? 'page' : undefined} onClick={() => openMyPack(pk.id)}>
-                                        <span className="side-code">{pk.code}</span><span className="min-w-0 flex-1 truncate text-left">{pk.name}</span>
-                                    </button>
-                                ))}
-                            </div>
-                        ) : <p className="px-3 text-xs leading-5 text-muted">Môn bạn thi thử sẽ hiện ở đây để mở lại nhanh.</p>}
-                        <p className="side-head">Khác</p>
-                        <div className="flex flex-col gap-1">
-                            <button type="button" className="side-link side-gem" onClick={() => setBilling('ai')}><Icon name="gem" size={18} /> Gói & Nhập mã</button>
-                            <button type="button" className="side-link" onClick={() => setGuideOpen(true)}><Icon name="play" size={18} /> Video hướng dẫn</button>
-                            <button type="button" className="side-link" onClick={openSupport}><Icon name="headset" size={18} /> Hỗ trợ & FAQ</button>
-                            <button type="button" className="side-link" onClick={openFeedback}><Icon name="bulb" size={18} /> Góp ý</button>
-                        </div>
+                        {sideBody()}
                     </aside>
+                    {drawer && (
+                        <div className="side-scrim lg:hidden" onMouseDown={(e) => { if (e.target === e.currentTarget) setDrawer(false); }}>
+                            <div id="side-drawer" ref={drawerRef} role="dialog" aria-modal="true" aria-label="Menu" className="app-side is-drawer" data-tier={obsidian ? 'obsidian' : 'eco'}
+                                onClick={(e) => { if (e.target.closest && e.target.closest('button')) setDrawer(false); }}>
+                                <div className="side-drawer-head">
+                                    <span className="flex items-center gap-2">
+                                        <span className={obsidian ? 'ob-logo' : ''}><img src="/public/stickers/logo.png" alt="" className="h-8 w-auto object-contain" /></span>
+                                        <b className={'text-lg font-extrabold leading-none ' + (obsidian ? 'ob-word' : 'text-[#0B192C]')}>FPass</b>
+                                    </span>
+                                    <button type="button" className="side-close" aria-label="Đóng menu"><Icon name="x" size={18} /></button>
+                                </div>
+                                {obsidian && <button type="button" className="ob-chip is-wide" onClick={() => setMemberOpen(true)}><Icon name="gem" size={13} /> Thẻ hội viên Obsidian</button>}
+                                {sideBody()}
+                            </div>
+                        </div>
+                    )}
                     <main id="main" className="min-w-0 flex-1 px-4 py-6 lg:px-8">
                         {!loaded ? (
                             <p className="text-center text-muted py-16">Đang mở kho dữ liệu…</p>
