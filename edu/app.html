@@ -110,9 +110,122 @@
         body:has(.eos-shell) .bnav { display: none; }
         .id-invite { display: inline-flex; align-items: center; gap: 4px; min-height: 34px; padding: 0 12px; border-radius: 999px; background: var(--primary-soft); color: var(--primary); border: 1px dashed var(--primary); font-size: 13px; font-weight: 700; white-space: nowrap; transition: background .15s ease, color .15s ease; }
         .id-invite:hover { background: var(--primary); color: #fff; }
-        .fund-strip { display: flex; align-items: center; gap: 8px; width: 100%; min-height: 40px; margin-bottom: 12px; padding: 0 12px; border-radius: 12px; background: var(--surface); border: 1px solid var(--border); font-size: 13px; color: var(--ink-2); text-align: left; white-space: nowrap; overflow: hidden; }
-        .fund-strip:hover { border-color: var(--primary); }
+        .fund-strip { display: flex; align-items: center; gap: 8px; width: 100%; min-height: 44px; margin-bottom: 12px; padding: 0 6px 0 6px; border-radius: 12px; background: var(--surface); border: 1px solid var(--border); font-size: 13px; color: var(--ink-2); text-align: left; white-space: nowrap; overflow: hidden; }
         .fund-strip svg { color: var(--muted); flex-shrink: 0; }
+        .fund-code { align-items: center; gap: 6px; min-height: 30px; padding: 0 8px; border-radius: 8px; color: var(--ink-2); }
+        .fund-code:hover { background: var(--surface-2); color: var(--ink); }
+        /* Pill phiếu hôm nay */
+        .ticket { display: inline-flex; align-items: center; gap: 7px; min-width: 0; padding: 4px 12px; border-radius: 9999px; border: 1px solid transparent; font-size: 13px; font-weight: 500; line-height: 20px; letter-spacing: -.005em; }
+        .ticket .ticket-ic { width: 15px; height: 15px; flex-shrink: 0; overflow: visible; }
+        .ticket.is-idle { color: var(--muted); border-color: var(--border); }
+        .ticket.is-idle .ticket-ic { color: #94A3B8; }
+        .ticket.is-due { color: #1E293B; background: #FFFFFF; border-color: #CBD5E1; box-shadow: 0 1px 2px rgba(0, 0, 0, .04); cursor: pointer; transition: border-color .15s ease, box-shadow .15s ease; }
+        .ticket.is-due:hover { border-color: #94A3B8; box-shadow: 0 1px 3px rgba(0, 0, 0, .08); }
+        .ticket.is-due:focus { outline: none; }
+        .ticket.is-due:focus-visible { outline: none; border-color: #6366F1; box-shadow: 0 0 0 3px rgba(99, 102, 241, .18); }
+        .ticket.is-due .ticket-ic { color: #4F46E5; }
+        .ticket-pulse { transform-box: fill-box; transform-origin: center; animation: ticket-pulse 2.2s cubic-bezier(.4, 0, .6, 1) infinite; }
+        .ticket .ticket-chev { width: 14px; height: 14px; flex-shrink: 0; margin-right: -3px; color: #94A3B8; transition: transform .18s ease, color .18s ease; }
+        .ticket.is-due:hover .ticket-chev { transform: translateX(2px); color: #4F46E5; }
+        .ticket.is-done { position: relative; gap: 8px; padding: 3px 4px 3px 4px; color: #064E3B; font-weight: 600; background: linear-gradient(135deg, #ECFDF5 0%, #D1FAE5 100%); border-color: #A7F3D0; box-shadow: 0 1px 2px rgba(5, 150, 105, .10), inset 0 1px 0 rgba(255, 255, 255, .7); }
+        .ticket-check { position: relative; display: inline-flex; width: 22px; height: 22px; flex-shrink: 0; align-items: center; justify-content: center; border-radius: 999px; background: #fff; box-shadow: 0 0 0 3px rgba(16, 185, 129, .16), 0 1px 3px rgba(5, 150, 105, .35); }
+        .ticket-check svg { width: 16px; height: 16px; }
+        .fund-strip .ticket { flex: 0 1 auto; max-width: 100%; }
+        @media (max-width: 639px) { .ticket.is-due { padding: 4px 10px; gap: 6px; } .ticket.is-due .ticket-chev { display: none; } }
+        .ticket-text { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .ticket-text b { font-weight: 700; }
+        .ticket.is-due .ticket-text b { color: #4338CA; }
+        .ticket-go { flex-shrink: 0; margin-left: -3px; color: #4F46E5; font-weight: 600; white-space: nowrap; }
+        .ticket.is-due:not(.is-slipped) { animation: ticket-breathe 2.8s ease-in-out infinite; }
+        .ticket.is-due.is-slipped { background: #FFFBF5; border-color: #FDBA74; box-shadow: 0 1px 2px rgba(234, 88, 12, .08); }
+        .ticket.is-due.is-slipped:hover { border-color: #FB923C; }
+        .ticket.is-due.is-slipped .ticket-ic, .ticket.is-due.is-slipped .ticket-go, .ticket.is-due.is-slipped:hover .ticket-chev { color: #EA580C; }
+        .ticket.is-done .ticket-text { color: #064E3B; }
+        @keyframes ticket-breathe { 0%, 100% { box-shadow: 0 1px 2px rgba(0, 0, 0, .04); } 50% { box-shadow: 0 1px 2px rgba(0, 0, 0, .04), 0 2px 12px rgba(79, 70, 229, .16); } }
+        .reward-wrap { position: fixed; z-index: 70; top: 14px; left: 0; right: 0; display: flex; justify-content: center; padding: 0 16px; pointer-events: none; }
+        .reward-toast { position: relative; display: flex; align-items: center; gap: 12px; width: 100%; max-width: 420px; padding: 12px 14px 14px; overflow: hidden; border-radius: 16px; background: #fff; border: 1px solid #A7F3D0; box-shadow: 0 12px 32px rgba(15, 23, 42, .14), 0 2px 6px rgba(5, 150, 105, .10); pointer-events: auto; animation: reward-in .45s cubic-bezier(.34, 1.4, .64, 1), reward-out .35s ease-in 3.15s forwards; }
+        .reward-badge { display: inline-flex; width: 36px; height: 36px; flex-shrink: 0; align-items: center; justify-content: center; border-radius: 999px; background: #ECFDF5; box-shadow: 0 0 0 4px rgba(16, 185, 129, .12); animation: ticket-glow 1.6s ease-out; }
+        .reward-badge svg { width: 24px; height: 24px; }
+        .reward-title { display: block; font-size: 14px; font-weight: 700; color: #0F172A; line-height: 1.35; }
+        .reward-body { display: block; margin-top: 2px; font-size: 12.5px; color: #475569; line-height: 1.45; }
+        .reward-streak { flex-shrink: 0; height: 26px; font-size: 13px; }
+        .reward-bar { position: absolute; left: 0; bottom: 0; height: 3px; width: 100%; background: linear-gradient(90deg, #34D399, #059669); transform-origin: left; animation: reward-bar 3.5s linear forwards; }
+        @keyframes reward-in { from { opacity: 0; transform: translateY(-16px) scale(.96); } to { opacity: 1; transform: none; } }
+        @keyframes reward-out { to { opacity: 0; transform: translateY(-10px); } }
+        @keyframes reward-bar { from { transform: scaleX(1); } to { transform: scaleX(0); } }
+        @media (prefers-reduced-motion: reduce) { .ticket.is-due:not(.is-slipped), .reward-badge { animation: none; } .reward-toast { animation: reward-out .2s ease-in 3.3s forwards; } .reward-bar { animation: none; } }
+        .ticket-streak { display: inline-flex; align-items: center; gap: 3px; height: 22px; padding: 0 8px 0 6px; border-radius: 999px; background: #fff; color: #C2410C; font-size: 12px; font-weight: 600; box-shadow: 0 0 0 1px #FED7AA; }
+        .ticket-streak svg { width: 13px; height: 13px; color: #F97316; }
+        .ticket-streak b { font-weight: 700; }
+        .ticket.is-fresh { animation: ticket-pop .55s cubic-bezier(.34, 1.56, .64, 1); }
+        .ticket.is-fresh .ticket-check { animation: ticket-glow 1.6s ease-out; }
+        .ticket.is-fresh .ticket-tick { stroke-dasharray: 12; stroke-dashoffset: 12; animation: ticket-draw .45s .15s ease-out forwards; }
+        .ticket.is-fresh .ticket-streak { animation: ticket-pop .5s .35s cubic-bezier(.34, 1.56, .64, 1) both; }
+        @keyframes ticket-pop { 0% { transform: scale(.86); } 60% { transform: scale(1.06); } 100% { transform: scale(1); } }
+        @keyframes ticket-draw { to { stroke-dashoffset: 0; } }
+        @keyframes ticket-glow { 0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, .55), 0 1px 3px rgba(5, 150, 105, .35); } 100% { box-shadow: 0 0 0 14px rgba(16, 185, 129, 0), 0 1px 3px rgba(5, 150, 105, .35); } }
+        @media (prefers-reduced-motion: reduce) { .ticket.is-fresh, .ticket.is-fresh .ticket-check, .ticket.is-fresh .ticket-streak { animation: none; } .ticket.is-fresh .ticket-tick { animation: none; stroke-dashoffset: 0; } }
+        @keyframes ticket-pulse { 0% { transform: scale(1); opacity: .45; } 70%, 100% { transform: scale(2.6); opacity: 0; } }
+        @media (prefers-reduced-motion: reduce) { .ticket-pulse { animation: none; opacity: 0; } }
+        .fund-warn { display: inline-flex; align-items: center; gap: 4px; min-height: 26px; padding: 0 10px; border-radius: 999px; font-size: 12px; font-weight: 700; color: #9A3412; background: #FFEDD5; border: 1px solid #FDBA74; }
+        .fund-warn:hover { background: #FED7AA; }
+        /* Nút AI quét bài đọc: nổi bật nhưng nhường nút chính "Thêm từ". */
+        .qp-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+        .qp-sub { margin: 2px 0 12px; font-size: 12px; line-height: 1.5; color: var(--muted); }
+        .qp-sub .qp-sample { height: auto; margin-left: 6px; padding: 0; }
+        .qp-tools { display: flex; flex-shrink: 0; align-items: center; gap: 4px; }
+        .qp-xls { display: inline-flex; align-items: center; gap: 6px; height: 32px; padding: 0 11px; border-radius: 9px; border: 1px solid #CBD5E1; background: #fff; color: #1E293B; font-size: 13px; font-weight: 600; white-space: nowrap; box-shadow: 0 1px 2px rgba(0, 0, 0, .04); transition: border-color .15s ease, color .15s ease, background .15s ease; }
+        .qp-xls svg { color: #4F46E5; }
+        .qp-xls:hover { border-color: #4F46E5; color: #4F46E5; background: #F5F3FF; }
+        .qp-xls:disabled { opacity: .6; cursor: progress; }
+        .qp-sample { height: 32px; padding: 0 6px; font-size: 12px; font-weight: 500; color: var(--muted); text-decoration: underline; text-underline-offset: 3px; white-space: nowrap; }
+        .qp-sample:hover { color: #4F46E5; }
+        .qp-drop { position: relative; border-radius: 12px; }
+        .qp-drop.is-drag .field { border: 2px dashed #4F46E5; background: #F5F3FF; }
+        .qp-overlay { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; padding: 12px; border-radius: 12px; text-align: center; color: #4338CA; background: rgba(245, 243, 255, .92); pointer-events: none; }
+        .qp-overlay b { font-size: 14px; font-weight: 700; }
+        .qp-overlay small { font-size: 12px; color: #6366F1; }
+        @media (max-width: 767px) { .qp-head h3 { font-size: 15px; } .qp-xls { padding: 0 9px; } }
+        @media (max-width: 359px) { .qp-xls span { display: none; } }
+        .import-bar { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
+        .imp-btn { display: inline-flex; align-items: center; justify-content: center; gap: 7px; height: 38px; padding: 0 14px; border-radius: 10px; border: 1px solid #CBD5E1; background: #fff; color: #1E293B; font-size: 13.5px; font-weight: 600; white-space: nowrap; box-shadow: 0 1px 2px rgba(0, 0, 0, .04); transition: border-color .15s ease, color .15s ease, background .15s ease; }
+        .imp-btn svg { color: #4F46E5; flex-shrink: 0; }
+        .imp-btn:hover { border-color: #4F46E5; color: #4F46E5; background: #F5F3FF; }
+        .imp-btn.is-ai svg { color: #7C3AED; }
+        .imp-sample { margin-left: auto; font-size: 12.5px; color: var(--muted); text-decoration: underline; text-underline-offset: 3px; white-space: nowrap; }
+        .imp-sample:hover { color: #4F46E5; }
+        @media (max-width: 767px) {
+            .import-bar { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
+            .imp-btn { min-width: 0; height: 40px; padding: 0 6px; gap: 5px; font-size: 13px; }
+            .imp-sample { display: none; }
+        }
+        .batch-group { display: inline-flex; align-items: center; gap: 6px; min-width: 0; max-width: 100%; flex: 0 1 auto; padding: 2px 8px; border-radius: 8px; color: var(--muted); cursor: text; }
+        .batch-group:hover, .batch-group:focus-within { background: var(--surface-2); }
+        .batch-group input { min-width: 0; width: auto; flex: 0 1 auto; field-sizing: content; border: 0; outline: 0; background: transparent; font-size: 15px; font-weight: 700; color: var(--ink); padding: 4px 0; }
+        .batch-grid { display: grid; gap: 6px; grid-template-columns: minmax(0, 1fr) 4.25rem; }
+        .batch-grid .batch-mean { grid-column: 1 / -1; }
+        .batch-grid .batch-ex { display: none; }
+        .batch-grid .batch-type { text-align: center; padding-left: 6px; padding-right: 6px; }
+        .batch-acts { display: flex; flex-shrink: 0; flex-direction: column; gap: 4px; }
+        .batch-cols { display: none; }
+        .batch-add, .batch-row, .batch-grid > * { min-width: 0; }
+        .saved-tag { display: inline-flex; align-items: center; gap: 4px; flex-shrink: 0; font-size: 11.5px; font-weight: 500; color: #94A3B8; white-space: nowrap; animation: saved-in .25s ease-out; }
+        .saved-tag svg { color: #94A3B8; }
+        @keyframes saved-in { from { opacity: 0; transform: translateY(-2px); } to { opacity: 1; transform: none; } }
+        @media (min-width: 768px) {
+            .batch-grid { grid-template-columns: minmax(0, 1.1fr) 4.5rem minmax(0, 1fr) minmax(0, 1.5fr); gap: 8px; }
+            .batch-grid .batch-mean { grid-column: auto; }
+            .batch-grid .batch-ex { display: block; }
+            .batch-acts { flex-direction: row; padding-top: 4px; }
+            .batch-cols { display: grid; grid-template-columns: 20px minmax(0, 1.1fr) 4.5rem minmax(0, 1fr) minmax(0, 1.5fr) 68px; gap: 8px; padding: 6px 12px; background: var(--surface-2); font-size: 11.5px; font-weight: 600; color: var(--ink-2); border-bottom: 1px solid var(--border); }
+            .batch-cols span:nth-child(n+2):nth-child(-n+5) { padding-left: 2px; }
+        }
+        .btn-ai { display: inline-flex; align-items: center; gap: 6px; min-height: 36px; padding: 0 12px; border-radius: 12px; font-size: 14px; font-weight: 600; color: #5B21B6; background: linear-gradient(135deg, #F5F3FF 0%, #EDE9FE 55%, #FCE7F3 100%); border: 1px solid #DDD6FE; transition: box-shadow .15s ease, transform .15s ease; white-space: nowrap; }
+        .btn-ai svg { color: #7C3AED; }
+        .btn-ai:hover { box-shadow: 0 4px 14px rgba(124, 58, 237, .22); transform: translateY(-1px); }
+        .side-ai { color: #5B21B6; }
+        .side-ai svg { color: #7C3AED !important; }
+        .side-new { padding: 1px 6px; border-radius: 999px; font-size: 10px; font-weight: 800; letter-spacing: .04em; color: #fff; background: linear-gradient(135deg, #7C3AED, #DB2777); }
         /* CTA gói AI: pill nhạt khi còn nhiều lượt, nút tím đậm khi còn <= 20 lượt. */
         .fund-cta { margin-left: auto; flex-shrink: 0; display: inline-flex; align-items: center; gap: 4px; min-height: 26px; padding: 0 10px; border-radius: 999px; font-size: 12px; font-weight: 700; transition: background .15s ease, transform .15s ease; }
         .fund-cta.is-soft { background: rgba(124, 58, 237, .08); border: 1px solid rgba(124, 58, 237, .28); color: var(--primary); }
@@ -142,7 +255,10 @@
         .ai-pin:hover:not(:disabled) { background: rgba(124, 58, 237, .16); }
         .ai-pin:disabled { opacity: .45; cursor: not-allowed; }
         .ai-pin.is-mini { height: 26px; padding: 0 8px; }
-        .ai-field:has(.ai-pin.is-mini) > .field { padding-right: 60px; }
+        .ai-field .ai-pin.is-mini { display: none; }
+        .ai-field:has(.ai-pin.is-mini) > .field { padding-right: 12px; }
+        .ai-field:focus-within .ai-pin.is-mini, .ai-field:has(> .field:not(:placeholder-shown)) .ai-pin.is-mini { display: inline-flex; }
+        .ai-field:focus-within:has(.ai-pin.is-mini) > .field, .ai-field:has(.ai-pin.is-mini):has(> .field:not(:placeholder-shown)) > .field { padding-right: 66px; }
         .ai-left { margin-left: 2px; padding: 0 6px; border-radius: 999px; background: rgba(124, 58, 237, .14); font-size: 11px; }
         .sg-list { position: fixed; z-index: 90; max-height: 280px; overflow-y: auto; margin: 0; padding: 4px; list-style: none; border-radius: 12px; background: var(--surface); border: 1px solid var(--border); box-shadow: 0 12px 32px rgba(15, 23, 42, .18); }
         .sg-item { display: flex; align-items: baseline; gap: 8px; padding: 8px 10px; border-radius: 8px; cursor: pointer; font-size: 14px; color: var(--ink); }
@@ -762,6 +878,19 @@
             else Store.prefs.remove('identity');
             window.dispatchEvent(new CustomEvent('edu-identity'));
         };
+        const DEFAULT_IDENTITY_NAME = 'Người học kỷ luật';
+        const identityName = (label) => String(label || '').trim() || DEFAULT_IDENTITY_NAME;
+        /* 3 thông điệp củng cố bản sắc, chọn ngẫu nhiên mỗi lần chốt phiếu (thưởng biến thiên). */
+        const REWARD_LINES = [
+            (name, n) => ({ title: 'Thêm một phiếu cho ' + name, body: 'Chuỗi ' + n + ' ngày. Không cần hoàn hảo, chỉ cần có mặt.' }),
+            (name, n) => ({ title: name + ' đã có mặt hôm nay', body: 'Ngày thứ ' + n + ' liên tiếp. Bạn đang trở thành đúng người mình chọn.' }),
+            (name, n) => ({ title: 'Lại một bằng chứng bạn là ' + name, body: n + ' ngày giữ nhịp. Mai chỉ cần 30 giây nữa.' })
+        ];
+        const showReward = (streak) => {
+            const name = identityName(readIdentity());
+            const pick = REWARD_LINES[Math.floor(Math.random() * REWARD_LINES.length)](name, Math.max(1, streak || 1));
+            window.dispatchEvent(new CustomEvent('edu-reward', { detail: Object.assign({ streak: Math.max(1, streak || 1) }, pick) }));
+        };
         const useIdentity = () => {
             const [label, setLabel] = useState(readIdentity);
             useEffect(() => {
@@ -819,6 +948,7 @@
                 const line = identityLine(readIdentity());
                 Store.identityVotes.all().then((rows) => {
                     const summary = summarize(Array.isArray(rows) ? rows : [], dayKey(new Date()));
+                    if (summary.todayCount === 1) { showReward(summary.streak); return; }
                     const goal = summary.rank.next == null ? String(summary.total) : (summary.total + '/' + summary.rank.next);
                     if (toast) toast('+1 phiếu · ' + line + ' · ' + goal, 'success', 2800);
                 }).catch(() => { if (toast) toast('+1 phiếu · ' + line, 'success', 2800); });
@@ -1143,7 +1273,39 @@
             );
         };
 
+        const RewardToast = () => {
+            const [msg, setMsg] = useState(null);
+            useEffect(() => {
+                let timer = 0;
+                const on = (e) => {
+                    window.clearTimeout(timer);
+                    setMsg(Object.assign({ id: Date.now() }, e.detail || {}));
+                    timer = window.setTimeout(() => setMsg(null), 3500);
+                };
+                window.addEventListener('edu-reward', on);
+                return () => { window.removeEventListener('edu-reward', on); window.clearTimeout(timer); };
+            }, []);
+            if (!msg) return null;
+            return (
+                <div className="reward-wrap" role="status" aria-live="polite">
+                    <div key={msg.id} className="reward-toast">
+                        <span className="reward-badge" aria-hidden="true">
+                            <svg viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="8" fill="url(#reward-g)" /><path d="M4.8 8.3 7 10.4 11.2 6" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" /><defs><linearGradient id="reward-g" x1="0" y1="0" x2="16" y2="16"><stop stopColor="#34D399" /><stop offset="1" stopColor="#059669" /></linearGradient></defs></svg>
+                        </span>
+                        <span className="min-w-0 flex-1">
+                            <b className="reward-title">{msg.title}</b>
+                            <span className="reward-body">{msg.body}</span>
+                        </span>
+                        <span className="ticket-streak reward-streak" aria-label={'Chuỗi ' + msg.streak + ' ngày'}>{FLAME}<b className="tnum">{msg.streak}</b></span>
+                        <span className="reward-bar" aria-hidden="true" />
+                    </div>
+                </div>
+            );
+        };
+        const FLAME = <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8.6 1.2c.3 2.1-.6 3.3-1.6 4.4C6 6.7 5 7.8 5 9.6 5 11.5 6.4 13 8 13c1.7 0 3-1.4 3-3.2 0-.9-.3-1.6-.7-2.2.9.3 1.6 1 2 1.9.3-.6.5-1.3.5-2C12.8 4.8 11 2.6 8.6 1.2Z" fill="currentColor" /><path d="M8 13c-1 0-1.8-.8-1.8-1.9 0-1 .7-1.6 1.3-2.2.3.7.9 1 1.4 1.2.5.2.9.6.9 1.1C9.8 12.2 9 13 8 13Z" fill="#FDE68A" /></svg>;
         const Toasts = ({ list }) => (
+            <>
+            <RewardToast />
             <div className="fixed z-[60] bottom-4 inset-x-4 sm:inset-x-auto sm:right-4 flex flex-col items-stretch sm:items-end gap-2 pointer-events-none" aria-live="polite" role="status">
                 {list.map(t => (
                     <div key={t.id} className={'enter pointer-events-auto max-w-md rounded-xl px-4 py-3 text-sm font-medium shadow-lg flex items-start gap-2 text-flow ' +
@@ -1153,6 +1315,7 @@
                     </div>
                 ))}
             </div>
+            </>
         );
 
         const Progress = ({ value, max, tone = 'primary', label }) => {
@@ -1874,24 +2037,86 @@
         };
         const WORD_TYPES = ['n', 'v', 'adj', 'adv', 'prep', 'conj', 'pron', 'phr', 'idiom'];
         /* Thanh trạng thái quỹ 1 dòng cho Sổ từ: bấm vào mới mở chi tiết đổi mã / nâng cấp. */
-        const FundStrip = ({ onOpen }) => {
+        const AI_SCARCE = 15;
+        /* Thanh trạng thái Sổ từ.
+           - Phiếu hôm nay (hiệu ứng Zeigarnik): chưa chốt thì pill sáng, có sóng radar và vệt sáng, bấm là vào học 30s; chốt rồi thì xanh lá, đứng yên.
+           - Lượt AI (khan hiếm tăng dần): còn nhiều thì chỉ hiện "Gói AI 29k"; còn <= 15 lượt thì hiện cảnh báo cam cạnh nút Nâng cấp. */
+        const FundStrip = ({ onOpen, onQuickVote }) => {
             const fund = useFund();
-            const aiCap = fund.aiLimit || E.Quota.AI_FREE;
-            const aiLeft = Math.max(0, aiCap - (fund.aiUsed || 0));
-            const aiOn = fund.aiUnlocked || (fund.aiCredits || 0) > 0;
+            const ai = useAiLeft();
             const votes = useVoteSummary();
-            const ticketLeft = votes && !votes.confirmedToday ? 1 : 0;
+            const due = !!votes && !votes.confirmedToday;
+            const scarce = !ai.on && ai.left <= AI_SCARCE;
+            const streak = votes ? Math.max(1, votes.streak || 0) : 0;
+            const name = identityName(useIdentity());
+            const slipped = !!votes && votes.missedOnce;
+            /* Vừa chốt phiếu (đang "Còn 1 phiếu" chuyển sang "Đã chốt"): chạy hiệu ứng mừng một lần. */
+            const wasDue = useRef(false);
+            const [fresh, setFresh] = useState(false);
+            useEffect(() => {
+                if (!votes) return undefined;
+                if (wasDue.current && votes.confirmedToday) {
+                    setFresh(true);
+                    const t = window.setTimeout(() => setFresh(false), 2400);
+                    wasDue.current = false;
+                    return () => window.clearTimeout(t);
+                }
+                wasDue.current = !votes.confirmedToday;
+                return undefined;
+            }, [votes && votes.confirmedToday]);
             return (
-                <button type="button" onClick={onOpen} className="fund-strip" aria-label="Mở chi tiết mã quỹ và gói AI">
-                    <span className="inline-flex min-w-0 shrink-0 items-center gap-1.5"><Icon name="key" size={14} /> <span className="hidden sm:inline">Mã</span> <b className="tnum">{fund.code}</b></span>
-                    <span className="opacity-40 hidden sm:inline" aria-hidden="true">·</span>
-                    {/* Phiếu bản sắc hôm nay lên trước: đây là việc cần làm mỗi ngày. Lượt AI chi tiết nằm trong khung Mã quỹ và cạnh nút AI điền. */}
-                    <span className={'inline-flex min-w-0 items-center gap-1.5 truncate' + (ticketLeft ? ' font-semibold text-ink' : '')}>
-                        <span aria-hidden="true">🎟️</span> {!votes ? 'Phiếu' : ticketLeft ? 'Còn ' + ticketLeft + ' phiếu' : 'Đã bỏ phiếu'}<span className="hidden sm:inline"> hôm nay</span>
+                <div className="fund-strip">
+                    <button type="button" className="fund-code hidden sm:inline-flex" onClick={onOpen} aria-label={'Mã quỹ ' + fund.code + ', mở chi tiết mã quỹ và gói AI'}>
+                        <Icon name="key" size={14} /> <b className="tnum">{fund.code}</b>
+                    </button>
+                    {!votes ? (
+                        <span className="ticket is-idle">
+                            <svg className="ticket-ic" viewBox="0 0 16 16" fill="none" aria-hidden="true"><circle cx="8" cy="8" r="6.5" stroke="currentColor" strokeWidth="1.5" /></svg>
+                            <span>Phiếu hôm nay</span>
+                        </span>
+                    ) : due ? (
+                        <button type="button" className={'ticket is-due' + (slipped ? ' is-slipped' : '')} onClick={onQuickVote}
+                            aria-label={slipped ? 'Hôm qua lỡ nhịp. Bấm để học nhanh 30 giây, chốt phiếu và quay lại chuỗi' : 'Giữ chất ' + name + '. Bấm để học nhanh 30 giây và chốt phiếu hôm nay'}
+                            title="Học nhanh 30 giây để chốt phiếu hôm nay">
+                            <svg className="ticket-ic" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                                <circle cx="8" cy="8" r="6.5" stroke="currentColor" strokeWidth="1.5" />
+                                <circle className="ticket-pulse" cx="8" cy="8" r="2.5" fill="currentColor" />
+                                <circle cx="8" cy="8" r="2.5" fill="currentColor" />
+                            </svg>
+                            {slipped ? (
+                                <><span className="ticket-text">Hôm qua lỡ nhịp</span><span className="ticket-go">· <span className="sm:hidden">Quay lại</span><span className="hidden sm:inline">Chốt để quay lại</span></span></>
+                            ) : (
+                                <><span className="ticket-text">Giữ chất <b>{name}</b></span><span className="ticket-go">· Chốt<span className="hidden sm:inline"> phiếu</span></span></>
+                            )}
+                            <svg className="ticket-chev" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M6 3.5 10.5 8 6 12.5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                        </button>
+                    ) : (
+                        <span className={'ticket is-done' + (fresh ? ' is-fresh' : '')} role="status"
+                            title={'+1 phiếu cho ' + name + ' hôm nay · chuỗi ' + streak + ' ngày. Mai quay lại để giữ chuỗi.'}>
+                            <span className="ticket-check" aria-hidden="true">
+                                <svg viewBox="0 0 16 16" fill="none">
+                                    <circle cx="8" cy="8" r="8" fill="url(#ticket-g)" />
+                                    <path className="ticket-tick" d="M4.8 8.3 7 10.4 11.2 6" stroke="#FFFFFF" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+                                    <defs><linearGradient id="ticket-g" x1="0" y1="0" x2="16" y2="16"><stop stopColor="#34D399" /><stop offset="1" stopColor="#059669" /></linearGradient></defs>
+                                </svg>
+                            </span>
+                            <span className="ticket-text">+1 phiếu: <b>{name}</b></span>
+                            <span className="ticket-streak" aria-label={'Chuỗi ' + streak + ' ngày'}>
+                                {FLAME}
+                                <b className="tnum">{streak}</b><span className="hidden sm:inline">&nbsp;ngày</span>
+                            </span>
+                        </span>
+                    )}
+                    <span className="ml-auto flex shrink-0 items-center gap-1.5">
+                        {scarce && (
+                            <button type="button" className="fund-warn" onClick={onOpen} aria-label={'AI còn ' + ai.left + ' lượt, mở gói AI'}>
+                                <span aria-hidden="true">⚠️</span> <span className="hidden sm:inline">AI còn </span><b className="tnum">{ai.left}</b><span className="hidden sm:inline"> lượt</span>
+                            </button>
+                        )}
+                        {ai.on ? <button type="button" className="fund-cta is-soft" onClick={onOpen}>Chi tiết ›</button>
+                            : <button type="button" className={'fund-cta ' + (scarce ? 'is-hot' : 'is-soft')} onClick={onOpen}><Icon name="zap" size={12} /> {scarce ? 'Nâng cấp 29k' : 'Gói AI 29k'}</button>}
                     </span>
-                    {aiOn ? <span className="ml-auto shrink-0 font-semibold text-primary">Chi tiết ›</span>
-                        : <span className={'fund-cta ' + (aiLeft <= 20 ? 'is-hot' : 'is-soft')}><Icon name="zap" size={12} /> {aiLeft <= 20 ? 'Nâng cấp 29k' : 'Gói AI 29k'}</span>}
-                </button>
+                </div>
             );
         };
         const FundPanel = ({ toast, kind = 'vocab', compact = false, items }) => (
@@ -2241,10 +2466,6 @@
                 {open && <div className="help-scrim" onMouseDown={onClose} />}
                 <div className="help-dock">
                     {open && <SupportPanel toast={toast} onClose={onClose} returnTo={returnTo} onFeedback={onFeedback} />}
-                    <button type="button" className="help-launch" data-help-open aria-expanded={open} aria-controls="fpass-help" aria-haspopup="dialog" onClick={(e) => (open ? onClose() : onOpen(e.currentTarget))}>
-                        <Icon name="headset" size={20} />
-                        <span className="help-launch-label">Hỗ trợ</span>
-                    </button>
                 </div>
             </>
         );
@@ -4678,11 +4899,13 @@
             );
         };
 
+        const BATCH_SAMPLE = { word: 'VD: accountant', type: 'n', meaning: 'kế toán viên', example: 'She works as an accountant…' };
+        const BATCH_PLAIN = { word: 'Từ tiếng Anh', type: 'Loại', meaning: 'Nghĩa tiếng Việt', example: 'Câu ví dụ (EN)' };
         const newDraft = () => ({ key: 'd' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6), questionOrWord: '', answerOrMeaning: '', wordType: '', ipa: '', explanationOrExample: '', exampleVi: '', keywords: [], open: false });
         /* Thẻ nhập nhanh nối vào cuối một Nhóm: gõ từ (có gợi ý), Enter sang nghĩa, Enter nữa là dòng mới. Lưu tất cả một lần. */
-        const BatchAdd = ({ drafts, setDrafts, group, onGroup, groups, onSave, onCancel, onAI }) => {
+        const BatchAdd = ({ drafts, setDrafts, group, onGroup, groups, onSave, onCancel, onAI, autoFocus = true, savedAt }) => {
             const refs = useRef({});
-            const [focusKey, setFocusKey] = useState(() => (drafts[0] ? drafts[0].key : null));
+            const [focusKey, setFocusKey] = useState(() => (autoFocus && drafts[0] ? drafts[0].key : null));
             const [busyKey, setBusyKey] = useState(null);
             const count = useRef(drafts.length);
             const groupListId = useMemo(() => 'bg-' + Math.random().toString(36).slice(2, 8), []);
@@ -4712,50 +4935,65 @@
             const ready = drafts.filter(x => x.questionOrWord.trim()).length;
             const enterTo = (e, next) => { if (e.key === 'Enter' && !e.shiftKey && !e.nativeEvent.isComposing) { e.preventDefault(); next(); } };
             return (
-                <section className="batch-add card" aria-label="Thêm nhanh nhiều từ">
+                <section className="batch-add card" aria-label="Nhập từ trực tiếp">
                     <div className="flex flex-wrap items-center gap-2 border-b border-line px-3 py-2.5 sm:px-4">
-                        <p className="text-sm font-semibold">Thêm vào nhóm</p>
-                        <input className="field !min-h-[34px] max-w-[14rem] flex-1 text-sm" list={groupListId} value={group} maxLength={80} placeholder="Unit 1, chủ đề…" aria-label="Lưu vào nhóm" onChange={(e) => onGroup(e.target.value)} />
+                        <span className="grp-dot" style={{ background: group.trim() ? Sch.groupColor(group.trim()) : 'var(--border)' }} aria-hidden="true" />
+                        <label className="batch-group">
+                            <input list={groupListId} value={group} maxLength={80} size={Math.max(6, Math.min(32, (group || '').length + 1))} placeholder="Tên nhóm, vd Unit 1" aria-label="Tên nhóm (bấm để sửa)" onChange={(e) => onGroup(e.target.value)} />
+                            <Icon name="pen" size={13} />
+                        </label>
                         <datalist id={groupListId}>{(groups || []).filter(([k]) => k !== '__none').map(([k]) => <option key={k} value={k} />)}</datalist>
-                        <p className="ml-auto hidden text-xs text-muted md:block"><Kbd>Enter</Kbd> sang ô kế / dòng mới · <Kbd>↓</Kbd> chọn gợi ý</p>
+                        <span className="ml-auto flex min-w-0 items-center gap-3">
+                            {savedAt ? <span key={savedAt} className="saved-tag"><Icon name="check" size={12} /> Đã tự lưu</span> : null}
+                            <span className="hidden min-w-0 truncate text-xs text-muted lg:inline"><Kbd>Enter</Kbd> sang ô kế / dòng mới · <Kbd>↓</Kbd> chọn gợi ý</span>
+                        </span>
                     </div>
+                    <div className="batch-cols" aria-hidden="true"><span /><span>Từ tiếng Anh</span><span>Loại</span><span>Nghĩa tiếng Việt</span><span>Ví dụ</span><span /></div>
                     <ol className="divide-y divide-line">
-                        {drafts.map((x, i) => (
+                        {drafts.map((x, i) => {
+                            const ph = i === 0 ? BATCH_SAMPLE : BATCH_PLAIN;
+                            const nextRow = () => { const at = drafts.findIndex(y => y.key === x.key); const nx = drafts[at + 1]; if (nx) setFocusKey(nx.key); else addNext(); };
+                            return (
                             <li key={x.key} className="batch-row">
                                 <span className="batch-num tnum" aria-hidden="true">{i + 1}</span>
                                 <div className="min-w-0 flex-1">
-                                    <div className="grid gap-2 md:grid-cols-2">
-                                        <WordSuggest value={x.questionOrWord} placeholder="Từ tiếng Anh" ariaLabel={'Từ tiếng Anh, dòng ' + (i + 1)}
+                                    <div className="batch-grid">
+                                        <WordSuggest value={x.questionOrWord} placeholder={ph.word} ariaLabel={'Từ tiếng Anh, dòng ' + (i + 1)}
                                             inputRef={el => { refs.current[x.key] = el; }}
                                             onChange={(v) => patch(x.key, { questionOrWord: v })}
                                             onPick={(e) => { patch(x.key, fillFromDict(x, e)); const m = refs.current[x.key + ':m']; if (m) window.setTimeout(() => m.focus(), 0); }}
                                             onKeyDown={(e) => enterTo(e, () => { const m = refs.current[x.key + ':m']; if (m) m.focus(); })}>
                                             <AiPin mini onClick={() => fill(x)} busy={busyKey === x.key} disabled={!x.questionOrWord.trim()} label="AI điền từ loại, IPA, nghĩa, ví dụ" />
                                         </WordSuggest>
-                                        <input ref={el => { refs.current[x.key + ':m'] = el; }} className="field" value={x.answerOrMeaning} maxLength={1500} placeholder="Nghĩa tiếng Việt" aria-label={'Nghĩa tiếng Việt, dòng ' + (i + 1)}
+                                        <input className="field batch-type" value={x.wordType} maxLength={24} placeholder={ph.type} aria-label={'Từ loại, dòng ' + (i + 1)} onChange={(e) => patch(x.key, { wordType: e.target.value })} />
+                                        <input ref={el => { refs.current[x.key + ':m'] = el; }} className="field batch-mean" value={x.answerOrMeaning} maxLength={1500} placeholder={ph.meaning} aria-label={'Nghĩa tiếng Việt, dòng ' + (i + 1)}
                                             onChange={(e) => patch(x.key, { answerOrMeaning: e.target.value })}
-                                            onKeyDown={(e) => enterTo(e, () => { const at = drafts.findIndex(y => y.key === x.key); const nx = drafts[at + 1]; if (nx) setFocusKey(nx.key); else addNext(); })} />
+                                            onKeyDown={(e) => enterTo(e, nextRow)} />
+                                        <input className="field batch-ex" value={x.explanationOrExample} maxLength={2500} placeholder={ph.example} aria-label={'Câu ví dụ, dòng ' + (i + 1)}
+                                            onChange={(e) => patch(x.key, { explanationOrExample: e.target.value })}
+                                            onKeyDown={(e) => enterTo(e, nextRow)} />
                                     </div>
-                                    {(x.wordType || x.ipa) && !x.open && <p className="mt-1 text-xs text-muted">{[x.wordType, x.ipa].filter(Boolean).join(' · ')}</p>}
+                                    {x.ipa && !x.open && <p className="mt-1 text-xs text-muted">{x.ipa}</p>}
                                     {x.open && (
-                                        <div className="mt-2 grid gap-2 sm:grid-cols-[7rem_1fr]">
-                                            <input className="field" value={x.wordType} maxLength={24} placeholder="Từ loại" aria-label="Từ loại" onChange={(e) => patch(x.key, { wordType: e.target.value })} />
+                                        <div className="mt-2 grid gap-2 md:grid-cols-[12rem_1fr]">
                                             <input className="field" value={x.ipa} maxLength={80} placeholder="IPA /…/" aria-label="IPA" onChange={(e) => patch(x.key, { ipa: e.target.value })} />
-                                            <textarea className="field py-2 sm:col-span-2" rows={1} value={x.explanationOrExample} maxLength={2500} placeholder="Câu ví dụ (EN)" aria-label="Câu ví dụ" onChange={(e) => patch(x.key, { explanationOrExample: e.target.value })} />
+                                            <input className="field md:hidden" value={x.explanationOrExample} maxLength={2500} placeholder="Câu ví dụ (EN)" aria-label="Câu ví dụ" onChange={(e) => patch(x.key, { explanationOrExample: e.target.value })} />
+                                            <input className="field" value={x.exampleVi} maxLength={1500} placeholder="Dịch câu ví dụ" aria-label="Dịch câu ví dụ" onChange={(e) => patch(x.key, { exampleVi: e.target.value })} />
                                         </div>
                                     )}
                                 </div>
-                                <div className="flex shrink-0 flex-col gap-1">
+                                <div className="batch-acts">
                                     <button type="button" className="lib-act" aria-expanded={x.open} aria-label={x.open ? 'Thu gọn' : 'Thêm IPA, ví dụ'} title={x.open ? 'Thu gọn' : 'Thêm IPA, ví dụ'} onClick={() => patch(x.key, { open: !x.open })}><Icon name={x.open ? 'chevronUp' : 'chevronDown'} size={15} /></button>
                                     <button type="button" className="lib-act" aria-label={'Bỏ dòng ' + (i + 1)} title="Bỏ dòng" onClick={() => drop(x.key)}><Icon name="x" size={15} /></button>
                                 </div>
                             </li>
-                        ))}
+                            );
+                        })}
                     </ol>
                     <div className="flex flex-wrap items-center gap-2 border-t border-line px-3 py-2.5 sm:px-4">
-                        <button type="button" className="btn btn-ghost btn-sm" onClick={addNext}><Icon name="plus" size={14} /> Thêm dòng tiếp</button>
+                        <button type="button" className="btn btn-ghost btn-sm" onClick={addNext}><Icon name="plus" size={14} /> Thêm dòng</button>
                         <div className="ml-auto flex items-center gap-2">
-                            <button type="button" className="btn btn-secondary btn-sm" onClick={onCancel}>Hủy</button>
+                            {onCancel && <button type="button" className="btn btn-secondary btn-sm" onClick={onCancel}>Hủy</button>}
                             <button type="button" className="btn btn-primary btn-sm whitespace-nowrap" disabled={!ready} onClick={onSave}>Lưu tất cả{ready ? ' (' + ready + ')' : ''}</button>
                         </div>
                     </div>
@@ -4764,11 +5002,89 @@
         };
 
         /* ---------- Quick Paste ---------- */
-        const QuickPaste = ({ groups, onAdd, toast, onLocked }) => {
+        const EXCEL_RE = /\.(xlsx|xls|csv)$/i;
+        const GENERIC_FILE = /^(book|sheet|trang tính|download|untitled|export|data|file|copy of)\s*[\d()\s-]*$/i;
+        /* Tên nhóm từ file: tên file bỏ đuôi; tên file chung chung (Book1, download…) thì lấy tên sheet đầu tiên. */
+        const groupFromFile = (fileName, sheetName) => {
+            const base = String(fileName || '').replace(EXCEL_RE, '').replace(/[_]+/g, ' ').replace(/\s+/g, ' ').trim();
+            const sheet = String(sheetName || '').trim();
+            if (base && !GENERIC_FILE.test(base)) return base.slice(0, 80);
+            if (sheet && !GENERIC_FILE.test(sheet)) return sheet.slice(0, 80);
+            return base.slice(0, 80);
+        };
+        const SAMPLE_SHEET = [
+            ['Từ / Câu hỏi', 'Nghĩa / Đáp án', 'Ví dụ / Giải thích'],
+            ['colleague', 'đồng nghiệp', 'My colleague helped me finish the report.'],
+            ['negotiate', 'đàm phán', 'We negotiated a higher salary.'],
+            ['deadline', 'hạn chót', 'The deadline is next Friday.']
+        ];
+        const downloadSample = () => {
+            if (!window.XLSX) return;
+            const ws = XLSX.utils.aoa_to_sheet(SAMPLE_SHEET);
+            ws['!cols'] = [{ wch: 18 }, { wch: 18 }, { wch: 44 }];
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, 'Unit 1 - Jobs');
+            XLSX.writeFile(wb, 'so-tu-mau.xlsx');
+        };
+        /* Đọc 1 file Excel/CSV thành danh sách mục. File không có dòng tiêu đề thì hiểu cột A = từ, B = nghĩa, C = ví dụ. */
+        const readExcelFile = async (file, group) => {
+            if (!window.XLSX) throw new Error('Thư viện Excel chưa tải xong, thử lại sau vài giây');
+            const wb = XLSX.read(await Sec.readBuffer(file), { type: 'array', cellFormula: false, cellHTML: false });
+            const sheetName = wb.SheetNames[0] || '';
+            let rows = XLSX.utils.sheet_to_json(wb.Sheets[sheetName], { header: 1, raw: false, defval: '' })
+                .filter(r => Array.isArray(r) && r.some(c => String(c).trim()));
+            const name = groupFromFile(Sec.cleanText(file.name, 120), sheetName);
+            const g = group || name;
+            let list;
+            try {
+                list = Sch.fromExcelRows(rows, g);
+            } catch (e) {
+                list = Sch.fromExcelRows([SAMPLE_SHEET[0]].concat(rows), g);
+            }
+            return { name, list };
+        };
+
+        const QuickPaste = ({ groups, onAdd, toast, onLocked, bare }) => {
             const [text, setText] = useState('');
             const [group, setGroup] = useState('');
             const [preview, setPreview] = useState(null);
             const [busy, setBusy] = useState(false);
+            const [drag, setDrag] = useState(false);
+            const xlsRef = useRef(null);
+            const dragDepth = useRef(0);
+            const isFileDrag = (e) => Array.from((e.dataTransfer && e.dataTransfer.types) || []).indexOf('Files') >= 0;
+            const takeFiles = async (files) => {
+                const picked = Array.from(files || []);
+                if (!picked.length) return;
+                const bad = picked.filter(f => !EXCEL_RE.test(f.name));
+                if (bad.length === picked.length) { toast('Chỉ nhận file Excel (.xlsx, .xls) hoặc CSV', 'error'); return; }
+                setBusy(true);
+                try {
+                    const typed = group.trim();
+                    let all = [];
+                    let first = '';
+                    for (const f of picked.filter(x => EXCEL_RE.test(x.name))) {
+                        const { name, list } = await readExcelFile(f, typed);
+                        if (!first) first = name;
+                        all = all.concat(list);
+                    }
+                    Sec.guardCount(all.length, 0);
+                    if (!typed && first) setGroup(first);
+                    if (!all.length) { toast('File không có dòng từ vựng nào', 'info'); return; }
+                    setPreview(all);
+                    toast('Đã tách ' + all.length + ' mục từ file' + (bad.length ? ' · bỏ qua ' + bad.length + ' file không phải Excel' : ''), 'success');
+                } catch (e) {
+                    toast((e && e.message) || 'File không đọc được', 'error');
+                } finally {
+                    setBusy(false);
+                }
+            };
+            const dropZone = {
+                onDragEnter: (e) => { if (!isFileDrag(e)) return; e.preventDefault(); dragDepth.current += 1; setDrag(true); },
+                onDragOver: (e) => { if (!isFileDrag(e)) return; e.preventDefault(); e.dataTransfer.dropEffect = 'copy'; },
+                onDragLeave: (e) => { if (!isFileDrag(e)) return; dragDepth.current = Math.max(0, dragDepth.current - 1); if (!dragDepth.current) setDrag(false); },
+                onDrop: (e) => { if (!isFileDrag(e)) return; e.preventDefault(); dragDepth.current = 0; setDrag(false); takeFiles(e.dataTransfer.files); }
+            };
             const parseLocal = () => {
                 const list = Sch.parseQuickPaste(text, group.trim());
                 if (!list.length) { toast('Chưa tách được mục nào. Thử định dạng "word - nghĩa" hoặc câu có A. B. C. D.', 'info'); return; }
@@ -4791,15 +5107,31 @@
                 }
             };
             return (
-                <section className="card p-4 sm:p-5 mb-4" aria-labelledby="qp-title">
-                    <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
-                        <h3 id="qp-title" className="font-semibold flex items-center gap-2"><Icon name="clipboard" /> Ô nhập thông minh</h3>
-                        <span className="text-xs text-muted">Dán danh sách từ hoặc cả đoạn câu hỏi trắc nghiệm</span>
-                    </div>
+                <section className={bare ? '' : 'card p-4 sm:p-5 mb-4'} aria-labelledby={bare ? undefined : 'qp-title'}>
+                    {!bare && <div className="qp-head">
+                        <h3 id="qp-title" className="flex min-w-0 items-center gap-2 whitespace-nowrap font-semibold"><Icon name="clipboard" />Ô nhập thông minh</h3>
+                        <div className="qp-tools">
+                            <button type="button" className="qp-xls" onClick={() => xlsRef.current && xlsRef.current.click()} disabled={busy} aria-label="Nhập file Excel (.xlsx, .xls, .csv)">
+                                <Icon name="upload" size={15} /><span>Nhập Excel</span>
+                            </button>
+                            <button type="button" className="qp-sample hidden items-center md:inline-flex" onClick={downloadSample} title="Tải file .xlsx mẫu 3 cột: Từ, Nghĩa, Ví dụ">File mẫu</button>
+                        </div>
+                    </div>}
+                    <input ref={xlsRef} type="file" multiple accept=".xlsx,.xls,.csv" className="hidden" onChange={(e) => { const f = e.target.files; takeFiles(f).finally(() => { e.target.value = ''; }); }} />
+                    <p className="qp-sub">Mỗi dòng "từ - nghĩa", hoặc cả đoạn câu hỏi trắc nghiệm. Có thể kéo file Excel thả vào ô.{bare && <button type="button" className="qp-sample" onClick={() => xlsRef.current && xlsRef.current.click()}>Chọn file</button>}<button type="button" className={'qp-sample' + (bare ? '' : ' md:hidden')} onClick={downloadSample}>File mẫu</button></p>
                     {!preview ? (
                         <>
-                            <textarea value={text} onChange={(e) => setText(e.target.value)} rows={6} maxLength={Sec.LIMITS.pasteChars} className="field py-2 font-mono text-[13px]" aria-label="Văn bản cần tách"
-                                placeholder={'accountant - kế toán viên\nresign (v) - nghỉ việc\n\n1. Which testing technique is based on the specification?\nA. White-box\nB. Black-box\nC. Static analysis\nD. Code review\nĐáp án: B'} />
+                            <div className={'qp-drop' + (drag ? ' is-drag' : '')} {...dropZone}>
+                                <textarea value={text} onChange={(e) => setText(e.target.value)} rows={6} maxLength={Sec.LIMITS.pasteChars} className="field py-2 font-mono text-[13px]" aria-label="Văn bản cần tách"
+                                    placeholder={'accountant - kế toán viên\nresign (v) - nghỉ việc\n\n1. Which testing technique is based on the specification?\nA. White-box\nB. Black-box\nC. Static analysis\nD. Code review\nĐáp án: B'} />
+                                {drag && (
+                                    <div className="qp-overlay" aria-hidden="true">
+                                        <Icon name="upload" size={22} />
+                                        <b>Thả file Excel để tự động tách từ vựng</b>
+                                        <small>.xlsx, .xls hoặc .csv · tên file thành tên nhóm</small>
+                                    </div>
+                                )}
+                            </div>
                             <div className="flex flex-wrap items-end gap-2 mt-3">
                                 <label className="flex-1 min-w-[180px]"><span className="label">Nhóm</span><input className="field" list="qp-groups" value={group} maxLength={80} onChange={(e) => setGroup(e.target.value)} placeholder="Unit 1 - Jobs / SWT301 Ch.2" /></label>
                                 <datalist id="qp-groups">{groups.filter(([k]) => k !== '__none').map(([k]) => <option key={k} value={k} />)}</datalist>
@@ -5199,7 +5531,25 @@
             );
         };
 
-        const LibraryView = ({ items, setItems, groups, groupFilter, setGroupFilter, onPractice, onWeak, onStudyFrom, toast, mergeItems }) => {
+        const START_ANCHOR = '__start';
+        const DRAFT_KEY = 'libDrafts';
+        const loadDrafts = () => {
+            const d = Store.prefs.get(DRAFT_KEY, null);
+            if (!d || !Array.isArray(d.list) || !d.list.length || typeof d.group !== 'string') return null;
+            const list = d.list.slice(0, 200).map(x => Object.assign(newDraft(), {
+                questionOrWord: String(x.questionOrWord || ''), answerOrMeaning: String(x.answerOrMeaning || ''), wordType: String(x.wordType || ''),
+                ipa: String(x.ipa || ''), explanationOrExample: String(x.explanationOrExample || ''), exampleVi: String(x.exampleVi || '')
+            }));
+            return { anchor: typeof d.anchor === 'string' ? d.anchor : START_ANCHOR, group: d.group.slice(0, 80), list };
+        };
+        const startDrafts = (group, anchor) => ({ anchor: anchor || START_ANCHOR, group: group || 'Unit 1', list: [newDraft(), newDraft(), newDraft()] });
+        /* Tên nhóm kế tiếp: Unit lớn nhất + 1, không có thì "Unit <số nhóm + 1>". */
+        const nextUnitName = (groups) => {
+            let top = 0;
+            (groups || []).forEach(([k]) => { const m = /^unit\s*(\d+)/i.exec(String(k || '')); if (m) top = Math.max(top, Number(m[1])); });
+            return 'Unit ' + ((top || (groups || []).filter(([k]) => k && k !== '__none').length) + 1);
+        };
+        const LibraryView = ({ items, setItems, groups, groupFilter, setGroupFilter, onPractice, onWeak, onStudyFrom, onQuickVote, toast, mergeItems }) => {
             const [quick, setQuick] = useState(false);
             const [importBatches, setImportBatches] = useState(null);
             const [editing, setEditing] = useState(null);
@@ -5213,12 +5563,49 @@
             const [tease, setTease] = useState(null);
             const [paywall, setPaywall] = useState(false);
             const [passage, setPassage] = useState(() => takeGo('reading'));
+            useEffect(() => {
+                const open = () => setPassage(true);
+                window.addEventListener('edu-reading', open);
+                return () => window.removeEventListener('edu-reading', open);
+            }, []);
             const [importHint, setImportHint] = useState(() => takeGo('import'));
             const [menu, setMenu] = useState(null);
             const [filterOpen, setFilterOpen] = useState(false);
             const [fundOpen, setFundOpen] = useState(false);
-            const [drafts, setDrafts] = useState(null);
+            const [drafts, setDrafts] = useState(() => loadDrafts() || (items.length ? null : startDrafts()));
+            const [draftSavedAt, setDraftSavedAt] = useState(0);
+            const [savedGroups, setSavedGroups] = useState(null);
+            /* Nháp trong bảng nhập tự lưu (mất điện, đóng tab vẫn còn), có nhãn "Đã tự lưu". */
+            useEffect(() => {
+                const typed = drafts && drafts.list.some(x => x.questionOrWord.trim() || x.answerOrMeaning.trim() || x.explanationOrExample.trim());
+                if (!typed) { Store.prefs.remove(DRAFT_KEY); setDraftSavedAt(0); return undefined; }
+                const t = window.setTimeout(() => { if (Store.prefs.set(DRAFT_KEY, drafts)) setDraftSavedAt(Date.now()); }, 500);
+                return () => window.clearTimeout(t);
+            }, [drafts]);
+            /* Mục trong sổ vừa ghi xuống IndexedDB: nhãn "Đã tự lưu" ở đầu nhóm trong 2.5 giây. */
+            useEffect(() => {
+                let t = 0;
+                const on = (e) => {
+                    window.clearTimeout(t);
+                    setSavedGroups(new Set((e.detail && e.detail.groups) || []));
+                    t = window.setTimeout(() => setSavedGroups(null), 2500);
+                };
+                window.addEventListener('edu-items-saved', on);
+                return () => { window.removeEventListener('edu-items-saved', on); window.clearTimeout(t); };
+            }, []);
+            /* Chốt phiếu khi sổ còn trống: không mở màn luyện tập rỗng, đưa con trỏ vào dòng 1. */
+            const voteOrStart = () => {
+                if (items.length) { onQuickVote && onQuickVote(); return; }
+                const el = document.querySelector('.batch-add input[aria-label="Từ tiếng Anh, dòng 1"]');
+                if (el) { el.scrollIntoView({ block: 'center', behavior: 'smooth' }); el.focus({ preventScroll: true }); }
+                toast('Thêm nhanh 1 từ đầu tiên để chốt phiếu hôm nay nhé!', 'info');
+            };
             const menuBox = useRef(null);
+            /* Sổ trống: luôn có sẵn nhóm "Unit 1" với 3 dòng trống để gõ ngay. Có từ thật (lưu, dán, Excel) thì dọn khung trống đi. */
+            useEffect(() => {
+                if (!items.length && !drafts) setDrafts(startDrafts());
+                if (items.length && drafts && drafts.anchor === START_ANCHOR && !drafts.list.some(x => x.questionOrWord.trim() || x.answerOrMeaning.trim())) setDrafts(null);
+            }, [items.length, drafts]);
             useEffect(() => {
                 if (!menu) return undefined;
                 const close = (e) => { if (menuBox.current && !menuBox.current.contains(e.target)) setMenu(null); };
@@ -5308,6 +5695,12 @@
                 setDrafts(d => (d && d.anchor === g ? Object.assign({}, d, { list: d.list.concat([newDraft()]) }) : { anchor: g, group: g, list: [newDraft()] }));
             };
             const addRow = () => addRowTo(null);
+            const newGroup = () => {
+                const typed = drafts && drafts.list.some(x => x.questionOrWord.trim() || x.answerOrMeaning.trim());
+                if (typed) { toast('Lưu hoặc bỏ các dòng đang nhập trước khi tạo nhóm mới', 'info'); return; }
+                setDrafts(startDrafts(nextUnitName(groups), '__new'));
+                window.setTimeout(() => { const el = document.querySelector('.batch-add'); if (el) el.scrollIntoView({ block: 'center', behavior: 'smooth' }); }, 60);
+            };
             const setDraftList = (fn) => setDrafts(d => (d ? Object.assign({}, d, { list: typeof fn === 'function' ? fn(d.list) : fn }) : d));
             const saveDrafts = () => {
                 if (!drafts) return;
@@ -5325,11 +5718,11 @@
             const cancelDrafts = () => {
                 const typed = (drafts ? drafts.list : []).some(x => x.questionOrWord.trim() || x.answerOrMeaning.trim());
                 if (typed && !confirm('Bỏ các dòng đang nhập?')) return;
-                setDrafts(null);
+                setDrafts(items.length ? null : startDrafts());
             };
             const batchCard = drafts ? (
-                <BatchAdd drafts={drafts.list} setDrafts={setDraftList} group={drafts.group} groups={groups}
-                    onGroup={(v) => setDrafts(d => Object.assign({}, d, { group: v }))} onAI={(t) => aiDraft(t)} onSave={saveDrafts} onCancel={cancelDrafts} />
+                <BatchAdd drafts={drafts.list} setDrafts={setDraftList} group={drafts.group} groups={groups} autoFocus={!(drafts.anchor === START_ANCHOR && !items.length)} savedAt={draftSavedAt}
+                    onGroup={(v) => setDrafts(d => Object.assign({}, d, { group: v }))} onAI={(t) => aiDraft(t)} onSave={saveDrafts} onCancel={items.length ? cancelDrafts : null} />
             ) : null;
             const draftsLoose = drafts && !secByKey.has(drafts.anchor);
             const groupHead = (sec) => (
@@ -5338,6 +5731,7 @@
                     <span className="grp-dot" style={{ background: sec.key ? Sch.groupColor(sec.key) : 'var(--border)' }} aria-hidden="true" />
                     <span className="min-w-0 flex-1 truncate text-left">{sec.label}</span>
                     {sec.sample && <span className="chip bg-surface2 text-muted">mẫu</span>}
+                    {savedGroups && savedGroups.has(sec.key || '') && <span className="saved-tag"><Icon name="check" size={12} /> Đã tự lưu</span>}
                     <span className="grp-count tnum">{sec.rows.length} {sec.rows.length > 1 ? 'mục' : 'mục'}</span>
                 </button>
             );
@@ -5495,26 +5889,20 @@
                     {/* Đầu trang gọn: tiêu đề + 2 nút (Thêm từ, •••). Luyện tập đầy đủ nằm ở tab Luyện tập. */}
                     <div className="mb-3 flex items-center justify-between gap-2" ref={menuBox}>
                         <div className="min-w-0">
-                            <h1 className="text-xl font-bold">Kho của tôi</h1>
-                            <p className="truncate text-sm text-muted">{rows.length}/{items.length} mục · từ vựng & câu hỏi bạn tự ghi</p>
+                            <h1 className="whitespace-nowrap text-xl font-bold tracking-tight sm:text-2xl">Sổ từ<span className="hidden sm:inline"> của tôi</span></h1>
+                            <p className="truncate text-sm text-muted"><b className="tnum font-semibold text-ink2">{items.length}</b> mục{groups.length ? ' · ' + groups.length + ' nhóm' : ''}{rows.length !== items.length ? ' · đang lọc ' + rows.length : ''}</p>
                         </div>
                         <div className="relative flex shrink-0 items-center gap-2">
                             {groupFilter !== 'all' && <button type="button" onClick={() => onPractice(studyable, 'flash', Sch.groupLabel(groupFilter))} disabled={!studyable.length} className="btn btn-secondary btn-sm hidden sm:inline-flex"><Icon name="layers" size={14} /> Luyện nhóm này</button>}
-                            <button type="button" onClick={() => setMenu(m => (m === 'add' ? null : 'add'))} aria-expanded={menu === 'add'} aria-haspopup="menu" className="btn btn-primary btn-sm"><Icon name="plus" size={15} /> Thêm từ</button>
+                            <button type="button" onClick={newGroup} className="btn btn-primary btn-sm whitespace-nowrap"><Icon name="plus" size={15} /> Tạo nhóm mới</button>
                             <button type="button" onClick={() => setMenu(m => (m === 'more' ? null : 'more'))} aria-expanded={menu === 'more'} aria-haspopup="menu" aria-label="Tùy chọn khác" className="btn btn-secondary btn-sm btn-icon !w-10">•••</button>
                             {menu && (
                                 <div role="menu" className="lib-menu">
-                                    {menu === 'add' ? (
-                                        <>
-                                            <button type="button" role="menuitem" onClick={() => runMenu(() => setQuick(true))}><Icon name="clipboard" size={16} /><span><b>Dán nhanh</b><small>Dán danh sách "từ - nghĩa", mỗi dòng một từ</small></span></button>
-                                            <button type="button" role="menuitem" onClick={() => runMenu(() => setPassage(true))}><Icon name="sparkles" size={16} /><span><b>AI quét bài đọc / đề thi</b><small>Dán bài, AI lọc từ mới kèm IPA</small></span></button>
-                                            <button type="button" role="menuitem" onClick={() => runMenu(() => fileRef.current && fileRef.current.click())}><Icon name="upload" size={16} /><span><b>Nhập từ file Excel</b><small>.xlsx, .xls hoặc .csv, tên file thành tên nhóm</small></span></button>
-                                            <button type="button" role="menuitem" onClick={() => runMenu(addRow)}><Icon name="plus" size={16} /><span><b>Thêm nhanh nhiều dòng</b><small>Gõ từ, Enter, gõ nghĩa, Enter sang dòng mới</small></span></button>
-                                        </>
-                                    ) : (
+                                    {menu === 'more' && (
                                         <>
                                             <button type="button" role="menuitem" disabled={!!aiAll || !items.length} onClick={() => runMenu(aiEverything)}><Icon name="sparkles" size={16} /><span><b>{aiAll ? 'AI ' + aiAll.done + '/' + aiAll.total : 'AI bổ sung tất cả'}</b><small>Điền nghĩa, IPA, ví dụ còn thiếu</small></span></button>
                                             <button type="button" role="menuitem" disabled={!items.length} onClick={() => runMenu(exportExcel)}><Icon name="sheet" size={16} /><span><b>Tải kho về Excel</b><small>Sao lưu toàn bộ kho</small></span></button>
+                                            <button type="button" role="menuitem" onClick={() => runMenu(downloadSample)}><Icon name="download" size={16} /><span><b>Tải file Excel mẫu</b><small>3 cột: Từ, Nghĩa, Ví dụ</small></span></button>
                                             <button type="button" role="menuitem" onClick={() => runMenu(() => window.dispatchEvent(new CustomEvent('edu-contribute')))}><Icon name="share" size={16} /><span><b>Gửi đề cho admin</b><small>Góp đề để mọi người cùng ôn</small></span></button>
                                             <button type="button" role="menuitem" className="is-danger" disabled={!items.length} onClick={() => runMenu(removeAll)}><Icon name="trash" size={16} /><span><b>Xóa hết từ trong bảng</b><small>Xóa toàn bộ {items.length} mục, không hoàn tác</small></span></button>
                                         </>
@@ -5525,12 +5913,28 @@
                         </div>
                     </div>
 
-                    <FundStrip onOpen={() => setFundOpen(true)} />
+                    <FundStrip onOpen={() => setFundOpen(true)} onQuickVote={voteOrStart} />
                     {fundOpen && <Modal title="Mã quỹ & gói AI" onClose={() => setFundOpen(false)} size="lg"><FundBody toast={toast} kind="vocab" compact items={items} /></Modal>}
 
-                    {quick && <QuickPaste groups={groups} toast={toast} onLocked={() => setPaywall(true)} onAdd={(list) => confirmImport({ items: list, mode: 'append' })} />}
+                    <div className="import-bar" role="toolbar" aria-label="Nhập hàng loạt">
+                        <button type="button" className="imp-btn is-ai" onClick={() => setPassage(true)} title="Dán bài đọc hoặc đề thi, AI lọc từ mới kèm IPA và nghĩa">
+                            <Icon name="sparkles" size={16} /><span className="md:hidden">AI quét</span><span className="hidden md:inline">AI quét bài đọc</span>
+                        </button>
+                        <button type="button" className="imp-btn" onClick={() => setQuick(true)} title='Dán danh sách "từ - nghĩa", mỗi dòng một từ'>
+                            <Icon name="clipboard" size={16} /><span className="md:hidden">Dán nhanh</span><span className="hidden md:inline">Dán danh sách</span>
+                        </button>
+                        <button type="button" className="imp-btn" onClick={() => fileRef.current && fileRef.current.click()} title=".xlsx, .xls hoặc .csv, tên file thành tên nhóm">
+                            <Icon name="upload" size={16} /><span>Nhập Excel</span>
+                        </button>
+                        <button type="button" className="imp-sample" onClick={downloadSample} title="Tải file .xlsx mẫu 3 cột: Từ, Nghĩa, Ví dụ">File Excel mẫu</button>
+                    </div>
+                    {quick && (
+                        <Modal title="Dán danh sách" size="lg" onClose={() => setQuick(false)}>
+                            <QuickPaste bare groups={groups} toast={toast} onLocked={() => { setQuick(false); setPaywall(true); }} onAdd={(list) => { confirmImport({ items: list, mode: 'append' }); setQuick(false); }} />
+                        </Modal>
+                    )}
 
-                    <div className="mb-3">
+                    {items.length > 0 && <div className="mb-3">
                         <div className="flex items-center gap-2">
                             <div className="relative min-w-0 flex-1"><Icon name="search" size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted" /><input value={search} onChange={(e) => setSearch(e.target.value)} className="field pl-9" placeholder="Tìm từ, câu hỏi, nghĩa…" aria-label="Tìm trong kho" /></div>
                             <div className="hidden w-52 md:block">{groupSelect}</div>
@@ -5544,11 +5948,8 @@
                                 {groupFilter !== 'all' && <button type="button" onClick={() => onPractice(studyable, 'flash', Sch.groupLabel(groupFilter))} disabled={!studyable.length} className="btn btn-secondary btn-sm col-span-2"><Icon name="layers" size={14} /> Luyện nhóm này ({studyable.length})</button>}
                             </div>
                         )}
-                    </div>
-                    {(pulse.neverMiss || importHint) && <div className="card mb-3">
-                        {pulse.neverMiss && (
-                            <p className="px-3 py-3 text-sm leading-5 text-ink2 sm:px-4">Không sao, đừng bỏ lỡ hai ngày liên tiếp.</p>
-                        )}
+                    </div>}
+                    {importHint && <div className="card mb-3">
                         {importHint && (
                             <div className="m-3 rounded-2xl border-2 border-primary/30 bg-primary-soft p-4 sm:mx-4" role="region" aria-label="Nhập từ vựng từ Excel">
                                 <p className="font-semibold text-ink">Nhập từ vựng từ file Excel</p>
@@ -5572,13 +5973,16 @@
                     )}
 
                     {/* Điện thoại (<768px): danh sách thẻ 2 dòng, chạm để sửa. Màn rộng giữ bảng đầy đủ. */}
+                    {/* Sổ từ trống: bảng nhập trực tiếp nằm ngay giữa trang (nhóm Unit 1, 3 dòng trống). */}
+                    {items.length === 0 && batchCard}
+
                     {/* Điện thoại: mỗi nhóm là một khối đóng/mở, thẻ 2 dòng, chạm để sửa. */}
-                    <div className="md:hidden">
+                    <div className={'md:hidden' + (items.length === 0 ? ' !hidden' : '')}>
                         {rows.length === 0 && !drafts ? (
-                            <div className="card"><Empty icon="layers" title="Chưa có mục nào ở đây">Bấm "Thêm từ" để bắt đầu.</Empty></div>
+                            <div className="card"><Empty icon="layers" title="Chưa có mục nào ở đây">Thử bỏ bớt bộ lọc, hoặc bấm "Tạo nhóm mới".</Empty></div>
                         ) : (
                             <div className="flex flex-col gap-2">
-                                {!wide && draftsLoose && batchCard}
+                                {items.length > 0 && !wide && draftsLoose && batchCard}
                                 {sections.map(sec => (
                                     <section key={'m:' + sec.key} className="card overflow-hidden">
                                         {groupHead(sec)}
@@ -5618,7 +6022,7 @@
                         )}
                     </div>
 
-                    <div className="card hidden overflow-hidden pb-24 md:block">
+                    <div className={'card hidden overflow-hidden pb-24' + (items.length === 0 ? '' : ' md:block')}>
                         <div className="overflow-x-auto" ref={tableBox}>
                             <table className="w-full min-w-[1080px] text-sm border-collapse">
                                 <caption className="sr-only">Bảng kho học</caption>
@@ -5636,10 +6040,10 @@
                                     </tr>
                                 </thead>
                                 {rows.length === 0 && !drafts ? (
-                                    <tbody><tr><td colSpan="9"><Empty icon="layers" title="Chưa có mục nào ở đây">Dùng "Dán nhanh" hoặc "Thêm dòng" để bắt đầu.</Empty></td></tr></tbody>
+                                    <tbody><tr><td colSpan="9"><Empty icon="layers" title="Chưa có mục nào ở đây">Thử bỏ bớt bộ lọc, hoặc bấm "Tạo nhóm mới".</Empty></td></tr></tbody>
                                 ) : (
                                     <>
-                                        {wide && draftsLoose && <tbody><tr><td colSpan="9" className="p-3">{pinned(batchCard)}</td></tr></tbody>}
+                                        {items.length > 0 && wide && draftsLoose && <tbody><tr><td colSpan="9" className="p-3">{pinned(batchCard)}</td></tr></tbody>}
                                         {sections.map(sec => (
                                             <tbody key={'t:' + sec.key}>
                                                 <tr className="grp-tr"><td colSpan="9" className="p-0">{groupHead(sec)}</td></tr>
@@ -6851,7 +7255,14 @@
                 clearTimeout(saveTimer.current);
                 const prev = savedItems.current;
                 savedItems.current = list;
-                return Store.syncDiff(Store.items, prev, list).catch(e => {
+                return Store.syncDiff(Store.items, prev, list).then(() => {
+                    if (prev === list || !prev) return;
+                    const before = new Map(prev.map(t => [t.id, t]));
+                    const groups = new Set();
+                    list.forEach(t => { if (before.get(t.id) !== t) groups.add(t.group || ''); before.delete(t.id); });
+                    before.forEach(t => groups.add(t.group || ''));
+                    if (groups.size) window.dispatchEvent(new CustomEvent('edu-items-saved', { detail: { groups: Array.from(groups), at: Date.now() } }));
+                }).catch(e => {
                     savedItems.current = prev;
                     toast('Lỗi lưu dữ liệu: ' + (e && e.message), 'error');
                 });
@@ -7303,6 +7714,30 @@
                 }
                 window.scrollTo(0, 0);
             };
+            /* Mở thẳng "AI quét bài đọc" ở Sổ từ từ bất kỳ đâu (thanh điều hướng). */
+            const openReading = () => {
+                if (nav.busy && !confirm('Bạn đang giữa một ca / phòng thi. Thoát ra?')) return;
+                setSession(s => (s && s.slotId ? s : null));
+                window.__fpassGo = 'reading';
+                dispatch({ type: 'TAB', tab: 'library', force: true });
+                window.scrollTo(0, 0);
+                /* Sổ từ đang mở sẵn thì không mount lại: báo qua sự kiện. */
+                window.setTimeout(() => { if (window.__fpassGo === 'reading') { window.__fpassGo = ''; window.dispatchEvent(new CustomEvent('edu-reading')); } }, 0);
+            };
+            /* Pill "Phiếu hôm nay": đang trong ca thì vào ca bản Chạm đáy (2 thẻ đủ phiếu); ngoài ca thì 5 thẻ flashcard, từ yếu trước. */
+            const quickVote = () => {
+                const slotNow = cur.slot;
+                if (slotNow && (cur.kind === 'ON_TIME_ACTIVE' || cur.kind === 'LATE_RECOVERY')) { startSlot(true); return; }
+                const filled = items.filter(Sch.isFilled);
+                if (filled.length < 5) { toast('Cần ít nhất 5 thẻ có nghĩa để chốt phiếu. Thêm vài từ nhé.', 'info'); return; }
+                const weak = filled.filter(t => Sch.isWeak(t)).sort((a, b) => Sch.weakScore(b) - Sch.weakScore(a));
+                const rest = Sch.shuffle(filled.filter(t => weak.indexOf(t) < 0));
+                const ids = weak.concat(rest).slice(0, 5).map(t => t.id);
+                noteStudyStart();
+                setSession({ id: Date.now(), title: 'Học 30s · chốt phiếu hôm nay', mode: 'flash', voteType: 'flashcard', ids: ids });
+                dispatch({ type: 'TAB', tab: 'practice', force: true });
+                window.scrollTo(0, 0);
+            };
             const openMyPack = (id) => {
                 if (nav.busy && !confirm('Bạn đang giữa một ca / phòng thi. Thoát ra?')) return;
                 setSession(s => (s && s.slotId ? s : null));
@@ -7389,6 +7824,9 @@
                                     {it.k === 'today' && slotDue && <><span className="side-dot" aria-hidden="true" /><span className="sr-only">, có ca học đến giờ</span></>}
                                 </button>
                             ))}
+                            <button type="button" className="side-link side-ai" onClick={openReading}>
+                                <Icon name="sparkles" size={18} /> <span className="min-w-0 flex-1 truncate text-left">AI quét bài đọc</span><span className="side-new">AI</span>
+                            </button>
                         </nav>
                         <p className="side-head">Kho đề của tôi</p>
                         {myPacks.length ? (
@@ -7421,7 +7859,7 @@
                                     onSetup={openSetup} account={account} setupDone={setupDone} />
                             ) : nav.tab === 'library' ? (
                                 <LibraryView items={items} setItems={setItems} groups={groups} groupFilter={groupFilter} setGroupFilter={setGroupFilter}
-                                    onPractice={startPractice} onWeak={startWeak} onStudyFrom={studyFrom} toast={toast} mergeItems={mergeItems} />
+                                    onPractice={startPractice} onWeak={startWeak} onStudyFrom={studyFrom} onQuickVote={quickVote} toast={toast} mergeItems={mergeItems} />
                             ) : (
                                 <PracticeHub items={items} itemsById={itemsById} groups={groups} groupFilter={groupFilter} setGroupFilter={setGroupFilter}
                                     session={session && !session.slotId ? session : null} startSession={restartSession} closeSession={() => setSession(null)}
