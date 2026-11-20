@@ -577,7 +577,8 @@ export async function listQuotas(env) {
     const list = (Array.isArray(codes) ? codes : []).map((code) => cleanCode(code)).filter(Boolean).slice(0, 200);
     if (!list.length) return [];
     const rows = await redisPipeline(env, list.map((code) => ['HGETALL', 'fpass:quota:' + code]));
-    return list.map((code, i) => quotaView(code, rows[i])).sort((a, b) => b.updated - a.updated);
+    const mails = await redisPipeline(env, list.map((code) => ['GET', 'fpass:fundmail:' + code]));
+    return list.map((code, i) => Object.assign(quotaView(code, rows[i]), { email: typeof mails[i] === 'string' ? mails[i].slice(0, 120) : '' })).sort((a, b) => b.updated - a.updated);
 }
 
 export async function listTransactions(env) {

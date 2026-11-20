@@ -1,8 +1,9 @@
 import { createGift, listGifts, toggleGift } from './account.js';
 import { clearCookie, loginAdmin, logoutAdmin, requireAdmin, sessionCookie, sessionToken, trustedWrite } from './admin-auth.js';
-import { OFFICIAL_BODY, deleteOfficial, listOfficial, listPending, publishPending, rejectPending, saveOfficial, takePending } from './exams-store.js';
+import { OFFICIAL_BODY, addQuestions, deleteOfficial, deleteQuestion, listOfficialForAdmin, listPending, publishPending, rejectPending, saveOfficial, saveQuestion, takePending } from './exams-store.js';
 import { clientIp, fail, json, mount, sameOrigin } from './http.js';
 import { adjustAiGrant, adjustQuota, listQuotas, listTransactions } from './ledger.js';
+import { readGuide, saveGuide } from './site.js';
 import { recordVisit, visitHistory } from './visits.js';
 
 export async function handleLogin(req, env) {
@@ -74,7 +75,7 @@ export async function handleExams(req, env) {
         const denied = await gate(req, env);
         if (denied) return denied;
         if (req.method === 'GET') {
-            const exams = await listOfficial(env);
+            const exams = await listOfficialForAdmin(env);
             const pending = await listPending(env);
             return json(200, { exams, pending });
         }
@@ -84,6 +85,10 @@ export async function handleExams(req, env) {
             await deleteOfficial(env, (body && body.id) || '');
             return json(200, { ok: true });
         }
+        /* Ngân hàng câu hỏi: sửa, thêm, xóa từng câu trong một đề. */
+        if (op === 'q-save') return json(200, await saveQuestion(env, body.id, body.item || {}));
+        if (op === 'q-add') return json(200, await addQuestions(env, body.id, body.items));
+        if (op === 'q-delete') return json(200, await deleteQuestion(env, body.id, body.qid));
         if (op === 'reject') {
             await rejectPending(env, body.id);
             return json(200, { ok: true });
@@ -158,6 +163,19 @@ export async function handleGiftcodes(req, env) {
     } catch (e) {
         if (e && (e.code === 'exists' || e.code === 'bad-gift' || e.code === 'missing-gift')) return json(400, { error: e.message });
         return fail(e, 'admin-gifts');
+    }
+}
+
+export async function handleGuide(req, env) {
+    try {
+        const denied = await gate(req, env);
+        if (denied) return denied;
+        if (req.method === 'GET') return json(200, { guide: await readGuide(env) });
+        if (req.method !== 'POST') return json(405, { error: 'Chỉ nhận GET hoặc POST.' });
+        const body = await req.json(8000);
+        return json(200, { guide: await saveGuide(env, body || {}) });
+    } catch (e) {
+        return fail(e, 'admin-guide');
     }
 }
 

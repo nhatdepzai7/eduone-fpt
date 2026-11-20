@@ -10,7 +10,7 @@ import { fileURLToPath } from 'node:url';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const out = join(root, 'dist');
-const PUBLIC = ['index.html', 'admin', 'js', 'public', 'assets'];
+const PUBLIC = ['index.html', 'app.html', 'admin', 'js', 'public', 'assets'];
 
 rmSync(out, { recursive: true, force: true });
 mkdirSync(out, { recursive: true });
