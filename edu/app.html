@@ -3970,8 +3970,7 @@
                 label = 'Ca ' + slot.id + ' · ' + slot.anchorLabel + ' · bước đọc sách cuối ca';
                 big = 'Pha 2';
             } else if (live) {
-                label = 'Ca ' + slot.id + ' · ' + slot.anchorLabel + (late ? ' · đang trễ giờ' : ' · đã đến giờ học');
-                big = late ? 'Trễ giờ' : 'Đến giờ';
+                label = 'Ca ' + slot.id + ' · ' + slot.anchorLabel;
             } else if (slot) {
                 label = 'Ca ' + slot.id + ' · ' + slot.anchorLabel + ' bắt đầu sau';
                 big = Plan.fmtCountdown(msUntil(slot));
@@ -3980,6 +3979,12 @@
             const lean = slot ? Math.min(2, slot.baseCardCount || 8) : 2;
             const quick = Math.min(8, Math.max(cardCount, 1));
             const resume = live && slot.deckIds && slot.deckIds.length && !slot.cardsDone;
+            /* Đang trong ca: tiêu đề chữ (không dùng font đồng hồ), kèm thời gian còn lại hoặc đã trễ bao lâu. */
+            const startMin = slot ? Plan.triggerMin(slot) : 0;
+            const nowMin = nowD.getHours() * 60 + nowD.getMinutes();
+            const lateBy = Math.max(0, nowMin - startMin);
+            const lateText = lateBy >= 60 ? Math.floor(lateBy / 60) + ' giờ' + (lateBy % 60 ? ' ' + (lateBy % 60) + ' phút' : '') : lateBy + ' phút';
+            const onTimeLeft = live && !late ? Math.max(0, (startMin + 30) * 60000 - (nowD.getTime() - new Date(nowD).setHours(0, 0, 0, 0))) : 0;
             return (
                 <section className="cmd-card p-5 text-left sm:p-7" aria-label="Ca học hôm nay">
                     <div className="relative z-10">
@@ -3987,10 +3992,23 @@
                             <span className="cmd-pill bg-white/15 text-white"><Icon name="lock" size={13} /> Lịch hôm nay đã khóa</span>
                             <span className="text-xs text-indigo-200">Sửa lịch chỉ áp dụng từ 00:00 ngày mai</span>
                         </div>
-                        <p className="mt-5 text-sm font-semibold text-indigo-100">{label}</p>
-                        <p className="tnum mt-1 flex items-center gap-3 text-5xl font-semibold tracking-tight sm:text-6xl" role="timer" aria-live="off">
-                            {live && <span className="h-3 w-3 shrink-0 rounded-full bg-[#F87171] pulse-rec" aria-hidden="true" />}{big}
+                        <p className="mt-5 flex flex-wrap items-center gap-2 text-sm font-semibold text-indigo-100">
+                            {live && <span className="h-2.5 w-2.5 shrink-0 rounded-full bg-[#F87171] pulse-rec" aria-hidden="true" />}
+                            {label}
+                            {live && <span className={'cmd-pill ' + (late ? 'bg-amber-300/20 text-amber-100' : 'bg-emerald-300/20 text-emerald-100')}>{late ? 'Trễ ' + lateText : 'Đúng giờ'}</span>}
                         </p>
+                        {live ? (
+                            <>
+                                <h2 className="mt-2 text-3xl font-extrabold leading-tight tracking-tight sm:text-4xl">{late ? 'Vẫn kịp gỡ ca này' : 'Đến giờ học rồi'}</h2>
+                                <p className="mt-2 text-sm leading-6 text-indigo-100">
+                                    {late
+                                        ? 'Ca bắt đầu lúc ' + Plan.hhmmOf(startMin) + '. Học bù bản rút gọn ' + full + ' thẻ là xong ca.'
+                                        : <>Còn <b className="tnum font-semibold text-white">{Plan.fmtCountdown(onTimeLeft)}</b> trong khung đúng giờ · {full} thẻ</>}
+                                </p>
+                            </>
+                        ) : (
+                            <p className="tnum mt-1 text-5xl font-semibold tracking-tight sm:text-6xl" role="timer" aria-live="off">{big}</p>
+                        )}
                         {cur.kind === 'ALL_DONE' && firstSlot && <p className="mt-1 text-sm text-indigo-100">Ca đầu tiên ngày mai lúc {firstSlot.time}. Không nợ thẻ sang mai.</p>}
                         <div className="mt-6"><SlotPath slots={plan.slots} activeId={slot && slot.id} /></div>
 
