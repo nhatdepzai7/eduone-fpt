@@ -91,6 +91,16 @@
         body:has(.eos-shell) .bnav { display: none; }
         .id-invite { display: inline-flex; align-items: center; gap: 4px; min-height: 34px; padding: 0 12px; border-radius: 999px; background: var(--primary-soft); color: var(--primary); border: 1px dashed var(--primary); font-size: 13px; font-weight: 700; white-space: nowrap; transition: background .15s ease, color .15s ease; }
         .id-invite:hover { background: var(--primary); color: #fff; }
+        .src-pick { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 4px; padding: 4px; border-radius: 14px; background: var(--surface-2); }
+        .src-opt { display: inline-flex; align-items: center; justify-content: center; gap: 5px; min-height: 36px; padding: 0 6px; border-radius: 10px; font-size: 13px; font-weight: 600; color: var(--ink-2); white-space: nowrap; transition: background .15s ease, color .15s ease; }
+        .src-opt:hover:not(:disabled) { color: var(--ink); }
+        .src-opt.is-on { background: var(--surface); color: var(--primary); box-shadow: 0 1px 3px rgba(15, 23, 42, .12); }
+        .src-opt:disabled { opacity: .45; cursor: not-allowed; }
+        .warm-opt { display: flex; align-items: flex-start; gap: 6px; width: 100%; min-height: 44px; padding: 10px 12px; border-radius: 12px; border: 1px solid var(--border); background: var(--surface); text-align: left; font-size: 14px; line-height: 1.5; color: var(--ink); transition: border-color .15s ease, background .15s ease; }
+        .warm-opt:hover:not(:disabled) { border-color: var(--primary); background: var(--primary-soft); }
+        .warm-opt:disabled { cursor: default; }
+        .warm-opt.is-good { border-color: var(--success); background: var(--success-soft); color: var(--success); }
+        .warm-opt.is-bad { border-color: #DC2626; background: #FEF2F2; color: #B91C1C; }
         .id-edit { display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; margin-left: 4px; vertical-align: middle; border-radius: 10px; color: var(--muted); transition: background .15s ease, color .15s ease; }
         .id-edit:hover { background: var(--primary-soft); color: var(--primary); }
         .stat-pill { position: relative; display: inline-flex; align-items: center; gap: 5px; min-height: 32px; padding: 0 11px; border-radius: 999px; background: var(--surface); border: 1px solid var(--border); color: var(--ink-2); font-size: 13px; font-weight: 500; white-space: nowrap; }
@@ -897,44 +907,37 @@
             }, [pick]);
             const choose = (option, locked) => pickIdentity(option, locked, () => setPick(false));
             return (
-                <section className="card mb-4 p-4 text-left sm:p-5" aria-label="Bản sắc hôm nay" ref={box}>
-                    <p className="text-xs font-semibold tracking-[0.14em] text-ink2">BẢN SẮC</p>
-                    <h2 className="mt-1">
-                        <button type="button" onClick={() => setPick(v => !v)} aria-expanded={pick} aria-haspopup="dialog" onMouseDown={(e) => e.preventDefault()} className="identity-title text-left text-xl font-bold leading-tight text-ink sm:text-2xl">{name}</button>
+                <section className="card p-4 text-left sm:p-5" aria-label="Bản sắc hôm nay" ref={box}>
+                    <p className="text-xs font-semibold tracking-[0.14em] text-muted">BẢN SẮC</p>
+                    <h2 className="mt-0.5">
+                        <button type="button" onClick={() => setPick(v => !v)} aria-expanded={pick} aria-haspopup="dialog" onMouseDown={(e) => e.preventDefault()} className="identity-title text-left text-lg font-bold leading-tight text-ink sm:text-xl">{name}</button>
                     </h2>
                     {pick && (
                         <div role="dialog" aria-label="Chọn bản sắc" className="mt-3">
                             <IdentityMenu current={label} obsidian={obsidian} dark={false} onChoose={choose} />
                         </div>
                     )}
-                    <p className="mt-2 text-base leading-6 text-ink2">{identityLine(label)}</p>
+                    <p className="mt-1 text-sm leading-6 text-ink2">{identityLine(label)}</p>
                     {summary && rank ? (
-                        <>
-                            <div className="mt-4 flex flex-wrap gap-x-4 gap-y-1 text-sm font-semibold text-ink">
-                                <span className="tnum">{summary.total} phiếu</span>
-                                <span className="tnum">{summary.todayCount} phiếu hôm nay</span>
-                            </div>
-                            <div className="mt-3">
-                                <div className="mb-1 flex flex-wrap items-baseline justify-between gap-2 text-sm text-ink2">
-                                    <span>Cấp {rank.level}</span>
-                                    <span className="tnum">{rank.next == null ? 'Đã tới mốc cao nhất' : (summary.total + '/' + rank.next)}</span>
-                                </div>
-                                <div className="h-2.5 overflow-hidden rounded-full bg-[#E2E8F0]" role="progressbar" aria-valuemin={0} aria-valuemax={rank.next == null ? summary.total : rank.next} aria-valuenow={summary.total} aria-label="Tiến độ tới cấp kế">
+                        <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2">
+                            <div className="flex min-w-[10rem] flex-1 items-center gap-2 text-xs text-ink2">
+                                <span className="shrink-0 font-semibold text-ink">Cấp {rank.level}</span>
+                                <div className="h-2 flex-1 overflow-hidden rounded-full bg-[#E2E8F0]" role="progressbar" aria-valuemin={0} aria-valuemax={rank.next == null ? summary.total : rank.next} aria-valuenow={summary.total} aria-label="Tiến độ tới cấp kế">
                                     <div className="h-full rounded-full bg-[#4338CA]" style={{ width: (progress * 100) + '%' }} />
                                 </div>
+                                <span className="tnum shrink-0">{rank.next == null ? 'Mốc cao nhất' : (summary.total + '/' + rank.next)}</span>
                             </div>
-                            <div className="mt-4 flex gap-2" role="img" aria-label={'7 ngày gần nhất, ' + lit + ' ngày có phiếu'}>
+                            <div className="flex gap-1.5" role="img" aria-label={'7 ngày gần nhất, ' + lit + ' ngày có phiếu'}>
                                 {summary.last7.map(day => (
-                                    <span key={day.date} className={'h-3.5 w-3.5 rounded-full ' + (day.on ? 'bg-[#4338CA]' : 'border-2 border-[#64748B] bg-white')} />
+                                    <span key={day.date} className={'h-3 w-3 rounded-full ' + (day.on ? 'bg-[#4338CA]' : 'border-2 border-[#94A3B8] bg-white')} />
                                 ))}
                             </div>
-                        </>
+                        </div>
                     ) : <p className="mt-3 text-sm text-ink2">Đang mở phiếu…</p>}
                     {summary && !summary.confirmedToday && (
-                        <div className="mt-4">
-                            <p className="text-sm font-medium text-ink">Chỉ cần 1 phiên 5 câu là bạn có phiếu hôm nay</p>
-                            {pulse.neverMiss ? <p className="mt-1 text-sm font-medium text-ink">Không sao, đừng bỏ lỡ hai ngày liên tiếp.</p> : null}
-                            <button type="button" className="btn btn-primary mt-3" onClick={onBurst} disabled={!canBurst}>{canBurst ? 'Bắt đầu Băng đạn 5 câu' : 'Cần đủ 5 mục trong kho'}</button>
+                        <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-2 border-t border-line pt-3">
+                            <p className="min-w-0 flex-1 text-sm text-ink2">{pulse.neverMiss ? 'Hôm qua lỡ rồi, đừng để hai ngày liền nhé. ' : ''}Xong 1 ca, kể cả Chạm đáy 2 thẻ, là có phiếu hôm nay.</p>
+                            {canBurst && <button type="button" className="btn btn-secondary btn-sm shrink-0" onClick={onBurst}><Icon name="zap" size={14} /> Băng đạn 5 câu</button>}
                         </div>
                     )}
                 </section>
@@ -3775,6 +3778,89 @@
            4 lối vào các trụ cột. Màn lật thẻ chỉ mở khi người dùng bấm bắt đầu, và luôn có nút về Tổng quan. */
         const greetOf = (d) => { const h = d.getHours(); return h < 11 ? 'Chào buổi sáng' : h < 14 ? 'Chào buổi trưa' : h < 18 ? 'Chào buổi chiều' : 'Chào buổi tối'; };
 
+        /* Nguồn câu hỏi cho ca học và câu khởi động: Sổ từ của bạn, Kho đề EOS (đề hệ thống) hoặc trộn cả 2. */
+        const SLOT_SOURCES = [
+            { key: 'vocab', label: 'Sổ từ', icon: 'book' },
+            { key: 'eos', label: 'Kho đề EOS', icon: 'monitor' },
+            { key: 'mix', label: 'Cả 2', icon: 'shuffle' }
+        ];
+        const readSource = () => { const v = Store.prefs.get('slotSource', 'mix'); return SLOT_SOURCES.some(s => s.key === v) ? v : 'mix'; };
+        const SourcePicker = ({ value, onChange, bankCount, dark }) => (
+            <div className={'src-pick' + (dark ? ' is-dark' : '')} role="radiogroup" aria-label="Nguồn câu hỏi">
+                {SLOT_SOURCES.map(s => {
+                    const off = s.key === 'eos' && !bankCount;
+                    return (
+                        <button key={s.key} type="button" role="radio" aria-checked={value === s.key} disabled={off} title={off ? 'Kho đề EOS chưa tải xong' : undefined}
+                            onClick={() => onChange(s.key)} className={'src-opt' + (value === s.key ? ' is-on' : '')}>
+                            <Icon name={s.icon} size={14} /> {s.label}
+                        </button>
+                    );
+                })}
+            </div>
+        );
+
+        /* Câu khởi động khi đến giờ ca (tâm lý học dòng chảy: 1 câu dễ để vào guồng, rồi mới vào ca).
+           Hiện tự động, không mở cả màn học. Trả lời xong mới chọn học đủ ca hay Chạm đáy. */
+        const FlowKick = ({ slot, kind, warm, source, bankCount, onSource, onAnswer, onStart, onLater, cardCount }) => {
+            const [picked, setPicked] = useState(null);
+            const [shown, setShown] = useState(false);
+            useEffect(() => { setPicked(null); setShown(false); }, [warm && warm.item.id]);
+            const t = warm ? warm.item : null;
+            const isMcq = !!(t && t.type === 'mcq');
+            const answered = picked != null;
+            const right = isMcq ? picked === t.answerOrMeaning : picked === 'ok';
+            const choose = (val) => { if (answered) return; setPicked(val); onAnswer(warm, isMcq ? val === t.answerOrMeaning : val === 'ok'); };
+            const late = kind === 'LATE_RECOVERY';
+            return (
+                <Modal title={'Đến giờ ca ' + slot.id + ' · ' + slot.anchorLabel} onClose={onLater} badge={late ? 'Trễ giờ' : 'Câu khởi động'}>
+                    <p className="text-sm leading-6 text-ink2">Trả lời 1 câu để vào guồng. Đầu đã chạy rồi thì học tiếp cả ca dễ hơn nhiều.</p>
+                    <div className="mt-3"><SourcePicker value={source} onChange={onSource} bankCount={bankCount} /></div>
+                    {!t ? (
+                        <p className="mt-4 rounded-2xl bg-surface2 p-4 text-sm text-ink2">Nguồn này chưa có câu nào. Đổi nguồn khác, hoặc thêm vài thẻ vào Sổ từ.</p>
+                    ) : (
+                        <div className="mt-4 rounded-2xl border border-line p-4">
+                            <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-muted">{warm.bank ? 'Kho đề EOS · ' + warm.bank.code : 'Sổ từ · ' + Sch.groupLabel(t.group)}</p>
+                            <p className="mt-1.5 text-base font-semibold leading-7 text-ink text-flow">{t.questionOrWord}</p>
+                            {isMcq ? (
+                                <div className="mt-3 grid gap-2">
+                                    {t.options.map((o, i) => {
+                                        if (!o) return null;
+                                        const letter = 'ABCDEF'[i];
+                                        const good = answered && letter === t.answerOrMeaning;
+                                        const bad = answered && letter === picked && !good;
+                                        return (
+                                            <button key={letter} type="button" disabled={answered} onClick={() => choose(letter)}
+                                                className={'warm-opt' + (good ? ' is-good' : '') + (bad ? ' is-bad' : '')}>
+                                                <b className="shrink-0">{letter}.</b> <span className="text-flow">{o}</span>
+                                            </button>
+                                        );
+                                    })}
+                                </div>
+                            ) : !shown ? (
+                                <button type="button" className="btn btn-secondary mt-3" onClick={() => setShown(true)}><Icon name="eye" size={15} /> Hiện nghĩa</button>
+                            ) : (
+                                <>
+                                    <p className="mt-3 rounded-xl bg-surface2 px-3 py-2 text-sm text-ink text-flow">{t.answerOrMeaning}</p>
+                                    {!answered && (
+                                        <div className="mt-3 flex gap-2">
+                                            <button type="button" className="btn btn-danger btn-sm" onClick={() => choose('no')}>Quên</button>
+                                            <button type="button" className="btn btn-success btn-sm" onClick={() => choose('ok')}>Đã nhớ</button>
+                                        </div>
+                                    )}
+                                </>
+                            )}
+                            {answered && <p className={'mt-3 text-sm font-semibold ' + (right ? 'text-success' : 'text-warn')}>{right ? 'Chuẩn! Đang vào guồng rồi, đi tiếp luôn.' : (warm.bank ? 'Câu này đã vào Sổ từ để ôn lại. Vào ca gỡ điểm nhé.' : 'Không sao, ca này sẽ nhắc lại.')}</p>}
+                        </div>
+                    )}
+                    <div className="mt-4 flex flex-wrap gap-2">
+                        <button type="button" className="btn btn-primary" onClick={() => onStart(false)}><Icon name="play" size={15} /> {answered ? 'Học tiếp ca ' + slot.id : 'Vào ca ' + slot.id}{cardCount ? ' · ' + cardCount + ' thẻ' : ''}</button>
+                        <button type="button" className="btn btn-secondary" onClick={() => onStart(true)}><Icon name="zap" size={15} /> Chạm đáy 30s · 2 thẻ</button>
+                        <button type="button" className="btn btn-ghost" onClick={onLater}>Để sau</button>
+                    </div>
+                </Modal>
+            );
+        };
+
         /* Chọn hoặc tự đặt bản sắc (Atomic Habits: mỗi ca học là một phiếu bầu cho con người bạn muốn trở thành). */
         const IdentityPicker = ({ onClose }) => {
             const label = useIdentity();
@@ -4012,11 +4098,8 @@
         ];
 
         const PillarGrid = ({ onOpen }) => (
-            <section aria-labelledby="pillars-title" className="mt-8">
-                <div className="mb-3 flex items-end justify-between gap-3">
-                    <h2 id="pillars-title" className="text-lg font-bold text-ink sm:text-xl">Mọi thứ để qua môn, ở một chỗ</h2>
-                </div>
-                <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+            <div>
+                <div className="grid grid-cols-2 gap-3">
                     {PILLARS.map(p => (
                         <button key={p.key} type="button" className="pillar" onClick={() => onOpen(p.key)}>
                             <span className="flex w-full items-center justify-between gap-2">
@@ -4032,17 +4115,17 @@
                         </button>
                     ))}
                 </div>
-            </section>
+            </div>
         );
 
-        const ScheduleCard = ({ plan, cur, week, nextWeek, groups, saveWeek, toast, askNotify, onSetup, account, setupDone, editOpen, setEditOpen, editRef }) => {
+        const ScheduleCard = ({ plan, cur, week, nextWeek, groups, saveWeek, toast, askNotify, onSetup, account, setupDone, editOpen, setEditOpen, editRef, source, onSource, bankCount }) => {
             const slot = cur.slot;
             const p2 = (slot && slot.phase2_externalTask) || {};
             const perm = window.Notification ? Notification.permission : 'denied';
             return (
-                <section className="card h-full p-5 scroll-mt-24" aria-label="Lịch tuần" ref={editRef}>
+                <section className="card p-4 scroll-mt-24 sm:p-5" aria-label="Lịch tuần" ref={editRef}>
                     <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted">Lịch học</p>
-                    <div className="my-3 grid grid-cols-7 gap-1 text-center text-xs" aria-label="Ngày trong tuần">
+                    <div className="my-2 grid grid-cols-7 gap-1 text-center text-xs" aria-label="Ngày trong tuần">
                         {Plan.WEEK.map(k => (
                             <span key={k} aria-current={k === plan.dayKey ? 'date' : undefined} className={'rounded-full py-1 ' + (k === plan.dayKey ? 'bg-ink font-semibold text-white' : 'text-muted')}>
                                 {String(Plan.WEEK_LABEL[k] || '').replace('Thứ ', 'T').replace('Chủ nhật', 'CN')}
@@ -4050,12 +4133,16 @@
                         ))}
                     </div>
                     {slot && cur.kind !== 'ALL_DONE' && (
-                        <div className="rounded-2xl bg-surface2 p-4">
+                        <div className="rounded-2xl bg-surface2 px-4 py-3">
                             <p className="text-xs font-semibold text-muted">Ca {slot.id} · {Plan.MODE_LABEL[slot.mode]} · {slot.baseCardCount} thẻ</p>
-                            <p className="mt-1 font-semibold text-ink">{Plan.hhmmOf(Plan.triggerMin(slot))} · {slot.anchorLabel} · {Sch.groupLabel(slot.group)}</p>
-                            <p className="mt-1 text-sm text-ink2 text-flow">{p2.hasExternal ? (p2.bookTitle + ' — ' + p2.taskDetail) : (p2.classSyncNote || 'Ca này chỉ học trên app')}</p>
+                            <p className="mt-0.5 font-semibold text-ink">{Plan.hhmmOf(Plan.triggerMin(slot))} · {slot.anchorLabel} · {Sch.groupLabel(slot.group)}</p>
+                            <p className="mt-0.5 text-sm text-ink2 text-flow">{p2.hasExternal ? (p2.bookTitle + ' — ' + p2.taskDetail) : (p2.classSyncNote || 'Ca này chỉ học trên app')}</p>
                         </div>
                     )}
+                    <div className="mt-3">
+                        <p className="mb-1.5 text-xs font-semibold text-ink2">Câu hỏi trong ca lấy từ</p>
+                        <SourcePicker value={source} onChange={onSource} bankCount={bankCount} />
+                    </div>
                     {plan.slots.some(s => s.dienTam) && <p className="mt-3 text-sm text-warn text-flow">Một vài phần sách hôm nay đang là buổi ôn tạm. Sửa lịch ngày mai nếu khác.</p>}
                     <div className="mt-4 flex flex-wrap gap-2">
                         {!setupDone && <button type="button" className="btn btn-primary btn-sm" onClick={onSetup}><Icon name="calendar" size={14} /> {account ? 'Đặt giờ 3 ca của bạn' : 'Đăng nhập để đặt giờ riêng'}</button>}
@@ -4069,7 +4156,7 @@
         };
 
         const TodayView = (p) => {
-            const { plan, planReady, week, nextWeek, now, items, itemsById, groups, session, cur, saveWeek, addItems, finishGate, snooze, askNotify, bonus, closeSession, startSession, review, patch, toast, finishSlot, onBurst, onStudyNow, onStart, onPillar, onLogin, onSetup, account, setupDone } = p;
+            const { plan, planReady, week, nextWeek, now, items, itemsById, groups, session, cur, saveWeek, addItems, finishGate, snooze, askNotify, bonus, closeSession, startSession, review, patch, toast, finishSlot, onBurst, onStudyNow, onStart, onPillar, onLogin, onSetup, account, setupDone, source, onSource, bankCount } = p;
             const [editOpen, setEditOpen] = useState(() => takeGo('plan'));
             const [starterHidden, setStarterHidden] = useState(() => !!Store.prefs.get('starterHidden', false));
             const editRef = useRef(null);
@@ -4078,16 +4165,19 @@
             const slot = cur.slot;
             const filled = items.filter(Sch.isFilled).length;
 
+            /* Ca lấy câu từ Kho đề EOS: các câu đó không nằm trong Sổ từ, đi kèm phiên trong session.extra. */
+            const extra = session && Array.isArray(session.extra) && session.extra.length ? session.extra : null;
             const renderSession = () => {
                 if (session.mode === 'burst') {
+                    const byIdAll = extra ? new Map(Array.from(itemsById.entries()).concat(extra.map(t => [t.id, t]))) : itemsById;
                     return (
-                        <BurstSession key={session.id} itemsById={itemsById} ids={session.ids} title={session.title} subtitle={session.slotId ? 'Pha 1 · Băng đạn 5 câu' : 'Băng đạn 5 câu'} sessionId={session.id} voteType={session.voteType} slotId={session.slotId}
+                        <BurstSession key={session.id} itemsById={byIdAll} ids={session.ids} title={session.title} subtitle={session.slotId ? 'Pha 1 · Băng đạn 5 câu' : 'Băng đạn 5 câu'} sessionId={session.id} voteType={session.voteType} slotId={session.slotId}
                             onReview={(id, ok) => review(id, ok)} toast={toast}
                             onFinish={(st) => { if (session.slotId) finishSlot({ slotId: session.slotId, cardsDone: st.total, remembered: st.firstTryCorrect }); }}
                             renderDone={session.slotId ? () => null : undefined} onExit={session.slotId ? undefined : closeSession} />
                     );
                 }
-                return <FlashSession key={session.id} items={items} session={session} onReview={review} onPatch={patch} onFinish={finishSlot} onClose={closeSession} onRestart={startSession} toast={toast} />;
+                return <FlashSession key={session.id} items={extra ? items.concat(extra) : items} session={session} onReview={review} onPatch={patch} onFinish={finishSlot} onClose={closeSession} onRestart={startSession} toast={toast} />;
             };
 
             /* Màn học: chỉ mở khi người dùng bấm bắt đầu. Luôn có nút về Tổng quan; ca đang dở thì quay lại học tiếp được. */
@@ -4148,15 +4238,17 @@
                         </div>
                         <HeroStats done={doneCount} total={active.length} />
                     </div>
+                    {/* Màn đầu (above the fold): ca học bên trái, Bản sắc + Lịch học bên phải. */}
                     <div className="grid gap-4 lg:grid-cols-12">
-                        <div className="lg:col-span-7">
+                        <div className="lg:col-span-7 [&>section]:h-full">
                             <FocusCard plan={plan} cur={cur} now={now} cardCount={filled} onStart={onStart} onStudyNow={onStudyNow} onSnooze={snooze} onBonus={bonus} onReceipt={receipt}
                                 onGate={() => { const el = document.getElementById('flow-bridge'); if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' }); }} />
                         </div>
-                        <div className="lg:col-span-5">
-                            {showStarter
-                                ? <StarterSteps studied={studied} triedEos={triedEos} account={account} onStudy={onStudyNow} onEos={() => onPillar('eos')} onLogin={onLogin} onHide={hideStarter} />
-                                : <TodayStats plan={plan} items={items} queued={(Store.prefs.get(EOS_QUEUE, []) || []).length} />}
+                        <div className="flex flex-col gap-4 lg:col-span-5">
+                            <IdentityToday canBurst={filled >= 5} onBurst={onBurst} />
+                            <ScheduleCard plan={plan} cur={cur} week={week} nextWeek={nextWeek} groups={groups} saveWeek={saveWeek} toast={toast} askNotify={askNotify}
+                                onSetup={onSetup} account={account} setupDone={setupDone} editOpen={editOpen} setEditOpen={setEditOpen} editRef={editRef}
+                                source={source} onSource={onSource} bankCount={bankCount} />
                         </div>
                     </div>
                     {cur.kind === 'GATE' && slot && (
@@ -4164,14 +4256,17 @@
                             <FlowBridge slot={slot} items={items} addItems={addItems} finishGate={finishGate} toast={toast} now={now} />
                         </div>
                     )}
-                    <PillarGrid onOpen={onPillar} />
-                    <div className="mt-8 grid gap-4 lg:grid-cols-12">
-                        <div className="lg:col-span-7 [&>section]:mb-0 [&>section]:h-full"><IdentityToday canBurst={filled >= 5} onBurst={onBurst} /></div>
-                        <div className="lg:col-span-5">
-                            <ScheduleCard plan={plan} cur={cur} week={week} nextWeek={nextWeek} groups={groups} saveWeek={saveWeek} toast={toast} askNotify={askNotify}
-                                onSetup={onSetup} account={account} setupDone={setupDone} editOpen={editOpen} setEditOpen={setEditOpen} editRef={editRef} />
+                    <section aria-labelledby="pillars-title" className="mt-8">
+                        <h2 id="pillars-title" className="mb-3 text-lg font-bold text-ink sm:text-xl">Mọi thứ để qua môn, ở một chỗ</h2>
+                        <div className="grid gap-4 lg:grid-cols-12">
+                            <div className="lg:col-span-7"><PillarGrid onOpen={onPillar} /></div>
+                            <div className="lg:col-span-5 [&>section]:h-full">
+                                {showStarter
+                                    ? <StarterSteps studied={studied} triedEos={triedEos} account={account} onStudy={onStudyNow} onEos={() => onPillar('eos')} onLogin={onLogin} onHide={hideStarter} />
+                                    : <TodayStats plan={plan} items={items} queued={(Store.prefs.get(EOS_QUEUE, []) || []).length} />}
+                            </div>
                         </div>
-                    </div>
+                    </section>
                 </div>
             );
         };
@@ -5906,6 +6001,8 @@
             const [nextWeek, setNextWeek] = useState(null);
             const [planReady, setPlanReady] = useState(false);
             const [minimal, setMinimal] = useState(false);
+            const [source, setSource] = useState(readSource);
+            const [kick, setKick] = useState(null);
             const [now, setNow] = useState(Date.now());
             const [hidden, setHidden] = useState(document.hidden);
             const [progress, setProgress] = useState({});
@@ -6083,6 +6180,15 @@
                 ? Object.assign({}, p, { items: (p.free || []).map(d => Sch.normalizeItem(d, { source: 'pack:' + p.id, group: p.code })) })
                 : p)), []);
             const packs = useMemo(() => catalogPacks.concat(systemPacks), [catalogPacks, systemPacks]);
+            /* Câu của Kho đề EOS (đề hệ thống) cho ca học, mang id riêng để không trùng thẻ trong Sổ từ. */
+            const bankPool = useMemo(() => {
+                const out = [];
+                systemPacks.forEach(pk => (pk.items || []).forEach(it => {
+                    if (!Sch.isFilled(it)) return;
+                    out.push({ id: ('bank-' + pk.id + '-' + it.id).slice(0, Sch.MAX.id), packId: pk.id, code: pk.code, item: it });
+                }));
+                return out;
+            }, [systemPacks]);
             const packById = useMemo(() => new Map(packs.map(p => [p.id, p])), [packs]);
             const itemsById = useMemo(() => new Map(items.map(t => [t.id, t])), [items]);
 
@@ -6233,6 +6339,12 @@
             /* ---------- Item operations ---------- */
             const review = (id, ok, kind) => setItems(prev => prev.map(t => (t.id === id ? Sch.applyReview(t, ok, kind).item : t)));
             const patch = (map) => setItems(prev => prev.map(t => (map[t.id] ? Object.assign({}, t, map[t.id]) : t)));
+            /* Câu Kho đề trong ca không có trong Sổ từ: trả lời sai thì đưa vào Sổ từ để ôn (giống phòng thi EOS). */
+            const reviewSlot = (id, ok, kind) => {
+                const b = session && session.bank && session.bank[id];
+                if (b) { if (!ok) queueEos([b]); return; }
+                review(id, ok, kind);
+            };
             const uniqueIds = (incoming, taken) => incoming.map(t => {
                 let id = t.id;
                 while (taken.has(id)) id = Sch.newId('it');
@@ -6326,12 +6438,14 @@
                 const slotNow = cur.slot;
                 if (!slotNow || !(cur.kind === 'ON_TIME_ACTIVE' || cur.kind === 'LATE_RECOVERY')) { studyNow(); return; }
                 const limit = lean ? Math.min(2, slotNow.baseCardCount || 8) : Plan.cardLimit(slotNow, cur.kind, false);
-                const ids = deckFor(slotNow, limit);
+                const deck = deckFor(slotNow, limit);
+                const ids = deck.ids;
+                setKick(null);
                 if (!ids.length) { dispatch({ type: 'TAB', tab: 'library', force: true }); toast('Nhóm "' + Sch.groupLabel(slotNow.group) + '" chưa có thẻ. Thêm vài thẻ trước nhé.', 'info'); return; }
                 setMinimal(!!lean);
                 const mode = sessionModeOf(slotNow.mode);
                 noteStudyStart();
-                setSession({ id: Date.now(), title: 'Ca ' + slotNow.id + ' · ' + slotNow.anchorLabel, mode: lean ? 'flash' : mode, voteType: voteTypeFor(lean ? 'flash' : mode), ids, slotId: slotNow.id, lean: !!lean });
+                setSession({ id: Date.now(), title: 'Ca ' + slotNow.id + ' · ' + slotNow.anchorLabel, mode: lean ? 'flash' : mode, voteType: voteTypeFor(lean ? 'flash' : mode), ids, slotId: slotNow.id, lean: !!lean, extra: deck.extra, bank: deck.bank });
                 dispatch({ type: 'TAB', tab: 'today', force: true });
                 window.scrollTo(0, 0);
             };
@@ -6413,26 +6527,71 @@
                 window.scrollTo(0, 0);
             };
             const finishGate = (slotId) => patchSlot(slotId, s => Object.assign({}, s, { status: 'done', finishedAt: new Date().toISOString() }));
+            const bankItem = (b) => Object.assign({}, b.item, { id: b.id, group: 'Kho đề EOS · ' + b.code });
+            const pickBank = (n) => Sch.shuffle(bankPool).slice(0, n);
+            const extrasOf = (deckBank, ids) => {
+                const list = (deckBank || []).filter(b => ids.indexOf(b.id) >= 0);
+                return { extra: list.map(bankItem), bank: list.reduce((m, b) => { m[b.id] = { item: b.item, packId: b.packId, code: b.code }; return m; }, {}) };
+            };
+            /* Bộ thẻ của ca theo nguồn đã chọn: Sổ từ (câu sai EOS lên đầu), Kho đề EOS, hoặc trộn nửa-nửa. */
             const deckFor = (slot, limit) => {
                 let full = slot.deckIds;
+                let deckBank = slot.deckBank || [];
                 if (!full || !full.length) {
                     const size = slot.baseCardCount || limit;
-                    const built = Plan.buildDeck(Object.assign({}, slot, { deckIds: null }), items, size).map(t => t.id);
-                    /* Câu sai / cắm cờ từ phòng thi EOS đứng đầu ca (tối đa nửa ca), phần còn lại theo lịch thường. */
-                    const queued = (Store.prefs.get(EOS_QUEUE, []) || []).filter(id => itemsById.has(id));
-                    const take = queued.slice(0, Math.max(1, Math.ceil(size / 2)));
-                    full = take.concat(built.filter(id => take.indexOf(id) < 0)).slice(0, size);
-                    Store.prefs.set(EOS_QUEUE, queued.slice(take.length));
-                    if (full.length) patchSlot(slot.id, s => Object.assign({}, s, { deckIds: full }));
+                    const src = bankPool.length ? source : 'vocab';
+                    const vocabNeed = src === 'eos' ? 0 : src === 'mix' ? Math.ceil(size / 2) : size;
+                    let mine = [];
+                    if (vocabNeed > 0) {
+                        const built = Plan.buildDeck(Object.assign({}, slot, { deckIds: null }), items, vocabNeed).map(t => t.id);
+                        /* Câu sai / cắm cờ từ phòng thi EOS đứng đầu (tối đa nửa phần Sổ từ), phần còn lại theo lịch thường. */
+                        const queued = (Store.prefs.get(EOS_QUEUE, []) || []).filter(id => itemsById.has(id));
+                        const take = queued.slice(0, Math.max(1, Math.ceil(vocabNeed / 2)));
+                        mine = take.concat(built.filter(id => take.indexOf(id) < 0)).slice(0, vocabNeed);
+                        Store.prefs.set(EOS_QUEUE, queued.slice(take.length));
+                    }
+                    deckBank = src === 'vocab' ? [] : pickBank(size - mine.length);
+                    const theirs = deckBank.map(b => b.id);
+                    /* Xen kẽ hai nguồn để ca không dồn một loại về một phía. */
+                    full = [];
+                    for (let i = 0; full.length < size && (i < mine.length || i < theirs.length); i += 1) {
+                        if (i < mine.length) full.push(mine[i]);
+                        if (i < theirs.length && full.length < size) full.push(theirs[i]);
+                    }
+                    const keep = full;
+                    if (keep.length) patchSlot(slot.id, sl => Object.assign({}, sl, { deckIds: keep, deckBank }));
                 }
-                return full.slice(0, limit);
+                const ids = full.slice(0, limit);
+                return Object.assign({ ids }, extrasOf(deckBank, ids));
+            };
+            /* Câu khởi động: 1 câu ngẫu nhiên từ nguồn đã chọn. "Cả 2" thì bốc thăm; nguồn trống thì lấy nguồn kia. */
+            const pickWarm = (key) => {
+                const mine = items.filter(Sch.isFilled);
+                const fromBank = () => { const b = pickBank(1)[0]; return b ? { item: bankItem(b), bank: { item: b.item, packId: b.packId, code: b.code } } : null; };
+                const fromMine = () => { const t = Sch.shuffle(mine)[0]; return t ? { item: t, bank: null } : null; };
+                const first = key === 'eos' ? fromBank : key === 'vocab' ? fromMine : (Math.random() < 0.5 ? fromBank : fromMine);
+                const second = first === fromBank ? fromMine : fromBank;
+                return first() || (key === 'mix' ? second() : null);
+            };
+            const answerWarm = (warm, ok) => {
+                if (!warm) return;
+                if (warm.bank) { if (!ok) queueEos([warm.bank]); }
+                else review(warm.item.id, ok);
+            };
+            /* Đổi nguồn: ca chưa bắt đầu soạn lại bộ thẻ theo nguồn mới. */
+            const changeSource = (key) => {
+                setSource(key);
+                Store.prefs.set('slotSource', key);
+                setPlan(pl => pl && Object.assign({}, pl, { slots: pl.slots.map(sl => (sl.status === 'pending' && !sl.cardsDone && !(session && session.slotId === sl.id)) ? Object.assign({}, sl, { deckIds: null, deckBank: null }) : sl) }));
+                setKick(k => (k ? Object.assign({}, k, { warm: pickWarm(key) }) : k));
             };
             const enterEarly = (slot) => {
-                const ids = deckFor(slot, Plan.cardLimit(slot, 'ON_TIME_ACTIVE', false));
+                const deck = deckFor(slot, Plan.cardLimit(slot, 'ON_TIME_ACTIVE', false));
+                const ids = deck.ids;
                 if (!ids.length) { toast('Nhóm này chưa có thẻ', 'error'); return; }
                 const mode = sessionModeOf(slot.mode);
                 noteStudyStart();
-                setSession({ id: Date.now(), title: 'Ca ' + slot.id + ' · ' + slot.anchorLabel, mode: mode, voteType: voteTypeFor(mode), ids, slotId: slot.id });
+                setSession({ id: Date.now(), title: 'Ca ' + slot.id + ' · ' + slot.anchorLabel, mode: mode, voteType: voteTypeFor(mode), ids, slotId: slot.id, extra: deck.extra, bank: deck.bank });
                 dispatch({ type: 'TAB', tab: 'today', force: true });
                 window.scrollTo(0, 0);
             };
@@ -6478,6 +6637,8 @@
                 if (alerted.current[key]) return;
                 alerted.current[key] = true;
                 Sfx.knock();
+                /* Đến giờ: hiện ngay 1 câu khởi động (không mở cả màn học). Đang học hay đang thi thì không chen ngang. */
+                if (!session) setKick({ slotId: slot.id, warm: pickWarm(source) });
                 if (document.hidden && window.Notification && Notification.permission === 'granted') {
                     try {
                         const n = new Notification('Đến giờ ca ' + slot.id + ' · ' + slot.anchorLabel, { body: 'Mở FPass: học đủ ca, hoặc Chạm đáy 30 giây để giữ chuỗi.', tag: 'ca-hoc-' + slot.id });
@@ -6487,7 +6648,9 @@
             }, [now, plan, live, loaded]);
 
             /* ---------- Treo tab cả ngày: nháy document.title bằng nội dung thẻ s1 ---------- */
-            const s1 = live ? itemsById.get(((cur.slot.deckIds && cur.slot.deckIds.length) ? cur.slot.deckIds : [])[0]) : null;
+            const s1id = live ? ((cur.slot.deckIds && cur.slot.deckIds.length) ? cur.slot.deckIds : [])[0] : null;
+            const s1b = s1id && !itemsById.has(s1id) ? (cur.slot.deckBank || []).find(b => b.id === s1id) : null;
+            const s1 = live ? (itemsById.get(s1id) || (s1b ? s1b.item : null)) : null;
             const titleA = live && s1 ? '🔴 [1/' + liveLimit + '] ' + promptOf(s1) : '';
             const titleB = live ? '🔔 Đến giờ ca ' + cur.slot.id + ' · ' + cur.slot.anchorLabel : '';
             useEffect(() => {
@@ -6644,7 +6807,7 @@
                                 <TodayView plan={plan} planReady={planReady} week={week} nextWeek={nextWeek} now={now} items={items} itemsById={itemsById} groups={groups}
                                     session={session} cur={cur} saveWeek={saveWeek} addItems={addItems} finishGate={finishGate}
                                     snooze={snooze} askNotify={askNotify} bonus={bonus} closeSession={() => { setSession(null); setMinimal(false); window.scrollTo(0, 0); }} startSession={restartSession} onBurst={startQuickBurst}
-                                    review={review} patch={patch} toast={toast} finishSlot={finishSlot}
+                                    review={reviewSlot} patch={patch} toast={toast} finishSlot={finishSlot} source={source} onSource={changeSource} bankCount={bankPool.length}
                                     onStudyNow={studyNow} onStart={startSlot} onPillar={openPillar} onLogin={() => { setPendingGift(''); setGoogleReason('save'); setGoogleOpen(true); }}
                                     onSetup={openSetup} account={account} setupDone={setupDone} />
                             ) : nav.tab === 'library' ? (
@@ -6718,6 +6881,12 @@
                         if (googleReason !== 'pay' && !Store.prefs.get('setupDone', false)) setSetupOpen(true);
                     }} />}
                     {guideOpen && <GuideModal onClose={() => setGuideOpen(false)} />}
+                    {kick && live && !session && cur.slot && cur.slot.id === kick.slotId && (
+                        <FlowKick slot={cur.slot} kind={cur.kind} warm={kick.warm} source={source} bankCount={bankPool.length} onSource={changeSource}
+                            cardCount={Plan.cardLimit(cur.slot, cur.kind, false)} onAnswer={answerWarm}
+                            onStart={(lean) => { setKick(null); dispatch({ type: 'TAB', tab: 'today', force: true }); startSlot(lean); }}
+                            onLater={() => setKick(null)} />
+                    )}
                     {setupOpen && <SetupWizard week={week} groups={groups} onSave={applySetup} onClose={() => setSetupOpen(false)} />}
                     {fundShop && <FundShop toast={toast} onClose={() => setFundShop(false)} />}
                     {upgradeOpen && <AiUnlockModal toast={toast} onClose={() => setUpgradeOpen(false)} />}
