@@ -855,6 +855,138 @@
         @keyframes dial-spin { to { transform: rotate(360deg); } }
         @media (prefers-reduced-motion: reduce) { .app-root[data-tier="obsidian"] .cmd-dial { animation: none; } .app-root[data-tier="obsidian"] .cmd-spot { transition: none; } }
         @media (prefers-reduced-motion: reduce) { .ob-chip, .app-side[data-tier="obsidian"] .side-link svg { transition: none; } }
+        /* ===== Obsidian Ngà (bản sáng của hội viên PRO): ngà ấm + vàng champagne + mực đen. Sáng, dịu mắt ngoài trời, vẫn sang. ===== */
+        .app-root { --ob-ink: #08080A; --ob-panel: #0C0C0F; --ob-line: rgba(232, 205, 150, .12); --ob-line-2: rgba(232, 205, 150, .22); --ob-gold: #D9B871; --ob-gold-hi: #F2DDA4; --ob-gold-lo: #A8884A; --ob-text: #EFEBE2; --ob-soft: #A39D90; --ob-mute: #6E695F; }
+        .app-root[data-tier="ivory"] { --iv-ink: #1C1810; --iv-text: #3A3328; --iv-soft: #6B6354; --iv-mute: #948B7A; --iv-gold: #B8913F; --iv-gold-hi: #D9B871; --iv-gold-deep: #7A5A1E; --iv-line: rgba(168, 136, 74, .2); --ob-text: #1C1810; }
+        body:has(.app-root[data-tier="ivory"]) { background: radial-gradient(1100px 560px at 50% -10%, #FFFEFA 0%, rgba(255, 254, 250, 0) 62%), #F4F0E7; }
+        .app-root[data-tier="ivory"] ::selection { background: rgba(217, 184, 113, .35); }
+        .app-root[data-tier="ivory"] :focus-visible { outline-color: var(--iv-gold); }
+        /* Topbar */
+        .ivory-head { position: relative; background: linear-gradient(180deg, #FFFEFA 0%, #FBF8F0 100%); border-bottom-color: transparent !important; color: var(--iv-ink); }
+        .ivory-head::after { content: ""; position: absolute; left: 0; right: 0; bottom: -1px; height: 1px; background: linear-gradient(90deg, rgba(184, 145, 63, 0) 0%, rgba(184, 145, 63, .45) 22%, rgba(217, 184, 113, .85) 50%, rgba(184, 145, 63, .45) 78%, rgba(184, 145, 63, 0) 100%); pointer-events: none; }
+        .ivory-head .btn-ghost { color: var(--iv-soft); }
+        .ivory-head .btn-ghost:hover:not(:disabled) { background: rgba(184, 145, 63, .1); color: var(--iv-gold-deep); }
+        .ivory-head .btn-secondary { background: #FFFFFF; color: var(--iv-ink); border-color: var(--iv-line); box-shadow: 0 1px 2px rgba(28, 24, 16, .05); }
+        .ivory-head .btn-secondary:hover:not(:disabled) { border-color: rgba(184, 145, 63, .5); }
+        .ivory-head .btn-primary { background: linear-gradient(180deg, #2A251B, #14110B); color: #F2DDA4; box-shadow: 0 6px 16px -8px rgba(28, 24, 16, .5); }
+        .ivory-head .top-contact { background: rgba(255, 255, 255, .7); border-color: var(--iv-line); }
+        .ivory-head .top-contact a { color: var(--iv-soft); }
+        .ivory-head .top-contact a:hover { background: #FFFFFF; color: var(--iv-gold-deep); }
+        .app-root[data-tier="ivory"] .ob-logo, .app-root[data-tier="eco"] .ob-logo { background: linear-gradient(160deg, #FFFFFF, #F6EEDC); }
+        .app-root[data-tier="ivory"] .ob-chip, .app-root[data-tier="eco"] .ob-chip { color: #7A5A1E; background: linear-gradient(180deg, #FFF9EA, #F5E9CC); box-shadow: inset 0 0 0 1px rgba(184, 145, 63, .45), 0 2px 8px -4px rgba(184, 145, 63, .45); }
+        .app-root[data-tier="ivory"] .ob-chip svg, .app-root[data-tier="eco"] .ob-chip svg { color: #B8913F; }
+        /* Sidebar + menu trượt */
+        @media (min-width: 1024px) {
+            .app-side[data-tier="ivory"] { background: linear-gradient(180deg, #FFFDF8 0%, #FAF6EC 60%, #F6F0E2 100%); border-right: 1px solid var(--iv-line); }
+        }
+        .app-side.is-drawer[data-tier="ivory"] { background: linear-gradient(180deg, #FFFDF8 0%, #F6F0E2 100%); border-right: 1px solid var(--iv-line); }
+        .app-side[data-tier="ivory"] .side-link { color: var(--iv-soft); font-weight: 500; }
+        .app-side[data-tier="ivory"] .side-link svg { color: var(--iv-mute); transition: color .15s ease; }
+        .app-side[data-tier="ivory"] .side-link:hover:not([aria-current="page"]) { background: rgba(184, 145, 63, .08); color: var(--iv-ink); }
+        .app-side[data-tier="ivory"] .side-link:hover:not([aria-current="page"]) svg { color: var(--iv-gold); }
+        .app-side[data-tier="ivory"] .side-link[aria-current="page"] { background: linear-gradient(90deg, rgba(217, 184, 113, .26) 0%, rgba(217, 184, 113, .08) 75%, rgba(217, 184, 113, 0) 100%); color: var(--iv-gold-deep); font-weight: 600; box-shadow: inset 0 0 0 1px rgba(184, 145, 63, .25); }
+        .app-side[data-tier="ivory"] .side-link[aria-current="page"] svg { color: var(--iv-gold); }
+        .app-side[data-tier="ivory"] .side-link[aria-current="page"]::before { background: linear-gradient(180deg, #D9B871, #8F6B26); box-shadow: 0 0 8px rgba(184, 145, 63, .45); }
+        .app-side[data-tier="ivory"] .side-link:focus-visible { box-shadow: 0 0 0 2px rgba(184, 145, 63, .5); }
+        .app-side[data-tier="ivory"] .side-head { display: flex; align-items: center; gap: 8px; font-size: 10.5px; font-weight: 600; letter-spacing: .2em; color: var(--iv-mute); }
+        .app-side[data-tier="ivory"] .side-head::after { content: ""; flex: 1; height: 1px; background: linear-gradient(90deg, var(--iv-line), transparent); }
+        .app-side[data-tier="ivory"] .text-muted { color: var(--iv-mute); }
+        .app-side[data-tier="ivory"] .side-ai, .app-side[data-tier="ivory"] .side-ai svg { color: #7C4DCC !important; }
+        .app-side[data-tier="ivory"] .side-gem svg { color: var(--iv-gold) !important; }
+        .app-side[data-tier="ivory"] .side-code { background: rgba(217, 184, 113, .18); color: var(--iv-gold-deep); }
+        .app-side[data-tier="ivory"] .side-sub[aria-current="page"] .side-code { background: var(--iv-ink); color: #F2DDA4; }
+        .app-side[data-tier="ivory"] .side-close:hover { background: rgba(184, 145, 63, .1); }
+        .bnav[data-tier="ivory"] { background: rgba(255, 253, 248, .96); border-top-color: transparent; box-shadow: 0 -1px 0 rgba(184, 145, 63, .3); }
+        .bnav[data-tier="ivory"] button { color: #948B7A; }
+        .bnav[data-tier="ivory"] button[aria-current="page"] { color: #7A5A1E; }
+        .bnav[data-tier="ivory"] button[aria-current="page"] svg { color: #B8913F; }
+        .bnav[data-tier="ivory"] button[aria-current="page"]::before { background: linear-gradient(90deg, #D9B871, #8F6B26, #D9B871); }
+        .bnav[data-tier="ivory"] .nav-dot { box-shadow: 0 0 0 2px #FFFDF8; }
+        /* Thẻ đếm ngược bản Ngà: nền ngọc trai, chữ mực, sóng "flow" vàng trôi chìm phía sau */
+        .app-root[data-tier="ivory"] .cmd-card { color: var(--iv-ink); background: radial-gradient(70% 80% at 100% 0%, rgba(217, 184, 113, .28) 0%, rgba(217, 184, 113, 0) 60%), linear-gradient(155deg, #FFFEFA 0%, #FBF5E8 50%, #F3E7CC 100%); box-shadow: 0 24px 44px -28px rgba(122, 90, 30, .45), inset 0 0 0 1px rgba(184, 145, 63, .3), inset 0 1px 0 #FFFFFF; }
+        .app-root[data-tier="ivory"] .cmd-card::after { background: radial-gradient(closest-side, rgba(255, 255, 255, .7), transparent 70%); }
+        .app-root[data-tier="ivory"] .cmd-card .text-indigo-100 { color: #4E4637; }
+        .app-root[data-tier="ivory"] .cmd-card .text-indigo-200 { color: #7D7465; }
+        .app-root[data-tier="ivory"] .cmd-card .text-white { color: var(--iv-ink); }
+        .app-root[data-tier="ivory"] .cmd-card .cmd-pill.bg-white\/15 { background: rgba(255, 255, 255, .75); color: #7A5A1E; box-shadow: inset 0 0 0 1px rgba(184, 145, 63, .35); }
+        .app-root[data-tier="ivory"] .cmd-card [role="timer"] { color: #1C1810; text-shadow: 0 1px 0 rgba(255, 255, 255, .8); }
+        .app-root[data-tier="ivory"] .cmd-go { color: #F6E6B8; background: linear-gradient(180deg, #2A251B 0%, #14110B 100%); box-shadow: inset 0 1px 0 rgba(242, 221, 164, .18), 0 12px 24px -12px rgba(28, 24, 16, .6); }
+        .app-root[data-tier="ivory"] .cmd-go:hover:not(:disabled) { background: linear-gradient(180deg, #353026 0%, #1C1810 100%); }
+        .app-root[data-tier="ivory"] .cmd-go.is-first { box-shadow: 0 0 0 4px rgba(184, 145, 63, .22), inset 0 1px 0 rgba(242, 221, 164, .18), 0 12px 24px -12px rgba(28, 24, 16, .6); }
+        .app-root[data-tier="ivory"] .cmd-go svg { color: #D9B871; }
+        .app-root[data-tier="ivory"] .cmd-alt { color: var(--iv-ink); background: rgba(255, 255, 255, .7); border-color: rgba(184, 145, 63, .4); }
+        .app-root[data-tier="ivory"] .cmd-alt:hover { background: #FFFFFF; }
+        .app-root[data-tier="ivory"] .cmd-link { color: #4E4637; }
+        .app-root[data-tier="ivory"] .cmd-link:hover { background: rgba(184, 145, 63, .12); color: #7A5A1E; }
+        .app-root[data-tier="ivory"] .slot-path::before { background: linear-gradient(90deg, rgba(184, 145, 63, .2), rgba(184, 145, 63, .5), rgba(184, 145, 63, .2)); }
+        .app-root[data-tier="ivory"] .slot-dot { background: #FFFFFF; color: #7D7465; box-shadow: 0 0 0 1px rgba(184, 145, 63, .45), 0 2px 6px -2px rgba(122, 90, 30, .3); }
+        .app-root[data-tier="ivory"] .slot-node.is-now .slot-dot { background: linear-gradient(180deg, #2A251B, #14110B); color: #F2DDA4; animation-name: nowRingIvory; }
+        .app-root[data-tier="ivory"] .slot-node.is-done .slot-dot { background: linear-gradient(180deg, #F6E6B8, #D9B871); color: #3B2C0D; }
+        .app-root[data-tier="ivory"] .slot-time { color: var(--iv-ink); }
+        .app-root[data-tier="ivory"] .slot-name { color: #7D7465; }
+        @keyframes nowRingIvory { 0%, 100% { box-shadow: 0 0 0 4px rgba(184, 145, 63, .35); } 50% { box-shadow: 0 0 0 9px rgba(184, 145, 63, .05); } }
+        .app-root[data-tier="ivory"] .cmd-sum { background: rgba(184, 145, 63, .22); }
+        .app-root[data-tier="ivory"] .cmd-sum > div { background: rgba(255, 255, 255, .78); }
+        .app-root[data-tier="ivory"] .cmd-sum dt { color: #7D7465; }
+        .app-root[data-tier="ivory"] .cmd-sum dd { color: #7A5A1E; }
+        .app-root[data-tier="ivory"] .cmd-card :focus-visible { outline-color: #B8913F; }
+        .cmd-flow { display: none; }
+        .app-root[data-tier="ivory"] .cmd-flow { display: block; position: absolute; z-index: 0; inset: -10% -5%; width: 110%; height: 120%; stroke: #B8913F; pointer-events: none; -webkit-mask-image: radial-gradient(120% 90% at 85% 20%, #000 0%, rgba(0, 0, 0, .7) 40%, transparent 80%); mask-image: radial-gradient(120% 90% at 85% 20%, #000 0%, rgba(0, 0, 0, .7) 40%, transparent 80%); }
+        .app-root[data-tier="ivory"] .cmd-flow-a { opacity: .16; animation: flow-drift 48s linear infinite; }
+        .app-root[data-tier="ivory"] .cmd-flow-b { opacity: .1; animation: flow-drift 72s linear infinite reverse; }
+        .app-root[data-tier="ivory"] .cmd-flow-orb { fill: rgba(217, 184, 113, .22); stroke: none; transform-origin: 470px 70px; animation: flow-breathe 9s ease-in-out infinite; filter: blur(14px); }
+        @keyframes flow-drift { from { transform: translateX(0); } to { transform: translateX(-600px); } }
+        @keyframes flow-breathe { 0%, 100% { transform: scale(.85); opacity: .7; } 50% { transform: scale(1.15); opacity: 1; } }
+        @media (hover: hover) and (pointer: fine) {
+            .app-root[data-tier="ivory"] .cmd-spot { display: block; position: absolute; inset: 0; z-index: 0; pointer-events: none; opacity: 0; background: radial-gradient(420px circle at var(--mx, 70%) var(--my, 20%), rgba(255, 255, 255, .55), transparent 60%); transition: opacity .5s ease; }
+            .app-root[data-tier="ivory"] .cmd-card:hover .cmd-spot { opacity: 1; }
+        }
+        @media (prefers-reduced-motion: reduce) { .app-root[data-tier="ivory"] .cmd-flow-a, .app-root[data-tier="ivory"] .cmd-flow-b, .app-root[data-tier="ivory"] .cmd-flow-orb { animation: none; } }
+        /* Tổng quan bản Ngà: nút mời bản sắc, nút lịch học */
+        .app-root[data-tier="ivory"] .id-invite { color: #7A5A1E; background: rgba(217, 184, 113, .14); border: 1px dashed #B8913F; }
+        .app-root[data-tier="ivory"] .id-invite:hover { color: #F2DDA4; background: #1C1810; border-color: transparent; }
+        .app-root[data-tier="ivory"] h1 .text-primary { color: #8F6B26; }
+        .app-root[data-tier="ivory"] .sched-card .btn-primary { color: #F2DDA4; background: linear-gradient(180deg, #2A251B, #14110B); box-shadow: 0 6px 14px -8px rgba(28, 24, 16, .55); }
+        .app-root[data-tier="ivory"] .sched-card [aria-current="date"] { background: #1C1810; color: #F2DDA4; }
+        .app-root[data-tier="ivory"] .sched-card .src-opt.is-on { color: #7A5A1E; box-shadow: 0 1px 3px rgba(28, 24, 16, .1), inset 0 0 0 1px rgba(184, 145, 63, .45); }
+        /* Banner phiếu bản sắc & thanh đã đóng dấu bản Ngà */
+        .mission[data-tier="ivory"] { color: #1C1810; background: radial-gradient(80% 140% at 100% 0%, rgba(217, 184, 113, .26) 0%, rgba(217, 184, 113, 0) 60%), linear-gradient(160deg, #FFFEFA 0%, #F7EEDA 100%); border-color: rgba(184, 145, 63, .4); box-shadow: 0 10px 26px -16px rgba(122, 90, 30, .5), inset 0 1px 0 #FFFFFF; }
+        .mission[data-tier="ivory"].is-late { border-color: #B8913F; }
+        .mission[data-tier="ivory"] .mission-label { color: #7D7465; letter-spacing: .16em; }
+        .mission[data-tier="ivory"] .mission-dot { background: #B8913F; }
+        .mission[data-tier="ivory"] .mission-clock { color: #7A5A1E; background: rgba(255, 255, 255, .8); border-color: rgba(184, 145, 63, .4); }
+        .mission[data-tier="ivory"] .mission-face { border-color: rgba(184, 145, 63, .5); background: #FFFFFF; }
+        .mission[data-tier="ivory"] .mission-badge { color: #3B2C0D; background: linear-gradient(180deg, #F6E6B8, #D9B871); border-color: #FFFDF8; }
+        .mission[data-tier="ivory"] .mission-name { color: #1C1810; }
+        .mission[data-tier="ivory"] .mission-sub { color: #6B6354; }
+        .mission[data-tier="ivory"] .mission-cta { color: #F6E6B8; background: linear-gradient(180deg, #2A251B 0%, #14110B 100%); box-shadow: inset 0 1px 0 rgba(242, 221, 164, .18), 0 8px 18px -8px rgba(28, 24, 16, .55); }
+        .mission[data-tier="ivory"] .mission-cta:hover { background: linear-gradient(180deg, #353026 0%, #1C1810 100%); }
+        .mission[data-tier="ivory"] .mission-cta svg { color: #D9B871; }
+        .fund-strip[data-tier="ivory"] { color: #4E4637; background: linear-gradient(160deg, #FFFEFA 0%, #F7EEDA 100%); border-color: rgba(184, 145, 63, .35); }
+        .fund-strip[data-tier="ivory"] .ticket.is-done { color: #1C1810; background: rgba(255, 255, 255, .7); border-color: rgba(184, 145, 63, .4); }
+        .fund-strip[data-tier="ivory"] .ticket.is-done .ticket-text { color: #1C1810; }
+        .fund-strip[data-tier="ivory"] .ticket.is-done .ticket-text b { color: #7A5A1E; }
+        .fund-strip[data-tier="ivory"] .ticket-streak { color: #7A5A1E; background: rgba(217, 184, 113, .18); box-shadow: 0 0 0 1px rgba(184, 145, 63, .4); }
+        .fund-strip[data-tier="ivory"] .fund-cta { color: #1C1810; background: #FFFFFF; border-color: rgba(184, 145, 63, .35); }
+        /* Chọn giao diện trong Cài đặt */
+        .skin-pick { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+        .skin-opt { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; min-width: 0; padding: 8px; border-radius: 14px; text-align: left; background: var(--surface); border: 1px solid var(--border); transition: border-color .15s ease, box-shadow .15s ease; }
+        .skin-opt:hover { border-color: #C9B27A; }
+        .skin-opt.is-on { border-color: #B8913F; box-shadow: 0 0 0 3px rgba(217, 184, 113, .25); }
+        .skin-opt b { margin-top: 6px; font-size: 13px; line-height: 1.2; color: var(--ink); }
+        .skin-opt small { font-size: 11px; line-height: 1.3; color: var(--ink-2); }
+        .skin-swatch { display: grid; grid-template-columns: 30% 1fr; grid-template-rows: 30% 1fr; width: 100%; height: 44px; overflow: hidden; border-radius: 9px; box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .08); }
+        .skin-swatch i { display: block; }
+        .skin-swatch i:nth-child(1) { grid-column: 1 / 3; }
+        .skin-swatch.is-dark i:nth-child(1) { background: #0B0B0E; box-shadow: inset 0 -1px 0 #D9B871; }
+        .skin-swatch.is-dark i:nth-child(2) { background: #0C0C0F; }
+        .skin-swatch.is-dark i:nth-child(3) { background: linear-gradient(135deg, #EFEDE7, #EFEDE7 55%, #141317 55%); }
+        .skin-swatch.is-light i:nth-child(1) { background: #FFFDF8; box-shadow: inset 0 -1px 0 #D9B871; }
+        .skin-swatch.is-light i:nth-child(2) { background: #F8F2E4; }
+        .skin-swatch.is-light i:nth-child(3) { background: linear-gradient(135deg, #F4F0E7, #F4F0E7 55%, #F3E7CC 55%); }
+        .skin-swatch.is-classic i:nth-child(1) { background: #E2E8F0; }
+        .skin-swatch.is-classic i:nth-child(2) { background: #EEF2F7; }
+        .skin-swatch.is-classic i:nth-child(3) { background: linear-gradient(135deg, #E2E8F0, #E2E8F0 55%, #4338CA 55%); }
         @keyframes identity-cue {
             0% { box-shadow: 0 0 0 0 rgba(231, 197, 106, .55); }
             70% { box-shadow: 0 0 0 8px rgba(231, 197, 106, 0); }
@@ -1156,6 +1288,23 @@
             return until === -1 || until > Date.now();
         };
         const obsidianOf = (fund) => !!fund && ((fund.aiCredits || 0) > 0 || proLive(fund));
+        /* Giao diện của hội viên PRO: mặc định Obsidian Đen (hiệu ứng "wow" khi vừa lên gói),
+           tự chọn được Obsidian Ngà (sáng, hợp học ngoài trời) hoặc Cổ điển (tím). Người chưa có gói luôn là Eco. */
+        const SKIN_KEY = 'skin';
+        const SKINS = ['dark', 'light', 'classic'];
+        const skinOf = (fund, pref) => !obsidianOf(fund) ? 'eco' : pref === 'light' ? 'ivory' : pref === 'classic' ? 'eco' : 'obsidian';
+        const readSkin = () => { const v = Store.prefs.get(SKIN_KEY, 'dark'); return SKINS.indexOf(v) >= 0 ? v : 'dark'; };
+        const setSkinPref = (v) => { Store.prefs.set(SKIN_KEY, v); window.dispatchEvent(new CustomEvent('edu-skin')); window.dispatchEvent(new CustomEvent('edu-identity')); };
+        const useSkinPref = () => {
+            const [v, setV] = useState(readSkin);
+            useEffect(() => {
+                const on = () => setV(readSkin());
+                window.addEventListener('edu-skin', on);
+                window.addEventListener('edu-account', on);
+                return () => { window.removeEventListener('edu-skin', on); window.removeEventListener('edu-account', on); };
+            }, []);
+            return v;
+        };
         const memberSince = (fund) => {
             const buys = (fund && fund.history || []).filter(ev => ev && ev.kind === 'buy' && ev.pack === 'vocab' && ev.t);
             if (!buys.length) return 0;
@@ -2058,6 +2207,7 @@
            - Phiếu hôm nay (hiệu ứng Zeigarnik): chưa chốt thì pill sáng, có sóng radar và vệt sáng, bấm là vào học 30s; chốt rồi thì xanh lá, đứng yên.
            - Lượt AI (khan hiếm tăng dần): còn nhiều thì chỉ hiện "Gói AI 29k"; còn <= 15 lượt thì hiện cảnh báo cam cạnh nút Nâng cấp. */
         const FundStrip = ({ onOpen, onQuickVote }) => {
+            const skinPref = useSkinPref();
             const fund = useFund();
             const ai = useAiLeft();
             const votes = useVoteSummary();
@@ -2087,13 +2237,13 @@
                 wasDue.current = !votes.confirmedToday;
                 return undefined;
             }, [votes && votes.confirmedToday]);
-            const tier = obsidianOf(fund) ? 'obsidian' : 'eco';
+            const tier = skinOf(fund, skinPref);
             if (due) {
                 const late = day.hour >= 21;
                 return (
                     <section className={'mission' + (late ? ' is-late' : '')} data-tier={tier} aria-label="Phiếu bản sắc hôm nay">
                         <div className="mission-head">
-                            <span className="mission-label">{tier === 'obsidian'
+                            <span className="mission-label">{tier !== 'eco'
                                 ? <><i className="mission-star" aria-hidden="true">✦</i>Obsidian Pass · chưa đóng dấu</>
                                 : <><i className="mission-dot" aria-hidden="true" />Phiếu bản sắc · chưa đóng dấu</>}</span>
                             <MissionClock />
@@ -4591,6 +4741,19 @@
                 {DIAL_TICKS.map((t, i) => <line key={i} x1={t.x1.toFixed(2)} y1={t.y1.toFixed(2)} x2={t.x2.toFixed(2)} y2={t.y2.toFixed(2)} strokeWidth={t.w} strokeLinecap="round" />)}
             </svg>
         ));
+        /* Obsidian Ngà: các dải sóng mảnh trôi chậm phía sau đồng hồ, gợi trạng thái "dòng chảy" (flow) khi học. Chỉ hiện ở bản Ngà. */
+        const FLOW_PATHS = Array.from({ length: 9 }, (_, i) => {
+            const y = 40 + i * 26;
+            const a = 10 + (i % 3) * 6;
+            return 'M0 ' + y + ' C 100 ' + (y - a) + ', 200 ' + (y + a) + ', 300 ' + y + ' S 500 ' + (y - a) + ', 600 ' + y + ' S 800 ' + (y + a) + ', 900 ' + y + ' S 1100 ' + (y - a) + ', 1200 ' + y;
+        });
+        const FlowLines = React.memo(() => (
+            <svg className="cmd-flow" viewBox="0 0 600 300" preserveAspectRatio="xMidYMid slice" aria-hidden="true" focusable="false">
+                <g className="cmd-flow-a">{FLOW_PATHS.map((d, i) => <path key={i} d={d} fill="none" strokeWidth={i % 3 === 0 ? 1.1 : 0.6} />)}</g>
+                <g className="cmd-flow-b">{FLOW_PATHS.slice(0, 5).map((d, i) => <path key={i} d={d} fill="none" strokeWidth="0.5" transform={'translate(0 ' + (13 + i * 2) + ')'} />)}</g>
+                <circle className="cmd-flow-orb" cx="470" cy="70" r="46" />
+            </svg>
+        ));
         /* Vầng sáng theo chuột: chỉ đổi biến CSS trên thẻ, không render lại React. */
         const moveSpot = (e) => {
             const el = e.currentTarget;
@@ -4638,6 +4801,7 @@
             return (
                 <section className="cmd-card flex flex-col p-5 text-left sm:p-7" aria-label="Ca học hôm nay" onPointerMove={moveSpot}>
                     <ChronoDial />
+                    <FlowLines />
                     <span className="cmd-grain" aria-hidden="true" />
                     <span className="cmd-spot" aria-hidden="true" />
                     <div className="relative z-10 flex flex-1 flex-col">
@@ -7137,7 +7301,7 @@
 
         /* Mỗi email Google một kho riêng trên máy: sổ từ, tiến độ, phiếu bản sắc và cài đặt học không lẫn giữa các tài khoản.
            'dataOwner' ghi email đang sở hữu dữ liệu trên máy; rỗng là khách chưa đăng nhập. */
-        const PROFILE_KEYS = ['identity', 'student', 'habitDays', 'milestones', 'exams', 'weeklyPlan', 'nextWeeklyPlan', 'setupDone', 'recentPacks', 'eosTried', 'licenses', 'slotSource', 'qlang'];
+        const PROFILE_KEYS = ['identity', 'student', 'habitDays', 'milestones', 'exams', 'weeklyPlan', 'nextWeeklyPlan', 'setupDone', 'recentPacks', 'eosTried', 'licenses', 'slotSource', 'qlang', 'skin'];
         const LOCAL_KEYS = ['mission', 'libDrafts', 'hybridToday', 'goneItems'];
         const dataOwner = () => String(Store.prefs.get('dataOwner', '') || '').toLowerCase();
         const profileSnapshot = () => {
@@ -7340,7 +7504,31 @@
             );
         };
 
+        const SKIN_CHOICES = [
+            { key: 'dark', label: 'Obsidian Đen', note: 'Mặc định PRO' },
+            { key: 'light', label: 'Obsidian Ngà', note: 'Sáng, hợp ngoài trời' },
+            { key: 'classic', label: 'Cổ điển', note: 'Tím quen thuộc' }
+        ];
+        const SkinPicker = () => {
+            const pref = useSkinPref();
+            return (
+                <div>
+                    <span className="font-semibold text-sm block">Giao diện hội viên</span>
+                    <span className="text-xs text-ink2">Đặc quyền PRO: đổi lúc nào cũng được, áp dụng ngay.</span>
+                    <div className="skin-pick mt-2" role="radiogroup" aria-label="Giao diện hội viên">
+                        {SKIN_CHOICES.map(c => (
+                            <button key={c.key} type="button" role="radio" aria-checked={pref === c.key} className={'skin-opt' + (pref === c.key ? ' is-on' : '')} onClick={() => setSkinPref(c.key)}>
+                                <span className={'skin-swatch is-' + c.key} aria-hidden="true"><i /><i /><i /></span>
+                                <b>{c.label}</b>
+                                <small>{c.note}</small>
+                            </button>
+                        ))}
+                    </div>
+                </div>
+            );
+        };
         const SettingsModal = ({ onClose, toast, muted, setMuted, onGoogle }) => {
+            const settingsFund = useFund();
             const [usage, setUsage] = useState(null);
             const [studentName, setStudentName] = useState(Store.prefs.get('student', '') || '');
             useEffect(() => { Store.estimate().then(setUsage); }, []);
@@ -7367,6 +7555,7 @@
                             <span><span className="font-semibold text-sm block">Thông báo khi đến giờ</span><span className="text-xs text-ink2">{perm === 'denied' ? 'Bị chặn trong cài đặt trình duyệt' : 'Báo khi một ca học bắt đầu'}</span></span>
                             <button type="button" className="btn btn-secondary btn-sm" disabled={perm !== 'default'} onClick={() => Notification.requestPermission().then(setPerm)}><Icon name="bell" size={14} /> {permLabel}</button>
                         </div>
+                        {obsidianOf(settingsFund) && <SkinPicker />}
                         <button type="button" className="hub-row" onClick={() => { onClose(); openBilling('code'); }}>
                             <span className="bill-stat-ic"><Icon name="gem" size={18} /></span>
                             <span className="min-w-0 flex-1 text-left">
@@ -7489,6 +7678,10 @@
             const [contribOpen, setContribOpen] = useState(false);
             const fund = useFund();
             const obsidian = obsidianOf(fund);
+            const skinPref = useSkinPref();
+            const tierAttr = skinOf(fund, skinPref);
+            const darkSkin = tierAttr === 'obsidian';
+            const luxSkin = tierAttr !== 'eco';
             const [memberOpen, setMemberOpen] = useState(false);
             const [welcome, setWelcome] = useState(false);
             const [welcomeHold, setWelcomeHold] = useState(false);
@@ -8315,20 +8508,20 @@
             };
 
             return (
-                <div className="app-root min-h-screen flex flex-col" data-tier={obsidian ? 'obsidian' : 'eco'}>
+                <div className="app-root min-h-screen flex flex-col" data-tier={tierAttr}>
                     <a href="#main" className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[70] btn btn-primary">Bỏ qua tới nội dung</a>
-                    <header className={'sticky top-0 z-50 border-b ' + (obsidian ? 'obsidian-head' : 'border-line')} style={obsidian ? undefined : { background: '#E2E8F0' }}>
+                    <header className={'sticky top-0 z-50 border-b ' + (darkSkin ? 'obsidian-head' : luxSkin ? 'ivory-head' : 'border-line')} style={luxSkin ? undefined : { background: '#E2E8F0' }}>
                         <div className="flex h-16 w-full items-center gap-2 px-4 sm:gap-3 lg:px-6">
                             <button type="button" className="btn btn-ghost btn-icon -ml-2 lg:hidden" onClick={() => setDrawer(true)} aria-label="Mở menu" aria-expanded={drawer} aria-controls="side-drawer"><Icon name="menu" /></button>
                             <button type="button" onClick={goHome} aria-label="Về Tổng quan" className="flex shrink-0 items-center gap-2.5 border-0 bg-transparent p-0 text-left cursor-pointer">
-                                <span className={obsidian ? 'ob-logo' : ''}>
+                                <span className={luxSkin ? 'ob-logo' : ''}>
                                     <img src="/public/stickers/logo.png" alt="" className="h-9 w-auto object-contain sm:h-10" />
                                 </span>
-                                <span className={'text-xl font-extrabold leading-none sm:text-2xl ' + (obsidian ? 'ob-word' : 'text-[#0B192C]')}>FPass</span>
+                                <span className={'text-xl font-extrabold leading-none sm:text-2xl ' + (luxSkin ? 'ob-word' : 'text-[#0B192C]')}>FPass</span>
                             </button>
                             <div className="ml-auto flex min-w-0 items-center gap-1">
                                 {/* Liên hệ: Zalo + hotline trên màn rộng, một nút mở khung Hỗ trợ trên điện thoại. */}
-                                <div className={'top-contact mr-1 hidden md:flex' + (obsidian ? ' is-dark' : '')}>
+                                <div className={'top-contact mr-1 hidden md:flex' + (darkSkin ? ' is-dark' : '')}>
                                     <a href={SUPPORT.zalo} target="_blank" rel="noopener noreferrer" aria-label="Nhắn Zalo hỗ trợ"><Icon name="chat" size={15} /> Zalo</a>
                                     <a href={'tel:' + SUPPORT.phone} aria-label={'Gọi hỗ trợ ' + SUPPORT.phoneDisplay}><Icon name="headset" size={15} /> <span className="tnum">{SUPPORT.phoneDisplay}</span></a>
                                 </div>
@@ -8350,17 +8543,17 @@
                     </header>
 
                     <div className="flex w-full flex-1">
-                    <aside className="app-side" data-tier={obsidian ? 'obsidian' : 'eco'} aria-label="Điều hướng">
+                    <aside className="app-side" data-tier={tierAttr} aria-label="Điều hướng">
                         {sideBody()}
                     </aside>
                     {drawer && (
                         <div className="side-scrim lg:hidden" onMouseDown={(e) => { if (e.target === e.currentTarget) setDrawer(false); }}>
-                            <div id="side-drawer" ref={drawerRef} role="dialog" aria-modal="true" aria-label="Menu" className="app-side is-drawer" data-tier={obsidian ? 'obsidian' : 'eco'}
+                            <div id="side-drawer" ref={drawerRef} role="dialog" aria-modal="true" aria-label="Menu" className="app-side is-drawer" data-tier={tierAttr}
                                 onClick={(e) => { if (e.target.closest && e.target.closest('button')) setDrawer(false); }}>
                                 <div className="side-drawer-head">
                                     <span className="flex items-center gap-2">
-                                        <span className={obsidian ? 'ob-logo' : ''}><img src="/public/stickers/logo.png" alt="" className="h-8 w-auto object-contain" /></span>
-                                        <b className={'text-lg font-extrabold leading-none ' + (obsidian ? 'ob-word' : 'text-[#0B192C]')}>FPass</b>
+                                        <span className={luxSkin ? 'ob-logo' : ''}><img src="/public/stickers/logo.png" alt="" className="h-8 w-auto object-contain" /></span>
+                                        <b className={'text-lg font-extrabold leading-none ' + (luxSkin ? 'ob-word' : 'text-[#0B192C]')}>FPass</b>
                                     </span>
                                     <button type="button" className="side-close" aria-label="Đóng menu"><Icon name="x" size={18} /></button>
                                 </div>
@@ -8416,7 +8609,7 @@
                     </main>
                     </div>
 
-                    <nav aria-label="Mục chính" className="bnav" data-tier={obsidian ? 'obsidian' : 'eco'}>
+                    <nav aria-label="Mục chính" className="bnav" data-tier={tierAttr}>
                         {navItems.map(it => (
                             <button key={it.k} type="button" aria-current={navNow === it.k ? 'page' : undefined} onClick={() => goNav(it.k)}>
                                 <Icon name={it.icon} size={20} /> {it.short}
