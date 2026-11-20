@@ -135,6 +135,17 @@
         .lib-bar { width: 3px; flex-shrink: 0; border-radius: 0 3px 3px 0; }
         .lib-word { min-width: 0; padding-top: 4px; text-align: left; font-size: 15px; font-weight: 700; line-height: 1.4; color: var(--primary); word-break: normal; overflow-wrap: break-word; hyphens: auto; }
         .lib-tag { display: inline-block; margin-left: 6px; padding: 0 6px; border-radius: 6px; background: var(--surface-2); color: var(--ink-2); font-size: 11px; font-weight: 600; line-height: 18px; vertical-align: 2px; }
+        .ai-field { position: relative; display: block; }
+        .ai-field > .field { padding-right: 92px; }
+        .ai-field > textarea.field { padding-right: 112px; }
+        .ai-pin { position: absolute; right: 6px; top: 6px; display: inline-flex; align-items: center; gap: 4px; height: 28px; padding: 0 10px; border-radius: 999px; font-size: 12px; font-weight: 700; color: var(--primary); background: rgba(124, 58, 237, .08); border: 1px solid rgba(124, 58, 237, .28); white-space: nowrap; transition: background .15s ease; }
+        .ai-pin:hover:not(:disabled) { background: rgba(124, 58, 237, .16); }
+        .ai-pin:disabled { opacity: .45; cursor: not-allowed; }
+        .ai-pin.is-mini { height: 26px; padding: 0 8px; }
+        .ai-field:has(.ai-pin.is-mini) > .field { padding-right: 60px; }
+        .batch-add { border-color: rgba(124, 58, 237, .35); box-shadow: 0 0 0 3px rgba(124, 58, 237, .08); }
+        .batch-row { display: flex; align-items: flex-start; gap: 8px; padding: 10px 12px; }
+        .batch-num { width: 20px; padding-top: 11px; font-size: 12px; color: var(--muted); text-align: right; flex-shrink: 0; }
         .lib-act { display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 9px; color: var(--muted); }
         .lib-act:hover:not(:disabled) { background: var(--surface-2); color: var(--primary); }
         .lib-act:disabled { opacity: .35; }
@@ -497,6 +508,8 @@
             x: <><path d="M18 6 6 18" /><path d="m6 6 12 12" /></>,
             left: <path d="m15 18-6-6 6-6" />,
             right: <path d="m9 18 6-6-6-6" />,
+            chevronDown: <path d="m6 9 6 6 6-6" />,
+            chevronUp: <path d="m18 15-6-6-6 6" />,
             back: <><path d="m12 19-7-7 7-7" /><path d="M19 12H5" /></>,
             plus: <><path d="M5 12h14" /><path d="M12 5v14" /></>,
             home: <><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" /><path d="M9 22V12h6v10" /></>,
@@ -4432,36 +4445,74 @@
             </Modal>
         );
 
-        const ItemEditor = ({ item, groups, onSave, onClose, onStudy, onAI, aiBusy }) => {
+        /* Ghép kết quả AI vào một mục: chỉ điền ô còn trống, IPA lấy bản AI nếu có. */
+        const mergeEnrich = (t, e) => (e ? Object.assign({}, t, {
+            wordType: t.wordType || e.wordType || '',
+            answerOrMeaning: t.answerOrMeaning || e.answerOrMeaning || '',
+            explanationOrExample: t.explanationOrExample || e.explanationOrExample || '',
+            exampleVi: t.exampleVi || e.exampleVi || '',
+            ipa: e.ipa || t.ipa || '',
+            vietSub: Sch.ipaToVi(e.ipa || t.ipa) || t.vietSub || '',
+            keywords: (t.keywords && t.keywords.length) ? t.keywords : (e.keywords || [])
+        }) : t);
+
+        /* Nút AI nhỏ ghim ở góc phải bên trong ô nhập. */
+        const AiPin = ({ onClick, busy, disabled, label = 'AI điền', mini }) => (
+            <button type="button" className={'ai-pin' + (mini ? ' is-mini' : '')} onClick={onClick} disabled={busy || disabled} aria-label={label} title={label}>
+                <Icon name="sparkles" size={12} /><span>{busy ? '…' : (mini ? 'AI' : label)}</span>
+            </button>
+        );
+
+        const ItemEditor = ({ item, groups, onSave, onClose, onAI }) => {
             const [d, setD] = useState(() => Object.assign({}, item, { keywordsText: (item.keywords || []).join(', ') }));
+            const [busy, setBusy] = useState(false);
             const set = (k, v) => setD(x => Object.assign({}, x, { [k]: v }));
             const mcq = d.type === 'mcq';
             const save = () => {
                 const out = Sch.normalizeItem(Object.assign({}, d, { keywords: d.keywordsText, options: mcq ? d.options : [] }), { source: item.source });
                 onSave(Object.assign({}, item, out, { id: item.id }));
             };
+            /* AI điền thẳng vào bản nháp trong form; bấm Lưu mới ghi vào Sổ từ. */
+            const fill = async () => {
+                setBusy(true);
+                try {
+                    const patch = await onAI(Object.assign({}, d, { keywords: d.keywordsText ? d.keywordsText.split(',').map(s => s.trim()).filter(Boolean) : [] }));
+                    if (!patch) return;
+                    if (mcq) {
+                        if (patch.explanationOrExample && (!d.explanationOrExample || confirm('Thay lời giải hiện có bằng lời giải AI?'))) set('explanationOrExample', patch.explanationOrExample);
+                    } else {
+                        setD(x => {
+                            const m = mergeEnrich(Object.assign({}, x, { keywords: x.keywordsText ? x.keywordsText.split(',').map(s => s.trim()).filter(Boolean) : [] }), patch);
+                            return Object.assign({}, m, { keywordsText: (m.keywords || []).join(', ') });
+                        });
+                    }
+                } finally {
+                    setBusy(false);
+                }
+            };
             return (
                 <Modal title={mcq ? 'Sửa câu trắc nghiệm' : 'Sửa từ vựng'} size="lg" onClose={onClose}
-                    footer={<>
-                        <button type="button" className="btn btn-ghost mr-auto" onClick={() => onStudy(item)}><Icon name="play" /> Học mục này</button>
-                        <button type="button" className="btn btn-secondary" onClick={() => onAI(item)} disabled={aiBusy}><Icon name="sparkles" /> {aiBusy ? 'AI…' : mcq ? 'AI giải thích' : 'AI bổ sung'}</button>
-                        <button type="button" className="btn btn-secondary" onClick={onClose}>Hủy</button>
-                        <button type="button" className="btn btn-primary" onClick={save}>Lưu</button>
-                    </>}>
-                    <div className="grid sm:grid-cols-3 gap-3">
-                        <label><span className="label">Loại</span>
+                    footer={<div className="flex w-full flex-nowrap items-center justify-end gap-2">
+                        <button type="button" className="btn btn-secondary flex-1 sm:flex-none" onClick={onClose}>Hủy</button>
+                        <button type="button" className="btn btn-primary flex-1 whitespace-nowrap sm:flex-none" onClick={save}>Lưu thay đổi</button>
+                    </div>}>
+                    <div className="grid grid-cols-[1fr_1.4fr_0.8fr] gap-2">
+                        <label className="min-w-0"><span className="label">Loại</span>
                             <select className="field" value={d.type} onChange={(e) => setD(x => Object.assign({}, x, { type: e.target.value, options: e.target.value === 'mcq' ? (x.options && x.options.length ? x.options : ['', '', '', '']) : [], answerOrMeaning: e.target.value === 'mcq' ? 'A' : '' }))}>
                                 <option value="vocab">Từ vựng</option><option value="mcq">Trắc nghiệm</option>
                             </select>
                         </label>
-                        <label><span className="label">Nhóm</span><input className="field" list="group-list" value={d.group} maxLength={80} onChange={(e) => set('group', e.target.value)} /></label>
-                        <label><span className="label">Chặng</span>
+                        <label className="min-w-0"><span className="label">Nhóm</span><input className="field" list="group-list" value={d.group} maxLength={80} placeholder="Unit…" onChange={(e) => set('group', e.target.value)} /></label>
+                        <label className="min-w-0"><span className="label">Chặng</span>
                             <select className="field" value={d.checkpoint} onChange={(e) => set('checkpoint', Number(e.target.value))}><option value={1}>1</option><option value={2}>2</option><option value={3}>3</option></select>
                         </label>
                     </div>
                     <datalist id="group-list">{groups.filter(([k]) => k !== '__none').map(([k]) => <option key={k} value={k} />)}</datalist>
                     <label className="block mt-3"><span className="label">{mcq ? 'Câu hỏi' : 'Từ / cụm từ tiếng Anh'}</span>
-                        <textarea className="field py-2" rows={mcq ? 3 : 1} value={d.questionOrWord} maxLength={mcq ? 1500 : 400} onChange={(e) => set('questionOrWord', e.target.value)} data-autofocus />
+                        <span className="ai-field">
+                            <textarea className="field py-2" rows={mcq ? 3 : 1} value={d.questionOrWord} maxLength={mcq ? 1500 : 400} onChange={(e) => set('questionOrWord', e.target.value)} data-autofocus />
+                            <AiPin onClick={fill} busy={busy} disabled={!String(d.questionOrWord || '').trim()} label={mcq ? 'AI giải thích' : 'AI điền'} />
+                        </span>
                     </label>
                     {mcq ? (
                         <fieldset className="mt-3">
@@ -4476,11 +4527,13 @@
                             </div>
                         </fieldset>
                     ) : (
-                        <div className="grid sm:grid-cols-3 gap-3 mt-3">
-                            <label><span className="label">Từ loại</span><input className="field" value={d.wordType} maxLength={24} onChange={(e) => set('wordType', e.target.value)} placeholder="n / v / adj…" /></label>
-                            <label><span className="label">IPA</span><input className="field" value={d.ipa} maxLength={80} onChange={(e) => set('ipa', e.target.value)} placeholder="/əˈkaʊntənt/" /></label>
-                            <label><span className="label">Nghĩa tiếng Việt</span><input className="field" value={d.answerOrMeaning} maxLength={1500} onChange={(e) => set('answerOrMeaning', e.target.value)} /></label>
-                        </div>
+                        <>
+                            <div className="grid grid-cols-2 gap-2 mt-3">
+                                <label className="min-w-0"><span className="label">Từ loại</span><input className="field" value={d.wordType} maxLength={24} onChange={(e) => set('wordType', e.target.value)} placeholder="n / v / adj…" /></label>
+                                <label className="min-w-0"><span className="label">IPA</span><input className="field" value={d.ipa} maxLength={80} onChange={(e) => set('ipa', e.target.value)} placeholder="/əˈkaʊntənt/" /></label>
+                            </div>
+                            <label className="block mt-3"><span className="label">Nghĩa tiếng Việt</span><input className="field" value={d.answerOrMeaning} maxLength={1500} onChange={(e) => set('answerOrMeaning', e.target.value)} /></label>
+                        </>
                     )}
                     <label className="block mt-3"><span className="label">{mcq ? 'Giải thích' : 'Câu ví dụ (EN)'}</span><textarea className="field py-2" rows={2} maxLength={2500} value={d.explanationOrExample} onChange={(e) => set('explanationOrExample', e.target.value)} /></label>
                     {!mcq && <label className="block mt-3"><span className="label">Dịch câu ví dụ</span><textarea className="field py-2" rows={1} maxLength={1500} value={d.exampleVi} onChange={(e) => set('exampleVi', e.target.value)} /></label>}
@@ -4492,6 +4545,81 @@
                     </div>
                     {Sch.reviewNote(item) && <p className="text-sm text-muted mt-2">Lịch ôn: {Sch.reviewNote(item)}</p>}
                 </Modal>
+            );
+        };
+
+        /* Thêm nhanh nhiều dòng ngay đầu danh sách, kiểu Quizlet: gõ từ, Enter, gõ nghĩa, Enter là sang dòng mới. */
+        const newDraft = () => ({ key: 'd' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6), questionOrWord: '', answerOrMeaning: '', wordType: '', ipa: '', explanationOrExample: '', exampleVi: '', keywords: [], open: false });
+        const BatchAdd = ({ drafts, setDrafts, group, onSave, onCancel, onAI }) => {
+            const refs = useRef({});
+            const [focusKey, setFocusKey] = useState(() => (drafts[0] ? drafts[0].key : null));
+            const [busyKey, setBusyKey] = useState(null);
+            useEffect(() => {
+                if (!focusKey) return;
+                const el = refs.current[focusKey];
+                if (el) { el.focus(); el.scrollIntoView({ block: 'nearest' }); }
+                setFocusKey(null);
+            }, [focusKey, drafts.length]);
+            const patch = (key, p) => setDrafts(list => list.map(x => (x.key === key ? Object.assign({}, x, p) : x)));
+            const addNext = () => { const n = newDraft(); setDrafts(list => list.concat([n])); setFocusKey(n.key); };
+            const drop = (key) => setDrafts(list => { const next = list.filter(x => x.key !== key); return next.length ? next : [newDraft()]; });
+            const fill = async (x) => {
+                setBusyKey(x.key);
+                try {
+                    const e = await onAI(Object.assign({ id: 'draft-' + x.key, type: 'vocab' }, x));
+                    if (e) setDrafts(list => list.map(y => (y.key === x.key ? Object.assign(mergeEnrich(y, e), { open: true }) : y)));
+                } finally {
+                    setBusyKey(null);
+                }
+            };
+            const ready = drafts.filter(x => x.questionOrWord.trim()).length;
+            const enterTo = (e, next) => { if (e.key === 'Enter' && !e.shiftKey && !e.nativeEvent.isComposing) { e.preventDefault(); next(); } };
+            return (
+                <section className="batch-add card mb-3" aria-label="Thêm nhanh nhiều từ">
+                    <div className="flex items-center gap-2 border-b border-line px-3 py-2.5 sm:px-4">
+                        <p className="text-sm font-semibold">Thêm nhanh {drafts.length > 1 ? drafts.length + ' dòng' : ''}</p>
+                        {group && <span className="chip bg-surface2 text-ink2 max-w-[10rem] truncate">{group}</span>}
+                        <p className="ml-auto hidden text-xs text-muted md:block"><Kbd>Enter</Kbd> sang ô kế / dòng mới</p>
+                    </div>
+                    <ol className="divide-y divide-line">
+                        {drafts.map((x, i) => (
+                            <li key={x.key} className="batch-row">
+                                <span className="batch-num tnum" aria-hidden="true">{i + 1}</span>
+                                <div className="min-w-0 flex-1">
+                                    <div className="grid gap-2 md:grid-cols-2">
+                                        <span className="ai-field">
+                                            <input ref={el => { refs.current[x.key] = el; }} className="field" value={x.questionOrWord} maxLength={400} placeholder="Từ tiếng Anh" aria-label={'Từ tiếng Anh, dòng ' + (i + 1)}
+                                                onChange={(e) => patch(x.key, { questionOrWord: e.target.value })}
+                                                onKeyDown={(e) => enterTo(e, () => { const m = refs.current[x.key + ':m']; if (m) m.focus(); })} />
+                                            <AiPin mini onClick={() => fill(x)} busy={busyKey === x.key} disabled={!x.questionOrWord.trim()} label="AI điền từ loại, IPA, nghĩa, ví dụ" />
+                                        </span>
+                                        <input ref={el => { refs.current[x.key + ':m'] = el; }} className="field" value={x.answerOrMeaning} maxLength={1500} placeholder="Nghĩa tiếng Việt" aria-label={'Nghĩa tiếng Việt, dòng ' + (i + 1)}
+                                            onChange={(e) => patch(x.key, { answerOrMeaning: e.target.value })}
+                                            onKeyDown={(e) => enterTo(e, () => { const at = drafts.findIndex(y => y.key === x.key); const nx = drafts[at + 1]; if (nx) setFocusKey(nx.key); else addNext(); })} />
+                                    </div>
+                                    {x.open && (
+                                        <div className="mt-2 grid gap-2 sm:grid-cols-[7rem_1fr]">
+                                            <input className="field" value={x.wordType} maxLength={24} placeholder="Từ loại" aria-label="Từ loại" onChange={(e) => patch(x.key, { wordType: e.target.value })} />
+                                            <input className="field" value={x.ipa} maxLength={80} placeholder="IPA /…/" aria-label="IPA" onChange={(e) => patch(x.key, { ipa: e.target.value })} />
+                                            <textarea className="field py-2 sm:col-span-2" rows={1} value={x.explanationOrExample} maxLength={2500} placeholder="Câu ví dụ (EN)" aria-label="Câu ví dụ" onChange={(e) => patch(x.key, { explanationOrExample: e.target.value })} />
+                                        </div>
+                                    )}
+                                </div>
+                                <div className="flex shrink-0 flex-col gap-1">
+                                    <button type="button" className="lib-act" aria-expanded={x.open} aria-label={x.open ? 'Thu gọn' : 'Thêm IPA, ví dụ'} title={x.open ? 'Thu gọn' : 'Thêm IPA, ví dụ'} onClick={() => patch(x.key, { open: !x.open })}><Icon name={x.open ? 'chevronUp' : 'chevronDown'} size={15} /></button>
+                                    <button type="button" className="lib-act" aria-label={'Bỏ dòng ' + (i + 1)} title="Bỏ dòng" onClick={() => drop(x.key)}><Icon name="x" size={15} /></button>
+                                </div>
+                            </li>
+                        ))}
+                    </ol>
+                    <div className="flex flex-wrap items-center gap-2 border-t border-line px-3 py-2.5 sm:px-4">
+                        <button type="button" className="btn btn-ghost btn-sm" onClick={addNext}><Icon name="plus" size={14} /> Thêm dòng tiếp</button>
+                        <div className="ml-auto flex items-center gap-2">
+                            <button type="button" className="btn btn-secondary btn-sm" onClick={onCancel}>Hủy</button>
+                            <button type="button" className="btn btn-primary btn-sm whitespace-nowrap" disabled={!ready} onClick={onSave}>Lưu tất cả{ready ? ' (' + ready + ')' : ''}</button>
+                        </div>
+                    </div>
+                </section>
             );
         };
 
@@ -4949,6 +5077,7 @@
             const [menu, setMenu] = useState(null);
             const [filterOpen, setFilterOpen] = useState(false);
             const [fundOpen, setFundOpen] = useState(false);
+            const [drafts, setDrafts] = useState(null);
             const menuBox = useRef(null);
             useEffect(() => {
                 if (!menu) return undefined;
@@ -4985,9 +5114,33 @@
             const update = (id, patch) => setItems(prev => prev.map(t => (t.id === id ? Object.assign({}, t, patch) : t)));
             const selectRange = (a, b) => { const lo = Math.min(a, b); const hi = Math.max(a, b); setSel(new Set(rows.slice(lo, hi + 1).map(r => r.id))); };
             const bulkSetGroup = (name) => { if (!sel.size) return; setItems(prev => prev.map(t => (sel.has(t.id) ? Object.assign({}, t, { group: name }) : t))); };
+            const draftGroup = groupFilter !== 'all' && groupFilter !== '__none' ? groupFilter : '';
+            /* Từ vựng: mở khung thêm nhanh ngay đầu danh sách, không chặn màn hình.
+               Đang lọc trắc nghiệm: thêm 1 câu rồi mở form vì câu hỏi cần 4 lựa chọn. */
             const addRow = () => {
-                const g = groupFilter !== 'all' && groupFilter !== '__none' ? groupFilter : '';
-                setItems(prev => prev.concat(Sch.normalizeItem({ type: typeFilter === 'mcq' ? 'mcq' : 'vocab', group: g, options: typeFilter === 'mcq' ? ['', '', '', ''] : [] })));
+                if (typeFilter === 'mcq') {
+                    const t = Object.assign(Sch.normalizeItem({ type: 'vocab', group: draftGroup }), { type: 'mcq', options: ['', '', '', ''], answerOrMeaning: 'A' });
+                    setItems(prev => [t].concat(prev));
+                    setEditing(t);
+                    return;
+                }
+                setDrafts(list => (list ? list.concat([newDraft()]) : [newDraft()]));
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            };
+            const saveDrafts = () => {
+                const made = (drafts || []).filter(x => x.questionOrWord.trim()).map(x => Sch.normalizeItem({
+                    type: 'vocab', group: draftGroup, questionOrWord: x.questionOrWord, answerOrMeaning: x.answerOrMeaning, wordType: x.wordType,
+                    ipa: x.ipa, vietSub: Sch.ipaToVi(x.ipa) || '', explanationOrExample: x.explanationOrExample, exampleVi: x.exampleVi, keywords: x.keywords
+                }));
+                if (!made.length) return;
+                setItems(prev => made.concat(prev));
+                setDrafts(null);
+                toast('Đã thêm ' + made.length + ' từ', 'success');
+            };
+            const cancelDrafts = () => {
+                const typed = (drafts || []).some(x => x.questionOrWord.trim() || x.answerOrMeaning.trim());
+                if (typed && !confirm('Bỏ các dòng đang nhập?')) return;
+                setDrafts(null);
             };
             const removeRow = (id) => { if (confirm('Xóa mục này?')) setItems(prev => prev.filter(t => t.id !== id)); };
             const removeAll = () => {
@@ -4998,19 +5151,31 @@
             };
             const removeSelected = () => { if (sel.size && confirm('Xóa ' + sel.size + ' mục đã chọn?')) { setItems(prev => prev.filter(t => !sel.has(t.id))); setSel(new Set()); } };
 
-            const applyEnrich = (map) => setItems(prev => prev.map(t => {
-                const e = map[t.id];
-                if (!e) return t;
-                return Object.assign({}, t, {
-                    wordType: t.wordType || e.wordType,
-                    answerOrMeaning: t.answerOrMeaning || e.answerOrMeaning,
-                    explanationOrExample: t.explanationOrExample || e.explanationOrExample,
-                    exampleVi: t.exampleVi || e.exampleVi,
-                    ipa: e.ipa || t.ipa,
-                    vietSub: Sch.ipaToVi(e.ipa || t.ipa) || t.vietSub,
-                    keywords: t.keywords.length ? t.keywords : e.keywords
-                });
-            }));
+            const applyEnrich = (map) => setItems(prev => prev.map(t => (map[t.id] ? mergeEnrich(t, map[t.id]) : t)));
+
+            /* AI cho bản nháp (form sửa, dòng thêm nhanh): trả về phần AI điền, không ghi vào Sổ từ. */
+            const aiDraft = async (t) => {
+                if (!AI.ready()) { toast('AI chỉ chạy khi mở trang qua web, không mở file trực tiếp.', 'info'); return null; }
+                if (!String(t.questionOrWord || '').trim()) { toast('Nhập từ trước đã', 'error'); return null; }
+                if (t.type !== 'mcq' && !E.Quota.aiFillAllowed()) { setPaywall(true); return null; }
+                try {
+                    if (t.type === 'mcq') {
+                        const ex = await AI.explain(t);
+                        noteStudyDay();
+                        return ex ? { explanationOrExample: ex } : null;
+                    }
+                    const id = t.id || 'draft';
+                    const map = await AI.enrichVocab([Object.assign({}, t, { id: id })]);
+                    const e = map[id] || null;
+                    if (e) { noteStudyDay(); toast('AI đã điền: ' + t.questionOrWord.slice(0, 40), 'success'); }
+                    else toast('AI chưa trả kết quả, thử lại sau', 'error');
+                    return e;
+                } catch (e) {
+                    if (e && e.code === 'ai-locked' && t.type !== 'mcq') { setPaywall(true); return null; }
+                    toast(e.message, 'error');
+                    return null;
+                }
+            };
 
             const armTease = (id) => {
                 window.clearTimeout(teaseTimer.current);
@@ -5142,7 +5307,7 @@
                                             <button type="button" role="menuitem" onClick={() => runMenu(() => setQuick(true))}><Icon name="clipboard" size={16} /><span><b>Dán nhanh</b><small>Dán danh sách "từ - nghĩa", mỗi dòng một từ</small></span></button>
                                             <button type="button" role="menuitem" onClick={() => runMenu(() => setPassage(true))}><Icon name="sparkles" size={16} /><span><b>AI quét bài đọc / đề thi</b><small>Dán bài, AI lọc từ mới kèm IPA</small></span></button>
                                             <button type="button" role="menuitem" onClick={() => runMenu(() => fileRef.current && fileRef.current.click())}><Icon name="upload" size={16} /><span><b>Nhập từ file Excel</b><small>.xlsx, .xls hoặc .csv, tên file thành tên nhóm</small></span></button>
-                                            <button type="button" role="menuitem" onClick={() => runMenu(addRow)}><Icon name="plus" size={16} /><span><b>Thêm 1 dòng trống</b><small>Tự gõ từ và nghĩa</small></span></button>
+                                            <button type="button" role="menuitem" onClick={() => runMenu(addRow)}><Icon name="plus" size={16} /><span><b>Thêm nhanh nhiều dòng</b><small>Gõ từ, Enter, gõ nghĩa, Enter sang dòng mới</small></span></button>
                                         </>
                                     ) : (
                                         <>
@@ -5203,6 +5368,8 @@
                             <button type="button" className="btn btn-sm text-white hover:bg-white/10 ml-auto" onClick={() => setSel(new Set())}>Bỏ chọn</button>
                         </div>
                     )}
+
+                    {drafts && <BatchAdd drafts={drafts} setDrafts={setDrafts} group={draftGroup} onAI={aiDraft} onSave={saveDrafts} onCancel={cancelDrafts} />}
 
                     {/* Điện thoại (<768px): danh sách thẻ 2 dòng, chạm để sửa. Màn rộng giữ bảng đầy đủ. */}
                     <div className="card overflow-hidden md:hidden">
@@ -5355,11 +5522,11 @@
                     </div>
 
                     {importBatches && <ImportDialog batches={importBatches} existingCount={items.length} onClose={() => setImportBatches(null)} onConfirm={confirmImport} />}
-                    {paywall && <AiUnlockModal toast={toast} onClose={() => setPaywall(false)} />}
                     {passage && <PassageReader toast={toast} onClose={() => setPassage(false)} onSave={(list) => confirmImport({ items: list, mode: 'append' })} />}
-                    {editing && <ItemEditor item={editing} groups={groups} aiBusy={aiRow === editing.id}
-                        onClose={() => setEditing(null)} onStudy={(t) => { setEditing(null); onStudyFrom(t); }}
-                        onAI={(t) => aiOne(t)} onSave={(t) => { setItems(prev => prev.map(x => (x.id === t.id ? t : x))); setEditing(null); toast('Đã lưu', 'success'); }} />}
+                    {editing && <ItemEditor item={editing} groups={groups}
+                        onClose={() => setEditing(null)}
+                        onAI={aiDraft} onSave={(t) => { setItems(prev => prev.map(x => (x.id === t.id ? t : x))); setEditing(null); toast('Đã lưu', 'success'); }} />}
+                    {paywall && <AiUnlockModal toast={toast} onClose={() => setPaywall(false)} />}
                 </div>
             );
         };
