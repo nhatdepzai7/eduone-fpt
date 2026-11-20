@@ -115,6 +115,39 @@
         .fund-code { align-items: center; gap: 6px; min-height: 30px; padding: 0 8px; border-radius: 8px; color: var(--ink-2); }
         .fund-code:hover { background: var(--surface-2); color: var(--ink); }
         /* Pill phiếu hôm nay */
+        .mission { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; align-items: center; gap: 22px; width: 100%; margin-bottom: 12px; padding: 16px 18px; border-radius: 16px; color: #fff; background: radial-gradient(120% 160% at 0% 0%, #3730A3 0%, #1E1B4B 46%, #0F172A 100%); border: 1px solid rgba(165, 180, 252, .3); box-shadow: 0 10px 28px rgba(15, 23, 42, .2), inset 0 1px 0 rgba(255, 255, 255, .08); animation: mission-in .35s ease-out; }
+        .mission.is-late { border-color: rgba(251, 146, 60, .6); box-shadow: 0 10px 28px rgba(15, 23, 42, .2), 0 0 0 3px rgba(251, 146, 60, .12); }
+        .mission-main { display: flex; align-items: center; gap: 12px; min-width: 0; }
+        .mission-ic { display: inline-flex; width: 42px; height: 42px; flex-shrink: 0; align-items: center; justify-content: center; border-radius: 12px; color: #FB923C; background: rgba(249, 115, 22, .16); box-shadow: inset 0 0 0 1px rgba(251, 146, 60, .3); }
+        .mission-ic.is-empty { color: #A5B4FC; background: rgba(165, 180, 252, .12); box-shadow: inset 0 0 0 1px rgba(165, 180, 252, .3); }
+        .mission-ic svg { width: 22px; height: 22px; }
+        .mission-title { font-size: 15.5px; font-weight: 700; line-height: 1.35; }
+        .mission-title b { color: #FDBA74; }
+        .mission-sub { margin-top: 2px; font-size: 13px; color: #C7D2FE; }
+        .mission-sub b { color: #fff; font-weight: 700; }
+        .mission.is-late .mission-sub, .mission.is-late .mission-sub b { color: #FED7AA; }
+        .mission-meter { display: flex; flex-direction: column; gap: 7px; min-width: 112px; }
+        .mission-count { font-size: 12px; color: #C7D2FE; }
+        .mission-count b { font-size: 16px; color: #fff; }
+        .mission-bars { display: flex; gap: 6px; }
+        .mission-bars i { width: 52px; height: 8px; border-radius: 999px; background: rgba(255, 255, 255, .1); box-shadow: inset 0 0 0 1px rgba(165, 180, 252, .35); animation: mission-glow 2.4s ease-in-out infinite; }
+        .mission-bars i.is-on { animation: none; background: linear-gradient(90deg, #A5B4FC, #FFFFFF); box-shadow: 0 0 10px rgba(165, 180, 252, .75); }
+        .mission-cta { display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 46px; padding: 0 20px; border-radius: 12px; font-size: 14.5px; font-weight: 700; color: #1E1B4B; background: #fff; white-space: nowrap; box-shadow: 0 6px 16px rgba(0, 0, 0, .28); transition: transform .12s ease, background .12s ease; }
+        .mission-cta:hover { background: #EEF2FF; transform: translateY(-1px); }
+        .mission-cta:focus-visible { outline: 3px solid #A5B4FC; outline-offset: 2px; }
+        .mission-cta svg { color: #4338CA; }
+        @media (max-width: 767px) {
+            .mission { grid-template-columns: minmax(0, 1fr); gap: 14px; padding: 14px; }
+            .mission-meter { flex-direction: row; align-items: center; justify-content: space-between; gap: 12px; }
+            .mission-bars { flex: 1; max-width: 62%; }
+            .mission-bars i { flex: 1; width: auto; }
+            .mission-cta { width: 100%; }
+        }
+        @keyframes mission-in { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
+        @keyframes mission-glow { 0%, 100% { box-shadow: inset 0 0 0 1px rgba(165, 180, 252, .35); } 50% { box-shadow: inset 0 0 0 1px rgba(199, 210, 254, .8), 0 0 8px rgba(165, 180, 252, .4); } }
+        .fund-strip.is-collapse { animation: mission-collapse .55s cubic-bezier(.2, .8, .2, 1); }
+        @keyframes mission-collapse { from { min-height: 96px; background: #1E1B4B; border-color: rgba(165, 180, 252, .3); } to { min-height: 44px; } }
+        @media (prefers-reduced-motion: reduce) { .mission, .mission-bars i, .fund-strip.is-collapse { animation: none; } }
         .bill-tabs { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 4px; padding: 4px; border-radius: 14px; background: #F1F5F9; }
         .bill-tab { min-height: 38px; padding: 0 8px; border-radius: 10px; font-size: 13.5px; font-weight: 600; color: var(--ink-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .bill-tab:hover { color: var(--ink); }
@@ -720,7 +753,7 @@
 
     <!-- ===================== UI KIT ===================== -->
     <script type="text/babel" data-presets="react" data-type="module">
-        import { IDENTITIES, dayKey, identityLine, planVote, shiftDay, summarize } from './js/core/identity.js?v=ielts';
+        import { IDENTITIES, dayKey, identityLine, planVote, shiftDay, summarize } from './js/core/identity.js?v=mission';
         const { useState, useEffect, useRef, useMemo, useReducer } = React;
         const E = window.EDU;
         /* /app?go=... từ trang chủ: đọc một lần trước khi vẽ, component nào cần thì lấy qua takeGo(). */
@@ -1042,13 +1075,46 @@
             const today = dayKey(new Date());
             return useMemo(() => (votes ? summarize(votes, today) : null), [votes, today]);
         };
+        /* Nhiệm vụ hôm nay: lật 2 thẻ là có phiếu. Tiến độ lưu theo ngày, thoát giữa chừng vẫn giữ 1/2. */
+        const MISSION_KEY = 'mission';
+        const MISSION_GOAL = 2;
+        const readMission = () => {
+            const m = Store.prefs.get(MISSION_KEY, null);
+            return m && m.date === dayKey(new Date()) ? Math.max(0, Math.min(MISSION_GOAL, Number(m.n) || 0)) : 0;
+        };
+        const noteMission = (n) => {
+            const prev = readMission();
+            const next = Math.min(MISSION_GOAL, Math.max(prev, n));
+            if (next === prev) return;
+            Store.prefs.set(MISSION_KEY, { date: dayKey(new Date()), n: next });
+            window.dispatchEvent(new CustomEvent('edu-mission'));
+        };
+        const useMission = () => {
+            const [n, setN] = useState(readMission);
+            useEffect(() => {
+                const on = () => setN(readMission());
+                window.addEventListener('edu-mission', on);
+                window.addEventListener('edu-votes', on);
+                return () => { window.removeEventListener('edu-mission', on); window.removeEventListener('edu-votes', on); };
+            }, []);
+            return n;
+        };
+        /* Đồng hồ cuối ngày: sau 18:00 hiện thời gian còn lại, sau 21:00 chuyển sang tông cảnh báo. */
+        const useDayLeft = () => {
+            const [now, setNow] = useState(Date.now());
+            useEffect(() => { const id = setInterval(() => setNow(Date.now()), 30000); return () => clearInterval(id); }, []);
+            const d = new Date(now);
+            const end = new Date(d); end.setHours(24, 0, 0, 0);
+            const mins = Math.max(0, Math.floor((end - d) / 60000));
+            return { hour: d.getHours(), h: Math.floor(mins / 60), m: mins % 60 };
+        };
         const castSessionVote = (session, answered, toast) => {
             if (!session) return;
-            const vote = planVote({ sessionId: session.id, type: session.voteType, answered: answered, slot: !!session.slotId }, new Date());
+            const vote = planVote({ sessionId: session.id, type: session.voteType, answered: answered, slot: !!session.slotId, lean: session.lean ? (session.need || MISSION_GOAL) : 0 }, new Date());
             if (!vote) return;
             Store.addIdentityVote(vote).then((res) => {
                 if (!res || !res.saved) return;
-                try { sessionStorage.setItem('edu.ringAnim', 'pending'); sessionStorage.setItem('edu.voteBump', '1'); } catch (e) {}
+                try { sessionStorage.setItem('edu.ringAnim', 'pending'); sessionStorage.setItem('edu.voteBump', '1'); sessionStorage.setItem('edu.missionDone', '1'); } catch (e) {}
                 window.dispatchEvent(new CustomEvent('edu-votes'));
                 window.dispatchEvent(new CustomEvent('edu-study-start'));
                 const line = identityLine(readIdentity());
@@ -1814,12 +1880,19 @@
             const streak = votes ? (votes.streak || 0) : 0;
             const name = identityName(useIdentity());
             const slipped = !!votes && votes.missedOnce;
+            const mission = useMission();
+            const day = useDayLeft();
             /* Vừa chốt phiếu (đang "Còn 1 phiếu" chuyển sang "Đã chốt"): chạy hiệu ứng mừng một lần. */
             const wasDue = useRef(false);
             const [fresh, setFresh] = useState(false);
             useEffect(() => {
                 if (!votes) return undefined;
-                if (wasDue.current && votes.confirmedToday) {
+                /* Chốt phiếu ở màn khác (đang học) thì về Sổ từ vẫn thấy Banner thu gọn. */
+                let pending = false;
+                if (votes.confirmedToday) {
+                    try { pending = sessionStorage.getItem('edu.missionDone') === '1'; if (pending) sessionStorage.removeItem('edu.missionDone'); } catch (e) {}
+                }
+                if ((wasDue.current || pending) && votes.confirmedToday) {
                     setFresh(true);
                     const t = window.setTimeout(() => setFresh(false), 2400);
                     wasDue.current = false;
@@ -1828,8 +1901,37 @@
                 wasDue.current = !votes.confirmedToday;
                 return undefined;
             }, [votes && votes.confirmedToday]);
+            if (due) {
+                const evening = day.hour >= 18;
+                const late = day.hour >= 21;
+                return (
+                    <section className={'mission' + (late ? ' is-late' : '')} aria-label="Phiếu hôm nay">
+                        <div className="mission-main">
+                            <span className={'mission-ic' + (streak > 0 ? '' : ' is-empty')}>
+                                {streak > 0 ? FLAME : <svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><circle cx="8" cy="8" r="6" stroke="currentColor" strokeWidth="1.6" strokeDasharray="3 2.4" /></svg>}
+                            </span>
+                            <div className="min-w-0">
+                                <p className="mission-title">{streak > 0
+                                    ? <>Đừng để đứt chuỗi <b className="tnum">{streak} ngày</b> của {name}</>
+                                    : <>Phiếu hôm nay đang trống · {name}</>}</p>
+                                <p className="mission-sub">{evening
+                                    ? <>Còn <b className="tnum">{day.h}g {day.m}p</b> hết hôm nay · chỉ cần lật {MISSION_GOAL - mission} thẻ</>
+                                    : mission > 0 ? <>Xong {mission}/{MISSION_GOAL} rồi, còn 1 thẻ nữa là có phiếu</>
+                                    : <>Chỉ cần lật nhanh 2 thẻ để giữ nhịp hôm nay</>}</p>
+                            </div>
+                        </div>
+                        <div className="mission-meter" role="progressbar" aria-valuemin={0} aria-valuemax={MISSION_GOAL} aria-valuenow={mission} aria-label={'Đã lật ' + mission + ' trên ' + MISSION_GOAL + ' thẻ hôm nay'}>
+                            <span className="mission-count"><b className="tnum">{mission}</b>/{MISSION_GOAL} thẻ</span>
+                            <span className="mission-bars">{Array.from({ length: MISSION_GOAL }, (_, i) => <i key={i} className={i < mission ? 'is-on' : ''} />)}</span>
+                        </div>
+                        <button type="button" className="mission-cta" onClick={onQuickVote}>
+                            <Icon name="zap" size={16} /> {mission > 0 ? 'Còn 1 thẻ · Hoàn tất' : 'Chốt nhanh 30s'} <span aria-hidden="true">→</span>
+                        </button>
+                    </section>
+                );
+            }
             return (
-                <div className="fund-strip">
+                <div className={'fund-strip' + (fresh ? ' is-collapse' : '')}>
                     {!votes ? (
                         <span className="ticket is-idle">
                             <svg className="ticket-ic" viewBox="0 0 16 16" fill="none" aria-hidden="true"><circle cx="8" cy="8" r="6.5" stroke="currentColor" strokeWidth="1.5" /></svg>
@@ -1861,7 +1963,7 @@
                                     <defs><linearGradient id="ticket-g" x1="0" y1="0" x2="16" y2="16"><stop stopColor="#34D399" /><stop offset="1" stopColor="#059669" /></linearGradient></defs>
                                 </svg>
                             </span>
-                            <span className="ticket-text">+1 phiếu: <b>{name}</b></span>
+                            <span className="ticket-text">Đã chốt phiếu <b>{name}</b></span>
                             <span className="ticket-streak" aria-label={'Chuỗi ' + streak + ' ngày'}>
                                 {FLAME}
                                 <b className="tnum">{streak}</b><span className="hidden sm:inline">&nbsp;ngày</span>
@@ -3088,6 +3190,9 @@
                 affirmStudy();
                 castSessionVote(session, known.length + forgot.length, toast);
             }, [done]);
+            useEffect(() => {
+                if (session && session.mission) noteMission((session.missionBase || 0) + known.length + forgot.length);
+            }, [known.length, forgot.length]);
 
             useEffect(() => {
                 const need = ids.map(id => byId.get(id)).filter(x => x && x.type === 'vocab' && x.questionOrWord && !x.recallPrompt).slice(0, 40);
@@ -7737,17 +7842,19 @@
                 /* Sổ từ đang mở sẵn thì không mount lại: báo qua sự kiện. */
                 window.setTimeout(() => { if (window.__fpassGo === 'reading') { window.__fpassGo = ''; window.dispatchEvent(new CustomEvent('edu-reading')); } }, 0);
             };
-            /* Pill "Phiếu hôm nay": đang trong ca thì vào ca bản Chạm đáy (2 thẻ đủ phiếu); ngoài ca thì 5 thẻ flashcard, từ yếu trước. */
+            /* Banner "Chốt nhanh 30s": đang trong ca thì vào ca bản Chạm đáy; ngoài ca thì lật 2 thẻ (hoặc số thẻ còn thiếu hôm nay), từ yếu trước. */
             const quickVote = () => {
                 const slotNow = cur.slot;
                 if (slotNow && (cur.kind === 'ON_TIME_ACTIVE' || cur.kind === 'LATE_RECOVERY')) { startSlot(true); return; }
                 const filled = items.filter(Sch.isFilled);
-                if (filled.length < 5) { toast('Cần ít nhất 5 thẻ có nghĩa để chốt phiếu. Thêm vài từ nhé.', 'info'); return; }
+                const base = readMission();
+                const need = Math.max(1, MISSION_GOAL - base);
+                if (filled.length < need) { toast('Cần ít nhất ' + need + ' thẻ có nghĩa để chốt phiếu. Thêm 1–2 từ nhé.', 'info'); return; }
                 const weak = filled.filter(t => Sch.isWeak(t)).sort((a, b) => Sch.weakScore(b) - Sch.weakScore(a));
                 const rest = Sch.shuffle(filled.filter(t => weak.indexOf(t) < 0));
-                const ids = weak.concat(rest).slice(0, 5).map(t => t.id);
+                const ids = weak.concat(rest).slice(0, need).map(t => t.id);
                 noteStudyStart();
-                setSession({ id: Date.now(), title: 'Học 30s · chốt phiếu hôm nay', mode: 'flash', voteType: 'flashcard', ids: ids });
+                setSession({ id: Date.now(), title: 'Chốt nhanh 30s · ' + need + ' thẻ', mode: 'flash', voteType: 'flashcard', ids: ids, lean: true, need: need, mission: true, missionBase: base });
                 dispatch({ type: 'TAB', tab: 'practice', force: true });
                 window.scrollTo(0, 0);
             };

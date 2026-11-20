@@ -46,7 +46,10 @@ export function meetsAnswerThreshold(count) {
    theo quy tắc 2 phút của Atomic Habits. Phiên tự do vẫn cần MIN_ANSWERS. */
 export function planVote(input, now) {
     if (!input || input.type === 'eosMock' || !isVoteType(input.type)) return null;
-    const enough = input.slot ? (typeof input.answered === 'number' && input.answered >= 1) : meetsAnswerThreshold(input.answered);
+    const lean = Number(input.lean) || 0;
+    const enough = input.slot
+        ? (typeof input.answered === 'number' && input.answered >= 1)
+        : lean > 0 ? (typeof input.answered === 'number' && input.answered >= Math.min(lean, MIN_ANSWERS)) : meetsAnswerThreshold(input.answered);
     if (!enough) return null;
     if (input.sessionId == null || input.sessionId === '') return null;
     const at = now instanceof Date ? now : new Date(now == null ? Date.now() : now);
