@@ -132,7 +132,10 @@
         .fund-warn { display: inline-flex; align-items: center; gap: 4px; min-height: 26px; padding: 0 10px; border-radius: 999px; font-size: 12px; font-weight: 700; color: #9A3412; background: #FFEDD5; border: 1px solid #FDBA74; }
         .fund-warn:hover { background: #FED7AA; }
         /* Nút AI quét bài đọc: nổi bật nhưng nhường nút chính "Thêm từ". */
-        .start-tile { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; padding: 16px; border-radius: 16px; border: 1px solid var(--border); background: var(--surface); text-align: left; transition: border-color .15s ease, box-shadow .15s ease, transform .15s ease; }
+        .sample-prev { position: relative; margin-top: 12px; }
+        .sample-body { overflow: hidden; border-radius: 16px; border: 1px dashed var(--border); background: var(--surface); opacity: .5; pointer-events: none; user-select: none; }
+        .sample-badge { position: absolute; z-index: 1; top: -9px; right: 12px; padding: 2px 10px; border-radius: 999px; font-size: 11px; font-weight: 700; letter-spacing: .02em; color: var(--ink-2); background: var(--surface); border: 1px solid var(--border); box-shadow: 0 1px 2px rgba(15, 23, 42, .06); }
+        .start-tile { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; padding: 14px; min-width: 0; border-radius: 16px; border: 1px solid var(--border); background: var(--surface); text-align: left; transition: border-color .15s ease, box-shadow .15s ease, transform .15s ease; }
         .start-tile:hover { border-color: var(--primary); box-shadow: 0 6px 18px rgba(15, 23, 42, .08); transform: translateY(-2px); }
         .start-tile b { margin-top: 6px; font-size: 15px; font-weight: 700; color: var(--ink); }
         .start-tile small { font-size: 13px; line-height: 1.45; color: var(--muted); }
@@ -2290,10 +2293,6 @@
                 {open && <div className="help-scrim" onMouseDown={onClose} />}
                 <div className="help-dock">
                     {open && <SupportPanel toast={toast} onClose={onClose} returnTo={returnTo} onFeedback={onFeedback} />}
-                    <button type="button" className="help-launch" data-help-open aria-expanded={open} aria-controls="fpass-help" aria-haspopup="dialog" onClick={(e) => (open ? onClose() : onOpen(e.currentTarget))}>
-                        <Icon name="headset" size={20} />
-                        <span className="help-launch-label">Hỗ trợ</span>
-                    </button>
                 </div>
             </>
         );
@@ -5248,6 +5247,54 @@
             );
         };
 
+        /* Xem trước Sổ từ khi còn trống: dữ liệu mẫu chỉ vẽ trên giao diện, không lưu IndexedDB, không bấm được.
+           Có từ thật đầu tiên là khối này biến mất (LibraryView chỉ vẽ nó khi items rỗng). */
+        const SAMPLE_ROWS = [
+            { group: 'Unit 1 · Jobs', type: 'n', word: 'colleague', ipa: '/ˈkɒliːɡ/', meaning: 'đồng nghiệp', example: 'My colleague helped me finish the report.' },
+            { group: 'Unit 1 · Jobs', type: 'v', word: 'negotiate', ipa: '/nɪˈɡəʊʃieɪt/', meaning: 'đàm phán', example: 'We negotiated a higher salary.' },
+            { group: 'Unit 1 · Jobs', type: 'n', word: 'deadline', ipa: '/ˈdedlaɪn/', meaning: 'hạn chót', example: 'The deadline is next Friday.' }
+        ];
+        const SamplePreview = () => (
+            <section className="sample-prev" aria-hidden="true">
+                <span className="sample-badge">Xem trước hiển thị</span>
+                <div className="sample-body">
+                    <div className="grp-head !cursor-default"><Icon name="chevronDown" size={16} /><span className="grp-dot" style={{ background: Sch.groupColor(SAMPLE_ROWS[0].group) }} /><span className="min-w-0 flex-1 truncate text-left">{SAMPLE_ROWS[0].group}</span><span className="grp-count tnum">3 mục</span></div>
+                    {/* Điện thoại: 2 thẻ 2 dòng */}
+                    <ul className="divide-y divide-line border-t border-line md:hidden">
+                        {SAMPLE_ROWS.slice(0, 2).map(r => (
+                            <li key={r.word} className="lib-row">
+                                <span className="lib-bar" style={{ background: Sch.groupColor(r.group) }} />
+                                <div className="min-w-0 flex-1">
+                                    <div className="flex items-start gap-2">
+                                        <span className="lib-word">{r.word}<span className="lib-tag">{r.type}</span></span>
+                                        <span className="ml-auto flex shrink-0 items-center gap-1 text-muted"><Icon name="volume" size={15} /><Icon name="play" size={15} /><Icon name="pen" size={15} /></span>
+                                    </div>
+                                    <p className="lib-mean mt-0.5">{r.meaning}</p>
+                                </div>
+                            </li>
+                        ))}
+                    </ul>
+                    {/* Màn rộng: bảng mẫu */}
+                    <table className="hidden w-full border-collapse text-sm md:table">
+                        <thead className="bg-surface2 text-xs text-ink2">
+                            <tr>{['#', 'Nhóm', 'Loại', 'Từ / Câu hỏi', 'Nghĩa / Đáp án', 'Ví dụ'].map(h => <th key={h} className="px-3 py-2 text-left font-semibold">{h}</th>)}</tr>
+                        </thead>
+                        <tbody>
+                            {SAMPLE_ROWS.map((r, i) => (
+                                <tr key={r.word} className="border-t border-line align-top">
+                                    <td className="px-3 py-2.5 text-xs text-muted tnum">{i + 1}</td>
+                                    <td className="px-3 py-2.5"><span className="inline-flex items-center gap-2"><span className="h-4 w-1 rounded" style={{ background: Sch.groupColor(r.group) }} />{r.group}</span></td>
+                                    <td className="px-3 py-2.5"><span className="lib-tag !ml-0">{r.type}</span></td>
+                                    <td className="px-3 py-2.5"><b className="font-semibold text-primary">{r.word}</b><p className="text-xs text-muted">{r.ipa}</p></td>
+                                    <td className="px-3 py-2.5">{r.meaning}</td>
+                                    <td className="px-3 py-2.5 text-ink2">{r.example}</td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        );
         const LibraryView = ({ items, setItems, groups, groupFilter, setGroupFilter, onPractice, onWeak, onStudyFrom, onQuickVote, toast, mergeItems }) => {
             const [quick, setQuick] = useState(false);
             const [importBatches, setImportBatches] = useState(null);
@@ -5554,9 +5601,9 @@
                         </div>
                         <div className="relative flex shrink-0 items-center gap-2">
                             {groupFilter !== 'all' && <button type="button" onClick={() => onPractice(studyable, 'flash', Sch.groupLabel(groupFilter))} disabled={!studyable.length} className="btn btn-secondary btn-sm hidden sm:inline-flex"><Icon name="layers" size={14} /> Luyện nhóm này</button>}
-                            <button type="button" onClick={() => setPassage(true)} className="btn-ai" title="Dán bài đọc hoặc đề thi, AI lọc từ mới kèm IPA và nghĩa">
+                            {items.length > 0 && <button type="button" onClick={() => setPassage(true)} className="btn-ai" title="Dán bài đọc hoặc đề thi, AI lọc từ mới kèm IPA và nghĩa">
                                 <Icon name="sparkles" size={15} /><span className="sm:hidden">Quét bài</span><span className="hidden sm:inline">AI quét bài đọc</span>
-                            </button>
+                            </button>}
                             <button type="button" onClick={() => setMenu(m => (m === 'add' ? null : 'add'))} aria-expanded={menu === 'add'} aria-haspopup="menu" className="btn btn-primary btn-sm"><Icon name="plus" size={15} /> Thêm từ</button>
                             <button type="button" onClick={() => setMenu(m => (m === 'more' ? null : 'more'))} aria-expanded={menu === 'more'} aria-haspopup="menu" aria-label="Tùy chọn khác" className="btn btn-secondary btn-sm btn-icon !w-10">•••</button>
                             {menu && (
@@ -5587,7 +5634,7 @@
 
                     {quick && <QuickPaste groups={groups} toast={toast} onLocked={() => setPaywall(true)} onAdd={(list) => confirmImport({ items: list, mode: 'append' })} />}
 
-                    <div className="mb-3">
+                    {items.length > 0 && <div className="mb-3">
                         <div className="flex items-center gap-2">
                             <div className="relative min-w-0 flex-1"><Icon name="search" size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted" /><input value={search} onChange={(e) => setSearch(e.target.value)} className="field pl-9" placeholder="Tìm từ, câu hỏi, nghĩa…" aria-label="Tìm trong kho" /></div>
                             <div className="hidden w-52 md:block">{groupSelect}</div>
@@ -5601,7 +5648,7 @@
                                 {groupFilter !== 'all' && <button type="button" onClick={() => onPractice(studyable, 'flash', Sch.groupLabel(groupFilter))} disabled={!studyable.length} className="btn btn-secondary btn-sm col-span-2"><Icon name="layers" size={14} /> Luyện nhóm này ({studyable.length})</button>}
                             </div>
                         )}
-                    </div>
+                    </div>}
                     {(pulse.neverMiss || importHint) && <div className="card mb-3">
                         {pulse.neverMiss && (
                             <p className="px-3 py-3 text-sm leading-5 text-ink2 sm:px-4">Không sao, đừng bỏ lỡ hai ngày liên tiếp.</p>
@@ -5631,10 +5678,11 @@
                     {/* Điện thoại (<768px): danh sách thẻ 2 dòng, chạm để sửa. Màn rộng giữ bảng đầy đủ. */}
                     {/* Sổ từ trống: 3 lối tạo từ ngay tại chỗ, như trang "Tạo học phần" của các web học lớn. */}
                     {items.length === 0 && !drafts && (
-                        <section className="card p-5 sm:p-8" aria-label="Bắt đầu Sổ từ">
+                        <>
+                        <section className="card p-4 sm:p-6" aria-label="Bắt đầu Sổ từ">
                             <p className="text-lg font-bold">Bắt đầu Sổ từ của bạn</p>
                             <p className="mt-1 text-sm text-ink2">Chọn cách nhanh nhất với bạn. Từ mới tự xếp theo nhóm, đúng thứ tự bài học.</p>
-                            <div className="mt-4 grid gap-3 sm:grid-cols-3">
+                            <div className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-3">
                                 <button type="button" className="start-tile is-ai" onClick={() => setPassage(true)}>
                                     <span className="start-ico"><Icon name="sparkles" size={20} /></span>
                                     <b>AI quét bài đọc</b><small>Dán bài đọc hoặc đề thi, AI lọc từ mới kèm IPA và nghĩa</small>
@@ -5649,6 +5697,8 @@
                                 </button>
                             </div>
                         </section>
+                        <SamplePreview />
+                        </>
                     )}
 
                     {/* Điện thoại: mỗi nhóm là một khối đóng/mở, thẻ 2 dòng, chạm để sửa. */}
