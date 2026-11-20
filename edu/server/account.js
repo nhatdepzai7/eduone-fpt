@@ -260,6 +260,21 @@ function mergeVotes(cloud, guest) {
     return Array.from(map.values()).slice(0, 5000);
 }
 
+/* Từ đã xóa trong kho của tài khoản: giữ mã lại để máy khác (hoặc bản cũ trên máy) không gửi lên làm từ sống lại. */
+const GONE_CAP = 6000;
+function cleanGone(raw) {
+    return (Array.isArray(raw) ? raw : []).map((id) => clip(id, 80)).filter(Boolean);
+}
+function mergeGone(cloud, incoming) {
+    const set = new Set(cleanGone(cloud));
+    cleanGone(incoming).forEach((id) => { set.delete(id); set.add(id); });
+    return Array.from(set).slice(-GONE_CAP);
+}
+const dropGone = (rows, gone) => {
+    const set = new Set(gone);
+    return (Array.isArray(rows) ? rows : []).filter((row) => row && !set.has(clip(row.id, 80)));
+};
+
 /* Cài đặt học riêng của từng tài khoản (bản sắc, lịch, mốc, chuỗi ngày...). Chỉ nhận đúng các khóa này. */
 const PROFILE_KEYS = ['identity', 'student', 'habitDays', 'milestones', 'exams', 'weeklyPlan', 'nextWeeklyPlan', 'setupDone', 'recentPacks', 'eosTried', 'licenses', 'slotSource', 'qlang'];
 function cleanProfile(raw) {
@@ -275,17 +290,18 @@ function cleanProfile(raw) {
 
 async function readLib(env, sub) {
     const raw = await redisCommand(env, ['GET', 'fpass:lib:' + sub]);
-    if (!raw || typeof raw !== 'string') return { items: [], progress: [], votes: [], profile: {} };
+    if (!raw || typeof raw !== 'string') return { items: [], progress: [], votes: [], profile: {}, gone: [] };
     try {
         const data = JSON.parse(raw);
         return {
             items: Array.isArray(data.items) ? data.items : [],
             progress: Array.isArray(data.progress) ? data.progress : [],
             votes: Array.isArray(data.votes) ? data.votes : [],
-            profile: cleanProfile(data.profile)
+            profile: cleanProfile(data.profile),
+            gone: cleanGone(data.gone)
         };
     } catch (e) {
-        return { items: [], progress: [], votes: [], profile: {} };
+        return { items: [], progress: [], votes: [], profile: {}, gone: [] };
     }
 }
 
@@ -330,12 +346,15 @@ export async function loginGoogle(env, body) {
         await redisCommand(env, ['HSET', 'fpass:quota:' + user.fundCode, 'pro', '1', 'proUntil', String(user.proUntil)]);
     }
     const cloud = await readLib(env, user.sub);
+    /* Kho trên máy gộp vào tài khoản này là thuộc về tài khoản này luôn; từ tài khoản đã xóa không sống lại. */
+    const gone = mergeGone(cloud.gone, guestLib.gone);
     const library = {
-        items: mergeItems(cloud.items, guestLib.items),
+        items: mergeItems(dropGone(cloud.items, gone), dropGone(guestLib.items, gone)),
         progress: mergeProgress(cloud.progress, guestLib.progress),
         votes: mergeVotes(cloud.votes, guestLib.votes),
         /* Bản trên mây thắng: máy khách chỉ lấp khóa tài khoản chưa có. */
-        profile: Object.assign({}, cleanProfile(guestLib.profile), cloud.profile)
+        profile: Object.assign({}, cleanProfile(guestLib.profile), cloud.profile),
+        gone
     };
     await writeLib(env, user.sub, library);
     await redisCommand(env, [
@@ -377,14 +396,16 @@ export async function pushLibrary(env, req, body) {
     if (!user) bad('auth', 'Cần đăng nhập Google.');
     const lib = body && body.library && typeof body.library === 'object' ? body.library : {};
     const cloud = await readLib(env, user.sub);
+    const gone = mergeGone(cloud.gone, lib.gone);
     const library = {
-        items: mergeItems(cloud.items, lib.items),
+        items: mergeItems(dropGone(cloud.items, gone), dropGone(lib.items, gone)),
         progress: mergeProgress(cloud.progress, lib.progress),
         votes: mergeVotes(cloud.votes, lib.votes),
-        profile: Object.assign({}, cloud.profile, cleanProfile(lib.profile))
+        profile: Object.assign({}, cloud.profile, cleanProfile(lib.profile)),
+        gone
     };
     await writeLib(env, user.sub, library);
-    return { ok: true, email: user.email, items: library.items.length, votes: library.votes.length };
+    return { ok: true, email: user.email, items: library.items.length, votes: library.votes.length, gone };
 }
 
 export async function currentAccount(env, req) {

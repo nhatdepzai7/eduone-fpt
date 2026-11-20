@@ -57,6 +57,11 @@
         .cmd-go { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 52px; padding: 0 22px; border-radius: 16px; background: #fff; color: #312E81; font-weight: 800; font-size: 16px; box-shadow: 0 10px 22px -12px rgba(0, 0, 0, .6); transition: transform .15s ease; }
         .cmd-go:hover { transform: translateY(-1px); }
         .cmd-go:disabled { opacity: .6; cursor: not-allowed; transform: none; }
+        .cmd-go.is-first { box-shadow: 0 0 0 4px rgba(255, 255, 255, .18), 0 12px 26px -12px rgba(0, 0, 0, .65); }
+        .cmd-sum { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1px; overflow: hidden; border-radius: 14px; background: rgba(255, 255, 255, .14); }
+        .cmd-sum > div { padding: 10px 12px; background: rgba(15, 12, 60, .28); }
+        .cmd-sum dt { font-size: 11px; font-weight: 500; line-height: 1.3; color: #C7D2FE; }
+        .cmd-sum dd { margin-top: 2px; font-size: 18px; font-weight: 700; color: #fff; }
         .cmd-link { display: inline-flex; align-items: center; gap: 6px; min-height: 44px; padding: 0 12px; border-radius: 12px; font-size: 14px; font-weight: 600; color: #E0E7FF; }
         .cmd-link:hover { background: rgba(255, 255, 255, .12); color: #fff; }
         .cmd-alt { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 52px; padding: 0 18px; border-radius: 16px; background: rgba(255, 255, 255, .12); color: #fff; font-weight: 700; font-size: 15px; border: 1px solid rgba(255, 255, 255, .3); transition: background .15s ease; }
@@ -83,9 +88,14 @@
         .side-link { position: relative; display: flex; align-items: center; gap: 10px; width: 100%; min-height: 44px; padding: 0 12px; border-radius: 12px; font-size: 14px; font-weight: 600; color: var(--ink-2); transition: background .15s ease, color .15s ease; }
         .side-link svg { color: var(--muted); flex-shrink: 0; }
         .side-link:hover:not([aria-current="page"]) { background: rgba(255, 255, 255, .55); color: var(--ink); }
-        .side-link[aria-current="page"] { background: var(--surface); color: var(--ink); box-shadow: 0 1px 3px rgba(15, 23, 42, .12); }
-        .side-link[aria-current="page"] svg { color: var(--primary); }
-        .side-link[aria-current="page"]::before { content: ""; position: absolute; left: -12px; top: 10px; bottom: 10px; width: 3px; border-radius: 0 3px 3px 0; background: var(--primary); }
+        /* Mục đang chọn: nền trắng đổ bóng nhẹ + vạch tím mảnh bên trái, không viền dày. */
+        .side-link[aria-current="page"] { background: #FFFFFF; color: #4F46E5; box-shadow: 0 1px 3px rgba(15, 23, 42, .08); }
+        .side-link[aria-current="page"] svg { color: #4F46E5; }
+        .side-link[aria-current="page"]::before { content: ""; position: absolute; left: 0; top: 10px; bottom: 10px; width: 3px; border-radius: 3px; background: #4F46E5; }
+        .side-link:focus { outline: none; }
+        .side-link:focus-visible { outline: none; box-shadow: 0 0 0 2px rgba(79, 70, 229, .35); }
+        .side-link[aria-current="page"]:focus-visible { box-shadow: 0 1px 3px rgba(15, 23, 42, .08), 0 0 0 2px rgba(79, 70, 229, .35); }
+        /* Obsidian: menu dọc tối liền với topbar, vùng nội dung bên phải vẫn sáng. */
         .side-sub { min-height: 38px; gap: 8px; font-weight: 500; font-size: 13px; }
         .side-code { flex-shrink: 0; padding: 2px 6px; border-radius: 6px; background: var(--primary-soft); color: var(--primary); font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 11px; font-weight: 700; }
         .side-sub[aria-current="page"] .side-code { background: var(--primary); color: #fff; }
@@ -698,19 +708,137 @@
             .eos-shell button.eos-hit { padding: 6px 4px; }
         }
 
-        .obsidian-head { background: #10141F; border-bottom-color: #202637; color: #F8F9FC; }
-        .obsidian-head .btn-ghost { color: #C6CBD4; }
-        .obsidian-head .btn-ghost:hover:not(:disabled) { background: #202637; }
-        .obsidian-head .tab { color: #C6CBD4; }
-        .obsidian-head .tab[aria-selected="true"] { background: #F8F9FC; color: #10141F; }
-        .obsidian-head .tab:hover:not([aria-selected="true"]) { background: #202637; color: #F8F9FC; }
         .obsidian-card { position: relative; overflow: hidden; border-radius: 18px; border: 1px solid rgba(216, 199, 160, .6); background: linear-gradient(145deg, #202637 0%, #10141F 58%, #161b28 100%); color: #F8F9FC; box-shadow: 0 16px 36px rgba(16, 20, 31, .18); }
         .obsidian-card::after { content: ""; position: absolute; inset: 0; background: linear-gradient(115deg, transparent 42%, rgba(216, 199, 160, .1) 50%, transparent 58%); pointer-events: none; }
-        .obsidian-dialog { background: #10141F; color: #F8F9FC; border: 1px solid #202637; box-shadow: 0 24px 60px rgba(0, 0, 0, .4); }
-        .obsidian-dialog .btn-ghost { color: #C6CBD4; }
-        .obsidian-dialog .btn-ghost:hover:not(:disabled) { background: #202637; }
         .obsidian-rise { animation: obsidian-rise 1.2s ease; }
         @keyframes obsidian-rise { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+        /* ===== Obsidian Noir: đen quyền lực + vàng champagne. Chỉ khung điều hướng tối; vùng học vẫn sáng (giấy ngà) để đọc lâu không mỏi. ===== */
+        .app-root[data-tier="obsidian"] { --ob-ink: #08080A; --ob-panel: #0C0C0F; --ob-line: rgba(232, 205, 150, .12); --ob-line-2: rgba(232, 205, 150, .22); --ob-gold: #D9B871; --ob-gold-hi: #F2DDA4; --ob-gold-lo: #A8884A; --ob-text: #EFEBE2; --ob-soft: #A39D90; --ob-mute: #6E695F; }
+        body:has(.app-root[data-tier="obsidian"]) { background: radial-gradient(1100px 520px at 50% -8%, #FBFAF7 0%, rgba(251, 250, 247, 0) 60%), #EFEDE7; }
+        .app-root[data-tier="obsidian"] ::selection { background: rgba(217, 184, 113, .35); }
+        .app-root[data-tier="obsidian"] :focus-visible { outline-color: var(--ob-gold); }
+        /* Topbar */
+        .obsidian-head { position: relative; background: linear-gradient(180deg, #0B0B0E 0%, var(--ob-ink) 100%); border-bottom-color: transparent !important; color: var(--ob-text); }
+        .obsidian-head::after { content: ""; position: absolute; left: 0; right: 0; bottom: -1px; height: 1px; background: linear-gradient(90deg, rgba(217, 184, 113, 0) 0%, rgba(217, 184, 113, .55) 22%, rgba(242, 221, 164, .8) 50%, rgba(217, 184, 113, .55) 78%, rgba(217, 184, 113, 0) 100%); pointer-events: none; }
+        .obsidian-head .btn-ghost { color: var(--ob-soft); }
+        .obsidian-head .btn-ghost:hover:not(:disabled) { background: rgba(255, 255, 255, .05); color: var(--ob-gold-hi); }
+        .obsidian-head .btn-secondary { background: rgba(255, 255, 255, .04); color: var(--ob-text); border-color: var(--ob-line-2); box-shadow: none; }
+        .obsidian-head .btn-secondary:hover:not(:disabled) { background: rgba(217, 184, 113, .08); border-color: rgba(217, 184, 113, .4); }
+        .obsidian-head .btn-primary { background: linear-gradient(180deg, var(--ob-gold-hi), var(--ob-gold)); color: #1A1408; box-shadow: 0 6px 16px -8px rgba(217, 184, 113, .7); }
+        .obsidian-head .tab { color: var(--ob-soft); }
+        .obsidian-head .tab[aria-selected="true"] { background: var(--ob-text); color: var(--ob-ink); }
+        .obsidian-head .tab:hover:not([aria-selected="true"]) { background: rgba(255, 255, 255, .05); color: var(--ob-text); }
+        .obsidian-head .top-contact.is-dark { background: rgba(255, 255, 255, .03); border-color: var(--ob-line); }
+        .obsidian-head .top-contact.is-dark a { color: var(--ob-soft); }
+        .obsidian-head .top-contact.is-dark a:hover { background: rgba(255, 255, 255, .05); color: var(--ob-gold-hi); }
+        .ob-logo { display: inline-flex; padding: 4px 6px; border-radius: 12px; background: linear-gradient(160deg, #FBF7EE, #EDE4D0); box-shadow: 0 0 0 1px rgba(217, 184, 113, .45), 0 4px 14px -6px rgba(217, 184, 113, .5); }
+        .ob-word { color: var(--ob-text); letter-spacing: -.01em; }
+        .ob-chip { display: none; align-items: center; gap: 6px; margin-right: 4px; padding: 5px 12px 5px 10px; border-radius: 999px; font-size: 11px; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; color: var(--ob-gold-hi); background: linear-gradient(180deg, rgba(217, 184, 113, .12), rgba(217, 184, 113, .04)); box-shadow: inset 0 0 0 1px rgba(217, 184, 113, .38); transition: box-shadow .2s ease, background .2s ease; }
+        .ob-chip svg { color: var(--ob-gold); }
+        .ob-chip:hover { background: linear-gradient(180deg, rgba(217, 184, 113, .2), rgba(217, 184, 113, .06)); box-shadow: inset 0 0 0 1px rgba(242, 221, 164, .6), 0 0 18px -6px rgba(217, 184, 113, .6); }
+        @media (min-width: 640px) { .ob-chip { display: inline-flex; } }
+        /* Sidebar */
+        @media (min-width: 1024px) {
+            .app-side[data-tier="obsidian"] { background: linear-gradient(180deg, #0B0B0E 0%, var(--ob-panel) 40%, #09090B 100%); border-right: 1px solid var(--ob-line); color-scheme: dark; }
+        }
+        .app-side[data-tier="obsidian"] .side-link { color: var(--ob-soft); font-weight: 500; letter-spacing: .005em; }
+        .app-side[data-tier="obsidian"] .side-link svg { color: var(--ob-mute); transition: color .15s ease; }
+        .app-side[data-tier="obsidian"] .side-link:hover:not([aria-current="page"]) { background: rgba(255, 255, 255, .035); color: var(--ob-text); }
+        .app-side[data-tier="obsidian"] .side-link:hover:not([aria-current="page"]) svg { color: var(--ob-gold); }
+        .app-side[data-tier="obsidian"] .side-link[aria-current="page"] { background: linear-gradient(90deg, rgba(217, 184, 113, .16) 0%, rgba(217, 184, 113, .04) 70%, rgba(217, 184, 113, 0) 100%); color: var(--ob-gold-hi); font-weight: 600; box-shadow: inset 0 0 0 1px rgba(217, 184, 113, .2); }
+        .app-side[data-tier="obsidian"] .side-link[aria-current="page"] svg { color: var(--ob-gold); }
+        .app-side[data-tier="obsidian"] .side-link[aria-current="page"]::before { background: linear-gradient(180deg, var(--ob-gold-hi), var(--ob-gold-lo)); box-shadow: 0 0 10px rgba(217, 184, 113, .55); }
+        .app-side[data-tier="obsidian"] .side-link:focus-visible { box-shadow: inset 0 0 0 1px rgba(217, 184, 113, .2), 0 0 0 2px rgba(217, 184, 113, .55); }
+        .app-side[data-tier="obsidian"] .side-head { display: flex; align-items: center; gap: 8px; font-size: 10.5px; font-weight: 600; letter-spacing: .2em; color: var(--ob-mute); }
+        .app-side[data-tier="obsidian"] .side-head::after { content: ""; flex: 1; height: 1px; background: linear-gradient(90deg, var(--ob-line-2), transparent); }
+        .app-side[data-tier="obsidian"] .text-muted { color: var(--ob-mute); }
+        .app-side[data-tier="obsidian"] .side-ai, .app-side[data-tier="obsidian"] .side-ai svg { color: #C9B6F2 !important; }
+        .app-side[data-tier="obsidian"] .side-ai:hover { color: #E2D6FA !important; }
+        .app-side[data-tier="obsidian"] .side-new { background: linear-gradient(135deg, #8B6CD9, #B85C9E); }
+        .app-side[data-tier="obsidian"] .side-gem svg { color: var(--ob-gold) !important; }
+        .app-side[data-tier="obsidian"] .side-code { background: rgba(217, 184, 113, .1); color: var(--ob-gold); box-shadow: inset 0 0 0 1px rgba(217, 184, 113, .18); }
+        .app-side[data-tier="obsidian"] .side-sub[aria-current="page"] .side-code { background: var(--ob-gold); color: var(--ob-ink); }
+        .app-side[data-tier="obsidian"] .side-dot { box-shadow: 0 0 0 2px var(--ob-panel); }
+        .app-side[data-tier="obsidian"]::-webkit-scrollbar-thumb { background: rgba(217, 184, 113, .18); }
+        /* Thanh đáy điện thoại */
+        .bnav[data-tier="obsidian"] { background: rgba(8, 8, 10, .96); border-top-color: transparent; box-shadow: 0 -1px 0 rgba(217, 184, 113, .22); }
+        .bnav[data-tier="obsidian"] button { color: #8C8678; }
+        .bnav[data-tier="obsidian"] button[aria-current="page"] { color: #F2DDA4; }
+        .bnav[data-tier="obsidian"] button[aria-current="page"] svg { color: #D9B871; filter: drop-shadow(0 0 6px rgba(217, 184, 113, .45)); }
+        .bnav[data-tier="obsidian"] button[aria-current="page"]::before { background: linear-gradient(90deg, #A8884A, #F2DDA4, #A8884A); box-shadow: 0 0 10px rgba(217, 184, 113, .6); }
+        .bnav[data-tier="obsidian"] .nav-dot { box-shadow: 0 0 0 2px #08080A; }
+        /* Hộp thoại & thẻ hội viên */
+        .obsidian-dialog { background: linear-gradient(180deg, #111114 0%, #0B0B0D 100%); color: #EFEBE2; border: 1px solid rgba(232, 205, 150, .18); box-shadow: 0 30px 80px rgba(0, 0, 0, .55), inset 0 1px 0 rgba(242, 221, 164, .08); }
+        .obsidian-dialog .btn-ghost { color: #A39D90; }
+        .obsidian-dialog .btn-ghost:hover:not(:disabled) { background: rgba(255, 255, 255, .05); color: #F2DDA4; }
+        .obsidian-dialog [class*="border-[#202637]"] { border-color: rgba(232, 205, 150, .12) !important; }
+        .obsidian-card { border-color: rgba(217, 184, 113, .45); background: radial-gradient(120% 90% at 100% 0%, rgba(217, 184, 113, .14) 0%, rgba(217, 184, 113, 0) 55%), linear-gradient(150deg, #17161A 0%, #0B0B0D 60%, #121114 100%); box-shadow: 0 20px 44px -12px rgba(8, 8, 10, .45), inset 0 1px 0 rgba(242, 221, 164, .12); }
+        .obsidian-card::after { background: linear-gradient(115deg, transparent 40%, rgba(242, 221, 164, .09) 50%, transparent 60%); }
+        /* Banner phiếu bản sắc & thanh đã đóng dấu */
+        .mission[data-tier="obsidian"] { color: #EFEBE2; background: radial-gradient(90% 140% at 100% 0%, rgba(217, 184, 113, .13) 0%, rgba(217, 184, 113, 0) 60%), linear-gradient(160deg, #141317 0%, #09090B 100%); border-color: rgba(217, 184, 113, .26); box-shadow: 0 14px 34px -14px rgba(8, 8, 10, .55), inset 0 1px 0 rgba(242, 221, 164, .1); }
+        .mission[data-tier="obsidian"]::before { background: radial-gradient(closest-side, rgba(217, 184, 113, .12), transparent 75%); }
+        .mission[data-tier="obsidian"].is-late { border-color: rgba(242, 221, 164, .5); }
+        .mission[data-tier="obsidian"] .mission-label { color: #A39D90; letter-spacing: .16em; }
+        .mission[data-tier="obsidian"] .mission-clock { color: #F2DDA4; }
+        .mission[data-tier="obsidian"] .mission-face { border-color: rgba(217, 184, 113, .4); background: #141417; }
+        .mission[data-tier="obsidian"] .mission-badge { color: #1A1408; background: linear-gradient(180deg, #F2DDA4, #D9B871); border-color: #09090B; }
+        .mission[data-tier="obsidian"] .mission-name { color: #F6F2E8; }
+        .mission[data-tier="obsidian"] .mission-sub { color: #A39D90; }
+        .mission[data-tier="obsidian"] .mission-cta { color: #1A1408; background: linear-gradient(180deg, #F6E6B8 0%, #D9B871 100%); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .55), 0 8px 20px -8px rgba(217, 184, 113, .65); }
+        .mission[data-tier="obsidian"] .mission-cta:hover { background: linear-gradient(180deg, #FAEDC6 0%, #E2C27E 100%); }
+        .mission[data-tier="obsidian"] .mission-cta svg { color: #6B4E14; }
+        .mission[data-tier="obsidian"] .mission-cta::after { background: linear-gradient(100deg, transparent, rgba(255, 252, 240, .85), transparent); }
+        .fund-strip[data-tier="obsidian"] { color: #CFC9BC; background: linear-gradient(160deg, #141317 0%, #09090B 100%); border-color: rgba(217, 184, 113, .22); }
+        .fund-strip[data-tier="obsidian"] .ticket.is-done { color: #EFEBE2; background: rgba(217, 184, 113, .05); border-color: rgba(217, 184, 113, .3); }
+        .fund-strip[data-tier="obsidian"] .ticket.is-done .ticket-text { color: #EFEBE2; }
+        .fund-strip[data-tier="obsidian"] .ticket.is-done .ticket-text b { color: #F2DDA4; }
+        .fund-strip[data-tier="obsidian"] .ticket-streak { color: #F2DDA4; background: rgba(217, 184, 113, .1); box-shadow: 0 0 0 1px rgba(217, 184, 113, .35); }
+        .fund-strip[data-tier="obsidian"] .fund-cta { color: #EFEBE2; background: rgba(255, 255, 255, .04); border-color: rgba(217, 184, 113, .25); }
+        .fund-strip[data-tier="obsidian"] svg { color: #A39D90; }
+        /* Tổng quan khi Obsidian: thẻ ca học đen-vàng, nút nhấn vàng champagne thay tím. Bản Eco giữ nguyên. */
+        .app-root[data-tier="obsidian"] .cmd-card { color: #F6F2E8; background: radial-gradient(80% 70% at 100% 0%, rgba(217, 184, 113, .16) 0%, rgba(217, 184, 113, 0) 60%), linear-gradient(155deg, #18171B 0%, #0E0E11 55%, #08080A 100%); box-shadow: 0 26px 48px -26px rgba(8, 8, 10, .7), inset 0 0 0 1px rgba(217, 184, 113, .22), inset 0 1px 0 rgba(242, 221, 164, .12); }
+        .app-root[data-tier="obsidian"] .cmd-card::after { background: radial-gradient(closest-side, rgba(242, 221, 164, .1), transparent 70%); }
+        .app-root[data-tier="obsidian"] .cmd-card .text-indigo-100 { color: #D8D2C4; }
+        .app-root[data-tier="obsidian"] .cmd-card .text-indigo-200 { color: #A39D90; }
+        .app-root[data-tier="obsidian"] .cmd-card .cmd-pill.bg-white\/15 { background: rgba(217, 184, 113, .1); color: #F2DDA4; box-shadow: inset 0 0 0 1px rgba(217, 184, 113, .3); }
+        .app-root[data-tier="obsidian"] .cmd-card [role="timer"] { color: #F6EBD0; text-shadow: 0 0 28px rgba(217, 184, 113, .18); }
+        .app-root[data-tier="obsidian"] .cmd-go { color: #1A1408; background: linear-gradient(180deg, #F6E6B8 0%, #D9B871 100%); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .55), 0 12px 26px -12px rgba(217, 184, 113, .6); }
+        .app-root[data-tier="obsidian"] .cmd-go:hover:not(:disabled) { background: linear-gradient(180deg, #FAEDC6 0%, #E2C27E 100%); }
+        .app-root[data-tier="obsidian"] .cmd-go.is-first { box-shadow: 0 0 0 4px rgba(217, 184, 113, .18), inset 0 1px 0 rgba(255, 255, 255, .55), 0 12px 26px -12px rgba(217, 184, 113, .6); }
+        .app-root[data-tier="obsidian"] .cmd-alt { color: #EFEBE2; background: rgba(255, 255, 255, .04); border-color: rgba(217, 184, 113, .3); }
+        .app-root[data-tier="obsidian"] .cmd-alt:hover { background: rgba(217, 184, 113, .1); }
+        .app-root[data-tier="obsidian"] .cmd-link { color: #D8D2C4; }
+        .app-root[data-tier="obsidian"] .cmd-link:hover { background: rgba(255, 255, 255, .06); color: #F2DDA4; }
+        .app-root[data-tier="obsidian"] .slot-path::before { background: linear-gradient(90deg, rgba(217, 184, 113, .15), rgba(217, 184, 113, .4), rgba(217, 184, 113, .15)); }
+        .app-root[data-tier="obsidian"] .slot-dot { background: #1A191D; color: #CFC9BC; box-shadow: 0 0 0 1px rgba(217, 184, 113, .35); }
+        .app-root[data-tier="obsidian"] .slot-node.is-now .slot-dot { background: linear-gradient(180deg, #F6E6B8, #D9B871); color: #1A1408; animation-name: nowRingGold; }
+        .app-root[data-tier="obsidian"] .slot-node.is-done .slot-dot { background: #1A191D; color: #F2DDA4; box-shadow: 0 0 0 1px rgba(242, 221, 164, .7); }
+        .app-root[data-tier="obsidian"] .slot-time { color: #F6F2E8; }
+        .app-root[data-tier="obsidian"] .slot-name { color: #A39D90; }
+        @keyframes nowRingGold { 0%, 100% { box-shadow: 0 0 0 4px rgba(217, 184, 113, .35); } 50% { box-shadow: 0 0 0 9px rgba(217, 184, 113, .05); } }
+        .app-root[data-tier="obsidian"] .cmd-sum { background: rgba(217, 184, 113, .16); }
+        .app-root[data-tier="obsidian"] .cmd-sum > div { background: #0E0E11; }
+        .app-root[data-tier="obsidian"] .cmd-sum dt { color: #8C8678; }
+        .app-root[data-tier="obsidian"] .cmd-sum dd { color: #F2DDA4; }
+        .app-root[data-tier="obsidian"] .id-invite { color: #6B4E14; background: rgba(217, 184, 113, .12); border: 1px dashed #B8975A; }
+        .app-root[data-tier="obsidian"] .id-invite:hover { color: #1A1408; background: linear-gradient(180deg, #F6E6B8, #D9B871); border-color: transparent; }
+        .app-root[data-tier="obsidian"] .sched-card .btn-primary { color: #F2DDA4; background: linear-gradient(180deg, #1C1B20, #0C0C0F); box-shadow: inset 0 0 0 1px rgba(217, 184, 113, .4), 0 6px 14px -8px rgba(8, 8, 10, .6); }
+        .app-root[data-tier="obsidian"] .sched-card .btn-primary:hover:not(:disabled) { background: linear-gradient(180deg, #25232A, #121215); color: #F6E6B8; }
+        .app-root[data-tier="obsidian"] .sched-card [aria-current="date"] { background: #0E0E11; color: #F2DDA4; }
+        .app-root[data-tier="obsidian"] .sched-card .src-opt.is-on { color: #6B4E14; box-shadow: 0 1px 3px rgba(15, 23, 42, .12), inset 0 0 0 1px rgba(217, 184, 113, .45); }
+        .app-root[data-tier="obsidian"] h1 .text-primary { color: #8F7034; }
+        .app-root[data-tier="obsidian"] .cmd-card :focus-visible { outline-color: #F2DDA4; }
+        /* Chất liệu thẻ đếm ngược Obsidian: mặt đồng hồ khắc chìm xoay rất chậm, hạt nhám đen, ánh kim theo chuột. Bản Eco không hiện. */
+        .cmd-dial, .cmd-grain, .cmd-spot { display: none; }
+        .app-root[data-tier="obsidian"] .cmd-dial { display: block; position: absolute; z-index: 0; top: -120px; right: -110px; width: 420px; height: 420px; stroke: #E5C98B; opacity: .08; pointer-events: none; -webkit-mask-image: radial-gradient(circle closest-side at 40% 60%, #000 55%, rgba(0, 0, 0, .6) 85%, transparent 104%); mask-image: radial-gradient(circle closest-side at 40% 60%, #000 55%, rgba(0, 0, 0, .6) 85%, transparent 104%); animation: dial-spin 120s linear infinite; will-change: transform; }
+        .app-root[data-tier="obsidian"] .cmd-grain { display: block; position: absolute; inset: 0; z-index: 0; opacity: .03; pointer-events: none; mix-blend-mode: screen; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 1 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); background-size: 160px 160px; }
+        @media (hover: hover) and (pointer: fine) {
+            .app-root[data-tier="obsidian"] .cmd-spot { display: block; position: absolute; inset: 0; z-index: 0; pointer-events: none; opacity: 0; background: radial-gradient(420px circle at var(--mx, 70%) var(--my, 20%), rgba(229, 201, 139, .07), transparent 60%); transition: opacity .5s ease; }
+            .app-root[data-tier="obsidian"] .cmd-card:hover .cmd-spot { opacity: 1; }
+        }
+        @keyframes dial-spin { to { transform: rotate(360deg); } }
+        @media (prefers-reduced-motion: reduce) { .app-root[data-tier="obsidian"] .cmd-dial { animation: none; } .app-root[data-tier="obsidian"] .cmd-spot { transition: none; } }
+        @media (prefers-reduced-motion: reduce) { .ob-chip, .app-side[data-tier="obsidian"] .side-link svg { transition: none; } }
         @keyframes identity-cue {
             0% { box-shadow: 0 0 0 0 rgba(231, 197, 106, .55); }
             70% { box-shadow: 0 0 0 8px rgba(231, 197, 106, 0); }
@@ -4431,7 +4559,30 @@
             </ol>
         );
 
-        const FocusCard = ({ plan, cur, now, cardCount, onStart, onStudyNow, onSnooze, onBonus, onReceipt, onGate }) => {
+        /* Mặt đồng hồ khắc chìm cho thẻ Obsidian: 2 vòng mảnh + 60 vạch giây, vạch 5 giây dài hơn. Bản Eco ẩn bằng CSS. */
+        const DIAL_TICKS = Array.from({ length: 60 }, (_, i) => {
+            const a = (i * 6 - 90) * Math.PI / 180;
+            const major = i % 5 === 0;
+            const r1 = major ? 80 : 86;
+            return { x1: 100 + r1 * Math.cos(a), y1: 100 + r1 * Math.sin(a), x2: 100 + 93 * Math.cos(a), y2: 100 + 93 * Math.sin(a), w: major ? 1.1 : 0.45 };
+        });
+        const ChronoDial = React.memo(() => (
+            <svg className="cmd-dial" viewBox="0 0 200 200" aria-hidden="true" focusable="false">
+                <circle cx="100" cy="100" r="97" fill="none" strokeWidth="0.6" />
+                <circle cx="100" cy="100" r="74" fill="none" strokeWidth="0.4" />
+                <circle cx="100" cy="100" r="40" fill="none" strokeWidth="0.3" strokeDasharray="0.6 2.4" />
+                {DIAL_TICKS.map((t, i) => <line key={i} x1={t.x1.toFixed(2)} y1={t.y1.toFixed(2)} x2={t.x2.toFixed(2)} y2={t.y2.toFixed(2)} strokeWidth={t.w} strokeLinecap="round" />)}
+            </svg>
+        ));
+        /* Vầng sáng theo chuột: chỉ đổi biến CSS trên thẻ, không render lại React. */
+        const moveSpot = (e) => {
+            const el = e.currentTarget;
+            const r = el.getBoundingClientRect();
+            el.style.setProperty('--mx', ((e.clientX - r.left) / r.width * 100).toFixed(1) + '%');
+            el.style.setProperty('--my', ((e.clientY - r.top) / r.height * 100).toFixed(1) + '%');
+        };
+
+        const FocusCard = ({ plan, cur, now, cardCount, onAddFirst, onStart, onStudyNow, onSnooze, onBonus, onReceipt, onGate }) => {
             const slot = cur.slot;
             const nowD = new Date(now);
             const msUntil = (s) => { const d = new Date(nowD); d.setHours(0, 0, 0, 0); return Math.max(0, d.getTime() + Plan.triggerMin(s) * 60000 - nowD.getTime()); };
@@ -4452,8 +4603,13 @@
                 label = 'Ca ' + slot.id + ' · ' + slot.anchorLabel + ' bắt đầu sau';
                 big = Plan.fmtCountdown(msUntil(slot));
             }
-            const full = slot ? Plan.cardLimit(slot, live ? cur.kind : 'ON_TIME_ACTIVE', false) : 0;
-            const lean = slot ? Math.min(2, slot.baseCardCount || 8) : 2;
+            /* Số thẻ hiển thị không vượt quá số thẻ thật đang có trong kho. */
+            const cap = (n) => (cardCount > 0 ? Math.min(n, cardCount) : n);
+            const full = slot ? cap(Plan.cardLimit(slot, live ? cur.kind : 'ON_TIME_ACTIVE', false)) : 0;
+            const lean = slot ? cap(Math.min(2, slot.baseCardCount || 8)) : 2;
+            const activeSlots = plan.slots.filter(s => !s.nghi);
+            const slotsDone = activeSlots.filter(s => s.status === 'done').length;
+            const cardsToday = plan.slots.reduce((n, s) => n + (s.cardsDone || 0), 0);
             const quick = Math.min(8, Math.max(cardCount, 1));
             const resume = live && slot.deckIds && slot.deckIds.length && !slot.cardsDone;
             /* Đang trong ca: tiêu đề chữ (không dùng font đồng hồ), kèm thời gian còn lại hoặc đã trễ bao lâu. */
@@ -4463,8 +4619,11 @@
             const lateText = lateBy >= 60 ? Math.floor(lateBy / 60) + ' giờ' + (lateBy % 60 ? ' ' + (lateBy % 60) + ' phút' : '') : lateBy + ' phút';
             const onTimeLeft = live && !late ? Math.max(0, (startMin + 30) * 60000 - (nowD.getTime() - new Date(nowD).setHours(0, 0, 0, 0))) : 0;
             return (
-                <section className="cmd-card p-5 text-left sm:p-7" aria-label="Ca học hôm nay">
-                    <div className="relative z-10">
+                <section className="cmd-card flex flex-col p-5 text-left sm:p-7" aria-label="Ca học hôm nay" onPointerMove={moveSpot}>
+                    <ChronoDial />
+                    <span className="cmd-grain" aria-hidden="true" />
+                    <span className="cmd-spot" aria-hidden="true" />
+                    <div className="relative z-10 flex flex-1 flex-col">
                         <div className="flex flex-wrap items-center gap-2">
                             <span className="cmd-pill bg-white/15 text-white"><Icon name="lock" size={13} /> Lịch hôm nay đã khóa</span>
                             <span className="text-xs text-indigo-200">Sửa lịch chỉ áp dụng từ 00:00 ngày mai</span>
@@ -4487,9 +4646,9 @@
                             <p className="tnum mt-1 text-5xl font-semibold tracking-tight sm:text-6xl" role="timer" aria-live="off">{big}</p>
                         )}
                         {cur.kind === 'ALL_DONE' && firstSlot && <p className="mt-1 text-sm text-indigo-100">Ca đầu tiên ngày mai lúc {firstSlot.time}. Không nợ thẻ sang mai.</p>}
-                        <div className="mt-6"><SlotPath slots={plan.slots} activeId={slot && slot.id} /></div>
+                        <div className="mt-6 lg:mt-auto lg:pt-6"><SlotPath slots={plan.slots} activeId={slot && slot.id} /></div>
 
-                        <div className="mt-6 flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
+                        <div className="mt-6 flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center lg:mt-auto lg:pt-6">
                             {live && (
                                 <>
                                     <button type="button" className="cmd-go" onClick={() => onStart(false)}><Icon name="play" size={18} /> {resume ? 'Học tiếp' : 'Học đủ'} ca {slot.id} · {full} thẻ</button>
@@ -4503,19 +4662,30 @@
                                     <button type="button" className="cmd-alt" onClick={onReceipt}><Icon name="copy" size={16} /> Copy phiếu hoàn thành</button>
                                 </>
                             )}
-                            {!live && slot && cur.kind !== 'GATE' && cur.kind !== 'ALL_DONE' && (
-                                <button type="button" className="cmd-go" onClick={onStudyNow} disabled={!cardCount}>
-                                    <Icon name="play" size={18} /> {!cardCount ? 'Kho chưa có thẻ' : cur.early ? 'Vào sớm ca ' + slot.id + ' · ' + full + ' thẻ' : 'Học ngay ' + quick + ' thẻ'}
+                            {!live && slot && cur.kind !== 'GATE' && cur.kind !== 'ALL_DONE' && (!cardCount ? (
+                                <button type="button" className="cmd-go is-first" onClick={onAddFirst}>
+                                    <Icon name="plus" size={18} /> Thêm thẻ đầu tiên <span aria-hidden="true">→</span>
                                 </button>
-                            )}
+                            ) : (
+                                <button type="button" className="cmd-go" onClick={onStudyNow}>
+                                    <Icon name="play" size={18} /> {cur.early ? 'Vào sớm ca ' + slot.id + ' · ' + full + ' thẻ' : 'Học ngay ' + quick + ' thẻ'}
+                                </button>
+                            ))}
                             {cur.kind === 'ON_TIME_ACTIVE' && !slot.snoozedOnce && <button type="button" className="cmd-link" onClick={() => onSnooze(slot.id)}><Icon name="clock" size={15} /> Đang dở tay? Lùi 15 phút</button>}
                         </div>
                         <p className="mt-3 text-xs leading-5 text-indigo-200">
                             {live ? 'Bận quá thì bấm Chạm đáy: ' + lean + ' thẻ trong 30 giây vẫn tính là giữ chuỗi hôm nay.'
                                 : cur.kind === 'ALL_DONE' ? 'Điểm dừng rõ ràng. Mai app sẽ gõ chuông đúng giờ.'
                                     : cur.kind === 'GATE' ? 'Đọc xong phần sách của ca rồi quay lại kiểm tra nhanh.'
-                                        : 'Đến giờ, app gõ chuông và nháy tiêu đề tab để nhắc. Có thể treo tab cả ngày.'}
+                                        : !cardCount ? 'Thêm vài từ (gõ tay, dán danh sách hoặc AI quét bài đọc) là ca học có thẻ để chạy.'
+                                            : 'Đến giờ, app gõ chuông và nháy tiêu đề tab để nhắc. Có thể treo tab cả ngày.'}
                         </p>
+                        {/* Tóm tắt ngày: ghim đáy thẻ để cột trái cân với cột phải, không để mảng màu trống. */}
+                        <div className="mt-auto pt-5"><dl className="cmd-sum">
+                            <div><dt>Ca đã xong</dt><dd className="tnum">{slotsDone}/{activeSlots.length}</dd></div>
+                            <div><dt>Thẻ đã học hôm nay</dt><dd className="tnum">{cardsToday}</dd></div>
+                            <div><dt>Thẻ trong kho</dt><dd className="tnum">{cardCount}</dd></div>
+                        </dl></div>
                     </div>
                 </section>
             );
@@ -4613,12 +4783,12 @@
             </div>
         );
 
-        const ScheduleCard = ({ plan, cur, week, nextWeek, groups, saveWeek, toast, askNotify, onSetup, account, setupDone, editOpen, setEditOpen, editRef, source, onSource, bankCount }) => {
+        const ScheduleCard = ({ plan, cur, week, nextWeek, groups, saveWeek, toast, askNotify, onSetup, account, setupDone, editOpen, setEditOpen, editRef, source, onSource, bankCount, cardCount }) => {
             const slot = cur.slot;
             const p2 = (slot && slot.phase2_externalTask) || {};
             const perm = window.Notification ? Notification.permission : 'denied';
             return (
-                <section className="card p-4 scroll-mt-24 sm:p-5" aria-label="Lịch tuần" ref={editRef}>
+                <section className="card sched-card p-4 scroll-mt-24 sm:p-5" aria-label="Lịch tuần" ref={editRef}>
                     <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted">Lịch học</p>
                     <div className="my-2 grid grid-cols-7 gap-1 text-center text-xs" aria-label="Ngày trong tuần">
                         {Plan.WEEK.map(k => (
@@ -4629,7 +4799,7 @@
                     </div>
                     {slot && cur.kind !== 'ALL_DONE' && (
                         <div className="rounded-2xl bg-surface2 px-4 py-3">
-                            <p className="text-xs font-semibold text-muted">Ca {slot.id} · {Plan.MODE_LABEL[slot.mode]} · {slot.baseCardCount} thẻ</p>
+                            <p className="text-xs font-semibold text-muted">Ca {slot.id} · {Plan.MODE_LABEL[slot.mode]} · {cardCount > 0 ? Math.min(slot.baseCardCount, cardCount) + ' thẻ' : 'kho chưa có thẻ'}</p>
                             <p className="mt-0.5 font-semibold text-ink">{Plan.hhmmOf(Plan.triggerMin(slot))} · {slot.anchorLabel} · {Sch.groupLabel(slot.group)}</p>
                             <p className="mt-0.5 text-sm text-ink2 text-flow">{p2.hasExternal ? (p2.bookTitle + ' — ' + p2.taskDetail) : (p2.classSyncNote || 'Ca này chỉ học trên app')}</p>
                         </div>
@@ -4651,7 +4821,7 @@
         };
 
         const TodayView = (p) => {
-            const { plan, planReady, week, nextWeek, now, items, itemsById, groups, session, cur, saveWeek, addItems, finishGate, snooze, askNotify, bonus, closeSession, startSession, review, patch, toast, finishSlot, onBurst, onStudyNow, onStart, onPillar, onLogin, onSetup, account, setupDone, source, onSource, bankCount } = p;
+            const { plan, planReady, week, nextWeek, now, items, itemsById, groups, session, cur, saveWeek, addItems, finishGate, snooze, askNotify, bonus, closeSession, startSession, review, patch, toast, finishSlot, onBurst, onStudyNow, onStart, onPillar, onLogin, onSetup, account, setupDone, source, onSource, bankCount, onAddFirst } = p;
             const [editOpen, setEditOpen] = useState(() => takeGo('plan'));
             const [starterHidden, setStarterHidden] = useState(() => !!Store.prefs.get('starterHidden', false));
             const editRef = useRef(null);
@@ -4736,14 +4906,14 @@
                     {/* Màn đầu (above the fold): ca học bên trái, Bản sắc + Lịch học bên phải. */}
                     <div className="grid gap-4 lg:grid-cols-12">
                         <div className="lg:col-span-7 [&>section]:h-full">
-                            <FocusCard plan={plan} cur={cur} now={now} cardCount={filled} onStart={onStart} onStudyNow={onStudyNow} onSnooze={snooze} onBonus={bonus} onReceipt={receipt}
+                            <FocusCard plan={plan} cur={cur} now={now} cardCount={filled} onAddFirst={onAddFirst} onStart={onStart} onStudyNow={onStudyNow} onSnooze={snooze} onBonus={bonus} onReceipt={receipt}
                                 onGate={() => { const el = document.getElementById('flow-bridge'); if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' }); }} />
                         </div>
                         <div className="flex flex-col gap-4 lg:col-span-5">
                             <IdentityToday canBurst={filled >= 5} onBurst={onBurst} />
                             <ScheduleCard plan={plan} cur={cur} week={week} nextWeek={nextWeek} groups={groups} saveWeek={saveWeek} toast={toast} askNotify={askNotify}
                                 onSetup={onSetup} account={account} setupDone={setupDone} editOpen={editOpen} setEditOpen={setEditOpen} editRef={editRef}
-                                source={source} onSource={onSource} bankCount={bankCount} />
+                                source={source} onSource={onSource} bankCount={bankCount} cardCount={filled} />
                         </div>
                     </div>
                     {cur.kind === 'GATE' && slot && (
@@ -6907,9 +7077,28 @@
             library: {
                 items: (await Store.items.all()).filter((t) => !(String(t.id || '').indexOf('starter-') === 0 && !(t.reviewCount > 0))).slice(0, 4000),
                 progress: (await Store.progress.all()).slice(0, 8000),
-                votes: (await Store.identityVotes.all()).slice(0, 5000)
+                votes: (await Store.identityVotes.all()).slice(0, 5000),
+                gone: goneItems()
             }
         });
+        /* Từ đã xóa khi đang đăng nhập: nhớ mã để tài khoản xóa theo, không gộp lại ở lần đồng bộ sau. */
+        const goneItems = () => { const v = Store.prefs.get('goneItems', []); return Array.isArray(v) ? v : []; };
+        const noteGone = (ids) => {
+            if (!ids.length || !Store.prefs.get('dataOwner', '')) return;
+            const set = new Set(goneItems());
+            ids.forEach((id) => { if (id && String(id).indexOf('starter-') !== 0) set.add(String(id)); });
+            Store.prefs.set('goneItems', Array.from(set).slice(-6000));
+        };
+        /* Máy khác của cùng tài khoản đã xóa từ: xóa theo trên máy này. */
+        const dropGoneLocal = async (gone) => {
+            if (!Array.isArray(gone) || !gone.length) return false;
+            const set = new Set(gone);
+            const ids = (await Store.items.all()).map((t) => t.id).filter((id) => set.has(id));
+            if (!ids.length) return false;
+            await Store.items.deleteMany(ids);
+            window.dispatchEvent(new CustomEvent('edu-library'));
+            return true;
+        };
 
         const applyCloud = async (data) => {
             /* spendCode: máy này đang dùng mã nhóm của người khác thì giữ mã đó để trừ lượt chung. */
@@ -6920,6 +7109,7 @@
             const until = data && data.proUntil;
             if (until === -1 || Number(until) > 0) E.Quota.noteAi({ proUntil: until, aiUnlocked: until === -1 || Number(until) > Date.now() });
             const lib = data && data.library || {};
+            await dropGoneLocal(lib.gone);
             if (Array.isArray(lib.items) && lib.items.length) await Store.items.putMany(lib.items.map((row) => Sch.normalizeItem(row)));
             if (Array.isArray(lib.progress) && lib.progress.length) await Store.progress.putMany(lib.progress.filter((row) => row && row.id));
             if (Array.isArray(lib.votes) && lib.votes.length) await Store.identityVotes.putMany(lib.votes.filter((row) => row && row.id && row.sessionId));
@@ -6931,7 +7121,7 @@
         /* Mỗi email Google một kho riêng trên máy: sổ từ, tiến độ, phiếu bản sắc và cài đặt học không lẫn giữa các tài khoản.
            'dataOwner' ghi email đang sở hữu dữ liệu trên máy; rỗng là khách chưa đăng nhập. */
         const PROFILE_KEYS = ['identity', 'student', 'habitDays', 'milestones', 'exams', 'weeklyPlan', 'nextWeeklyPlan', 'setupDone', 'recentPacks', 'eosTried', 'licenses', 'slotSource', 'qlang'];
-        const LOCAL_KEYS = ['mission', 'libDrafts', 'hybridToday'];
+        const LOCAL_KEYS = ['mission', 'libDrafts', 'hybridToday', 'goneItems'];
         const dataOwner = () => String(Store.prefs.get('dataOwner', '') || '').toLowerCase();
         const profileSnapshot = () => {
             const out = {};
@@ -6966,6 +7156,14 @@
                 body: JSON.stringify({ library: snap.library })
             });
             if (res.status === 401) { Store.prefs.remove('googleToken'); noteAccount(); }
+            if (res.ok) {
+                const data = await res.json().catch(() => ({}));
+                /* Tài khoản đã giữ các mã xóa: bỏ khỏi danh sách chờ (trừ mã mới xóa trong lúc gửi). */
+                const sent = new Set(snap.library.gone || []);
+                const left = goneItems().filter((id) => !sent.has(id));
+                if (left.length) Store.prefs.set('goneItems', left); else Store.prefs.remove('goneItems');
+                await dropGoneLocal(data.gone);
+            }
             return res.ok;
         };
         window.EDU.pushLibrary = pushLibrary;
@@ -7525,6 +7723,7 @@
                     const groups = new Set();
                     list.forEach(t => { if (before.get(t.id) !== t) groups.add(t.group || ''); before.delete(t.id); });
                     before.forEach(t => groups.add(t.group || ''));
+                    noteGone(Array.from(before.keys()));
                     if (groups.size) window.dispatchEvent(new CustomEvent('edu-items-saved', { detail: { groups: Array.from(groups), at: Date.now() } }));
                 }).catch(e => {
                     savedItems.current = prev;
@@ -8046,15 +8245,15 @@
             };
 
             return (
-                <div className="min-h-screen flex flex-col">
+                <div className="app-root min-h-screen flex flex-col" data-tier={obsidian ? 'obsidian' : 'eco'}>
                     <a href="#main" className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[70] btn btn-primary">Bỏ qua tới nội dung</a>
-                    <header className={'sticky top-0 z-50 border-b ' + (obsidian ? 'obsidian-head border-[#202637]' : 'border-line')} style={obsidian ? undefined : { background: '#E2E8F0' }}>
+                    <header className={'sticky top-0 z-50 border-b ' + (obsidian ? 'obsidian-head' : 'border-line')} style={obsidian ? undefined : { background: '#E2E8F0' }}>
                         <div className="flex h-16 w-full items-center gap-2 px-4 sm:gap-3 lg:px-6">
                             <button type="button" onClick={goHome} aria-label="Về Tổng quan" className="flex shrink-0 items-center gap-2.5 border-0 bg-transparent p-0 text-left cursor-pointer">
-                                <span className={obsidian ? 'inline-flex rounded-xl bg-[#F8F9FC] px-1.5 py-1' : ''}>
+                                <span className={obsidian ? 'ob-logo' : ''}>
                                     <img src="/public/stickers/logo.png" alt="" className="h-9 w-auto object-contain sm:h-10" />
                                 </span>
-                                <span className={'text-xl font-extrabold leading-none sm:text-2xl ' + (obsidian ? 'text-[#F8F9FC]' : 'text-[#0B192C]')}>FPass</span>
+                                <span className={'text-xl font-extrabold leading-none sm:text-2xl ' + (obsidian ? 'ob-word' : 'text-[#0B192C]')}>FPass</span>
                             </button>
                             <div className="ml-auto flex min-w-0 items-center gap-1">
                                 {/* Liên hệ: Zalo + hotline trên màn rộng, một nút mở khung Hỗ trợ trên điện thoại. */}
@@ -8064,8 +8263,8 @@
                                 </div>
                                 <button type="button" className="btn btn-ghost btn-icon md:hidden" onClick={openSupport} aria-label="Liên hệ hỗ trợ"><Icon name="headset" /></button>
                                 {obsidian && (
-                                    <button type="button" onClick={() => setMemberOpen(true)} className="mr-1 hidden items-center gap-1.5 rounded-full border border-[#D8C7A0]/70 bg-[#202637] px-3 py-1.5 text-xs font-semibold tracking-wide text-[#F8F9FC] sm:inline-flex">
-                                        <Icon name="gem" size={14} className="text-[#D8C7A0]" /> Obsidian
+                                    <button type="button" onClick={() => setMemberOpen(true)} className="ob-chip">
+                                        <Icon name="gem" size={13} /> Obsidian
                                     </button>
                                 )}
                                 <button type="button" className="btn btn-ghost btn-icon hidden sm:inline-flex lg:hidden" onClick={() => setGuideOpen(true)} aria-label="Video hướng dẫn"><Icon name="play" size={16} /></button>
@@ -8080,7 +8279,7 @@
                     </header>
 
                     <div className="flex w-full flex-1">
-                    <aside className="app-side" aria-label="Điều hướng">
+                    <aside className="app-side" data-tier={obsidian ? 'obsidian' : 'eco'} aria-label="Điều hướng">
                         <nav aria-label="Mục chính" className="flex flex-col gap-1">
                             {navItems.map(it => (
                                 <button key={it.k} type="button" className="side-link" aria-current={navNow === it.k ? 'page' : undefined} onClick={() => goNav(it.k)}>
@@ -8104,7 +8303,7 @@
                         ) : <p className="px-3 text-xs leading-5 text-muted">Môn bạn thi thử sẽ hiện ở đây để mở lại nhanh.</p>}
                         <p className="side-head">Khác</p>
                         <div className="flex flex-col gap-1">
-                            <button type="button" className="side-link" onClick={() => setBilling('ai')}><Icon name="gem" size={18} /> Gói & Nhập mã</button>
+                            <button type="button" className="side-link side-gem" onClick={() => setBilling('ai')}><Icon name="gem" size={18} /> Gói & Nhập mã</button>
                             <button type="button" className="side-link" onClick={() => setGuideOpen(true)}><Icon name="play" size={18} /> Video hướng dẫn</button>
                             <button type="button" className="side-link" onClick={openSupport}><Icon name="headset" size={18} /> Hỗ trợ & FAQ</button>
                             <button type="button" className="side-link" onClick={openFeedback}><Icon name="bulb" size={18} /> Góp ý</button>
@@ -8120,7 +8319,7 @@
                                     snooze={snooze} askNotify={askNotify} bonus={bonus} closeSession={() => { setSession(null); setMinimal(false); window.scrollTo(0, 0); }} startSession={restartSession} onBurst={startQuickBurst}
                                     review={reviewSlot} patch={patch} toast={toast} finishSlot={finishSlot} source={source} onSource={changeSource} bankCount={bankPool.length}
                                     onStudyNow={studyNow} onStart={startSlot} onPillar={openPillar} onLogin={() => { setPendingGift(''); setGoogleReason('save'); setGoogleOpen(true); }}
-                                    onSetup={openSetup} account={account} setupDone={setupDone} />
+                                    onSetup={openSetup} account={account} setupDone={setupDone} onAddFirst={() => { dispatch({ type: 'TAB', tab: 'library' }); window.scrollTo(0, 0); }} />
                             ) : nav.tab === 'library' ? (
                                 <LibraryView items={items} setItems={setItems} groups={groups} groupFilter={groupFilter} setGroupFilter={setGroupFilter}
                                     onPractice={startPractice} onWeak={startWeak} onStudyFrom={studyFrom} onQuickVote={quickVote} toast={toast} mergeItems={mergeItems} />
@@ -8157,7 +8356,7 @@
                     </main>
                     </div>
 
-                    <nav aria-label="Mục chính" className="bnav">
+                    <nav aria-label="Mục chính" className="bnav" data-tier={obsidian ? 'obsidian' : 'eco'}>
                         {navItems.map(it => (
                             <button key={it.k} type="button" aria-current={navNow === it.k ? 'page' : undefined} onClick={() => goNav(it.k)}>
                                 <Icon name={it.icon} size={20} /> {it.short}
