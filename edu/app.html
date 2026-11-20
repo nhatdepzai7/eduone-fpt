@@ -135,7 +135,25 @@
         .sample-prev { position: relative; margin-top: 12px; }
         .sample-body { overflow: hidden; border-radius: 16px; border: 1px dashed var(--border); background: var(--surface); opacity: .5; pointer-events: none; user-select: none; }
         .sample-badge { position: absolute; z-index: 1; top: -9px; right: 12px; padding: 2px 10px; border-radius: 999px; font-size: 11px; font-weight: 700; letter-spacing: .02em; color: var(--ink-2); background: var(--surface); border: 1px solid var(--border); box-shadow: 0 1px 2px rgba(15, 23, 42, .06); }
-        .start-tile { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; padding: 14px; min-width: 0; border-radius: 16px; border: 1px solid var(--border); background: var(--surface); text-align: left; transition: border-color .15s ease, box-shadow .15s ease, transform .15s ease; }
+        .start-badge { position: absolute; top: 12px; right: 12px; padding: 2px 7px; border-radius: 6px; font-size: 10.5px; font-weight: 700; letter-spacing: .03em; color: #047857; background: #ECFDF5; border: 1px solid #A7F3D0; font-variant-numeric: tabular-nums; }
+        .qp-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+        .qp-sub { margin: 2px 0 12px; font-size: 12px; line-height: 1.5; color: var(--muted); }
+        .qp-sub .qp-sample { height: auto; margin-left: 6px; padding: 0; }
+        .qp-tools { display: flex; flex-shrink: 0; align-items: center; gap: 4px; }
+        .qp-xls { display: inline-flex; align-items: center; gap: 6px; height: 32px; padding: 0 11px; border-radius: 9px; border: 1px solid #CBD5E1; background: #fff; color: #1E293B; font-size: 13px; font-weight: 600; white-space: nowrap; box-shadow: 0 1px 2px rgba(0, 0, 0, .04); transition: border-color .15s ease, color .15s ease, background .15s ease; }
+        .qp-xls svg { color: #4F46E5; }
+        .qp-xls:hover { border-color: #4F46E5; color: #4F46E5; background: #F5F3FF; }
+        .qp-xls:disabled { opacity: .6; cursor: progress; }
+        .qp-sample { height: 32px; padding: 0 6px; font-size: 12px; font-weight: 500; color: var(--muted); text-decoration: underline; text-underline-offset: 3px; white-space: nowrap; }
+        .qp-sample:hover { color: #4F46E5; }
+        .qp-drop { position: relative; border-radius: 12px; }
+        .qp-drop.is-drag .field { border: 2px dashed #4F46E5; background: #F5F3FF; }
+        .qp-overlay { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; padding: 12px; border-radius: 12px; text-align: center; color: #4338CA; background: rgba(245, 243, 255, .92); pointer-events: none; }
+        .qp-overlay b { font-size: 14px; font-weight: 700; }
+        .qp-overlay small { font-size: 12px; color: #6366F1; }
+        @media (max-width: 767px) { .qp-head h3 { font-size: 15px; } .qp-xls { padding: 0 9px; } }
+        @media (max-width: 359px) { .qp-xls span { display: none; } }
+        .start-tile { position: relative; display: flex; flex-direction: column; align-items: flex-start; gap: 4px; padding: 14px; min-width: 0; border-radius: 16px; border: 1px solid var(--border); background: var(--surface); text-align: left; transition: border-color .15s ease, box-shadow .15s ease, transform .15s ease; }
         .start-tile:hover { border-color: var(--primary); box-shadow: 0 6px 18px rgba(15, 23, 42, .08); transform: translateY(-2px); }
         .start-tile b { margin-top: 6px; font-size: 15px; font-weight: 700; color: var(--ink); }
         .start-tile small { font-size: 13px; line-height: 1.45; color: var(--muted); }
@@ -4826,11 +4844,89 @@
         };
 
         /* ---------- Quick Paste ---------- */
+        const EXCEL_RE = /\.(xlsx|xls|csv)$/i;
+        const GENERIC_FILE = /^(book|sheet|trang tính|download|untitled|export|data|file|copy of)\s*[\d()\s-]*$/i;
+        /* Tên nhóm từ file: tên file bỏ đuôi; tên file chung chung (Book1, download…) thì lấy tên sheet đầu tiên. */
+        const groupFromFile = (fileName, sheetName) => {
+            const base = String(fileName || '').replace(EXCEL_RE, '').replace(/[_]+/g, ' ').replace(/\s+/g, ' ').trim();
+            const sheet = String(sheetName || '').trim();
+            if (base && !GENERIC_FILE.test(base)) return base.slice(0, 80);
+            if (sheet && !GENERIC_FILE.test(sheet)) return sheet.slice(0, 80);
+            return base.slice(0, 80);
+        };
+        const SAMPLE_SHEET = [
+            ['Từ / Câu hỏi', 'Nghĩa / Đáp án', 'Ví dụ / Giải thích'],
+            ['colleague', 'đồng nghiệp', 'My colleague helped me finish the report.'],
+            ['negotiate', 'đàm phán', 'We negotiated a higher salary.'],
+            ['deadline', 'hạn chót', 'The deadline is next Friday.']
+        ];
+        const downloadSample = () => {
+            if (!window.XLSX) return;
+            const ws = XLSX.utils.aoa_to_sheet(SAMPLE_SHEET);
+            ws['!cols'] = [{ wch: 18 }, { wch: 18 }, { wch: 44 }];
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, 'Unit 1 - Jobs');
+            XLSX.writeFile(wb, 'so-tu-mau.xlsx');
+        };
+        /* Đọc 1 file Excel/CSV thành danh sách mục. File không có dòng tiêu đề thì hiểu cột A = từ, B = nghĩa, C = ví dụ. */
+        const readExcelFile = async (file, group) => {
+            if (!window.XLSX) throw new Error('Thư viện Excel chưa tải xong, thử lại sau vài giây');
+            const wb = XLSX.read(await Sec.readBuffer(file), { type: 'array', cellFormula: false, cellHTML: false });
+            const sheetName = wb.SheetNames[0] || '';
+            let rows = XLSX.utils.sheet_to_json(wb.Sheets[sheetName], { header: 1, raw: false, defval: '' })
+                .filter(r => Array.isArray(r) && r.some(c => String(c).trim()));
+            const name = groupFromFile(Sec.cleanText(file.name, 120), sheetName);
+            const g = group || name;
+            let list;
+            try {
+                list = Sch.fromExcelRows(rows, g);
+            } catch (e) {
+                list = Sch.fromExcelRows([SAMPLE_SHEET[0]].concat(rows), g);
+            }
+            return { name, list };
+        };
+
         const QuickPaste = ({ groups, onAdd, toast, onLocked }) => {
             const [text, setText] = useState('');
             const [group, setGroup] = useState('');
             const [preview, setPreview] = useState(null);
             const [busy, setBusy] = useState(false);
+            const [drag, setDrag] = useState(false);
+            const xlsRef = useRef(null);
+            const dragDepth = useRef(0);
+            const isFileDrag = (e) => Array.from((e.dataTransfer && e.dataTransfer.types) || []).indexOf('Files') >= 0;
+            const takeFiles = async (files) => {
+                const picked = Array.from(files || []);
+                if (!picked.length) return;
+                const bad = picked.filter(f => !EXCEL_RE.test(f.name));
+                if (bad.length === picked.length) { toast('Chỉ nhận file Excel (.xlsx, .xls) hoặc CSV', 'error'); return; }
+                setBusy(true);
+                try {
+                    const typed = group.trim();
+                    let all = [];
+                    let first = '';
+                    for (const f of picked.filter(x => EXCEL_RE.test(x.name))) {
+                        const { name, list } = await readExcelFile(f, typed);
+                        if (!first) first = name;
+                        all = all.concat(list);
+                    }
+                    Sec.guardCount(all.length, 0);
+                    if (!typed && first) setGroup(first);
+                    if (!all.length) { toast('File không có dòng từ vựng nào', 'info'); return; }
+                    setPreview(all);
+                    toast('Đã tách ' + all.length + ' mục từ file' + (bad.length ? ' · bỏ qua ' + bad.length + ' file không phải Excel' : ''), 'success');
+                } catch (e) {
+                    toast((e && e.message) || 'File không đọc được', 'error');
+                } finally {
+                    setBusy(false);
+                }
+            };
+            const dropZone = {
+                onDragEnter: (e) => { if (!isFileDrag(e)) return; e.preventDefault(); dragDepth.current += 1; setDrag(true); },
+                onDragOver: (e) => { if (!isFileDrag(e)) return; e.preventDefault(); e.dataTransfer.dropEffect = 'copy'; },
+                onDragLeave: (e) => { if (!isFileDrag(e)) return; dragDepth.current = Math.max(0, dragDepth.current - 1); if (!dragDepth.current) setDrag(false); },
+                onDrop: (e) => { if (!isFileDrag(e)) return; e.preventDefault(); dragDepth.current = 0; setDrag(false); takeFiles(e.dataTransfer.files); }
+            };
             const parseLocal = () => {
                 const list = Sch.parseQuickPaste(text, group.trim());
                 if (!list.length) { toast('Chưa tách được mục nào. Thử định dạng "word - nghĩa" hoặc câu có A. B. C. D.', 'info'); return; }
@@ -4854,14 +4950,30 @@
             };
             return (
                 <section className="card p-4 sm:p-5 mb-4" aria-labelledby="qp-title">
-                    <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
-                        <h3 id="qp-title" className="font-semibold flex items-center gap-2"><Icon name="clipboard" /> Ô nhập thông minh</h3>
-                        <span className="text-xs text-muted">Dán danh sách từ hoặc cả đoạn câu hỏi trắc nghiệm</span>
+                    <div className="qp-head">
+                        <h3 id="qp-title" className="flex min-w-0 items-center gap-2 whitespace-nowrap font-semibold"><Icon name="clipboard" />Ô nhập thông minh</h3>
+                        <div className="qp-tools">
+                            <button type="button" className="qp-xls" onClick={() => xlsRef.current && xlsRef.current.click()} disabled={busy} aria-label="Nhập file Excel (.xlsx, .xls, .csv)">
+                                <Icon name="upload" size={15} /><span>Nhập Excel</span>
+                            </button>
+                            <button type="button" className="qp-sample hidden items-center md:inline-flex" onClick={downloadSample} title="Tải file .xlsx mẫu 3 cột: Từ, Nghĩa, Ví dụ">File mẫu</button>
+                            <input ref={xlsRef} type="file" multiple accept=".xlsx,.xls,.csv" className="hidden" onChange={(e) => { const f = e.target.files; takeFiles(f).finally(() => { e.target.value = ''; }); }} />
+                        </div>
                     </div>
+                    <p className="qp-sub">Dán danh sách từ, câu trắc nghiệm, hoặc kéo file Excel vào ô bên dưới<button type="button" className="qp-sample md:hidden" onClick={downloadSample}>File mẫu</button></p>
                     {!preview ? (
                         <>
-                            <textarea value={text} onChange={(e) => setText(e.target.value)} rows={6} maxLength={Sec.LIMITS.pasteChars} className="field py-2 font-mono text-[13px]" aria-label="Văn bản cần tách"
-                                placeholder={'accountant - kế toán viên\nresign (v) - nghỉ việc\n\n1. Which testing technique is based on the specification?\nA. White-box\nB. Black-box\nC. Static analysis\nD. Code review\nĐáp án: B'} />
+                            <div className={'qp-drop' + (drag ? ' is-drag' : '')} {...dropZone}>
+                                <textarea value={text} onChange={(e) => setText(e.target.value)} rows={6} maxLength={Sec.LIMITS.pasteChars} className="field py-2 font-mono text-[13px]" aria-label="Văn bản cần tách"
+                                    placeholder={'accountant - kế toán viên\nresign (v) - nghỉ việc\n\n1. Which testing technique is based on the specification?\nA. White-box\nB. Black-box\nC. Static analysis\nD. Code review\nĐáp án: B'} />
+                                {drag && (
+                                    <div className="qp-overlay" aria-hidden="true">
+                                        <Icon name="upload" size={22} />
+                                        <b>Thả file Excel để tự động tách từ vựng</b>
+                                        <small>.xlsx, .xls hoặc .csv · tên file thành tên nhóm</small>
+                                    </div>
+                                )}
+                            </div>
                             <div className="flex flex-wrap items-end gap-2 mt-3">
                                 <label className="flex-1 min-w-[180px]"><span className="label">Nhóm</span><input className="field" list="qp-groups" value={group} maxLength={80} onChange={(e) => setGroup(e.target.value)} placeholder="Unit 1 - Jobs / SWT301 Ch.2" /></label>
                                 <datalist id="qp-groups">{groups.filter(([k]) => k !== '__none').map(([k]) => <option key={k} value={k} />)}</datalist>
@@ -5706,8 +5818,9 @@
                                     <b>Gõ từng từ</b><small>Gõ 2 chữ là có gợi ý nghĩa, không tốn lượt AI</small>
                                 </button>
                                 <button type="button" className="start-tile" onClick={() => setQuick(true)}>
+                                    <span className="start-badge" aria-hidden="true">.XLSX / .CSV</span>
                                     <span className="start-ico"><Icon name="clipboard" size={20} /></span>
-                                    <b>Dán danh sách</b><small>Mỗi dòng "từ - nghĩa", hoặc <span className="underline" role="link" onClick={(e) => { e.stopPropagation(); if (fileRef.current) fileRef.current.click(); }}>nhập file Excel</span></small>
+                                    <b>Dán danh sách / Excel</b><small>Mỗi dòng "từ - nghĩa", hoặc <span className="underline" role="link" onClick={(e) => { e.stopPropagation(); if (fileRef.current) fileRef.current.click(); }}>nhập file Excel</span></small>
                                 </button>
                             </div>
                         </section>
