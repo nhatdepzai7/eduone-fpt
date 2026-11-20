@@ -57,6 +57,11 @@
         .cmd-go { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 52px; padding: 0 22px; border-radius: 16px; background: #fff; color: #312E81; font-weight: 800; font-size: 16px; box-shadow: 0 10px 22px -12px rgba(0, 0, 0, .6); transition: transform .15s ease; }
         .cmd-go:hover { transform: translateY(-1px); }
         .cmd-go:disabled { opacity: .6; cursor: not-allowed; transform: none; }
+        .cmd-go.is-first { box-shadow: 0 0 0 4px rgba(255, 255, 255, .18), 0 12px 26px -12px rgba(0, 0, 0, .65); }
+        .cmd-sum { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1px; overflow: hidden; border-radius: 14px; background: rgba(255, 255, 255, .14); }
+        .cmd-sum > div { padding: 10px 12px; background: rgba(15, 12, 60, .28); }
+        .cmd-sum dt { font-size: 11px; font-weight: 500; line-height: 1.3; color: #C7D2FE; }
+        .cmd-sum dd { margin-top: 2px; font-size: 18px; font-weight: 700; color: #fff; }
         .cmd-link { display: inline-flex; align-items: center; gap: 6px; min-height: 44px; padding: 0 12px; border-radius: 12px; font-size: 14px; font-weight: 600; color: #E0E7FF; }
         .cmd-link:hover { background: rgba(255, 255, 255, .12); color: #fff; }
         .cmd-alt { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 52px; padding: 0 18px; border-radius: 16px; background: rgba(255, 255, 255, .12); color: #fff; font-weight: 700; font-size: 15px; border: 1px solid rgba(255, 255, 255, .3); transition: background .15s ease; }
@@ -790,6 +795,39 @@
         .fund-strip[data-tier="obsidian"] .ticket-streak { color: #F2DDA4; background: rgba(217, 184, 113, .1); box-shadow: 0 0 0 1px rgba(217, 184, 113, .35); }
         .fund-strip[data-tier="obsidian"] .fund-cta { color: #EFEBE2; background: rgba(255, 255, 255, .04); border-color: rgba(217, 184, 113, .25); }
         .fund-strip[data-tier="obsidian"] svg { color: #A39D90; }
+        /* Tổng quan khi Obsidian: thẻ ca học đen-vàng, nút nhấn vàng champagne thay tím. Bản Eco giữ nguyên. */
+        .app-root[data-tier="obsidian"] .cmd-card { color: #F6F2E8; background: radial-gradient(80% 70% at 100% 0%, rgba(217, 184, 113, .16) 0%, rgba(217, 184, 113, 0) 60%), linear-gradient(155deg, #18171B 0%, #0E0E11 55%, #08080A 100%); box-shadow: 0 26px 48px -26px rgba(8, 8, 10, .7), inset 0 0 0 1px rgba(217, 184, 113, .22), inset 0 1px 0 rgba(242, 221, 164, .12); }
+        .app-root[data-tier="obsidian"] .cmd-card::after { background: radial-gradient(closest-side, rgba(242, 221, 164, .1), transparent 70%); }
+        .app-root[data-tier="obsidian"] .cmd-card .text-indigo-100 { color: #D8D2C4; }
+        .app-root[data-tier="obsidian"] .cmd-card .text-indigo-200 { color: #A39D90; }
+        .app-root[data-tier="obsidian"] .cmd-card .cmd-pill.bg-white\/15 { background: rgba(217, 184, 113, .1); color: #F2DDA4; box-shadow: inset 0 0 0 1px rgba(217, 184, 113, .3); }
+        .app-root[data-tier="obsidian"] .cmd-card [role="timer"] { color: #F6EBD0; text-shadow: 0 0 28px rgba(217, 184, 113, .18); }
+        .app-root[data-tier="obsidian"] .cmd-go { color: #1A1408; background: linear-gradient(180deg, #F6E6B8 0%, #D9B871 100%); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .55), 0 12px 26px -12px rgba(217, 184, 113, .6); }
+        .app-root[data-tier="obsidian"] .cmd-go:hover:not(:disabled) { background: linear-gradient(180deg, #FAEDC6 0%, #E2C27E 100%); }
+        .app-root[data-tier="obsidian"] .cmd-go.is-first { box-shadow: 0 0 0 4px rgba(217, 184, 113, .18), inset 0 1px 0 rgba(255, 255, 255, .55), 0 12px 26px -12px rgba(217, 184, 113, .6); }
+        .app-root[data-tier="obsidian"] .cmd-alt { color: #EFEBE2; background: rgba(255, 255, 255, .04); border-color: rgba(217, 184, 113, .3); }
+        .app-root[data-tier="obsidian"] .cmd-alt:hover { background: rgba(217, 184, 113, .1); }
+        .app-root[data-tier="obsidian"] .cmd-link { color: #D8D2C4; }
+        .app-root[data-tier="obsidian"] .cmd-link:hover { background: rgba(255, 255, 255, .06); color: #F2DDA4; }
+        .app-root[data-tier="obsidian"] .slot-path::before { background: linear-gradient(90deg, rgba(217, 184, 113, .15), rgba(217, 184, 113, .4), rgba(217, 184, 113, .15)); }
+        .app-root[data-tier="obsidian"] .slot-dot { background: #1A191D; color: #CFC9BC; box-shadow: 0 0 0 1px rgba(217, 184, 113, .35); }
+        .app-root[data-tier="obsidian"] .slot-node.is-now .slot-dot { background: linear-gradient(180deg, #F6E6B8, #D9B871); color: #1A1408; animation-name: nowRingGold; }
+        .app-root[data-tier="obsidian"] .slot-node.is-done .slot-dot { background: #1A191D; color: #F2DDA4; box-shadow: 0 0 0 1px rgba(242, 221, 164, .7); }
+        .app-root[data-tier="obsidian"] .slot-time { color: #F6F2E8; }
+        .app-root[data-tier="obsidian"] .slot-name { color: #A39D90; }
+        @keyframes nowRingGold { 0%, 100% { box-shadow: 0 0 0 4px rgba(217, 184, 113, .35); } 50% { box-shadow: 0 0 0 9px rgba(217, 184, 113, .05); } }
+        .app-root[data-tier="obsidian"] .cmd-sum { background: rgba(217, 184, 113, .16); }
+        .app-root[data-tier="obsidian"] .cmd-sum > div { background: #0E0E11; }
+        .app-root[data-tier="obsidian"] .cmd-sum dt { color: #8C8678; }
+        .app-root[data-tier="obsidian"] .cmd-sum dd { color: #F2DDA4; }
+        .app-root[data-tier="obsidian"] .id-invite { color: #6B4E14; background: rgba(217, 184, 113, .12); border: 1px dashed #B8975A; }
+        .app-root[data-tier="obsidian"] .id-invite:hover { color: #1A1408; background: linear-gradient(180deg, #F6E6B8, #D9B871); border-color: transparent; }
+        .app-root[data-tier="obsidian"] .sched-card .btn-primary { color: #F2DDA4; background: linear-gradient(180deg, #1C1B20, #0C0C0F); box-shadow: inset 0 0 0 1px rgba(217, 184, 113, .4), 0 6px 14px -8px rgba(8, 8, 10, .6); }
+        .app-root[data-tier="obsidian"] .sched-card .btn-primary:hover:not(:disabled) { background: linear-gradient(180deg, #25232A, #121215); color: #F6E6B8; }
+        .app-root[data-tier="obsidian"] .sched-card [aria-current="date"] { background: #0E0E11; color: #F2DDA4; }
+        .app-root[data-tier="obsidian"] .sched-card .src-opt.is-on { color: #6B4E14; box-shadow: 0 1px 3px rgba(15, 23, 42, .12), inset 0 0 0 1px rgba(217, 184, 113, .45); }
+        .app-root[data-tier="obsidian"] h1 .text-primary { color: #8F7034; }
+        .app-root[data-tier="obsidian"] .cmd-card :focus-visible { outline-color: #F2DDA4; }
         @media (prefers-reduced-motion: reduce) { .ob-chip, .app-side[data-tier="obsidian"] .side-link svg { transition: none; } }
         @keyframes identity-cue {
             0% { box-shadow: 0 0 0 0 rgba(231, 197, 106, .55); }
@@ -4511,7 +4549,7 @@
             </ol>
         );
 
-        const FocusCard = ({ plan, cur, now, cardCount, onStart, onStudyNow, onSnooze, onBonus, onReceipt, onGate }) => {
+        const FocusCard = ({ plan, cur, now, cardCount, onAddFirst, onStart, onStudyNow, onSnooze, onBonus, onReceipt, onGate }) => {
             const slot = cur.slot;
             const nowD = new Date(now);
             const msUntil = (s) => { const d = new Date(nowD); d.setHours(0, 0, 0, 0); return Math.max(0, d.getTime() + Plan.triggerMin(s) * 60000 - nowD.getTime()); };
@@ -4532,8 +4570,13 @@
                 label = 'Ca ' + slot.id + ' · ' + slot.anchorLabel + ' bắt đầu sau';
                 big = Plan.fmtCountdown(msUntil(slot));
             }
-            const full = slot ? Plan.cardLimit(slot, live ? cur.kind : 'ON_TIME_ACTIVE', false) : 0;
-            const lean = slot ? Math.min(2, slot.baseCardCount || 8) : 2;
+            /* Số thẻ hiển thị không vượt quá số thẻ thật đang có trong kho. */
+            const cap = (n) => (cardCount > 0 ? Math.min(n, cardCount) : n);
+            const full = slot ? cap(Plan.cardLimit(slot, live ? cur.kind : 'ON_TIME_ACTIVE', false)) : 0;
+            const lean = slot ? cap(Math.min(2, slot.baseCardCount || 8)) : 2;
+            const activeSlots = plan.slots.filter(s => !s.nghi);
+            const slotsDone = activeSlots.filter(s => s.status === 'done').length;
+            const cardsToday = plan.slots.reduce((n, s) => n + (s.cardsDone || 0), 0);
             const quick = Math.min(8, Math.max(cardCount, 1));
             const resume = live && slot.deckIds && slot.deckIds.length && !slot.cardsDone;
             /* Đang trong ca: tiêu đề chữ (không dùng font đồng hồ), kèm thời gian còn lại hoặc đã trễ bao lâu. */
@@ -4543,8 +4586,8 @@
             const lateText = lateBy >= 60 ? Math.floor(lateBy / 60) + ' giờ' + (lateBy % 60 ? ' ' + (lateBy % 60) + ' phút' : '') : lateBy + ' phút';
             const onTimeLeft = live && !late ? Math.max(0, (startMin + 30) * 60000 - (nowD.getTime() - new Date(nowD).setHours(0, 0, 0, 0))) : 0;
             return (
-                <section className="cmd-card p-5 text-left sm:p-7" aria-label="Ca học hôm nay">
-                    <div className="relative z-10">
+                <section className="cmd-card flex flex-col p-5 text-left sm:p-7" aria-label="Ca học hôm nay">
+                    <div className="relative z-10 flex flex-1 flex-col">
                         <div className="flex flex-wrap items-center gap-2">
                             <span className="cmd-pill bg-white/15 text-white"><Icon name="lock" size={13} /> Lịch hôm nay đã khóa</span>
                             <span className="text-xs text-indigo-200">Sửa lịch chỉ áp dụng từ 00:00 ngày mai</span>
@@ -4567,9 +4610,9 @@
                             <p className="tnum mt-1 text-5xl font-semibold tracking-tight sm:text-6xl" role="timer" aria-live="off">{big}</p>
                         )}
                         {cur.kind === 'ALL_DONE' && firstSlot && <p className="mt-1 text-sm text-indigo-100">Ca đầu tiên ngày mai lúc {firstSlot.time}. Không nợ thẻ sang mai.</p>}
-                        <div className="mt-6"><SlotPath slots={plan.slots} activeId={slot && slot.id} /></div>
+                        <div className="mt-6 lg:mt-auto lg:pt-6"><SlotPath slots={plan.slots} activeId={slot && slot.id} /></div>
 
-                        <div className="mt-6 flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
+                        <div className="mt-6 flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center lg:mt-auto lg:pt-6">
                             {live && (
                                 <>
                                     <button type="button" className="cmd-go" onClick={() => onStart(false)}><Icon name="play" size={18} /> {resume ? 'Học tiếp' : 'Học đủ'} ca {slot.id} · {full} thẻ</button>
@@ -4583,19 +4626,30 @@
                                     <button type="button" className="cmd-alt" onClick={onReceipt}><Icon name="copy" size={16} /> Copy phiếu hoàn thành</button>
                                 </>
                             )}
-                            {!live && slot && cur.kind !== 'GATE' && cur.kind !== 'ALL_DONE' && (
-                                <button type="button" className="cmd-go" onClick={onStudyNow} disabled={!cardCount}>
-                                    <Icon name="play" size={18} /> {!cardCount ? 'Kho chưa có thẻ' : cur.early ? 'Vào sớm ca ' + slot.id + ' · ' + full + ' thẻ' : 'Học ngay ' + quick + ' thẻ'}
+                            {!live && slot && cur.kind !== 'GATE' && cur.kind !== 'ALL_DONE' && (!cardCount ? (
+                                <button type="button" className="cmd-go is-first" onClick={onAddFirst}>
+                                    <Icon name="plus" size={18} /> Thêm thẻ đầu tiên <span aria-hidden="true">→</span>
                                 </button>
-                            )}
+                            ) : (
+                                <button type="button" className="cmd-go" onClick={onStudyNow}>
+                                    <Icon name="play" size={18} /> {cur.early ? 'Vào sớm ca ' + slot.id + ' · ' + full + ' thẻ' : 'Học ngay ' + quick + ' thẻ'}
+                                </button>
+                            ))}
                             {cur.kind === 'ON_TIME_ACTIVE' && !slot.snoozedOnce && <button type="button" className="cmd-link" onClick={() => onSnooze(slot.id)}><Icon name="clock" size={15} /> Đang dở tay? Lùi 15 phút</button>}
                         </div>
                         <p className="mt-3 text-xs leading-5 text-indigo-200">
                             {live ? 'Bận quá thì bấm Chạm đáy: ' + lean + ' thẻ trong 30 giây vẫn tính là giữ chuỗi hôm nay.'
                                 : cur.kind === 'ALL_DONE' ? 'Điểm dừng rõ ràng. Mai app sẽ gõ chuông đúng giờ.'
                                     : cur.kind === 'GATE' ? 'Đọc xong phần sách của ca rồi quay lại kiểm tra nhanh.'
-                                        : 'Đến giờ, app gõ chuông và nháy tiêu đề tab để nhắc. Có thể treo tab cả ngày.'}
+                                        : !cardCount ? 'Thêm vài từ (gõ tay, dán danh sách hoặc AI quét bài đọc) là ca học có thẻ để chạy.'
+                                            : 'Đến giờ, app gõ chuông và nháy tiêu đề tab để nhắc. Có thể treo tab cả ngày.'}
                         </p>
+                        {/* Tóm tắt ngày: ghim đáy thẻ để cột trái cân với cột phải, không để mảng màu trống. */}
+                        <div className="mt-auto pt-5"><dl className="cmd-sum">
+                            <div><dt>Ca đã xong</dt><dd className="tnum">{slotsDone}/{activeSlots.length}</dd></div>
+                            <div><dt>Thẻ đã học hôm nay</dt><dd className="tnum">{cardsToday}</dd></div>
+                            <div><dt>Thẻ trong kho</dt><dd className="tnum">{cardCount}</dd></div>
+                        </dl></div>
                     </div>
                 </section>
             );
@@ -4693,12 +4747,12 @@
             </div>
         );
 
-        const ScheduleCard = ({ plan, cur, week, nextWeek, groups, saveWeek, toast, askNotify, onSetup, account, setupDone, editOpen, setEditOpen, editRef, source, onSource, bankCount }) => {
+        const ScheduleCard = ({ plan, cur, week, nextWeek, groups, saveWeek, toast, askNotify, onSetup, account, setupDone, editOpen, setEditOpen, editRef, source, onSource, bankCount, cardCount }) => {
             const slot = cur.slot;
             const p2 = (slot && slot.phase2_externalTask) || {};
             const perm = window.Notification ? Notification.permission : 'denied';
             return (
-                <section className="card p-4 scroll-mt-24 sm:p-5" aria-label="Lịch tuần" ref={editRef}>
+                <section className="card sched-card p-4 scroll-mt-24 sm:p-5" aria-label="Lịch tuần" ref={editRef}>
                     <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted">Lịch học</p>
                     <div className="my-2 grid grid-cols-7 gap-1 text-center text-xs" aria-label="Ngày trong tuần">
                         {Plan.WEEK.map(k => (
@@ -4709,7 +4763,7 @@
                     </div>
                     {slot && cur.kind !== 'ALL_DONE' && (
                         <div className="rounded-2xl bg-surface2 px-4 py-3">
-                            <p className="text-xs font-semibold text-muted">Ca {slot.id} · {Plan.MODE_LABEL[slot.mode]} · {slot.baseCardCount} thẻ</p>
+                            <p className="text-xs font-semibold text-muted">Ca {slot.id} · {Plan.MODE_LABEL[slot.mode]} · {cardCount > 0 ? Math.min(slot.baseCardCount, cardCount) + ' thẻ' : 'kho chưa có thẻ'}</p>
                             <p className="mt-0.5 font-semibold text-ink">{Plan.hhmmOf(Plan.triggerMin(slot))} · {slot.anchorLabel} · {Sch.groupLabel(slot.group)}</p>
                             <p className="mt-0.5 text-sm text-ink2 text-flow">{p2.hasExternal ? (p2.bookTitle + ' — ' + p2.taskDetail) : (p2.classSyncNote || 'Ca này chỉ học trên app')}</p>
                         </div>
@@ -4731,7 +4785,7 @@
         };
 
         const TodayView = (p) => {
-            const { plan, planReady, week, nextWeek, now, items, itemsById, groups, session, cur, saveWeek, addItems, finishGate, snooze, askNotify, bonus, closeSession, startSession, review, patch, toast, finishSlot, onBurst, onStudyNow, onStart, onPillar, onLogin, onSetup, account, setupDone, source, onSource, bankCount } = p;
+            const { plan, planReady, week, nextWeek, now, items, itemsById, groups, session, cur, saveWeek, addItems, finishGate, snooze, askNotify, bonus, closeSession, startSession, review, patch, toast, finishSlot, onBurst, onStudyNow, onStart, onPillar, onLogin, onSetup, account, setupDone, source, onSource, bankCount, onAddFirst } = p;
             const [editOpen, setEditOpen] = useState(() => takeGo('plan'));
             const [starterHidden, setStarterHidden] = useState(() => !!Store.prefs.get('starterHidden', false));
             const editRef = useRef(null);
@@ -4816,14 +4870,14 @@
                     {/* Màn đầu (above the fold): ca học bên trái, Bản sắc + Lịch học bên phải. */}
                     <div className="grid gap-4 lg:grid-cols-12">
                         <div className="lg:col-span-7 [&>section]:h-full">
-                            <FocusCard plan={plan} cur={cur} now={now} cardCount={filled} onStart={onStart} onStudyNow={onStudyNow} onSnooze={snooze} onBonus={bonus} onReceipt={receipt}
+                            <FocusCard plan={plan} cur={cur} now={now} cardCount={filled} onAddFirst={onAddFirst} onStart={onStart} onStudyNow={onStudyNow} onSnooze={snooze} onBonus={bonus} onReceipt={receipt}
                                 onGate={() => { const el = document.getElementById('flow-bridge'); if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' }); }} />
                         </div>
                         <div className="flex flex-col gap-4 lg:col-span-5">
                             <IdentityToday canBurst={filled >= 5} onBurst={onBurst} />
                             <ScheduleCard plan={plan} cur={cur} week={week} nextWeek={nextWeek} groups={groups} saveWeek={saveWeek} toast={toast} askNotify={askNotify}
                                 onSetup={onSetup} account={account} setupDone={setupDone} editOpen={editOpen} setEditOpen={setEditOpen} editRef={editRef}
-                                source={source} onSource={onSource} bankCount={bankCount} />
+                                source={source} onSource={onSource} bankCount={bankCount} cardCount={filled} />
                         </div>
                     </div>
                     {cur.kind === 'GATE' && slot && (
@@ -8229,7 +8283,7 @@
                                     snooze={snooze} askNotify={askNotify} bonus={bonus} closeSession={() => { setSession(null); setMinimal(false); window.scrollTo(0, 0); }} startSession={restartSession} onBurst={startQuickBurst}
                                     review={reviewSlot} patch={patch} toast={toast} finishSlot={finishSlot} source={source} onSource={changeSource} bankCount={bankPool.length}
                                     onStudyNow={studyNow} onStart={startSlot} onPillar={openPillar} onLogin={() => { setPendingGift(''); setGoogleReason('save'); setGoogleOpen(true); }}
-                                    onSetup={openSetup} account={account} setupDone={setupDone} />
+                                    onSetup={openSetup} account={account} setupDone={setupDone} onAddFirst={() => { dispatch({ type: 'TAB', tab: 'library' }); window.scrollTo(0, 0); }} />
                             ) : nav.tab === 'library' ? (
                                 <LibraryView items={items} setItems={setItems} groups={groups} groupFilter={groupFilter} setGroupFilter={setGroupFilter}
                                     onPractice={startPractice} onWeak={startWeak} onStudyFrom={studyFrom} onQuickVote={quickVote} toast={toast} mergeItems={mergeItems} />
