@@ -110,9 +110,41 @@
         body:has(.eos-shell) .bnav { display: none; }
         .id-invite { display: inline-flex; align-items: center; gap: 4px; min-height: 34px; padding: 0 12px; border-radius: 999px; background: var(--primary-soft); color: var(--primary); border: 1px dashed var(--primary); font-size: 13px; font-weight: 700; white-space: nowrap; transition: background .15s ease, color .15s ease; }
         .id-invite:hover { background: var(--primary); color: #fff; }
-        .fund-strip { display: flex; align-items: center; gap: 8px; width: 100%; min-height: 40px; margin-bottom: 12px; padding: 0 12px; border-radius: 12px; background: var(--surface); border: 1px solid var(--border); font-size: 13px; color: var(--ink-2); text-align: left; white-space: nowrap; overflow: hidden; }
-        .fund-strip:hover { border-color: var(--primary); }
+        .fund-strip { display: flex; align-items: center; gap: 8px; width: 100%; min-height: 44px; margin-bottom: 12px; padding: 0 6px 0 6px; border-radius: 12px; background: var(--surface); border: 1px solid var(--border); font-size: 13px; color: var(--ink-2); text-align: left; white-space: nowrap; overflow: hidden; }
         .fund-strip svg { color: var(--muted); flex-shrink: 0; }
+        .fund-code { align-items: center; gap: 6px; min-height: 30px; padding: 0 8px; border-radius: 8px; color: var(--ink-2); }
+        .fund-code:hover { background: var(--surface-2); color: var(--ink); }
+        /* Pill phiếu hôm nay */
+        .ticket { position: relative; display: inline-flex; align-items: center; gap: 8px; min-width: 0; min-height: 30px; padding: 0 12px; border-radius: 999px; font-size: 13px; font-weight: 600; overflow: hidden; }
+        .ticket.is-idle { color: var(--muted); }
+        .ticket.is-due { color: #9A3412; background: #FFF7ED; border: 1px solid #FDBA74; box-shadow: 0 1px 2px rgba(234, 88, 12, .12); transition: transform .15s ease, box-shadow .15s ease; }
+        .ticket.is-due:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(234, 88, 12, .22); }
+        .ticket.is-due:active { transform: translateY(0); }
+        .ticket.is-due::after { content: ""; position: absolute; inset: 0; background: linear-gradient(110deg, transparent 30%, rgba(255, 255, 255, .85) 50%, transparent 70%); transform: translateX(-120%); animation: ticket-shimmer 7s ease-in-out infinite; pointer-events: none; }
+        .ticket-dot { position: relative; width: 8px; height: 8px; border-radius: 999px; background: #F97316; flex-shrink: 0; }
+        .ticket-dot::before, .ticket-dot::after { content: ""; position: absolute; inset: 0; border-radius: 999px; background: #F97316; animation: ticket-radar 2s cubic-bezier(.2, .6, .35, 1) infinite; }
+        .ticket-dot::after { animation-delay: 1s; }
+        .ticket-go { flex-shrink: 0; padding-left: 8px; border-left: 1px solid #FDBA74; color: #C2410C; }
+        .ticket.is-done { color: #166534; background: #F0FDF4; border: 1px solid #BBF7D0; }
+        @keyframes ticket-radar { 0% { transform: scale(1); opacity: .55; } 100% { transform: scale(3.2); opacity: 0; } }
+        @keyframes ticket-shimmer { 0%, 82% { transform: translateX(-120%); } 96%, 100% { transform: translateX(120%); } }
+        @media (prefers-reduced-motion: reduce) { .ticket.is-due::after, .ticket-dot::before, .ticket-dot::after { animation: none; display: none; } }
+        .fund-warn { display: inline-flex; align-items: center; gap: 4px; min-height: 26px; padding: 0 10px; border-radius: 999px; font-size: 12px; font-weight: 700; color: #9A3412; background: #FFEDD5; border: 1px solid #FDBA74; }
+        .fund-warn:hover { background: #FED7AA; }
+        /* Nút AI quét bài đọc: nổi bật nhưng nhường nút chính "Thêm từ". */
+        .start-tile { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; padding: 16px; border-radius: 16px; border: 1px solid var(--border); background: var(--surface); text-align: left; transition: border-color .15s ease, box-shadow .15s ease, transform .15s ease; }
+        .start-tile:hover { border-color: var(--primary); box-shadow: 0 6px 18px rgba(15, 23, 42, .08); transform: translateY(-2px); }
+        .start-tile b { margin-top: 6px; font-size: 15px; font-weight: 700; color: var(--ink); }
+        .start-tile small { font-size: 13px; line-height: 1.45; color: var(--muted); }
+        .start-ico { display: inline-flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 12px; background: var(--surface-2); color: var(--primary); }
+        .start-tile.is-ai { border-color: #DDD6FE; background: linear-gradient(160deg, #FAF5FF 0%, #FFFFFF 60%); }
+        .start-tile.is-ai .start-ico { background: linear-gradient(135deg, #7C3AED, #DB2777); color: #fff; }
+        .btn-ai { display: inline-flex; align-items: center; gap: 6px; min-height: 36px; padding: 0 12px; border-radius: 12px; font-size: 14px; font-weight: 600; color: #5B21B6; background: linear-gradient(135deg, #F5F3FF 0%, #EDE9FE 55%, #FCE7F3 100%); border: 1px solid #DDD6FE; transition: box-shadow .15s ease, transform .15s ease; white-space: nowrap; }
+        .btn-ai svg { color: #7C3AED; }
+        .btn-ai:hover { box-shadow: 0 4px 14px rgba(124, 58, 237, .22); transform: translateY(-1px); }
+        .side-ai { color: #5B21B6; }
+        .side-ai svg { color: #7C3AED !important; }
+        .side-new { padding: 1px 6px; border-radius: 999px; font-size: 10px; font-weight: 800; letter-spacing: .04em; color: #fff; background: linear-gradient(135deg, #7C3AED, #DB2777); }
         /* CTA gói AI: pill nhạt khi còn nhiều lượt, nút tím đậm khi còn <= 20 lượt. */
         .fund-cta { margin-left: auto; flex-shrink: 0; display: inline-flex; align-items: center; gap: 4px; min-height: 26px; padding: 0 10px; border-radius: 999px; font-size: 12px; font-weight: 700; transition: background .15s ease, transform .15s ease; }
         .fund-cta.is-soft { background: rgba(124, 58, 237, .08); border: 1px solid rgba(124, 58, 237, .28); color: var(--primary); }
@@ -1874,24 +1906,41 @@
         };
         const WORD_TYPES = ['n', 'v', 'adj', 'adv', 'prep', 'conj', 'pron', 'phr', 'idiom'];
         /* Thanh trạng thái quỹ 1 dòng cho Sổ từ: bấm vào mới mở chi tiết đổi mã / nâng cấp. */
-        const FundStrip = ({ onOpen }) => {
+        const AI_SCARCE = 15;
+        /* Thanh trạng thái Sổ từ.
+           - Phiếu hôm nay (hiệu ứng Zeigarnik): chưa chốt thì pill sáng, có sóng radar và vệt sáng, bấm là vào học 30s; chốt rồi thì xanh lá, đứng yên.
+           - Lượt AI (khan hiếm tăng dần): còn nhiều thì chỉ hiện "Gói AI 29k"; còn <= 15 lượt thì hiện cảnh báo cam cạnh nút Nâng cấp. */
+        const FundStrip = ({ onOpen, onQuickVote }) => {
             const fund = useFund();
-            const aiCap = fund.aiLimit || E.Quota.AI_FREE;
-            const aiLeft = Math.max(0, aiCap - (fund.aiUsed || 0));
-            const aiOn = fund.aiUnlocked || (fund.aiCredits || 0) > 0;
+            const ai = useAiLeft();
             const votes = useVoteSummary();
-            const ticketLeft = votes && !votes.confirmedToday ? 1 : 0;
+            const due = !!votes && !votes.confirmedToday;
+            const scarce = !ai.on && ai.left <= AI_SCARCE;
             return (
-                <button type="button" onClick={onOpen} className="fund-strip" aria-label="Mở chi tiết mã quỹ và gói AI">
-                    <span className="inline-flex min-w-0 shrink-0 items-center gap-1.5"><Icon name="key" size={14} /> <span className="hidden sm:inline">Mã</span> <b className="tnum">{fund.code}</b></span>
-                    <span className="opacity-40 hidden sm:inline" aria-hidden="true">·</span>
-                    {/* Phiếu bản sắc hôm nay lên trước: đây là việc cần làm mỗi ngày. Lượt AI chi tiết nằm trong khung Mã quỹ và cạnh nút AI điền. */}
-                    <span className={'inline-flex min-w-0 items-center gap-1.5 truncate' + (ticketLeft ? ' font-semibold text-ink' : '')}>
-                        <span aria-hidden="true">🎟️</span> {!votes ? 'Phiếu' : ticketLeft ? 'Còn ' + ticketLeft + ' phiếu' : 'Đã bỏ phiếu'}<span className="hidden sm:inline"> hôm nay</span>
+                <div className="fund-strip">
+                    <button type="button" className="fund-code hidden sm:inline-flex" onClick={onOpen} aria-label={'Mã quỹ ' + fund.code + ', mở chi tiết mã quỹ và gói AI'}>
+                        <Icon name="key" size={14} /> <b className="tnum">{fund.code}</b>
+                    </button>
+                    {!votes ? <span className="ticket is-idle"><span aria-hidden="true">🎟️</span><span>Phiếu hôm nay</span></span>
+                        : due ? (
+                            <button type="button" className="ticket is-due" onClick={onQuickVote} aria-label="Còn 1 phiếu hôm nay. Học 30 giây để chốt phiếu">
+                                <span className="ticket-dot" aria-hidden="true" />
+                                <span className="truncate">Còn 1 phiếu<span className="hidden sm:inline"> hôm nay</span></span>
+                                <span className="ticket-go">Học 30s →</span>
+                            </button>
+                        ) : (
+                            <span className="ticket is-done" role="status"><span aria-hidden="true">✅</span><span>Đã chốt phiếu<span className="hidden sm:inline"> hôm nay</span></span></span>
+                        )}
+                    <span className="ml-auto flex shrink-0 items-center gap-1.5">
+                        {scarce && (
+                            <button type="button" className="fund-warn" onClick={onOpen} aria-label={'AI còn ' + ai.left + ' lượt, mở gói AI'}>
+                                <span aria-hidden="true">⚠️</span> <span className="hidden sm:inline">AI còn </span><b className="tnum">{ai.left}</b><span className="hidden sm:inline"> lượt</span>
+                            </button>
+                        )}
+                        {ai.on ? <button type="button" className="fund-cta is-soft" onClick={onOpen}>Chi tiết ›</button>
+                            : <button type="button" className={'fund-cta ' + (scarce ? 'is-hot' : 'is-soft')} onClick={onOpen}><Icon name="zap" size={12} /> {scarce ? 'Nâng cấp 29k' : 'Gói AI 29k'}</button>}
                     </span>
-                    {aiOn ? <span className="ml-auto shrink-0 font-semibold text-primary">Chi tiết ›</span>
-                        : <span className={'fund-cta ' + (aiLeft <= 20 ? 'is-hot' : 'is-soft')}><Icon name="zap" size={12} /> {aiLeft <= 20 ? 'Nâng cấp 29k' : 'Gói AI 29k'}</span>}
-                </button>
+                </div>
             );
         };
         const FundPanel = ({ toast, kind = 'vocab', compact = false, items }) => (
@@ -5199,7 +5248,7 @@
             );
         };
 
-        const LibraryView = ({ items, setItems, groups, groupFilter, setGroupFilter, onPractice, onWeak, onStudyFrom, toast, mergeItems }) => {
+        const LibraryView = ({ items, setItems, groups, groupFilter, setGroupFilter, onPractice, onWeak, onStudyFrom, onQuickVote, toast, mergeItems }) => {
             const [quick, setQuick] = useState(false);
             const [importBatches, setImportBatches] = useState(null);
             const [editing, setEditing] = useState(null);
@@ -5213,6 +5262,11 @@
             const [tease, setTease] = useState(null);
             const [paywall, setPaywall] = useState(false);
             const [passage, setPassage] = useState(() => takeGo('reading'));
+            useEffect(() => {
+                const open = () => setPassage(true);
+                window.addEventListener('edu-reading', open);
+                return () => window.removeEventListener('edu-reading', open);
+            }, []);
             const [importHint, setImportHint] = useState(() => takeGo('import'));
             const [menu, setMenu] = useState(null);
             const [filterOpen, setFilterOpen] = useState(false);
@@ -5495,11 +5549,14 @@
                     {/* Đầu trang gọn: tiêu đề + 2 nút (Thêm từ, •••). Luyện tập đầy đủ nằm ở tab Luyện tập. */}
                     <div className="mb-3 flex items-center justify-between gap-2" ref={menuBox}>
                         <div className="min-w-0">
-                            <h1 className="text-xl font-bold">Kho của tôi</h1>
-                            <p className="truncate text-sm text-muted">{rows.length}/{items.length} mục · từ vựng & câu hỏi bạn tự ghi</p>
+                            <h1 className="whitespace-nowrap text-xl font-bold tracking-tight sm:text-2xl">Sổ từ<span className="hidden sm:inline"> của tôi</span></h1>
+                            <p className="truncate text-sm text-muted"><b className="tnum font-semibold text-ink2">{items.length}</b> mục{groups.length ? ' · ' + groups.length + ' nhóm' : ''}{rows.length !== items.length ? ' · đang lọc ' + rows.length : ''}</p>
                         </div>
                         <div className="relative flex shrink-0 items-center gap-2">
                             {groupFilter !== 'all' && <button type="button" onClick={() => onPractice(studyable, 'flash', Sch.groupLabel(groupFilter))} disabled={!studyable.length} className="btn btn-secondary btn-sm hidden sm:inline-flex"><Icon name="layers" size={14} /> Luyện nhóm này</button>}
+                            <button type="button" onClick={() => setPassage(true)} className="btn-ai" title="Dán bài đọc hoặc đề thi, AI lọc từ mới kèm IPA và nghĩa">
+                                <Icon name="sparkles" size={15} /><span className="sm:hidden">Quét bài</span><span className="hidden sm:inline">AI quét bài đọc</span>
+                            </button>
                             <button type="button" onClick={() => setMenu(m => (m === 'add' ? null : 'add'))} aria-expanded={menu === 'add'} aria-haspopup="menu" className="btn btn-primary btn-sm"><Icon name="plus" size={15} /> Thêm từ</button>
                             <button type="button" onClick={() => setMenu(m => (m === 'more' ? null : 'more'))} aria-expanded={menu === 'more'} aria-haspopup="menu" aria-label="Tùy chọn khác" className="btn btn-secondary btn-sm btn-icon !w-10">•••</button>
                             {menu && (
@@ -5525,7 +5582,7 @@
                         </div>
                     </div>
 
-                    <FundStrip onOpen={() => setFundOpen(true)} />
+                    <FundStrip onOpen={() => setFundOpen(true)} onQuickVote={onQuickVote} />
                     {fundOpen && <Modal title="Mã quỹ & gói AI" onClose={() => setFundOpen(false)} size="lg"><FundBody toast={toast} kind="vocab" compact items={items} /></Modal>}
 
                     {quick && <QuickPaste groups={groups} toast={toast} onLocked={() => setPaywall(true)} onAdd={(list) => confirmImport({ items: list, mode: 'append' })} />}
@@ -5572,8 +5629,30 @@
                     )}
 
                     {/* Điện thoại (<768px): danh sách thẻ 2 dòng, chạm để sửa. Màn rộng giữ bảng đầy đủ. */}
+                    {/* Sổ từ trống: 3 lối tạo từ ngay tại chỗ, như trang "Tạo học phần" của các web học lớn. */}
+                    {items.length === 0 && !drafts && (
+                        <section className="card p-5 sm:p-8" aria-label="Bắt đầu Sổ từ">
+                            <p className="text-lg font-bold">Bắt đầu Sổ từ của bạn</p>
+                            <p className="mt-1 text-sm text-ink2">Chọn cách nhanh nhất với bạn. Từ mới tự xếp theo nhóm, đúng thứ tự bài học.</p>
+                            <div className="mt-4 grid gap-3 sm:grid-cols-3">
+                                <button type="button" className="start-tile is-ai" onClick={() => setPassage(true)}>
+                                    <span className="start-ico"><Icon name="sparkles" size={20} /></span>
+                                    <b>AI quét bài đọc</b><small>Dán bài đọc hoặc đề thi, AI lọc từ mới kèm IPA và nghĩa</small>
+                                </button>
+                                <button type="button" className="start-tile" onClick={addRow}>
+                                    <span className="start-ico"><Icon name="plus" size={20} /></span>
+                                    <b>Gõ từng từ</b><small>Gõ 2 chữ là có gợi ý nghĩa, không tốn lượt AI</small>
+                                </button>
+                                <button type="button" className="start-tile" onClick={() => setQuick(true)}>
+                                    <span className="start-ico"><Icon name="clipboard" size={20} /></span>
+                                    <b>Dán danh sách</b><small>Mỗi dòng "từ - nghĩa", hoặc <span className="underline" role="link" onClick={(e) => { e.stopPropagation(); if (fileRef.current) fileRef.current.click(); }}>nhập file Excel</span></small>
+                                </button>
+                            </div>
+                        </section>
+                    )}
+
                     {/* Điện thoại: mỗi nhóm là một khối đóng/mở, thẻ 2 dòng, chạm để sửa. */}
-                    <div className="md:hidden">
+                    <div className={'md:hidden' + (items.length === 0 && !drafts ? ' !hidden' : '')}>
                         {rows.length === 0 && !drafts ? (
                             <div className="card"><Empty icon="layers" title="Chưa có mục nào ở đây">Bấm "Thêm từ" để bắt đầu.</Empty></div>
                         ) : (
@@ -5618,7 +5697,7 @@
                         )}
                     </div>
 
-                    <div className="card hidden overflow-hidden pb-24 md:block">
+                    <div className={'card hidden overflow-hidden pb-24' + (items.length === 0 && !drafts ? '' : ' md:block')}>
                         <div className="overflow-x-auto" ref={tableBox}>
                             <table className="w-full min-w-[1080px] text-sm border-collapse">
                                 <caption className="sr-only">Bảng kho học</caption>
@@ -7303,6 +7382,30 @@
                 }
                 window.scrollTo(0, 0);
             };
+            /* Mở thẳng "AI quét bài đọc" ở Sổ từ từ bất kỳ đâu (thanh điều hướng). */
+            const openReading = () => {
+                if (nav.busy && !confirm('Bạn đang giữa một ca / phòng thi. Thoát ra?')) return;
+                setSession(s => (s && s.slotId ? s : null));
+                window.__fpassGo = 'reading';
+                dispatch({ type: 'TAB', tab: 'library', force: true });
+                window.scrollTo(0, 0);
+                /* Sổ từ đang mở sẵn thì không mount lại: báo qua sự kiện. */
+                window.setTimeout(() => { if (window.__fpassGo === 'reading') { window.__fpassGo = ''; window.dispatchEvent(new CustomEvent('edu-reading')); } }, 0);
+            };
+            /* Pill "Phiếu hôm nay": đang trong ca thì vào ca bản Chạm đáy (2 thẻ đủ phiếu); ngoài ca thì 5 thẻ flashcard, từ yếu trước. */
+            const quickVote = () => {
+                const slotNow = cur.slot;
+                if (slotNow && (cur.kind === 'ON_TIME_ACTIVE' || cur.kind === 'LATE_RECOVERY')) { startSlot(true); return; }
+                const filled = items.filter(Sch.isFilled);
+                if (filled.length < 5) { toast('Cần ít nhất 5 thẻ có nghĩa để chốt phiếu. Thêm vài từ nhé.', 'info'); return; }
+                const weak = filled.filter(t => Sch.isWeak(t)).sort((a, b) => Sch.weakScore(b) - Sch.weakScore(a));
+                const rest = Sch.shuffle(filled.filter(t => weak.indexOf(t) < 0));
+                const ids = weak.concat(rest).slice(0, 5).map(t => t.id);
+                noteStudyStart();
+                setSession({ id: Date.now(), title: 'Học 30s · chốt phiếu hôm nay', mode: 'flash', voteType: 'flashcard', ids: ids });
+                dispatch({ type: 'TAB', tab: 'practice', force: true });
+                window.scrollTo(0, 0);
+            };
             const openMyPack = (id) => {
                 if (nav.busy && !confirm('Bạn đang giữa một ca / phòng thi. Thoát ra?')) return;
                 setSession(s => (s && s.slotId ? s : null));
@@ -7389,6 +7492,9 @@
                                     {it.k === 'today' && slotDue && <><span className="side-dot" aria-hidden="true" /><span className="sr-only">, có ca học đến giờ</span></>}
                                 </button>
                             ))}
+                            <button type="button" className="side-link side-ai" onClick={openReading}>
+                                <Icon name="sparkles" size={18} /> <span className="min-w-0 flex-1 truncate text-left">AI quét bài đọc</span><span className="side-new">AI</span>
+                            </button>
                         </nav>
                         <p className="side-head">Kho đề của tôi</p>
                         {myPacks.length ? (
@@ -7421,7 +7527,7 @@
                                     onSetup={openSetup} account={account} setupDone={setupDone} />
                             ) : nav.tab === 'library' ? (
                                 <LibraryView items={items} setItems={setItems} groups={groups} groupFilter={groupFilter} setGroupFilter={setGroupFilter}
-                                    onPractice={startPractice} onWeak={startWeak} onStudyFrom={studyFrom} toast={toast} mergeItems={mergeItems} />
+                                    onPractice={startPractice} onWeak={startWeak} onStudyFrom={studyFrom} onQuickVote={quickVote} toast={toast} mergeItems={mergeItems} />
                             ) : (
                                 <PracticeHub items={items} itemsById={itemsById} groups={groups} groupFilter={groupFilter} setGroupFilter={setGroupFilter}
                                     session={session && !session.slotId ? session : null} startSession={restartSession} closeSession={() => setSession(null)}
