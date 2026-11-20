@@ -80,7 +80,7 @@
 <body>
     <a href="#main" class="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-50 cta cta-main">Bỏ qua tới nội dung</a>
 
-    <header class="sticky top-0 z-40 border-b border-slate-200/80 bg-white/85 backdrop-blur">
+    <header class="sticky top-0 z-50 border-b border-slate-200 bg-white">
         <div class="mx-auto flex max-w-6xl items-center gap-3 px-4 py-3">
             <a href="/" class="mr-auto flex items-center gap-2.5 no-underline" aria-label="FPass trang chủ">
                 <img src="/public/stickers/logo.png" alt="" class="h-10 w-auto">
@@ -323,7 +323,13 @@
         (function () {
             /* Người đã học trên máy này: đổi chữ trên nút cho đúng việc họ cần làm. */
             var back = false;
-            try { back = /^[a-f0-9]{16}$/.test(localStorage.getItem('edu.visitor') || ''); } catch (e) {}
+            try {
+                back = /^[a-f0-9]{16}$/.test(localStorage.getItem('edu.visitor') || '');
+                for (var i = 0; !back && i < localStorage.length; i++) {
+                    var k = localStorage.key(i) || '';
+                    if (/^edu\.(identity|libDrafts|starterSeeded|fund|prefs)/.test(k)) back = true;
+                }
+            } catch (e) {}
             if (back) {
                 document.querySelectorAll('[data-resume]').forEach(function (a) {
                     if (a.closest('header')) a.textContent = 'Tiếp tục học';

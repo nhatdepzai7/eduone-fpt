@@ -115,6 +115,41 @@
         .fund-code { align-items: center; gap: 6px; min-height: 30px; padding: 0 8px; border-radius: 8px; color: var(--ink-2); }
         .fund-code:hover { background: var(--surface-2); color: var(--ink); }
         /* Pill phiếu hôm nay */
+        .eos-strip { gap: 10px; padding: 0 6px 0 12px; }
+        .eos-turns { display: inline-flex; align-items: center; gap: 6px; color: var(--ink); font-weight: 600; }
+        .eos-turns svg { color: #1E3A8A; }
+        .eos-turns b { font-size: 15px; }
+        .eos-turns.is-low b, .eos-turns.is-low svg { color: #C2410C; }
+        .fund-sep { width: 1px; height: 18px; background: var(--border); }
+        .eos-pro { padding: 2px 8px; border-radius: 999px; font-size: 11px; font-weight: 800; letter-spacing: .08em; color: #E7C56A; background: #161B2B; }
+        .eos-ai { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 999px; font-size: 12px; font-weight: 600; color: #4338CA; background: #EEF2FF; }
+        .eos-manage { margin-left: auto; display: inline-flex; align-items: center; gap: 4px; height: 32px; padding: 0 12px; border-radius: 999px; font-size: 13px; font-weight: 600; color: #fff; background: #4338CA; white-space: nowrap; }
+        .eos-manage:hover { background: #3730A3; }
+        .plan-cta { display: flex; align-items: center; justify-content: center; margin-top: 12px; height: 36px; border-radius: 10px; font-size: 13px; font-weight: 700; color: #4338CA; background: #fff; border: 1px solid #C7D2FE; }
+        .plan-cta.is-featured { color: #fff; background: #4338CA; border-color: #4338CA; }
+        .plan-cta.is-on { color: #fff; background: #059669; border-color: #059669; }
+        .soon-box { margin-top: 16px; border-radius: 16px; border: 1px solid var(--border); background: var(--surface); }
+        .soon-box > summary { display: flex; align-items: center; gap: 8px; padding: 12px 14px; cursor: pointer; list-style: none; font-size: 14px; }
+        .soon-box > summary::-webkit-details-marker { display: none; }
+        .soon-box[open] .soon-chev { transform: rotate(90deg); }
+        .soon-chev { transition: transform .15s ease; color: var(--muted); }
+        .word-say { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; padding: 0 10px 8px; margin-top: -4px; font-size: 12px; line-height: 1.3; }
+        .word-say-btn { display: inline-flex; width: 24px; height: 24px; flex-shrink: 0; align-items: center; justify-content: center; border-radius: 999px; color: var(--ink-2); border: 1px solid var(--border); background: var(--surface); }
+        .word-say-btn:hover { color: var(--primary); border-color: var(--primary); }
+        .word-ipa { color: var(--ink-2); white-space: nowrap; }
+        .learn-badge { display: inline-flex; align-items: center; height: 24px; padding: 0 9px; border-radius: 999px; font-size: 12px; font-weight: 600; white-space: nowrap; }
+        .learn-badge.is-new { color: #475569; background: #F1F5F9; }
+        .learn-badge.is-mid { color: #B45309; background: #FFFBEB; box-shadow: inset 0 0 0 1px #FDE68A; }
+        .learn-badge.is-done { color: #047857; background: #ECFDF5; box-shadow: inset 0 0 0 1px #A7F3D0; }
+        .grp-inline-count { font-weight: 500; color: var(--muted); }
+        .week-dots { display: flex; justify-content: space-between; max-width: 260px; gap: 4px; }
+        .week-dots li { display: flex; flex-direction: column; align-items: center; gap: 3px; width: 22px; }
+        .week-dot { width: 14px; height: 14px; border-radius: 999px; border: 2px solid #94A3B8; background: #fff; }
+        .week-dots li.is-on .week-dot { border-color: #4338CA; background: #4338CA; }
+        .week-dots li.is-today .week-dot { box-shadow: 0 0 0 3px rgba(67, 56, 202, .18); }
+        .week-dots li.is-future .week-dot { border-style: dashed; border-color: #CBD5E1; }
+        .week-day { font-size: 10.5px; font-weight: 600; color: #64748B; }
+        .week-dots li.is-today .week-day { color: #312E81; }
         .ticket { display: inline-flex; align-items: center; gap: 7px; min-width: 0; padding: 4px 12px; border-radius: 9999px; border: 1px solid transparent; font-size: 13px; font-weight: 500; line-height: 20px; letter-spacing: -.005em; }
         .ticket .ticket-ic { width: 15px; height: 15px; flex-shrink: 0; overflow: visible; }
         .ticket.is-idle { color: var(--muted); border-color: var(--border); }
@@ -562,7 +597,7 @@
             .eos-shell button.eos-hit { padding: 6px 4px; }
         }
 
-        .obsidian-head { background: rgba(16, 20, 31, .96); border-bottom-color: #202637; color: #F8F9FC; }
+        .obsidian-head { background: #10141F; border-bottom-color: #202637; color: #F8F9FC; }
         .obsidian-head .btn-ghost { color: #C6CBD4; }
         .obsidian-head .btn-ghost:hover:not(:disabled) { background: #202637; }
         .obsidian-head .tab { color: #C6CBD4; }
@@ -640,7 +675,7 @@
 
     <!-- ===================== UI KIT ===================== -->
     <script type="text/babel" data-presets="react" data-type="module">
-        import { IDENTITIES, dayKey, identityLine, planVote, summarize } from './js/core/identity.js?v=ielts';
+        import { IDENTITIES, dayKey, identityLine, planVote, shiftDay, summarize } from './js/core/identity.js?v=ielts';
         const { useState, useEffect, useRef, useMemo, useReducer } = React;
         const E = window.EDU;
         /* /app?go=... từ trang chủ: đọc một lần trước khi vẽ, component nào cần thì lấy qua takeGo(). */
@@ -938,21 +973,29 @@
                 neverMiss: !!summary.missedOnce
             };
         };
+        /* Một nguồn duy nhất cho phiếu bản sắc: mọi nơi (Tổng quan, Topbar, Sổ từ) đọc cùng một bản, nạp lại một lần khi có phiếu mới. */
+        const voteHub = { rows: null, subs: new Set(), loading: false, again: false };
+        const loadVotes = () => {
+            if (voteHub.loading) { voteHub.again = true; return; }
+            voteHub.loading = true;
+            Store.identityVotes.all().then((rows) => { voteHub.rows = Array.isArray(rows) ? rows : []; })
+                .catch(() => { voteHub.rows = voteHub.rows || []; })
+                .then(() => {
+                    voteHub.loading = false;
+                    voteHub.subs.forEach((fn) => fn(voteHub.rows));
+                    if (voteHub.again) { voteHub.again = false; loadVotes(); }
+                });
+        };
+        window.addEventListener('edu-votes', loadVotes);
         const useVoteSummary = () => {
-            const [votes, setVotes] = useState(null);
+            const [votes, setVotes] = useState(voteHub.rows);
             useEffect(() => {
-                let live = true;
-                const load = () => {
-                    Store.identityVotes.all().then((rows) => {
-                        if (live) setVotes(Array.isArray(rows) ? rows : []);
-                    }).catch(() => { if (live) setVotes([]); });
-                };
-                load();
-                window.addEventListener('edu-votes', load);
-                return () => { live = false; window.removeEventListener('edu-votes', load); };
+                voteHub.subs.add(setVotes);
+                if (voteHub.rows) setVotes(voteHub.rows); else loadVotes();
+                return () => { voteHub.subs.delete(setVotes); };
             }, []);
-            if (!votes) return null;
-            return summarize(votes, dayKey(new Date()));
+            const today = dayKey(new Date());
+            return useMemo(() => (votes ? summarize(votes, today) : null), [votes, today]);
         };
         const castSessionVote = (session, answered, toast) => {
             if (!session) return;
@@ -1111,6 +1154,19 @@
                 </div>
             );
         };
+        const RANK_NAMES = ['Khởi động', 'Giữ nhịp ổn định', 'Thành nếp', 'Bền bỉ', 'Bản lĩnh trọn vẹn'];
+        const rankName = (level) => RANK_NAMES[Math.max(0, Math.min(RANK_NAMES.length - 1, level - 1))];
+        const WEEK_LABELS = ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'];
+        /* Tuần hiện tại từ thứ Hai, mỗi ngày: có phiếu, hôm nay, hay còn ở phía trước. */
+        const weekDots = (summary) => {
+            const today = dayKey(new Date());
+            const back = (new Date().getDay() + 6) % 7;
+            const on = new Map(((summary && summary.last7) || []).map(d => [d.date, d.on]));
+            return WEEK_LABELS.map((label, i) => {
+                const date = shiftDay(today, i - back);
+                return { label, date, on: !!on.get(date), today: date === today, future: i > back };
+            });
+        };
         const IdentityToday = ({ canBurst, onBurst }) => {
             const label = useIdentity();
             const summary = useVoteSummary();
@@ -1121,7 +1177,7 @@
             const pulse = habitPulse(summary);
             const rank = summary ? summary.rank : null;
             const progress = rank ? Math.max(0, Math.min(1, rank.progress)) : 0;
-            const lit = summary ? summary.last7.filter(d => d.on).length : 0;
+            const week = weekDots(summary);
             useEffect(() => {
                 if (!pick) return undefined;
                 const close = (e) => { if (box.current && !box.current.contains(e.target)) setPick(false); };
@@ -1147,25 +1203,37 @@
                     )}
                     <p className="mt-1 text-sm leading-6 text-ink2">{identityLine(label)}</p>
                     {summary && rank ? (
-                        <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2">
-                            <div className="flex min-w-[10rem] flex-1 items-center gap-2 text-xs text-ink2">
-                                <span className="shrink-0 font-semibold text-ink">Cấp {rank.level}</span>
-                                <div className="h-2 flex-1 overflow-hidden rounded-full bg-[#E2E8F0]" role="progressbar" aria-valuemin={0} aria-valuemax={rank.next == null ? summary.total : rank.next} aria-valuenow={summary.total} aria-label="Tiến độ tới cấp kế">
+                        <div className="mt-3 grid gap-3">
+                            <div className="min-w-0">
+                                <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-0.5 text-xs">
+                                    <span className="font-semibold text-ink">Cấp {rank.level} · {rankName(rank.level)}</span>
+                                    <span className="tnum text-ink2">{rank.next == null
+                                        ? <>{summary.total} phiếu · mốc cao nhất</>
+                                        : <>{summary.total}/{rank.next} phiếu <span aria-hidden="true">→</span> <b className="font-semibold text-[#4338CA]">Cấp {rank.level + 1}: {rankName(rank.level + 1)}</b></>}</span>
+                                </div>
+                                <div className="mt-1.5 h-2 overflow-hidden rounded-full bg-[#E2E8F0]" role="progressbar" aria-valuemin={0} aria-valuemax={rank.next == null ? summary.total : rank.next} aria-valuenow={summary.total} aria-label={rank.next == null ? 'Đã đạt cấp cao nhất' : 'Tiến độ tới cấp ' + (rank.level + 1)}>
                                     <div className="h-full rounded-full bg-[#4338CA]" style={{ width: (progress * 100) + '%' }} />
                                 </div>
-                                <span className="tnum shrink-0">{rank.next == null ? 'Mốc cao nhất' : (summary.total + '/' + rank.next)}</span>
                             </div>
-                            <div className="flex gap-1.5" role="img" aria-label={'7 ngày gần nhất, ' + lit + ' ngày có phiếu'}>
-                                {summary.last7.map(day => (
-                                    <span key={day.date} className={'h-3 w-3 rounded-full ' + (day.on ? 'bg-[#4338CA]' : 'border-2 border-[#94A3B8] bg-white')} />
-                                ))}
+                            <div>
+                                <p className="mb-1.5 text-xs text-ink2">Tuần này · chuỗi <b className="tnum font-semibold text-ink">{pulse.streak}</b> ngày</p>
+                                <ol className="week-dots" aria-label={'Tuần này, ' + week.filter(d => d.on).length + ' ngày có phiếu'}>
+                                    {week.map(d => (
+                                        <li key={d.date} className={(d.on ? 'is-on' : '') + (d.today ? ' is-today' : '') + (d.future ? ' is-future' : '')} title={d.date + (d.on ? ' · có phiếu' : '')}>
+                                            <span className="week-dot" aria-hidden="true" />
+                                            <span className="week-day">{d.label}</span>
+                                        </li>
+                                    ))}
+                                </ol>
                             </div>
                         </div>
                     ) : <p className="mt-3 text-sm text-ink2">Đang mở phiếu…</p>}
-                    {summary && !summary.confirmedToday && (
+                    {summary && (
                         <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-2 border-t border-line pt-3">
-                            <p className="min-w-0 flex-1 text-sm text-ink2">{pulse.neverMiss ? 'Hôm qua lỡ rồi, đừng để hai ngày liền nhé. ' : ''}Xong 1 ca, kể cả Chạm đáy 2 thẻ, là có phiếu hôm nay.</p>
-                            {canBurst && <button type="button" className="btn btn-secondary btn-sm shrink-0" onClick={onBurst}><Icon name="zap" size={14} /> Băng đạn 5 câu</button>}
+                            <p className="min-w-0 flex-1 text-sm text-ink2">{summary.confirmedToday
+                                ? <>Hôm nay đã có phiếu cho <b className="font-semibold text-ink">{identityName(label)}</b>. Mai quay lại để giữ chuỗi.</>
+                                : <>{pulse.neverMiss ? 'Hôm qua lỡ nhịp, chốt hôm nay để quay lại chuỗi. ' : ''}{canBurst ? 'Làm Băng đạn 5 câu (khoảng 1 phút) là có phiếu hôm nay.' : 'Xong 1 ca học bất kỳ là có phiếu hôm nay.'}</>}</p>
+                            {!summary.confirmedToday && canBurst && <button type="button" className="btn btn-primary btn-sm shrink-0" onClick={onBurst}><Icon name="zap" size={14} /> Băng đạn 5 câu</button>}
                         </div>
                     )}
                 </section>
@@ -2008,6 +2076,7 @@
                                         <span className="block text-sm tnum mt-1">{vnd(p.price)}{p.off ? <span className="text-success"> · giảm {Math.round(p.off * 100)}%</span> : ''}</span>
                                         {p.off ? <span className="block text-xs text-muted line-through tnum">{vnd(p.list)}</span> : <span className="block text-xs text-muted">Giá tiêu chuẩn {vnd(E.Quota.UNIT)}/lượt</span>}
                                         <span className="mt-3 block text-xs font-medium text-ink2">✓ Tặng kèm trợ lý AI từ vựng</span>
+                                        <span className={'plan-cta' + (on ? ' is-on' : featured ? ' is-featured' : '')}>{on ? 'Đã chọn · quét QR bên dưới' : 'Chọn gói'}</span>
                                     </button>
                                 );
                             })}
@@ -2065,7 +2134,7 @@
             const votes = useVoteSummary();
             const due = !!votes && !votes.confirmedToday;
             const scarce = !ai.on && ai.left <= AI_SCARCE;
-            const streak = votes ? Math.max(1, votes.streak || 0) : 0;
+            const streak = votes ? (votes.streak || 0) : 0;
             const name = identityName(useIdentity());
             const slipped = !!votes && votes.missedOnce;
             /* Vừa chốt phiếu (đang "Còn 1 phiếu" chuyển sang "Đã chốt"): chạy hiệu ứng mừng một lần. */
@@ -5567,6 +5636,14 @@
             (groups || []).forEach(([k]) => { const m = /^unit\s*(\d+)/i.exec(String(k || '')); if (m) top = Math.max(top, Number(m[1])); });
             return 'Unit ' + ((top || (groups || []).filter(([k]) => k && k !== '__none').length) + 1);
         };
+        /* Tiến độ 1 từ gọn thành 1 nhãn: chưa luyện / đang nhớ / đã thuộc. */
+        const learnState = (t) => {
+            const right = t.correctCount || 0;
+            const tries = right + (t.wrongCount || 0);
+            if (!tries && !(t.reviewCount || 0)) return { key: 'new', label: 'Mới' };
+            if (right >= 3 && !Sch.isWeak(t)) return { key: 'done', label: 'Đã thuộc' };
+            return { key: 'mid', label: 'Đang nhớ' };
+        };
         const LibraryView = ({ items, setItems, groups, groupFilter, setGroupFilter, onPractice, onWeak, onStudyFrom, onQuickVote, toast, mergeItems }) => {
             const [quick, setQuick] = useState(false);
             const [importBatches, setImportBatches] = useState(null);
@@ -5747,10 +5824,9 @@
                 <button type="button" className="grp-head" aria-expanded={sec.open} onClick={() => toggleGroup(sec.key)} disabled={!!q}>
                     <Icon name={sec.open ? 'chevronDown' : 'right'} size={16} />
                     <span className="grp-dot" style={{ background: sec.key ? Sch.groupColor(sec.key) : 'var(--border)' }} aria-hidden="true" />
-                    <span className="min-w-0 flex-1 truncate text-left">{sec.label}</span>
+                    <span className="min-w-0 flex-1 truncate text-left">{sec.label}<span className="grp-inline-count tnum"> · {sec.rows.length} mục</span></span>
                     {sec.sample && <span className="chip bg-surface2 text-muted">mẫu</span>}
                     {savedGroups && savedGroups.has(sec.key || '') && <span className="saved-tag"><Icon name="check" size={12} /> Đã tự lưu</span>}
-                    <span className="grp-count tnum">{sec.rows.length} {sec.rows.length > 1 ? 'mục' : 'mục'}</span>
                 </button>
             );
             const groupFoot = (sec) => (drafts && drafts.anchor === sec.key ? batchCard : (sec.sample ? null : (
@@ -6042,29 +6118,27 @@
 
                     <div className={'card hidden overflow-hidden pb-24' + (items.length === 0 ? '' : ' md:block')}>
                         <div className="overflow-x-auto" ref={tableBox}>
-                            <table className="w-full min-w-[1080px] text-sm border-collapse">
+                            <table className="w-full min-w-[820px] text-sm border-collapse">
                                 <caption className="sr-only">Bảng kho học</caption>
                                 <thead className="bg-surface2 text-ink2 text-xs">
                                     <tr>
                                         <th scope="col" className="w-auto whitespace-nowrap px-2 py-2 text-left" title="Giữ chuột và kéo để chọn nhiều hàng">#</th>
-                                        <th scope="col" className="px-3 py-2 text-left w-48">Nhóm</th>
                                         <th scope="col" className="w-auto whitespace-nowrap px-3 py-2 text-left">Loại</th>
                                         <th scope="col" className="min-w-[200px] px-3 py-2 text-left">Từ / Câu hỏi</th>
                                         <th scope="col" className="px-3 py-2 text-left w-56">Nghĩa / Đáp án</th>
-                                        <th scope="col" className="col-example min-w-[240px] max-w-[320px] px-3 py-2 text-left">Ví dụ / Giải thích</th>
-                                        <th scope="col" className="px-3 py-2 text-left w-40">Phát âm</th>
+                                        <th scope="col" className="col-example min-w-[200px] px-3 py-2 text-left">Ví dụ / Giải thích</th>
                                         <th scope="col" className="w-auto whitespace-nowrap px-3 py-2 text-left">Tiến độ</th>
-                                        <th scope="col" className="px-3 py-2 text-left w-40">Thao tác</th>
+                                        <th scope="col" className="w-px whitespace-nowrap px-3 py-2 text-left">Thao tác</th>
                                     </tr>
                                 </thead>
                                 {rows.length === 0 && !drafts ? (
-                                    <tbody><tr><td colSpan="9"><Empty icon="layers" title="Chưa có mục nào ở đây">Thử bỏ bớt bộ lọc, hoặc bấm "Tạo nhóm mới".</Empty></td></tr></tbody>
+                                    <tbody><tr><td colSpan="7"><Empty icon="layers" title="Chưa có mục nào ở đây">Thử bỏ bớt bộ lọc, hoặc bấm "Tạo nhóm mới".</Empty></td></tr></tbody>
                                 ) : (
                                     <>
-                                        {items.length > 0 && wide && draftsLoose && <tbody><tr><td colSpan="9" className="p-3">{pinned(batchCard)}</td></tr></tbody>}
+                                        {items.length > 0 && wide && draftsLoose && <tbody><tr><td colSpan="7" className="p-3">{pinned(batchCard)}</td></tr></tbody>}
                                         {sections.map(sec => (
                                             <tbody key={'t:' + sec.key}>
-                                                <tr className="grp-tr"><td colSpan="9" className="p-0">{groupHead(sec)}</td></tr>
+                                                <tr className="grp-tr"><td colSpan="7" className="p-0">{groupHead(sec)}</td></tr>
                                                 {sec.open && sec.rows.map(t => {
                                         const i = flatIndex.get(t.id);
                                         const on = sel.has(t.id);
@@ -6077,13 +6151,6 @@
                                                         onKeyDown={(e) => { if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); setSel(s => { const n = new Set(s); if (n.has(t.id)) n.delete(t.id); else n.add(t.id); return n; }); } }}>
                                                         {i + 1}
                                                     </button>
-                                                </td>
-                                                <td className="p-0">
-                                                    <div className="flex items-stretch">
-                                                        <span className="w-1 shrink-0" style={{ background: t.group ? Sch.groupColor(t.group) : 'var(--border)' }} />
-                                                        <textarea rows={1} className="cell-ta" value={t.group} maxLength={80} aria-label="Nhóm" placeholder="Unit, chủ đề…"
-                                                            onChange={(e) => { if (on) bulkSetGroup(e.target.value); else update(t.id, { group: e.target.value }); }} />
-                                                    </div>
                                                 </td>
                                                 <td className="w-auto whitespace-nowrap p-2">
                                                     {/* Một ô chọn cho cả từ loại (n, v, adj…) và câu trắc nghiệm. */}
@@ -6103,6 +6170,13 @@
                                                 <td className="p-0">
                                                     <textarea rows={1} className="cell-ta font-semibold text-primary" value={t.questionOrWord} maxLength={mcq ? 1500 : 400} aria-label={mcq ? 'Câu hỏi' : 'Từ vựng'} placeholder={mcq ? 'Câu hỏi…' : 'Nhập từ…'}
                                                         onChange={(e) => update(t.id, { questionOrWord: e.target.value })} onDoubleClick={() => setEditing(t)} />
+                                                    {!mcq && t.questionOrWord && (
+                                                        <div className="word-say">
+                                                            <button type="button" onClick={() => speak(t.questionOrWord, 0.7)} className="word-say-btn" aria-label={'Nghe ' + t.questionOrWord} title="Nghe phát âm"><Icon name="volume" size={13} /></button>
+                                                            {t.ipa && <span className="word-ipa">{t.ipa}</span>}
+                                                            {Sch.readingOf(t) && <span className="text-muted">· {Sch.readingOf(t)}</span>}
+                                                        </div>
+                                                    )}
                                                 </td>
                                                 <td className="p-0">
                                                     {mcq ? (
@@ -6126,24 +6200,14 @@
                                                         <textarea rows={1} className="cell-ta" value={t.answerOrMeaning} maxLength={1500} aria-label="Nghĩa" placeholder="Nghĩa…" onChange={(e) => update(t.id, { answerOrMeaning: e.target.value })} />
                                                     )}
                                                 </td>
-                                                <td className="col-example min-w-[240px] max-w-[320px] p-0">
+                                                <td className="col-example min-w-[200px] p-0">
                                                     <textarea rows={1} className="cell-ta" value={t.explanationOrExample} maxLength={2500} aria-label={mcq ? 'Giải thích' : 'Câu ví dụ'} placeholder={mcq ? 'Giải thích…' : 'Câu ví dụ…'} onChange={(e) => update(t.id, { explanationOrExample: e.target.value })} />
                                                 </td>
-                                                <td className="p-2">
-                                                    {!mcq && (
-                                                        <div className="flex items-start gap-2">
-                                                            <button type="button" onClick={() => speak(t.questionOrWord, 0.7)} disabled={!t.questionOrWord} className="btn btn-secondary btn-sm btn-icon !w-9" aria-label={'Nghe ' + t.questionOrWord}><Icon name="volume" size={14} /></button>
-                                                            <div className="text-xs text-flow">{t.ipa && <p className="text-ink2">{t.ipa}</p>}{Sch.readingOf(t) && <p className="text-muted">{Sch.readingOf(t)}</p>}</div>
-                                                        </div>
-                                                    )}
+                                                <td className="w-auto whitespace-nowrap p-2 pt-3">
+                                                    {(() => { const st = learnState(t); return <span className={'learn-badge is-' + st.key} title={'Đúng ' + (t.correctCount || 0) + ' · Sai ' + (t.wrongCount || 0) + ' · Ôn ' + (t.reviewCount || 0) + (Sch.reviewNote(t) ? ' · ' + Sch.reviewNote(t) : '')}>{st.label}</span>; })()}
                                                 </td>
-                                                <td className="w-auto whitespace-nowrap p-2 text-xs">
-                                                    <p className="tnum">Đ {t.correctCount || 0} · S {t.wrongCount || 0}</p>
-                                                    <p className="tnum text-muted">Ôn {t.reviewCount || 0}</p>
-                                                    {Sch.reviewNote(t) && <p className={Sch.isWeak(t) ? 'text-warn font-medium' : 'text-muted'}>{Sch.reviewNote(t)}</p>}
-                                                </td>
-                                                <td className="p-2">
-                                                    <div className="flex flex-wrap gap-1">
+                                                <td className="w-px whitespace-nowrap p-2">
+                                                    <div className="flex flex-nowrap gap-1">
                                                         <button type="button" onClick={() => aiOne(t)} disabled={!t.questionOrWord || aiRow === t.id} className={'btn btn-secondary btn-sm' + (obsidian ? ' border border-[#D8C7A0] shadow-sm' : '')} title={mcq ? 'AI giải thích' : 'AI bổ sung'}><Icon name="sparkles" size={14} />{aiRow === t.id ? '…' : 'AI'}</button>
                                                         <button type="button" onClick={() => onStudyFrom(t)} disabled={!t.questionOrWord} className="btn btn-secondary btn-sm">Học</button>
                                                         <button type="button" onClick={() => setEditing(t)} className="btn btn-secondary btn-sm btn-icon !w-9" aria-label="Sửa chi tiết"><Icon name="pen" size={14} /></button>
@@ -6153,7 +6217,7 @@
                                             </tr>
                                         );
                                                 })}
-                                                {sec.open && wide && <tr><td colSpan="9" className="grp-foot">{pinned(groupFoot(sec))}</td></tr>}
+                                                {sec.open && wide && <tr><td colSpan="7" className="grp-foot">{pinned(groupFoot(sec))}</td></tr>}
                                             </tbody>
                                         ))}
                                     </>
@@ -6480,48 +6544,70 @@
             );
         };
 
+        /* Thanh trạng thái mảnh của Kho đề: lượt EOS, mã, PRO. Bảng giá, lịch sử, dùng chung mã nằm trong Modal "Nạp lượt / Quản lý quỹ". */
+        const EosStatusBar = ({ toast }) => {
+            const fund = useFund();
+            const [open, setOpen] = useState(false);
+            const pro = proLive(fund);
+            const low = fund.balance < 5;
+            return (
+                <>
+                    <div className="fund-strip eos-strip">
+                        <span className={'eos-turns' + (low ? ' is-low' : '')}><Icon name="monitor" size={15} /><b className="tnum">{fund.balance}</b> lượt EOS</span>
+                        <span className="fund-sep hidden sm:inline" aria-hidden="true" />
+                        <span className="hidden items-center gap-1.5 text-ink2 sm:inline-flex"><Icon name="key" size={14} /><b className="tnum text-ink">{fund.code}</b></span>
+                        {pro ? <span className="eos-pro">PRO</span> : fund.aiUnlocked ? <span className="eos-ai"><Icon name="sparkles" size={12} />AI đang mở</span> : null}
+                        <button type="button" className="eos-manage" onClick={() => setOpen(true)}><span className="sm:hidden">Nạp lượt</span><span className="hidden sm:inline">Nạp lượt / Quản lý quỹ</span><Icon name="right" size={14} /></button>
+                    </div>
+                    {open && <Modal title="Nạp lượt / Quản lý quỹ" size="lg" onClose={() => setOpen(false)}><FundBody toast={toast} kind="eos" /></Modal>}
+                </>
+            );
+        };
         const Storefront = ({ packs, block, setBlock, statsOf, unlockedIds, exams, openPack, onContribute, now, toast }) => {
             const [trialFocus] = useState(() => takeGo('eos'));
+            const [scope, setScope] = useState('ready');
             const startTrial = (id) => { window.__fpassTrial = id; openPack(id); };
             const blocks = (Catalog.blocks || []).concat(packs.some(p => p.block === 'system') ? [{ id: 'system', name: 'Đề hệ thống' }] : []);
-            const list = packs.filter(p => p.block === block);
+            const tabs = [{ id: 'ready', name: 'Môn đã sẵn sàng' }].concat(blocks);
+            const current = scope === 'ready' ? 'ready' : block;
+            const inScope = current === 'ready' ? packs : packs.filter(p => p.block === block);
+            const list = inScope.filter(p => p.status === 'ready');
+            const soon = inScope.filter(p => p.status !== 'ready');
+            const pickTab = (id) => { if (id === 'ready') setScope('ready'); else { setScope('block'); setBlock(id); } };
             const onTabKey = (e) => {
-                const i = blocks.findIndex(b => b.id === block);
+                const i = tabs.findIndex(b => b.id === current);
                 if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
                     e.preventDefault();
-                    const n = blocks[(i + (e.key === 'ArrowRight' ? 1 : blocks.length - 1)) % blocks.length];
-                    setBlock(n.id);
+                    const n = tabs[(i + (e.key === 'ArrowRight' ? 1 : tabs.length - 1)) % tabs.length];
+                    pickTab(n.id);
                     const el = document.getElementById('blk-' + n.id);
                     if (el) el.focus();
                 }
             };
             return (
                 <div>
-                    <div className="mb-5">
-                        <h1 className="text-xl font-bold">Kho Src Qua Môn</h1>
-                        <p className="text-sm text-ink2 mt-1 text-flow">Bộ Src ôn thi FE / EOS / PT do team biên soạn. Chặng 1 của mọi bộ đề: free 100% với đầy đủ Băng đạn 5 câu. Đề hệ thống là bản admin vừa đăng.</p>
-                        <button type="button" className="btn btn-secondary btn-sm mt-3" onClick={() => onContribute(null)}><Icon name="share" size={14} /> Gửi đề đóng góp cho admin</button>
+                    <div className="mb-3 flex flex-wrap items-end justify-between gap-2">
+                        <div className="min-w-0">
+                            <h1 className="text-xl font-bold">Kho Src Qua Môn</h1>
+                            <p className="text-sm text-ink2 mt-0.5 text-flow">Chặng 1 của mọi bộ đề free 100%, kèm Băng đạn 5 câu.</p>
+                        </div>
+                        <button type="button" className="btn btn-secondary btn-sm" onClick={() => onContribute(null)}><Icon name="share" size={14} /> Góp đề cho admin</button>
                     </div>
+                    <EosStatusBar toast={toast} />
                     <EosTrialCard packs={packs} onStart={startTrial} focus={trialFocus} />
-                    <FundPanel toast={toast} kind="eos" />
-                    <div role="tablist" aria-label="Khối ngành" className="flex flex-wrap gap-1 p-1 rounded-2xl bg-surface border border-line mb-5" onKeyDown={onTabKey}>
-                        {blocks.map(b => (
-                            <button key={b.id} id={'blk-' + b.id} type="button" role="tab" aria-selected={block === b.id} tabIndex={block === b.id ? 0 : -1} onClick={() => setBlock(b.id)} className="tab text-flow">
-                                {b.name} <span className="tnum text-xs opacity-70">{packs.filter(p => p.block === b.id).length}</span>
-                            </button>
-                        ))}
+                    <div role="tablist" aria-label="Kho môn học" className="flex flex-wrap gap-1 p-1 rounded-2xl bg-surface border border-line mb-4" onKeyDown={onTabKey}>
+                        {tabs.map(b => {
+                            const n = (b.id === 'ready' ? packs : packs.filter(p => p.block === b.id)).filter(p => p.status === 'ready').length;
+                            return (
+                                <button key={b.id} id={'blk-' + b.id} type="button" role="tab" aria-selected={current === b.id} tabIndex={current === b.id ? 0 : -1} onClick={() => pickTab(b.id)} className="tab text-flow">
+                                    {b.name} <span className="tnum text-xs opacity-70">{n}</span>
+                                </button>
+                            );
+                        })}
                     </div>
+                    {!list.length && <p className="card p-5 text-sm text-ink2">Khối này chưa có môn nào sẵn sàng. Xem các môn sắp ra mắt bên dưới, hoặc góp đề để team làm sớm hơn.</p>}
                     <div className="grid sm:grid-cols-2 xl:grid-cols-3 gap-4" role="tabpanel">
                         {list.map(p => {
-                            if (p.status !== 'ready') {
-                                return (
-                                    <div key={p.id} className="card p-5 bg-surface2/60 border-dashed">
-                                        <div className="flex flex-wrap items-center gap-2"><span className="chip bg-surface text-ink2 tnum">{p.code}</span><span className="chip bg-surface text-muted">Đang biên soạn</span></div>
-                                        <p className="font-semibold mt-3 text-flow">{p.name}</p>
-                                        <button type="button" className="btn btn-ghost btn-sm mt-3 -ml-2" onClick={() => onContribute(p)}><Icon name="plus" size={14} /> Góp đề môn này</button>
-                                    </div>
-                                );
-                            }
                             const st = statsOf(p);
                             const exam = exams[p.id];
                             const unlocked = unlockedIds.indexOf(p.id) >= 0;
@@ -6545,6 +6631,20 @@
                             );
                         })}
                     </div>
+                    {soon.length > 0 && (
+                        <details className="soon-box">
+                            <summary><Icon name="right" size={15} className="soon-chev" /><span className="font-semibold text-ink">Sắp ra mắt · Góp đề</span><span className="tnum text-muted">{soon.length} môn đang biên soạn</span></summary>
+                            <div className="grid gap-3 p-3 pt-0 sm:grid-cols-2 xl:grid-cols-3">
+                                {soon.map(p => (
+                                    <div key={p.id} className="rounded-xl border border-dashed border-line bg-surface2/60 p-4">
+                                        <div className="flex flex-wrap items-center gap-2"><span className="chip bg-surface text-ink2 tnum">{p.code}</span><span className="chip bg-surface text-muted">Đang biên soạn</span></div>
+                                        <p className="font-semibold mt-2 text-flow">{p.name}</p>
+                                        <button type="button" className="btn btn-ghost btn-sm mt-2 -ml-2" onClick={() => onContribute(p)}><Icon name="plus" size={14} /> Góp đề môn này</button>
+                                    </div>
+                                ))}
+                            </div>
+                        </details>
+                    )}
                 </div>
             );
         };
@@ -7800,7 +7900,7 @@
             return (
                 <div className="min-h-screen flex flex-col">
                     <a href="#main" className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[70] btn btn-primary">Bỏ qua tới nội dung</a>
-                    <header className={'sticky top-0 z-30 border-b ' + (obsidian ? 'obsidian-head border-[#202637]' : 'border-line')} style={obsidian ? undefined : { background: 'rgba(226,232,240,.9)', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)' }}>
+                    <header className={'sticky top-0 z-50 border-b ' + (obsidian ? 'obsidian-head border-[#202637]' : 'border-line')} style={obsidian ? undefined : { background: '#E2E8F0' }}>
                         <div className="flex h-16 w-full items-center gap-2 px-4 sm:gap-3 lg:px-6">
                             <button type="button" onClick={goHome} aria-label="Về Tổng quan" className="flex shrink-0 items-center gap-2.5 border-0 bg-transparent p-0 text-left cursor-pointer">
                                 <span className={obsidian ? 'inline-flex rounded-xl bg-[#F8F9FC] px-1.5 py-1' : ''}>
@@ -7862,7 +7962,6 @@
                             <button type="button" className="side-link" onClick={openSupport}><Icon name="headset" size={18} /> Hỗ trợ & FAQ</button>
                             <button type="button" className="side-link" onClick={openFeedback}><Icon name="bulb" size={18} /> Góp ý</button>
                         </div>
-                        <p className="mt-auto px-3 pt-6 text-xs leading-5 text-muted">Học đúng giờ · thi chắc qua</p>
                     </aside>
                     <main id="main" className="min-w-0 flex-1 px-4 py-6 lg:px-8">
                         {!loaded ? (
