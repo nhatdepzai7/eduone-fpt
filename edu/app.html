@@ -89,7 +89,23 @@
         @media (min-width: 1024px) { .bnav { display: none; } }
         @media (max-width: 1023px) { body .help-dock { bottom: calc(70px + env(safe-area-inset-bottom)); } }
         body:has(.eos-shell) .bnav { display: none; }
-        @media (prefers-reduced-motion: reduce) { .slot-node.is-now .slot-dot { animation: none; } .pillar:hover { transform: none; } }
+        .id-invite { display: inline-flex; align-items: center; gap: 4px; min-height: 34px; padding: 0 12px; border-radius: 999px; background: var(--primary-soft); color: var(--primary); border: 1px dashed var(--primary); font-size: 13px; font-weight: 700; white-space: nowrap; transition: background .15s ease, color .15s ease; }
+        .id-invite:hover { background: var(--primary); color: #fff; }
+        .id-edit { display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; margin-left: 4px; vertical-align: middle; border-radius: 10px; color: var(--muted); transition: background .15s ease, color .15s ease; }
+        .id-edit:hover { background: var(--primary-soft); color: var(--primary); }
+        .stat-pill { position: relative; display: inline-flex; align-items: center; gap: 5px; min-height: 32px; padding: 0 11px; border-radius: 999px; background: var(--surface); border: 1px solid var(--border); color: var(--ink-2); font-size: 13px; font-weight: 500; white-space: nowrap; }
+        .stat-pill b { color: var(--ink); font-weight: 700; }
+        .stat-pill svg { color: var(--muted); }
+        .stat-pill.is-vote.is-on { border-color: var(--primary); background: var(--primary-soft); }
+        .stat-pill.is-vote.is-on svg, .stat-pill.is-vote.is-on b { color: var(--primary); }
+        .stat-pill.is-streak.is-on svg { color: #EA580C; }
+        .stat-pill.is-slot.is-on { border-color: var(--success); background: var(--success-soft); }
+        .stat-pill.is-slot.is-on svg, .stat-pill.is-slot.is-on b { color: var(--success); }
+        @keyframes voteBump { 0% { transform: scale(1); } 35% { transform: scale(1.12); } 100% { transform: scale(1); } }
+        @keyframes votePlus { 0% { opacity: 0; transform: translate(-50%, 4px); } 25% { opacity: 1; } 100% { opacity: 0; transform: translate(-50%, -18px); } }
+        .stat-pill.is-bump { animation: voteBump .5s ease-out 2; }
+        .vote-plus { position: absolute; left: 50%; top: -4px; font-size: 12px; font-weight: 800; color: var(--primary); pointer-events: none; animation: votePlus 1.6s ease-out forwards; }
+        @media (prefers-reduced-motion: reduce) { .slot-node.is-now .slot-dot { animation: none; } .pillar:hover { transform: none; } .stat-pill.is-bump { animation: none; } .vote-plus { animation: none; opacity: 1; } }
         .guide-frame { position: relative; width: 100%; aspect-ratio: 16 / 9; border-radius: 16px; overflow: hidden; background: #0F172A; }
         .guide-frame.is-tall { aspect-ratio: 9 / 16; max-width: 340px; margin: 0 auto; }
         .guide-frame iframe, .guide-frame video { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
@@ -402,7 +418,7 @@
 
     <!-- ===================== UI KIT ===================== -->
     <script type="text/babel" data-presets="react" data-type="module">
-        import { IDENTITIES, dayKey, identityLine, planVote, summarize } from './js/core/identity.js';
+        import { IDENTITIES, dayKey, identityLine, planVote, summarize } from './js/core/identity.js?v=slotvote';
         const { useState, useEffect, useRef, useMemo, useReducer } = React;
         const E = window.EDU;
         /* /app?go=... từ trang chủ: đọc một lần trước khi vẽ, component nào cần thì lấy qua takeGo(). */
@@ -703,11 +719,11 @@
         };
         const castSessionVote = (session, answered, toast) => {
             if (!session) return;
-            const vote = planVote({ sessionId: session.id, type: session.voteType, answered: answered }, new Date());
+            const vote = planVote({ sessionId: session.id, type: session.voteType, answered: answered, slot: !!session.slotId }, new Date());
             if (!vote) return;
             Store.addIdentityVote(vote).then((res) => {
                 if (!res || !res.saved) return;
-                try { sessionStorage.setItem('edu.ringAnim', 'pending'); } catch (e) {}
+                try { sessionStorage.setItem('edu.ringAnim', 'pending'); sessionStorage.setItem('edu.voteBump', '1'); } catch (e) {}
                 window.dispatchEvent(new CustomEvent('edu-votes'));
                 window.dispatchEvent(new CustomEvent('edu-study-start'));
                 const line = identityLine(readIdentity());
@@ -2344,7 +2360,7 @@
         /* ---------------------------------------------------------------
          * BurstSession — Băng đạn 5 câu
          * --------------------------------------------------------------- */
-        const BurstSession = ({ itemsById: rawById, ids, title, subtitle, canHighlight = true, highlightLockedMsg, onReview, onFinish, onExit, canExplain, toast, timerMin, renderDone, skipPreview, sessionId, voteType }) => {
+        const BurstSession = ({ itemsById: rawById, ids, title, subtitle, canHighlight = true, highlightLockedMsg, onReview, onFinish, onExit, canExplain, toast, timerMin, renderDone, skipPreview, sessionId, voteType, slotId }) => {
             const [qlang] = useQLang();
             const itemsById = useMemo(() => langMap(rawById, qlang), [rawById, qlang]);
             const bilingual = useMemo(() => ids.some(id => Sch.hasVi(rawById.get(id))), [rawById]);
@@ -2398,7 +2414,7 @@
                     finished.current = true;
                     const st = Burst.stats(s);
                     affirmStudy();
-                    castSessionVote({ id: sessionId, voteType: voteType }, st.answered, toast);
+                    castSessionVote({ id: sessionId, voteType: voteType, slotId: slotId }, st.answered, toast);
                     if (onFinish) onFinish(st);
                 }
             }, [s.phase]);
@@ -2764,7 +2780,15 @@
                 if (index < ids.length - 1) { setIndex(index + 1); return; }
                 if (!isSlot || allGraded(knownNow, forgotNow)) {
                     setDone(true);
-                    if (onFinish && isSlot) onFinish({ slotId: session.slotId, cardsDone: ids.length, remembered: knownNow.length });
+                    if (onFinish && isSlot) {
+                        /* onFinish đóng phiên ngay, effect [done] không kịp chạy: bỏ phiếu ca học ở đây. */
+                        if (!voted.current) {
+                            voted.current = true;
+                            affirmStudy();
+                            castSessionVote(session, knownNow.length + forgotNow.length, toast);
+                        }
+                        onFinish({ slotId: session.slotId, cardsDone: ids.length, remembered: knownNow.length });
+                    }
                     return;
                 }
                 setNote('Ca này tính xong khi bạn chấm hết các thẻ.');
@@ -3751,6 +3775,83 @@
            4 lối vào các trụ cột. Màn lật thẻ chỉ mở khi người dùng bấm bắt đầu, và luôn có nút về Tổng quan. */
         const greetOf = (d) => { const h = d.getHours(); return h < 11 ? 'Chào buổi sáng' : h < 14 ? 'Chào buổi trưa' : h < 18 ? 'Chào buổi chiều' : 'Chào buổi tối'; };
 
+        /* Chọn hoặc tự đặt bản sắc (Atomic Habits: mỗi ca học là một phiếu bầu cho con người bạn muốn trở thành). */
+        const IdentityPicker = ({ onClose }) => {
+            const label = useIdentity();
+            const obsidian = obsidianOf(useFund());
+            const preset = IDENTITIES.some(o => o.name === label);
+            const [custom, setCustom] = useState(preset ? '' : label);
+            const choose = (option, locked) => pickIdentity(option, locked, onClose);
+            const saveCustom = (e) => {
+                e.preventDefault();
+                if (!custom.trim()) return;
+                saveIdentity(custom);
+                onClose();
+            };
+            return (
+                <Modal title="Bản sắc học tập" onClose={onClose}>
+                    <p className="text-sm leading-6 text-ink2">Đừng đặt mục tiêu, hãy chọn con người bạn muốn trở thành. Mỗi ca học xong là <b className="text-ink">một phiếu bầu</b> cho bản sắc đó.</p>
+                    <div className="mt-4"><IdentityMenu current={label} obsidian={obsidian} dark={false} onChoose={choose} /></div>
+                    <form onSubmit={saveCustom} className="mt-4">
+                        <label htmlFor="identity-custom" className="text-xs font-semibold text-ink2">Hoặc tự đặt</label>
+                        <div className="mt-1 flex gap-2">
+                            <input id="identity-custom" value={custom} maxLength={48} onChange={(e) => setCustom(e.target.value)} className="field min-w-0 flex-1" placeholder="VD: Người nói tiếng Anh tự tin" />
+                            <button type="submit" className="btn btn-primary shrink-0" disabled={!custom.trim()}>Lưu</button>
+                        </div>
+                    </form>
+                    {label && <button type="button" className="mt-4 text-sm font-medium text-muted underline-offset-2 hover:underline" onClick={() => { saveIdentity(''); onClose(); }}>Bỏ bản sắc</button>}
+                </Modal>
+            );
+        };
+
+        /* Lời chào đầu trang: có bản sắc thì chào bằng bản sắc, chưa có thì mời chọn ngay cạnh tên. */
+        const IdentityGreeting = ({ greet, name }) => {
+            const label = useIdentity();
+            const [open, setOpen] = useState(false);
+            return (
+                <div className="flex flex-wrap items-center gap-x-2 gap-y-1.5">
+                    <h1 className="min-w-0 text-2xl font-extrabold tracking-tight text-ink sm:text-3xl">
+                        {greet}{label ? ', ' : (name ? ', ' + name : '')}{label && <span className="text-primary">{label}</span>}
+                        {label && <button type="button" onClick={() => setOpen(true)} className="id-edit" aria-label="Đổi bản sắc học tập" title="Đổi bản sắc"><Icon name="pen" size={16} /></button>}
+                    </h1>
+                    {!label && <button type="button" onClick={() => setOpen(true)} className="id-invite"><Icon name="plus" size={14} /> Chọn bản sắc học tập</button>}
+                    {open && <IdentityPicker onClose={() => setOpen(false)} />}
+                </div>
+            );
+        };
+
+        /* Thanh chỉ số trên thẻ tâm điểm: phiếu bản sắc · chuỗi ngày · ca hôm nay. Phiếu mới bầu thì pill nảy "+1". */
+        const HeroStats = ({ done, total }) => {
+            const summary = useVoteSummary();
+            const [bump, setBump] = useState(false);
+            useEffect(() => {
+                if (!summary) return undefined;
+                let pending = false;
+                try { pending = sessionStorage.getItem('edu.voteBump') === '1'; sessionStorage.removeItem('edu.voteBump'); } catch (e) {}
+                if (!pending) return undefined;
+                setBump(true);
+                const id = setTimeout(() => setBump(false), 1800);
+                return () => clearTimeout(id);
+            }, [summary && summary.total]);
+            const votes = summary ? summary.total : 0;
+            const streak = summary ? summary.streak : 0;
+            const voted = !!(summary && summary.confirmedToday);
+            return (
+                <ul className="flex flex-wrap items-center gap-1.5" aria-label="Chỉ số hôm nay">
+                    <li className={'stat-pill is-vote' + (voted ? ' is-on' : '') + (bump ? ' is-bump' : '')} title="Phiếu bầu bản sắc đã tích lũy" aria-live="polite">
+                        <Icon name="check" size={14} /><b className="tnum">{votes}</b> phiếu bản sắc
+                        {bump && <span className="vote-plus" aria-hidden="true">+1</span>}
+                    </li>
+                    <li className={'stat-pill is-streak' + (streak > 0 ? ' is-on' : '')} title="Chuỗi ngày học liên tiếp">
+                        <Icon name="flame" size={14} /><b className="tnum">{streak}</b> ngày
+                    </li>
+                    <li className={'stat-pill is-slot' + (total && done >= total ? ' is-on' : '')} title="Ca học hôm nay">
+                        <Icon name="clock" size={14} />Ca <b className="tnum">{done}/{total}</b>
+                    </li>
+                </ul>
+            );
+        };
+
         const SlotPath = ({ slots, activeId }) => (
             <ol className="slot-path" aria-label="Các ca hôm nay">
                 {slots.map(s => {
@@ -3980,7 +4081,7 @@
             const renderSession = () => {
                 if (session.mode === 'burst') {
                     return (
-                        <BurstSession key={session.id} itemsById={itemsById} ids={session.ids} title={session.title} subtitle={session.slotId ? 'Pha 1 · Băng đạn 5 câu' : 'Băng đạn 5 câu'} sessionId={session.id} voteType={session.voteType}
+                        <BurstSession key={session.id} itemsById={itemsById} ids={session.ids} title={session.title} subtitle={session.slotId ? 'Pha 1 · Băng đạn 5 câu' : 'Băng đạn 5 câu'} sessionId={session.id} voteType={session.voteType} slotId={session.slotId}
                             onReview={(id, ok) => review(id, ok)} toast={toast}
                             onFinish={(st) => { if (session.slotId) finishSlot({ slotId: session.slotId, cardsDone: st.total, remembered: st.firstTryCorrect }); }}
                             renderDone={session.slotId ? () => null : undefined} onExit={session.slotId ? undefined : closeSession} />
@@ -4043,9 +4144,9 @@
                     <div className="mb-4 flex flex-wrap items-end justify-between gap-2">
                         <div>
                             <p className="text-sm font-medium capitalize text-muted">{dateText}</p>
-                            <h1 className="mt-0.5 text-2xl font-extrabold tracking-tight text-ink sm:text-3xl">{greetOf(new Date(now))}{name ? ', ' + name : ''}</h1>
+                            <div className="mt-0.5"><IdentityGreeting greet={greetOf(new Date(now))} name={name} /></div>
                         </div>
-                        <p className="text-sm text-ink2">Hôm nay: <b className="tnum text-ink">{doneCount}/{active.length}</b> ca · <b className="tnum text-ink">{filled}</b> thẻ trong sổ</p>
+                        <HeroStats done={doneCount} total={active.length} />
                     </div>
                     <div className="grid gap-4 lg:grid-cols-12">
                         <div className="lg:col-span-7">
@@ -6309,6 +6410,7 @@
                 });
                 setSession(null);
                 setMinimal(false);
+                window.scrollTo(0, 0);
             };
             const finishGate = (slotId) => patchSlot(slotId, s => Object.assign({}, s, { status: 'done', finishedAt: new Date().toISOString() }));
             const deckFor = (slot, limit) => {
