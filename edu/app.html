@@ -6203,6 +6203,8 @@
             };
 
             const goDone = useRef(false);
+            /* Mở từ trang chủ tới kệ đề / kho: chưa tự bung ca học cho tới khi người dùng tự quay về Hôm nay. */
+            const goHold = useRef('');
             useEffect(() => {
                 if (!loaded || !planReady || goDone.current) return;
                 goDone.current = true;
@@ -6210,6 +6212,7 @@
                 go = readGo();
                 if (!go) return;
                 try { history.replaceState(null, '', location.pathname); } catch (e) {}
+                if (['reading', 'import', 'exams', 'eos'].indexOf(go) >= 0) goHold.current = 'pending';
                 if (go === 'today' || go === 'plan') dispatch({ type: 'TAB', tab: 'today', force: true });
                 else if (go === 'reading' || go === 'import') dispatch({ type: 'TAB', tab: 'library', force: true });
                 else if (go === 'exams') dispatch({ type: 'SWITCH_MODE', mode: 'bank', force: true });
@@ -6219,6 +6222,11 @@
                 else if (go === 'video') setGuideOpen(true);
                 else if (go === 'legal-id' || go === 'legal-pay' || go === 'legal-study') setLegalTab(go.slice(6));
             }, [loaded, planReady]);
+            useEffect(() => {
+                const home = nav.mode === 'self' && nav.tab === 'today';
+                if (goHold.current === 'pending' && !home) goHold.current = 'away';
+                else if (goHold.current === 'away' && home) goHold.current = '';
+            }, [nav.mode, nav.tab]);
 
             const cur = plan ? Plan.currentSlot(plan.slots, new Date(now)) : { kind: 'NONE', slot: null };
             const live = plan && plan.date === Plan.dayKeyOf(new Date(now)) && (cur.kind === 'ON_TIME_ACTIVE' || cur.kind === 'LATE_RECOVERY');
@@ -6226,7 +6234,7 @@
 
             /* ---------- Zero-Click Entry: đến giờ là bung thẳng thẻ s1 ---------- */
             useEffect(() => {
-                if (!live || !loaded) return;
+                if (!live || !loaded || goHold.current) return;
                 const slot = cur.slot;
                 const ids = deckFor(slot, liveLimit);
                 const first = itemsById.get(ids[0]);
@@ -6248,7 +6256,7 @@
                 noteStudyStart();
                 setSession({ id: Date.now(), title: 'Ca ' + slot.id + ' · ' + slot.anchorLabel, mode: mode, voteType: voteTypeFor(mode), ids, slotId: slot.id });
                 dispatch({ type: 'ZERO_CLICK' });
-            }, [now, plan, items, minimal, session, loaded]);
+            }, [now, plan, items, minimal, session, loaded, nav.mode, nav.tab]);
 
             /* ---------- Treo tab cả ngày: nháy document.title bằng nội dung thẻ s1 ---------- */
             const s1 = live ? itemsById.get(((cur.slot.deckIds && cur.slot.deckIds.length) ? cur.slot.deckIds : [])[0]) : null;
