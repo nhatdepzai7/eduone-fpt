@@ -115,39 +115,42 @@
         .fund-code { align-items: center; gap: 6px; min-height: 30px; padding: 0 8px; border-radius: 8px; color: var(--ink-2); }
         .fund-code:hover { background: var(--surface-2); color: var(--ink); }
         /* Pill phiếu hôm nay */
-        .mission { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; align-items: center; gap: 22px; width: 100%; margin-bottom: 12px; padding: 16px 18px; border-radius: 16px; color: #fff; background: radial-gradient(120% 160% at 0% 0%, #3730A3 0%, #1E1B4B 46%, #0F172A 100%); border: 1px solid rgba(165, 180, 252, .3); box-shadow: 0 10px 28px rgba(15, 23, 42, .2), inset 0 1px 0 rgba(255, 255, 255, .08); animation: mission-in .35s ease-out; }
-        .mission.is-late { border-color: rgba(251, 146, 60, .6); box-shadow: 0 10px 28px rgba(15, 23, 42, .2), 0 0 0 3px rgba(251, 146, 60, .12); }
-        .mission-main { display: flex; align-items: center; gap: 12px; min-width: 0; }
-        .mission-ic { display: inline-flex; width: 42px; height: 42px; flex-shrink: 0; align-items: center; justify-content: center; border-radius: 12px; color: #FB923C; background: rgba(249, 115, 22, .16); box-shadow: inset 0 0 0 1px rgba(251, 146, 60, .3); }
-        .mission-ic.is-empty { color: #A5B4FC; background: rgba(165, 180, 252, .12); box-shadow: inset 0 0 0 1px rgba(165, 180, 252, .3); }
-        .mission-ic svg { width: 22px; height: 22px; }
-        .mission-title { font-size: 15.5px; font-weight: 700; line-height: 1.35; }
-        .mission-title b { color: #FDBA74; }
-        .mission-sub { margin-top: 2px; font-size: 13px; color: #C7D2FE; }
-        .mission-sub b { color: #fff; font-weight: 700; }
-        .mission.is-late .mission-sub, .mission.is-late .mission-sub b { color: #FED7AA; }
-        .mission-meter { display: flex; flex-direction: column; gap: 7px; min-width: 112px; }
-        .mission-count { font-size: 12px; color: #C7D2FE; }
-        .mission-count b { font-size: 16px; color: #fff; }
-        .mission-bars { display: flex; gap: 6px; }
-        .mission-bars i { width: 52px; height: 8px; border-radius: 999px; background: rgba(255, 255, 255, .1); box-shadow: inset 0 0 0 1px rgba(165, 180, 252, .35); animation: mission-glow 2.4s ease-in-out infinite; }
-        .mission-bars i.is-on { animation: none; background: linear-gradient(90deg, #A5B4FC, #FFFFFF); box-shadow: 0 0 10px rgba(165, 180, 252, .75); }
-        .mission-cta { display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 46px; padding: 0 20px; border-radius: 12px; font-size: 14.5px; font-weight: 700; color: #1E1B4B; background: #fff; white-space: nowrap; box-shadow: 0 6px 16px rgba(0, 0, 0, .28); transition: transform .12s ease, background .12s ease; }
-        .mission-cta:hover { background: #EEF2FF; transform: translateY(-1px); }
-        .mission-cta:focus-visible { outline: 3px solid #A5B4FC; outline-offset: 2px; }
-        .mission-cta svg { color: #4338CA; }
+        .mission { position: relative; overflow: hidden; width: 100%; margin-bottom: 12px; padding: 10px 14px 12px; border-radius: 16px; color: #F8FAFC; background: linear-gradient(160deg, #121524 0%, #0B0D14 100%); border: 1px solid rgba(255, 255, 255, .12); box-shadow: 0 12px 30px -10px rgba(11, 13, 20, .45); animation: mission-in .35s ease-out; isolation: isolate; }
+        .mission::before { content: ''; position: absolute; z-index: -1; top: -60%; right: -10%; width: 70%; height: 180%; background: radial-gradient(closest-side, rgba(245, 158, 11, .16), rgba(129, 140, 248, .10) 55%, transparent 75%); pointer-events: none; }
+        .mission.is-late { border-color: rgba(245, 158, 11, .35); }
+        .mission-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+        .mission-label { display: inline-flex; align-items: center; gap: 7px; min-width: 0; font-size: 10px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: #94A3B8; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .mission-dot { width: 6px; height: 6px; flex-shrink: 0; border-radius: 999px; background: #F59E0B; box-shadow: 0 0 0 0 rgba(245, 158, 11, .5); animation: mission-breathe 2.4s ease-in-out infinite; }
+        .mission-clock { flex-shrink: 0; font-size: 12px; font-weight: 600; letter-spacing: .02em; color: #FBBF24; font-variant-numeric: tabular-nums; font-feature-settings: 'tnum' 1; }
+        .mission-body { display: flex; align-items: center; gap: 12px; margin-top: 8px; }
+        .mission-ring { position: relative; display: inline-flex; width: 44px; height: 44px; flex-shrink: 0; align-items: center; justify-content: center; }
+        .mission-ring svg { position: absolute; inset: 0; width: 44px; height: 44px; }
+        .mission-ring b { position: relative; font-size: 11.5px; font-weight: 700; color: #F8FAFC; font-variant-numeric: tabular-nums; }
+        .mission-arc { filter: drop-shadow(0 0 4px rgba(251, 191, 36, .65)); transition: stroke-dashoffset .6s cubic-bezier(.2, .8, .2, 1); }
+        .mission-copy { min-width: 0; flex: 1; }
+        .mission-name { font-size: 17px; font-weight: 600; line-height: 1.25; color: #F8FAFC; letter-spacing: -.01em; text-wrap: balance; }
+        .mission-sub { margin-top: 1px; font-size: 12.5px; line-height: 1.35; color: #94A3B8; text-wrap: pretty; }
+        .mission-cta { position: relative; overflow: hidden; display: inline-flex; flex-shrink: 0; align-items: center; justify-content: center; gap: 6px; height: 40px; padding: 0 16px; border-radius: 11px; font-size: 14px; font-weight: 600; color: #0F172A; white-space: nowrap; background: linear-gradient(180deg, #FFFFFF 0%, #EEF2FF 100%); box-shadow: 0 1px 0 rgba(255, 255, 255, .6) inset, 0 6px 16px -6px rgba(0, 0, 0, .5); transition: transform .12s ease, box-shadow .12s ease; }
+        .mission-cta::after { content: ''; position: absolute; top: 0; bottom: 0; left: -40%; width: 30%; background: linear-gradient(100deg, transparent, rgba(255, 255, 255, .95), transparent); transform: skewX(-18deg); animation: mission-shimmer 6s ease-in-out infinite; pointer-events: none; }
+        .mission-cta:hover { box-shadow: 0 1px 0 rgba(255, 255, 255, .6) inset, 0 8px 20px -6px rgba(0, 0, 0, .55); }
+        .mission-cta:active { transform: scale(.98); }
+        .mission-cta:focus-visible { outline: 2px solid #FBBF24; outline-offset: 2px; }
         @media (max-width: 767px) {
-            .mission { grid-template-columns: minmax(0, 1fr); gap: 14px; padding: 14px; }
-            .mission-meter { flex-direction: row; align-items: center; justify-content: space-between; gap: 12px; }
-            .mission-bars { flex: 1; max-width: 62%; }
-            .mission-bars i { flex: 1; width: auto; }
+            .mission-body { flex-wrap: wrap; row-gap: 10px; }
+            .mission-name { font-size: 16px; }
             .mission-cta { width: 100%; }
         }
         @keyframes mission-in { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
-        @keyframes mission-glow { 0%, 100% { box-shadow: inset 0 0 0 1px rgba(165, 180, 252, .35); } 50% { box-shadow: inset 0 0 0 1px rgba(199, 210, 254, .8), 0 0 8px rgba(165, 180, 252, .4); } }
+        @keyframes mission-breathe { 0%, 100% { opacity: .65; box-shadow: 0 0 0 0 rgba(245, 158, 11, .45); } 50% { opacity: 1; box-shadow: 0 0 0 4px rgba(245, 158, 11, 0); } }
+        @keyframes mission-shimmer { 0%, 78% { left: -40%; } 92%, 100% { left: 120%; } }
+        .ticket-check.is-seal { width: 24px; height: 24px; background: transparent; box-shadow: none; }
+        .ticket-check.is-seal svg { width: 24px; height: 24px; }
+        .ticket.is-fresh .ticket-check.is-seal { animation: seal-stamp .6s cubic-bezier(.34, 1.56, .64, 1); }
+        @keyframes seal-stamp { 0% { transform: scale(1.6) rotate(-14deg); opacity: 0; } 60% { transform: scale(.92) rotate(3deg); opacity: 1; } 100% { transform: scale(1) rotate(0); } }
+        @media (prefers-reduced-motion: reduce) { .mission, .mission-dot, .mission-cta::after, .ticket.is-fresh .ticket-check.is-seal { animation: none; } }
         .fund-strip.is-collapse { animation: mission-collapse .55s cubic-bezier(.2, .8, .2, 1); }
-        @keyframes mission-collapse { from { min-height: 96px; background: #1E1B4B; border-color: rgba(165, 180, 252, .3); } to { min-height: 44px; } }
-        @media (prefers-reduced-motion: reduce) { .mission, .mission-bars i, .fund-strip.is-collapse { animation: none; } }
+        @keyframes mission-collapse { from { min-height: 84px; background: #0B0D14; border-color: rgba(255, 255, 255, .12); } to { min-height: 44px; } }
+        @media (prefers-reduced-motion: reduce) { .fund-strip.is-collapse { animation: none; } }
         .bill-tabs { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 4px; padding: 4px; border-radius: 14px; background: #F1F5F9; }
         .bill-tab { min-height: 38px; padding: 0 8px; border-radius: 10px; font-size: 13.5px; font-weight: 600; color: var(--ink-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .bill-tab:hover { color: var(--ink); }
@@ -240,7 +243,7 @@
         .ticket-pulse { transform-box: fill-box; transform-origin: center; animation: ticket-pulse 2.2s cubic-bezier(.4, 0, .6, 1) infinite; }
         .ticket .ticket-chev { width: 14px; height: 14px; flex-shrink: 0; margin-right: -3px; color: #94A3B8; transition: transform .18s ease, color .18s ease; }
         .ticket.is-due:hover .ticket-chev { transform: translateX(2px); color: #4F46E5; }
-        .ticket.is-done { position: relative; gap: 8px; padding: 3px 4px 3px 4px; color: #064E3B; font-weight: 600; background: linear-gradient(135deg, #ECFDF5 0%, #D1FAE5 100%); border-color: #A7F3D0; box-shadow: 0 1px 2px rgba(5, 150, 105, .10), inset 0 1px 0 rgba(255, 255, 255, .7); }
+        .ticket.is-done { position: relative; gap: 8px; padding: 3px 4px 3px 4px; color: #134E4A; font-weight: 600; background: linear-gradient(135deg, #F0FDFA 0%, #FFFBEB 100%); border-color: #CCE7DF; box-shadow: 0 1px 2px rgba(15, 118, 110, .08), inset 0 1px 0 rgba(255, 255, 255, .7); }
         .ticket-check { position: relative; display: inline-flex; width: 22px; height: 22px; flex-shrink: 0; align-items: center; justify-content: center; border-radius: 999px; background: #fff; box-shadow: 0 0 0 3px rgba(16, 185, 129, .16), 0 1px 3px rgba(5, 150, 105, .35); }
         .ticket-check svg { width: 16px; height: 16px; }
         .fund-strip .ticket { flex: 0 1 auto; max-width: 100%; }
@@ -1108,6 +1111,32 @@
             const mins = Math.max(0, Math.floor((end - d) / 60000));
             return { hour: d.getHours(), h: Math.floor(mins / 60), m: mins % 60 };
         };
+        const MissionClock = () => {
+            const [now, setNow] = useState(Date.now());
+            useEffect(() => { const id = setInterval(() => setNow(Date.now()), 1000); return () => clearInterval(id); }, []);
+            const d = new Date(now);
+            const end = new Date(d); end.setHours(23, 59, 59, 999);
+            const sec = Math.max(0, Math.floor((end - d) / 1000));
+            const pad = (n) => String(n).padStart(2, '0');
+            const text = pad(Math.floor(sec / 3600)) + ':' + pad(Math.floor(sec / 60) % 60) + ':' + pad(sec % 60);
+            return <time className="mission-clock" aria-label={'Còn ' + Math.floor(sec / 3600) + ' giờ ' + (Math.floor(sec / 60) % 60) + ' phút hết hôm nay'}>{text}</time>;
+        };
+        /* Vòng tiến độ kiểu Apple Fitness, số n/2 ở giữa. */
+        const MissionRing = ({ n, goal }) => {
+            const r = 18;
+            const c = 2 * Math.PI * r;
+            const off = c * (1 - Math.min(1, n / goal));
+            return (
+                <span className="mission-ring" role="progressbar" aria-valuemin={0} aria-valuemax={goal} aria-valuenow={n} aria-label={'Đã lật ' + n + ' trên ' + goal + ' thẻ hôm nay'}>
+                    <svg viewBox="0 0 44 44" aria-hidden="true">
+                        <circle cx="22" cy="22" r={r} fill="none" stroke="rgba(255,255,255,.1)" strokeWidth="4" />
+                        {n > 0 && <circle className="mission-arc" cx="22" cy="22" r={r} fill="none" stroke="url(#mission-g)" strokeWidth="4" strokeLinecap="round" strokeDasharray={c} strokeDashoffset={off} transform="rotate(-90 22 22)" />}
+                        <defs><linearGradient id="mission-g" x1="0" y1="0" x2="44" y2="44"><stop stopColor="#FDE68A" /><stop offset="1" stopColor="#F59E0B" /></linearGradient></defs>
+                    </svg>
+                    <b className="tnum">{n}/{goal}</b>
+                </span>
+            );
+        };
         const castSessionVote = (session, answered, toast) => {
             if (!session) return;
             const vote = planVote({ sessionId: session.id, type: session.voteType, answered: answered, slot: !!session.slotId, lean: session.lean ? (session.need || MISSION_GOAL) : 0 }, new Date());
@@ -1902,31 +1931,25 @@
                 return undefined;
             }, [votes && votes.confirmedToday]);
             if (due) {
-                const evening = day.hour >= 18;
                 const late = day.hour >= 21;
                 return (
-                    <section className={'mission' + (late ? ' is-late' : '')} aria-label="Phiếu hôm nay">
-                        <div className="mission-main">
-                            <span className={'mission-ic' + (streak > 0 ? '' : ' is-empty')}>
-                                {streak > 0 ? FLAME : <svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><circle cx="8" cy="8" r="6" stroke="currentColor" strokeWidth="1.6" strokeDasharray="3 2.4" /></svg>}
-                            </span>
-                            <div className="min-w-0">
-                                <p className="mission-title">{streak > 0
-                                    ? <>Đừng để đứt chuỗi <b className="tnum">{streak} ngày</b> của {name}</>
-                                    : <>Phiếu hôm nay đang trống · {name}</>}</p>
-                                <p className="mission-sub">{evening
-                                    ? <>Còn <b className="tnum">{day.h}g {day.m}p</b> hết hôm nay · chỉ cần lật {MISSION_GOAL - mission} thẻ</>
-                                    : mission > 0 ? <>Xong {mission}/{MISSION_GOAL} rồi, còn 1 thẻ nữa là có phiếu</>
-                                    : <>Chỉ cần lật nhanh 2 thẻ để giữ nhịp hôm nay</>}</p>
+                    <section className={'mission' + (late ? ' is-late' : '')} aria-label="Phiếu bản sắc hôm nay">
+                        <div className="mission-head">
+                            <span className="mission-label"><i className="mission-dot" aria-hidden="true" />Phiếu bản sắc · chưa đóng dấu</span>
+                            <MissionClock />
+                        </div>
+                        <div className="mission-body">
+                            <MissionRing n={mission} goal={MISSION_GOAL} />
+                            <div className="mission-copy">
+                                <p className="mission-name">{name}</p>
+                                <p className="mission-sub">{mission > 0
+                                    ? 'Còn 1 thẻ nữa để xác nhận hôm nay'
+                                    : streak > 0 ? 'Giữ vững chuỗi ' + streak + ' ngày liên tiếp' : 'Lật 2 thẻ để xác nhận hôm nay'}</p>
                             </div>
+                            <button type="button" className="mission-cta" onClick={onQuickVote}>
+                                {mission > 0 ? 'Đóng dấu · còn 1 thẻ' : 'Đóng dấu hôm nay · 30s'} <span aria-hidden="true">→</span>
+                            </button>
                         </div>
-                        <div className="mission-meter" role="progressbar" aria-valuemin={0} aria-valuemax={MISSION_GOAL} aria-valuenow={mission} aria-label={'Đã lật ' + mission + ' trên ' + MISSION_GOAL + ' thẻ hôm nay'}>
-                            <span className="mission-count"><b className="tnum">{mission}</b>/{MISSION_GOAL} thẻ</span>
-                            <span className="mission-bars">{Array.from({ length: MISSION_GOAL }, (_, i) => <i key={i} className={i < mission ? 'is-on' : ''} />)}</span>
-                        </div>
-                        <button type="button" className="mission-cta" onClick={onQuickVote}>
-                            <Icon name="zap" size={16} /> {mission > 0 ? 'Còn 1 thẻ · Hoàn tất' : 'Chốt nhanh 30s'} <span aria-hidden="true">→</span>
-                        </button>
                     </section>
                 );
             }
@@ -1955,15 +1978,17 @@
                         </button>
                     ) : (
                         <span className={'ticket is-done' + (fresh ? ' is-fresh' : '')} role="status"
-                            title={'+1 phiếu cho ' + name + ' hôm nay · chuỗi ' + streak + ' ngày. Mai quay lại để giữ chuỗi.'}>
-                            <span className="ticket-check" aria-hidden="true">
-                                <svg viewBox="0 0 16 16" fill="none">
-                                    <circle cx="8" cy="8" r="8" fill="url(#ticket-g)" />
-                                    <path className="ticket-tick" d="M4.8 8.3 7 10.4 11.2 6" stroke="#FFFFFF" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
-                                    <defs><linearGradient id="ticket-g" x1="0" y1="0" x2="16" y2="16"><stop stopColor="#34D399" /><stop offset="1" stopColor="#059669" /></linearGradient></defs>
+                            title={'Đã đóng dấu ' + name + ' hôm nay · chuỗi ' + streak + ' ngày. Mai quay lại để giữ chuỗi.'}>
+                            <span className="ticket-check is-seal" aria-hidden="true">
+                                <svg viewBox="0 0 24 24" fill="none">
+                                    <circle cx="12" cy="12" r="11" fill="#FFFBEB" stroke="#C08A2E" strokeWidth="1.2" />
+                                    <circle cx="12" cy="12" r="8.6" stroke="#C08A2E" strokeWidth=".8" strokeDasharray="1.4 1.6" />
+                                    <circle cx="12" cy="12" r="6.6" fill="url(#seal-g)" />
+                                    <path className="ticket-tick" d="M9.2 12.2 11.2 14.1 14.9 10.3" stroke="#FFFFFF" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" />
+                                    <defs><linearGradient id="seal-g" x1="5" y1="5" x2="19" y2="19"><stop stopColor="#2DD4BF" /><stop offset="1" stopColor="#0F766E" /></linearGradient></defs>
                                 </svg>
                             </span>
-                            <span className="ticket-text">Đã chốt phiếu <b>{name}</b></span>
+                            <span className="ticket-text">Đã đóng dấu<span className="hidden sm:inline"> · <b>{name}</b></span></span>
                             <span className="ticket-streak" aria-label={'Chuỗi ' + streak + ' ngày'}>
                                 {FLAME}
                                 <b className="tnum">{streak}</b><span className="hidden sm:inline">&nbsp;ngày</span>
