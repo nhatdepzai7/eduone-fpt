@@ -418,7 +418,7 @@
 
     <!-- ===================== UI KIT ===================== -->
     <script type="text/babel" data-presets="react" data-type="module">
-        import { IDENTITIES, dayKey, identityLine, planVote, summarize } from './js/core/identity.js?v=slotvote';
+        import { IDENTITIES, dayKey, identityLine, planVote, summarize } from './js/core/identity.js?v=ielts';
         const { useState, useEffect, useRef, useMemo, useReducer } = React;
         const E = window.EDU;
         /* /app?go=... từ trang chủ: đọc một lần trước khi vẽ, component nào cần thì lấy qua takeGo(). */
@@ -662,7 +662,7 @@
         const readIdentity = () => {
             const raw = Store.prefs.get('identity', '');
             if (typeof raw !== 'string') return '';
-            if (raw === 'Chinh phục IELTS 6.5+') { Store.prefs.set('identity', 'Chinh phục IELTS'); return 'Chinh phục IELTS'; }
+            if (raw === 'Chinh phục IELTS 6.5+' || raw === 'Chinh phục IELTS') { Store.prefs.set('identity', 'Người chinh phục IELTS'); return 'Người chinh phục IELTS'; }
             if (raw === 'Kỹ sư AI & Tech Thực chiến' || raw === 'Kỹ sư Chuyên ngành Thực chiến') { Store.prefs.remove('identity'); return ''; }
             return raw;
         };

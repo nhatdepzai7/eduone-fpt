@@ -1,4 +1,4 @@
-import { DEFAULT_IDENTITY_LINE, IDENTITIES, MIN_ANSWERS, OBSIDIAN_IDENTITY, RANK_THRESHOLDS, VOTE_TYPES } from './identity-config.js';
+import { DEFAULT_IDENTITY_LINE, IDENTITIES, MIN_ANSWERS, OBSIDIAN_IDENTITY, RANK_THRESHOLDS, VOTE_TYPES } from './identity-config.js?v=ielts';
 
 const DAY = /^\d{4}-\d{2}-\d{2}$/;
 const MAX_WALK = 3660;
