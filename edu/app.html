@@ -115,6 +115,60 @@
         .fund-code { align-items: center; gap: 6px; min-height: 30px; padding: 0 8px; border-radius: 8px; color: var(--ink-2); }
         .fund-code:hover { background: var(--surface-2); color: var(--ink); }
         /* Pill phiếu hôm nay */
+        .mission { position: relative; overflow: hidden; width: 100%; margin-bottom: 12px; padding: 10px 14px 12px; border-radius: 16px; color: #0F172A; background: linear-gradient(135deg, #FFFFFF 0%, #EEF2FF 100%); border: 1px solid #C7D2FE; box-shadow: 0 4px 16px -4px rgba(79, 70, 229, .12); animation: mission-in .35s ease-out; isolation: isolate; }
+        .mission.is-late { border-color: #FCD34D; }
+        .mission-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+        .mission-label { display: inline-flex; align-items: center; gap: 7px; min-width: 0; font-size: 10px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: #475569; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .mission-dot { width: 6px; height: 6px; flex-shrink: 0; border-radius: 999px; background: #F97316; animation: mission-breathe 2.4s ease-in-out infinite; }
+        .mission-clock { flex-shrink: 0; padding: 2px 8px; border-radius: 999px; font-size: 12px; font-weight: 600; line-height: 18px; color: #B45309; background: #FEF3C7; border: 1px solid #FDE68A; font-variant-numeric: tabular-nums; font-feature-settings: 'tnum' 1; }
+        .mission-body { display: flex; align-items: center; gap: 12px; margin-top: 8px; }
+        .mission-duck { position: relative; display: inline-flex; width: 72px; height: 72px; flex-shrink: 0; }
+        .mission-face { display: block; width: 72px; height: 72px; overflow: hidden; border-radius: 12px; border: 1.5px solid #C7D2FE; background: #E0E7FF; transition: transform .2s ease; }
+        .mission-face img { display: block; width: 100%; height: 100%; object-fit: cover; }
+        .mission:has(.mission-cta:hover) .mission-face, .mission:has(.mission-cta:focus-visible) .mission-face { transform: rotate(-6deg) scale(1.05); }
+        .mission-badge { position: absolute; right: -6px; bottom: -4px; padding: 0 5px; border-radius: 999px; font-size: 10.5px; font-weight: 700; line-height: 16px; color: #78350F; background: #FBBF24; border: 2px solid #fff; font-variant-numeric: tabular-nums; }
+        .mission-copy { min-width: 0; flex: 1; }
+        .mission-name { font-size: 16px; font-weight: 600; line-height: 1.3; color: #0F172A; letter-spacing: -.01em; text-wrap: balance; overflow-wrap: anywhere; }
+        .mission-sub { margin-top: 2px; font-size: 12.5px; line-height: 1.35; color: #475569; text-wrap: balance; }
+        .mission-cta { position: relative; overflow: hidden; display: inline-flex; flex-shrink: 0; align-items: center; justify-content: center; gap: 6px; height: 40px; padding: 0 16px; border-radius: 11px; font-size: 14px; font-weight: 600; color: #fff; white-space: nowrap; background: #4F46E5; box-shadow: 0 6px 14px -6px rgba(79, 70, 229, .6); transition: transform .12s ease, background .15s ease; }
+        .mission-cta:hover { background: #4338CA; }
+        .mission-cta:active { transform: scale(.98); }
+        .mission-cta:focus-visible { outline: 2px solid #A5B4FC; outline-offset: 2px; }
+        .mission[data-tier="obsidian"] { color: #F8FAFC; background: linear-gradient(160deg, #121524 0%, #0B0D14 100%); border-color: rgba(255, 255, 255, .12); box-shadow: 0 12px 30px -10px rgba(11, 13, 20, .45); }
+        .mission[data-tier="obsidian"]::before { content: ''; position: absolute; z-index: -1; top: -60%; right: -10%; width: 70%; height: 180%; background: radial-gradient(closest-side, rgba(245, 158, 11, .16), rgba(129, 140, 248, .10) 55%, transparent 75%); pointer-events: none; }
+        .mission[data-tier="obsidian"].is-late { border-color: rgba(245, 158, 11, .35); }
+        .mission[data-tier="obsidian"] .mission-label { color: #94A3B8; }
+        .mission-star { font-style: normal; font-size: 11px; line-height: 1; color: #FBBF24; animation: mission-breathe 2.4s ease-in-out infinite; }
+        .mission[data-tier="obsidian"] .mission-clock { padding: 0; color: #FBBF24; background: none; border: 0; }
+        .mission[data-tier="obsidian"] .mission-face { border: 1px solid rgba(255, 255, 255, .2); background: #1E2235; box-shadow: 0 4px 12px rgba(0, 0, 0, .4); }
+        .mission[data-tier="obsidian"] .mission-badge { border-color: #0B0D14; }
+        .mission[data-tier="obsidian"] .mission-name { color: #F8FAFC; }
+        .mission[data-tier="obsidian"] .mission-sub { color: #94A3B8; }
+        .mission[data-tier="obsidian"] .mission-cta { color: #0F172A; background: linear-gradient(180deg, #FFFFFF 0%, #EEF2FF 100%); box-shadow: 0 1px 0 rgba(255, 255, 255, .6) inset, 0 6px 16px -6px rgba(0, 0, 0, .5); }
+        .mission[data-tier="obsidian"] .mission-cta svg { color: #4338CA; }
+        .mission[data-tier="obsidian"] .mission-cta::after { content: ''; position: absolute; top: 0; bottom: 0; left: -40%; width: 30%; background: linear-gradient(100deg, transparent, rgba(255, 255, 255, .95), transparent); transform: skewX(-18deg); animation: mission-shimmer 6s ease-in-out infinite; pointer-events: none; }
+        .mission[data-tier="obsidian"] .mission-cta:focus-visible { outline-color: #FBBF24; }
+        @media (max-width: 767px) {
+            .mission-body { flex-wrap: wrap; row-gap: 10px; }
+            .mission-name { font-size: 15px; }
+            .mission-cta { width: 100%; }
+        }
+        @keyframes mission-in { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
+        @keyframes mission-breathe { 0%, 100% { opacity: .55; transform: scale(.9); } 50% { opacity: 1; transform: scale(1.15); } }
+        @keyframes mission-shimmer { 0%, 78% { left: -40%; } 92%, 100% { left: 120%; } }
+        .ticket-check.is-seal { width: 24px; height: 24px; background: transparent; box-shadow: none; }
+        .ticket-check.is-seal svg { width: 24px; height: 24px; }
+        .fund-strip[data-tier="obsidian"] { color: #CBD5E1; background: linear-gradient(160deg, #121524 0%, #0B0D14 100%); border-color: rgba(255, 255, 255, .12); }
+        .fund-strip[data-tier="obsidian"] .ticket.is-done { color: #F1F5F9; background: rgba(255, 255, 255, .04); border-color: rgba(231, 197, 106, .35); box-shadow: none; }
+        .fund-strip[data-tier="obsidian"] .ticket-streak { color: #FBBF24; background: rgba(245, 158, 11, .1); box-shadow: 0 0 0 1px rgba(245, 158, 11, .35); }
+        .fund-strip[data-tier="obsidian"] .fund-cta { color: #E2E8F0; background: rgba(255, 255, 255, .06); border-color: rgba(255, 255, 255, .14); }
+        .fund-strip[data-tier="obsidian"] svg { color: #94A3B8; }
+        .ticket.is-fresh .ticket-check.is-seal { animation: seal-stamp .6s cubic-bezier(.34, 1.56, .64, 1); }
+        @keyframes seal-stamp { 0% { transform: scale(1.6) rotate(-14deg); opacity: 0; } 60% { transform: scale(.92) rotate(3deg); opacity: 1; } 100% { transform: scale(1) rotate(0); } }
+        @media (prefers-reduced-motion: reduce) { .mission, .mission-dot, .mission-star, .mission[data-tier="obsidian"] .mission-cta::after, .ticket.is-fresh .ticket-check.is-seal { animation: none; } .mission-face { transition: none; } }
+        .fund-strip.is-collapse { animation: mission-collapse .55s cubic-bezier(.2, .8, .2, 1); }
+        @keyframes mission-collapse { from { min-height: 84px; background: #0B0D14; border-color: rgba(255, 255, 255, .12); } to { min-height: 44px; } }
+        @media (prefers-reduced-motion: reduce) { .fund-strip.is-collapse { animation: none; } }
         .bill-tabs { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 4px; padding: 4px; border-radius: 14px; background: #F1F5F9; }
         .bill-tab { min-height: 38px; padding: 0 8px; border-radius: 10px; font-size: 13.5px; font-weight: 600; color: var(--ink-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .bill-tab:hover { color: var(--ink); }
@@ -207,7 +261,7 @@
         .ticket-pulse { transform-box: fill-box; transform-origin: center; animation: ticket-pulse 2.2s cubic-bezier(.4, 0, .6, 1) infinite; }
         .ticket .ticket-chev { width: 14px; height: 14px; flex-shrink: 0; margin-right: -3px; color: #94A3B8; transition: transform .18s ease, color .18s ease; }
         .ticket.is-due:hover .ticket-chev { transform: translateX(2px); color: #4F46E5; }
-        .ticket.is-done { position: relative; gap: 8px; padding: 3px 4px 3px 4px; color: #064E3B; font-weight: 600; background: linear-gradient(135deg, #ECFDF5 0%, #D1FAE5 100%); border-color: #A7F3D0; box-shadow: 0 1px 2px rgba(5, 150, 105, .10), inset 0 1px 0 rgba(255, 255, 255, .7); }
+        .ticket.is-done { position: relative; gap: 8px; padding: 3px 4px 3px 4px; color: #134E4A; font-weight: 600; background: linear-gradient(135deg, #F0FDFA 0%, #FFFBEB 100%); border-color: #CCE7DF; box-shadow: 0 1px 2px rgba(15, 118, 110, .08), inset 0 1px 0 rgba(255, 255, 255, .7); }
         .ticket-check { position: relative; display: inline-flex; width: 22px; height: 22px; flex-shrink: 0; align-items: center; justify-content: center; border-radius: 999px; background: #fff; box-shadow: 0 0 0 3px rgba(16, 185, 129, .16), 0 1px 3px rgba(5, 150, 105, .35); }
         .ticket-check svg { width: 16px; height: 16px; }
         .fund-strip .ticket { flex: 0 1 auto; max-width: 100%; }
@@ -220,7 +274,9 @@
         .ticket.is-due.is-slipped { background: #FFFBF5; border-color: #FDBA74; box-shadow: 0 1px 2px rgba(234, 88, 12, .08); }
         .ticket.is-due.is-slipped:hover { border-color: #FB923C; }
         .ticket.is-due.is-slipped .ticket-ic, .ticket.is-due.is-slipped .ticket-go, .ticket.is-due.is-slipped:hover .ticket-chev { color: #EA580C; }
-        .ticket.is-done .ticket-text { color: #064E3B; }
+        .ticket.is-done .ticket-text { color: #134E4A; }
+        .fund-strip[data-tier="obsidian"] .ticket.is-done .ticket-text { color: #F1F5F9; }
+        .fund-strip[data-tier="obsidian"] .ticket.is-done .ticket-text b { color: #E7C56A; }
         @keyframes ticket-breathe { 0%, 100% { box-shadow: 0 1px 2px rgba(0, 0, 0, .04); } 50% { box-shadow: 0 1px 2px rgba(0, 0, 0, .04), 0 2px 12px rgba(79, 70, 229, .16); } }
         .reward-wrap { position: fixed; z-index: 70; top: 14px; left: 0; right: 0; display: flex; justify-content: center; padding: 0 16px; pointer-events: none; }
         .reward-toast { position: relative; display: flex; align-items: center; gap: 12px; width: 100%; max-width: 420px; padding: 12px 14px 14px; overflow: hidden; border-radius: 16px; background: #fff; border: 1px solid #A7F3D0; box-shadow: 0 12px 32px rgba(15, 23, 42, .14), 0 2px 6px rgba(5, 150, 105, .10); pointer-events: auto; animation: reward-in .45s cubic-bezier(.34, 1.4, .64, 1), reward-out .35s ease-in 3.15s forwards; }
@@ -720,7 +776,7 @@
 
     <!-- ===================== UI KIT ===================== -->
     <script type="text/babel" data-presets="react" data-type="module">
-        import { IDENTITIES, dayKey, identityLine, planVote, shiftDay, summarize } from './js/core/identity.js?v=ielts';
+        import { IDENTITIES, dayKey, identityLine, planVote, shiftDay, summarize } from './js/core/identity.js?v=mission';
         const { useState, useEffect, useRef, useMemo, useReducer } = React;
         const E = window.EDU;
         /* /app?go=... từ trang chủ: đọc một lần trước khi vẽ, component nào cần thì lấy qua takeGo(). */
@@ -1042,13 +1098,64 @@
             const today = dayKey(new Date());
             return useMemo(() => (votes ? summarize(votes, today) : null), [votes, today]);
         };
+        /* Nhiệm vụ hôm nay: lật 2 thẻ là có phiếu. Tiến độ lưu theo ngày, thoát giữa chừng vẫn giữ 1/2. */
+        const MISSION_KEY = 'mission';
+        const MISSION_GOAL = 2;
+        const readMission = () => {
+            const m = Store.prefs.get(MISSION_KEY, null);
+            return m && m.date === dayKey(new Date()) ? Math.max(0, Math.min(MISSION_GOAL, Number(m.n) || 0)) : 0;
+        };
+        const noteMission = (n) => {
+            const prev = readMission();
+            const next = Math.min(MISSION_GOAL, Math.max(prev, n));
+            if (next === prev) return;
+            Store.prefs.set(MISSION_KEY, { date: dayKey(new Date()), n: next });
+            window.dispatchEvent(new CustomEvent('edu-mission'));
+        };
+        const useMission = () => {
+            const [n, setN] = useState(readMission);
+            useEffect(() => {
+                const on = () => setN(readMission());
+                window.addEventListener('edu-mission', on);
+                window.addEventListener('edu-votes', on);
+                return () => { window.removeEventListener('edu-mission', on); window.removeEventListener('edu-votes', on); };
+            }, []);
+            return n;
+        };
+        /* Đồng hồ cuối ngày: sau 18:00 hiện thời gian còn lại, sau 21:00 chuyển sang tông cảnh báo. */
+        const useDayLeft = () => {
+            const [now, setNow] = useState(Date.now());
+            useEffect(() => { const id = setInterval(() => setNow(Date.now()), 30000); return () => clearInterval(id); }, []);
+            const d = new Date(now);
+            const end = new Date(d); end.setHours(24, 0, 0, 0);
+            const mins = Math.max(0, Math.floor((end - d) / 60000));
+            return { hour: d.getHours(), h: Math.floor(mins / 60), m: mins % 60 };
+        };
+        const MissionClock = () => {
+            const [now, setNow] = useState(Date.now());
+            useEffect(() => { const id = setInterval(() => setNow(Date.now()), 1000); return () => clearInterval(id); }, []);
+            const d = new Date(now);
+            const end = new Date(d); end.setHours(23, 59, 59, 999);
+            const sec = Math.max(0, Math.floor((end - d) / 1000));
+            const pad = (n) => String(n).padStart(2, '0');
+            const text = pad(Math.floor(sec / 3600)) + ':' + pad(Math.floor(sec / 60) % 60) + ':' + pad(sec % 60);
+            return <time className="mission-clock" aria-label={'Còn ' + Math.floor(sec / 3600) + ' giờ ' + (Math.floor(sec / 60) % 60) + ' phút hết hôm nay'}>{text}</time>;
+        };
+        /* Câu thoại của con vịt đổi theo giờ: càng về khuya càng gắt. */
+        const DUCK_SRC = '/public/stickers/duck.png';
+        const duckLine = (hour, name) => {
+            const q = '"' + name + '"';
+            if (hour >= 21) return 'Tính để đứt chuỗi thật hả ' + q + '?';
+            if (hour >= 18) return 'Sắp hết ngày rồi ' + q + ' ơi...';
+            return 'Kêu tui là ' + q + ' hả?';
+        };
         const castSessionVote = (session, answered, toast) => {
             if (!session) return;
-            const vote = planVote({ sessionId: session.id, type: session.voteType, answered: answered, slot: !!session.slotId }, new Date());
+            const vote = planVote({ sessionId: session.id, type: session.voteType, answered: answered, slot: !!session.slotId, lean: session.lean ? (session.need || MISSION_GOAL) : 0 }, new Date());
             if (!vote) return;
             Store.addIdentityVote(vote).then((res) => {
                 if (!res || !res.saved) return;
-                try { sessionStorage.setItem('edu.ringAnim', 'pending'); sessionStorage.setItem('edu.voteBump', '1'); } catch (e) {}
+                try { sessionStorage.setItem('edu.ringAnim', 'pending'); sessionStorage.setItem('edu.voteBump', '1'); sessionStorage.setItem('edu.missionDone', '1'); } catch (e) {}
                 window.dispatchEvent(new CustomEvent('edu-votes'));
                 window.dispatchEvent(new CustomEvent('edu-study-start'));
                 const line = identityLine(readIdentity());
@@ -1814,12 +1921,19 @@
             const streak = votes ? (votes.streak || 0) : 0;
             const name = identityName(useIdentity());
             const slipped = !!votes && votes.missedOnce;
+            const mission = useMission();
+            const day = useDayLeft();
             /* Vừa chốt phiếu (đang "Còn 1 phiếu" chuyển sang "Đã chốt"): chạy hiệu ứng mừng một lần. */
             const wasDue = useRef(false);
             const [fresh, setFresh] = useState(false);
             useEffect(() => {
                 if (!votes) return undefined;
-                if (wasDue.current && votes.confirmedToday) {
+                /* Chốt phiếu ở màn khác (đang học) thì về Sổ từ vẫn thấy Banner thu gọn. */
+                let pending = false;
+                if (votes.confirmedToday) {
+                    try { pending = sessionStorage.getItem('edu.missionDone') === '1'; if (pending) sessionStorage.removeItem('edu.missionDone'); } catch (e) {}
+                }
+                if ((wasDue.current || pending) && votes.confirmedToday) {
                     setFresh(true);
                     const t = window.setTimeout(() => setFresh(false), 2400);
                     wasDue.current = false;
@@ -1828,8 +1942,35 @@
                 wasDue.current = !votes.confirmedToday;
                 return undefined;
             }, [votes && votes.confirmedToday]);
+            const tier = obsidianOf(fund) ? 'obsidian' : 'eco';
+            if (due) {
+                const late = day.hour >= 21;
+                return (
+                    <section className={'mission' + (late ? ' is-late' : '')} data-tier={tier} aria-label="Phiếu bản sắc hôm nay">
+                        <div className="mission-head">
+                            <span className="mission-label">{tier === 'obsidian'
+                                ? <><i className="mission-star" aria-hidden="true">✦</i>Obsidian Pass · chưa đóng dấu</>
+                                : <><i className="mission-dot" aria-hidden="true" />Phiếu bản sắc · chưa đóng dấu</>}</span>
+                            <MissionClock />
+                        </div>
+                        <div className="mission-body">
+                            <span className="mission-duck">
+                                <span className="mission-face"><img src={DUCK_SRC} alt="Con vịt đang chờ bạn chốt phiếu" width="72" height="72" decoding="async" /></span>
+                                <b className="mission-badge tnum" aria-label={'Đã lật ' + mission + ' trên ' + MISSION_GOAL + ' thẻ'}>{mission}/{MISSION_GOAL}</b>
+                            </span>
+                            <div className="mission-copy">
+                                <p className="mission-name">{duckLine(day.hour, name)}</p>
+                                <p className="mission-sub">{mission > 0 ? 'Còn 1 thẻ nữa là đuổi được con vịt này đi.' : 'Lật nhanh 2 thẻ (30s) để đuổi con vịt này đi.'}</p>
+                            </div>
+                            <button type="button" className="mission-cta" onClick={onQuickVote}>
+                                <Icon name="zap" size={15} /> {mission > 0 ? 'Chốt nốt 1 thẻ' : 'Chốt phiếu 30s'} <span aria-hidden="true">→</span>
+                            </button>
+                        </div>
+                    </section>
+                );
+            }
             return (
-                <div className="fund-strip">
+                <div className={'fund-strip' + (fresh ? ' is-collapse' : '')} data-tier={tier}>
                     {!votes ? (
                         <span className="ticket is-idle">
                             <svg className="ticket-ic" viewBox="0 0 16 16" fill="none" aria-hidden="true"><circle cx="8" cy="8" r="6.5" stroke="currentColor" strokeWidth="1.5" /></svg>
@@ -1853,15 +1994,17 @@
                         </button>
                     ) : (
                         <span className={'ticket is-done' + (fresh ? ' is-fresh' : '')} role="status"
-                            title={'+1 phiếu cho ' + name + ' hôm nay · chuỗi ' + streak + ' ngày. Mai quay lại để giữ chuỗi.'}>
-                            <span className="ticket-check" aria-hidden="true">
-                                <svg viewBox="0 0 16 16" fill="none">
-                                    <circle cx="8" cy="8" r="8" fill="url(#ticket-g)" />
-                                    <path className="ticket-tick" d="M4.8 8.3 7 10.4 11.2 6" stroke="#FFFFFF" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
-                                    <defs><linearGradient id="ticket-g" x1="0" y1="0" x2="16" y2="16"><stop stopColor="#34D399" /><stop offset="1" stopColor="#059669" /></linearGradient></defs>
+                            title={'Đã đóng dấu ' + name + ' hôm nay · chuỗi ' + streak + ' ngày. Mai quay lại để giữ chuỗi.'}>
+                            <span className="ticket-check is-seal" aria-hidden="true">
+                                <svg viewBox="0 0 24 24" fill="none">
+                                    <circle cx="12" cy="12" r="11" fill="#FFFBEB" stroke="#C08A2E" strokeWidth="1.2" />
+                                    <circle cx="12" cy="12" r="8.6" stroke="#C08A2E" strokeWidth=".8" strokeDasharray="1.4 1.6" />
+                                    <circle cx="12" cy="12" r="6.6" fill="url(#seal-g)" />
+                                    <path className="ticket-tick" d="M9.2 12.2 11.2 14.1 14.9 10.3" stroke="#FFFFFF" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" />
+                                    <defs><linearGradient id="seal-g" x1="5" y1="5" x2="19" y2="19"><stop stopColor="#2DD4BF" /><stop offset="1" stopColor="#0F766E" /></linearGradient></defs>
                                 </svg>
                             </span>
-                            <span className="ticket-text">+1 phiếu: <b>{name}</b></span>
+                            <span className="ticket-text">Đã đóng dấu<span className="hidden sm:inline"> · <b>{name}</b></span></span>
                             <span className="ticket-streak" aria-label={'Chuỗi ' + streak + ' ngày'}>
                                 {FLAME}
                                 <b className="tnum">{streak}</b><span className="hidden sm:inline">&nbsp;ngày</span>
@@ -3088,6 +3231,9 @@
                 affirmStudy();
                 castSessionVote(session, known.length + forgot.length, toast);
             }, [done]);
+            useEffect(() => {
+                if (session && session.mission) noteMission((session.missionBase || 0) + known.length + forgot.length);
+            }, [known.length, forgot.length]);
 
             useEffect(() => {
                 const need = ids.map(id => byId.get(id)).filter(x => x && x.type === 'vocab' && x.questionOrWord && !x.recallPrompt).slice(0, 40);
@@ -7737,17 +7883,19 @@
                 /* Sổ từ đang mở sẵn thì không mount lại: báo qua sự kiện. */
                 window.setTimeout(() => { if (window.__fpassGo === 'reading') { window.__fpassGo = ''; window.dispatchEvent(new CustomEvent('edu-reading')); } }, 0);
             };
-            /* Pill "Phiếu hôm nay": đang trong ca thì vào ca bản Chạm đáy (2 thẻ đủ phiếu); ngoài ca thì 5 thẻ flashcard, từ yếu trước. */
+            /* Banner "Chốt nhanh 30s": đang trong ca thì vào ca bản Chạm đáy; ngoài ca thì lật 2 thẻ (hoặc số thẻ còn thiếu hôm nay), từ yếu trước. */
             const quickVote = () => {
                 const slotNow = cur.slot;
                 if (slotNow && (cur.kind === 'ON_TIME_ACTIVE' || cur.kind === 'LATE_RECOVERY')) { startSlot(true); return; }
                 const filled = items.filter(Sch.isFilled);
-                if (filled.length < 5) { toast('Cần ít nhất 5 thẻ có nghĩa để chốt phiếu. Thêm vài từ nhé.', 'info'); return; }
+                const base = readMission();
+                const need = Math.max(1, MISSION_GOAL - base);
+                if (filled.length < need) { toast('Cần ít nhất ' + need + ' thẻ có nghĩa để chốt phiếu. Thêm 1–2 từ nhé.', 'info'); return; }
                 const weak = filled.filter(t => Sch.isWeak(t)).sort((a, b) => Sch.weakScore(b) - Sch.weakScore(a));
                 const rest = Sch.shuffle(filled.filter(t => weak.indexOf(t) < 0));
-                const ids = weak.concat(rest).slice(0, 5).map(t => t.id);
+                const ids = weak.concat(rest).slice(0, need).map(t => t.id);
                 noteStudyStart();
-                setSession({ id: Date.now(), title: 'Học 30s · chốt phiếu hôm nay', mode: 'flash', voteType: 'flashcard', ids: ids });
+                setSession({ id: Date.now(), title: 'Chốt nhanh 30s · ' + need + ' thẻ', mode: 'flash', voteType: 'flashcard', ids: ids, lean: true, need: need, mission: true, missionBase: base });
                 dispatch({ type: 'TAB', tab: 'practice', force: true });
                 window.scrollTo(0, 0);
             };
