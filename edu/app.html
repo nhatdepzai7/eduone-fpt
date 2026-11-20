@@ -132,10 +132,6 @@
         .fund-warn { display: inline-flex; align-items: center; gap: 4px; min-height: 26px; padding: 0 10px; border-radius: 999px; font-size: 12px; font-weight: 700; color: #9A3412; background: #FFEDD5; border: 1px solid #FDBA74; }
         .fund-warn:hover { background: #FED7AA; }
         /* Nút AI quét bài đọc: nổi bật nhưng nhường nút chính "Thêm từ". */
-        .sample-prev { position: relative; margin-top: 12px; }
-        .sample-body { overflow: hidden; border-radius: 16px; border: 1px dashed var(--border); background: var(--surface); opacity: .5; pointer-events: none; user-select: none; }
-        .sample-badge { position: absolute; z-index: 1; top: -9px; right: 12px; padding: 2px 10px; border-radius: 999px; font-size: 11px; font-weight: 700; letter-spacing: .02em; color: var(--ink-2); background: var(--surface); border: 1px solid var(--border); box-shadow: 0 1px 2px rgba(15, 23, 42, .06); }
-        .start-badge { position: absolute; top: 12px; right: 12px; padding: 2px 7px; border-radius: 6px; font-size: 10.5px; font-weight: 700; letter-spacing: .03em; color: #047857; background: #ECFDF5; border: 1px solid #A7F3D0; font-variant-numeric: tabular-nums; }
         .qp-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
         .qp-sub { margin: 2px 0 12px; font-size: 12px; line-height: 1.5; color: var(--muted); }
         .qp-sub .qp-sample { height: auto; margin-left: 6px; padding: 0; }
@@ -153,13 +149,35 @@
         .qp-overlay small { font-size: 12px; color: #6366F1; }
         @media (max-width: 767px) { .qp-head h3 { font-size: 15px; } .qp-xls { padding: 0 9px; } }
         @media (max-width: 359px) { .qp-xls span { display: none; } }
-        .start-tile { position: relative; display: flex; flex-direction: column; align-items: flex-start; gap: 4px; padding: 14px; min-width: 0; border-radius: 16px; border: 1px solid var(--border); background: var(--surface); text-align: left; transition: border-color .15s ease, box-shadow .15s ease, transform .15s ease; }
-        .start-tile:hover { border-color: var(--primary); box-shadow: 0 6px 18px rgba(15, 23, 42, .08); transform: translateY(-2px); }
-        .start-tile b { margin-top: 6px; font-size: 15px; font-weight: 700; color: var(--ink); }
-        .start-tile small { font-size: 13px; line-height: 1.45; color: var(--muted); }
-        .start-ico { display: inline-flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 12px; background: var(--surface-2); color: var(--primary); }
-        .start-tile.is-ai { border-color: #DDD6FE; background: linear-gradient(160deg, #FAF5FF 0%, #FFFFFF 60%); }
-        .start-tile.is-ai .start-ico { background: linear-gradient(135deg, #7C3AED, #DB2777); color: #fff; }
+        .import-bar { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
+        .imp-btn { display: inline-flex; align-items: center; justify-content: center; gap: 7px; height: 38px; padding: 0 14px; border-radius: 10px; border: 1px solid #CBD5E1; background: #fff; color: #1E293B; font-size: 13.5px; font-weight: 600; white-space: nowrap; box-shadow: 0 1px 2px rgba(0, 0, 0, .04); transition: border-color .15s ease, color .15s ease, background .15s ease; }
+        .imp-btn svg { color: #4F46E5; flex-shrink: 0; }
+        .imp-btn:hover { border-color: #4F46E5; color: #4F46E5; background: #F5F3FF; }
+        .imp-btn.is-ai svg { color: #7C3AED; }
+        .imp-sample { margin-left: auto; font-size: 12.5px; color: var(--muted); text-decoration: underline; text-underline-offset: 3px; white-space: nowrap; }
+        .imp-sample:hover { color: #4F46E5; }
+        @media (max-width: 767px) {
+            .import-bar { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
+            .imp-btn { min-width: 0; height: 40px; padding: 0 6px; gap: 5px; font-size: 13px; }
+            .imp-sample { display: none; }
+        }
+        .batch-group { display: inline-flex; align-items: center; gap: 6px; min-width: 0; max-width: 20rem; flex: 1 1 10rem; padding: 2px 8px; border-radius: 8px; color: var(--muted); cursor: text; }
+        .batch-group:hover, .batch-group:focus-within { background: var(--surface-2); }
+        .batch-group input { min-width: 0; flex: 1; border: 0; outline: 0; background: transparent; font-size: 15px; font-weight: 700; color: var(--ink); padding: 4px 0; }
+        .batch-grid { display: grid; gap: 6px; grid-template-columns: minmax(0, 1fr) 4.25rem; }
+        .batch-grid .batch-mean { grid-column: 1 / -1; }
+        .batch-grid .batch-ex { display: none; }
+        .batch-grid .batch-type { text-align: center; padding-left: 6px; padding-right: 6px; }
+        .batch-acts { display: flex; flex-shrink: 0; flex-direction: column; gap: 4px; }
+        .batch-cols { display: none; }
+        @media (min-width: 768px) {
+            .batch-grid { grid-template-columns: minmax(0, 1.1fr) 4.5rem minmax(0, 1fr) minmax(0, 1.5fr); gap: 8px; }
+            .batch-grid .batch-mean { grid-column: auto; }
+            .batch-grid .batch-ex { display: block; }
+            .batch-acts { flex-direction: row; padding-top: 4px; }
+            .batch-cols { display: grid; grid-template-columns: 20px minmax(0, 1.1fr) 4.5rem minmax(0, 1fr) minmax(0, 1.5fr) 68px; gap: 8px; padding: 6px 12px; background: var(--surface-2); font-size: 11.5px; font-weight: 600; color: var(--ink-2); border-bottom: 1px solid var(--border); }
+            .batch-cols span:nth-child(n+2):nth-child(-n+5) { padding-left: 2px; }
+        }
         .btn-ai { display: inline-flex; align-items: center; gap: 6px; min-height: 36px; padding: 0 12px; border-radius: 12px; font-size: 14px; font-weight: 600; color: #5B21B6; background: linear-gradient(135deg, #F5F3FF 0%, #EDE9FE 55%, #FCE7F3 100%); border: 1px solid #DDD6FE; transition: box-shadow .15s ease, transform .15s ease; white-space: nowrap; }
         .btn-ai svg { color: #7C3AED; }
         .btn-ai:hover { box-shadow: 0 4px 14px rgba(124, 58, 237, .22); transform: translateY(-1px); }
@@ -4758,11 +4776,13 @@
             );
         };
 
+        const BATCH_SAMPLE = { word: 'VD: accountant', type: 'n', meaning: 'kế toán viên', example: 'She works as an accountant…' };
+        const BATCH_PLAIN = { word: 'Từ tiếng Anh', type: 'Loại', meaning: 'Nghĩa tiếng Việt', example: 'Câu ví dụ (EN)' };
         const newDraft = () => ({ key: 'd' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6), questionOrWord: '', answerOrMeaning: '', wordType: '', ipa: '', explanationOrExample: '', exampleVi: '', keywords: [], open: false });
         /* Thẻ nhập nhanh nối vào cuối một Nhóm: gõ từ (có gợi ý), Enter sang nghĩa, Enter nữa là dòng mới. Lưu tất cả một lần. */
-        const BatchAdd = ({ drafts, setDrafts, group, onGroup, groups, onSave, onCancel, onAI }) => {
+        const BatchAdd = ({ drafts, setDrafts, group, onGroup, groups, onSave, onCancel, onAI, autoFocus = true }) => {
             const refs = useRef({});
-            const [focusKey, setFocusKey] = useState(() => (drafts[0] ? drafts[0].key : null));
+            const [focusKey, setFocusKey] = useState(() => (autoFocus && drafts[0] ? drafts[0].key : null));
             const [busyKey, setBusyKey] = useState(null);
             const count = useRef(drafts.length);
             const groupListId = useMemo(() => 'bg-' + Math.random().toString(36).slice(2, 8), []);
@@ -4792,50 +4812,62 @@
             const ready = drafts.filter(x => x.questionOrWord.trim()).length;
             const enterTo = (e, next) => { if (e.key === 'Enter' && !e.shiftKey && !e.nativeEvent.isComposing) { e.preventDefault(); next(); } };
             return (
-                <section className="batch-add card" aria-label="Thêm nhanh nhiều từ">
+                <section className="batch-add card" aria-label="Nhập từ trực tiếp">
                     <div className="flex flex-wrap items-center gap-2 border-b border-line px-3 py-2.5 sm:px-4">
-                        <p className="text-sm font-semibold">Thêm vào nhóm</p>
-                        <input className="field !min-h-[34px] max-w-[14rem] flex-1 text-sm" list={groupListId} value={group} maxLength={80} placeholder="Unit 1, chủ đề…" aria-label="Lưu vào nhóm" onChange={(e) => onGroup(e.target.value)} />
+                        <span className="grp-dot" style={{ background: group.trim() ? Sch.groupColor(group.trim()) : 'var(--border)' }} aria-hidden="true" />
+                        <label className="batch-group">
+                            <input list={groupListId} value={group} maxLength={80} placeholder="Tên nhóm, vd Unit 1" aria-label="Tên nhóm (bấm để sửa)" onChange={(e) => onGroup(e.target.value)} />
+                            <Icon name="pen" size={13} />
+                        </label>
                         <datalist id={groupListId}>{(groups || []).filter(([k]) => k !== '__none').map(([k]) => <option key={k} value={k} />)}</datalist>
                         <p className="ml-auto hidden text-xs text-muted md:block"><Kbd>Enter</Kbd> sang ô kế / dòng mới · <Kbd>↓</Kbd> chọn gợi ý</p>
                     </div>
+                    <div className="batch-cols" aria-hidden="true"><span /><span>Từ tiếng Anh</span><span>Loại</span><span>Nghĩa tiếng Việt</span><span>Ví dụ</span><span /></div>
                     <ol className="divide-y divide-line">
-                        {drafts.map((x, i) => (
+                        {drafts.map((x, i) => {
+                            const ph = i === 0 ? BATCH_SAMPLE : BATCH_PLAIN;
+                            const nextRow = () => { const at = drafts.findIndex(y => y.key === x.key); const nx = drafts[at + 1]; if (nx) setFocusKey(nx.key); else addNext(); };
+                            return (
                             <li key={x.key} className="batch-row">
                                 <span className="batch-num tnum" aria-hidden="true">{i + 1}</span>
                                 <div className="min-w-0 flex-1">
-                                    <div className="grid gap-2 md:grid-cols-2">
-                                        <WordSuggest value={x.questionOrWord} placeholder="Từ tiếng Anh" ariaLabel={'Từ tiếng Anh, dòng ' + (i + 1)}
+                                    <div className="batch-grid">
+                                        <WordSuggest value={x.questionOrWord} placeholder={ph.word} ariaLabel={'Từ tiếng Anh, dòng ' + (i + 1)}
                                             inputRef={el => { refs.current[x.key] = el; }}
                                             onChange={(v) => patch(x.key, { questionOrWord: v })}
                                             onPick={(e) => { patch(x.key, fillFromDict(x, e)); const m = refs.current[x.key + ':m']; if (m) window.setTimeout(() => m.focus(), 0); }}
                                             onKeyDown={(e) => enterTo(e, () => { const m = refs.current[x.key + ':m']; if (m) m.focus(); })}>
                                             <AiPin mini onClick={() => fill(x)} busy={busyKey === x.key} disabled={!x.questionOrWord.trim()} label="AI điền từ loại, IPA, nghĩa, ví dụ" />
                                         </WordSuggest>
-                                        <input ref={el => { refs.current[x.key + ':m'] = el; }} className="field" value={x.answerOrMeaning} maxLength={1500} placeholder="Nghĩa tiếng Việt" aria-label={'Nghĩa tiếng Việt, dòng ' + (i + 1)}
+                                        <input className="field batch-type" value={x.wordType} maxLength={24} placeholder={ph.type} aria-label={'Từ loại, dòng ' + (i + 1)} onChange={(e) => patch(x.key, { wordType: e.target.value })} />
+                                        <input ref={el => { refs.current[x.key + ':m'] = el; }} className="field batch-mean" value={x.answerOrMeaning} maxLength={1500} placeholder={ph.meaning} aria-label={'Nghĩa tiếng Việt, dòng ' + (i + 1)}
                                             onChange={(e) => patch(x.key, { answerOrMeaning: e.target.value })}
-                                            onKeyDown={(e) => enterTo(e, () => { const at = drafts.findIndex(y => y.key === x.key); const nx = drafts[at + 1]; if (nx) setFocusKey(nx.key); else addNext(); })} />
+                                            onKeyDown={(e) => enterTo(e, nextRow)} />
+                                        <input className="field batch-ex" value={x.explanationOrExample} maxLength={2500} placeholder={ph.example} aria-label={'Câu ví dụ, dòng ' + (i + 1)}
+                                            onChange={(e) => patch(x.key, { explanationOrExample: e.target.value })}
+                                            onKeyDown={(e) => enterTo(e, nextRow)} />
                                     </div>
-                                    {(x.wordType || x.ipa) && !x.open && <p className="mt-1 text-xs text-muted">{[x.wordType, x.ipa].filter(Boolean).join(' · ')}</p>}
+                                    {x.ipa && !x.open && <p className="mt-1 text-xs text-muted">{x.ipa}</p>}
                                     {x.open && (
-                                        <div className="mt-2 grid gap-2 sm:grid-cols-[7rem_1fr]">
-                                            <input className="field" value={x.wordType} maxLength={24} placeholder="Từ loại" aria-label="Từ loại" onChange={(e) => patch(x.key, { wordType: e.target.value })} />
+                                        <div className="mt-2 grid gap-2 md:grid-cols-[12rem_1fr]">
                                             <input className="field" value={x.ipa} maxLength={80} placeholder="IPA /…/" aria-label="IPA" onChange={(e) => patch(x.key, { ipa: e.target.value })} />
-                                            <textarea className="field py-2 sm:col-span-2" rows={1} value={x.explanationOrExample} maxLength={2500} placeholder="Câu ví dụ (EN)" aria-label="Câu ví dụ" onChange={(e) => patch(x.key, { explanationOrExample: e.target.value })} />
+                                            <input className="field md:hidden" value={x.explanationOrExample} maxLength={2500} placeholder="Câu ví dụ (EN)" aria-label="Câu ví dụ" onChange={(e) => patch(x.key, { explanationOrExample: e.target.value })} />
+                                            <input className="field" value={x.exampleVi} maxLength={1500} placeholder="Dịch câu ví dụ" aria-label="Dịch câu ví dụ" onChange={(e) => patch(x.key, { exampleVi: e.target.value })} />
                                         </div>
                                     )}
                                 </div>
-                                <div className="flex shrink-0 flex-col gap-1">
+                                <div className="batch-acts">
                                     <button type="button" className="lib-act" aria-expanded={x.open} aria-label={x.open ? 'Thu gọn' : 'Thêm IPA, ví dụ'} title={x.open ? 'Thu gọn' : 'Thêm IPA, ví dụ'} onClick={() => patch(x.key, { open: !x.open })}><Icon name={x.open ? 'chevronUp' : 'chevronDown'} size={15} /></button>
                                     <button type="button" className="lib-act" aria-label={'Bỏ dòng ' + (i + 1)} title="Bỏ dòng" onClick={() => drop(x.key)}><Icon name="x" size={15} /></button>
                                 </div>
                             </li>
-                        ))}
+                            );
+                        })}
                     </ol>
                     <div className="flex flex-wrap items-center gap-2 border-t border-line px-3 py-2.5 sm:px-4">
-                        <button type="button" className="btn btn-ghost btn-sm" onClick={addNext}><Icon name="plus" size={14} /> Thêm dòng tiếp</button>
+                        <button type="button" className="btn btn-ghost btn-sm" onClick={addNext}><Icon name="plus" size={14} /> Thêm dòng</button>
                         <div className="ml-auto flex items-center gap-2">
-                            <button type="button" className="btn btn-secondary btn-sm" onClick={onCancel}>Hủy</button>
+                            {onCancel && <button type="button" className="btn btn-secondary btn-sm" onClick={onCancel}>Hủy</button>}
                             <button type="button" className="btn btn-primary btn-sm whitespace-nowrap" disabled={!ready} onClick={onSave}>Lưu tất cả{ready ? ' (' + ready + ')' : ''}</button>
                         </div>
                     </div>
@@ -4886,7 +4918,7 @@
             return { name, list };
         };
 
-        const QuickPaste = ({ groups, onAdd, toast, onLocked }) => {
+        const QuickPaste = ({ groups, onAdd, toast, onLocked, bare }) => {
             const [text, setText] = useState('');
             const [group, setGroup] = useState('');
             const [preview, setPreview] = useState(null);
@@ -4949,18 +4981,18 @@
                 }
             };
             return (
-                <section className="card p-4 sm:p-5 mb-4" aria-labelledby="qp-title">
-                    <div className="qp-head">
+                <section className={bare ? '' : 'card p-4 sm:p-5 mb-4'} aria-labelledby={bare ? undefined : 'qp-title'}>
+                    {!bare && <div className="qp-head">
                         <h3 id="qp-title" className="flex min-w-0 items-center gap-2 whitespace-nowrap font-semibold"><Icon name="clipboard" />Ô nhập thông minh</h3>
                         <div className="qp-tools">
                             <button type="button" className="qp-xls" onClick={() => xlsRef.current && xlsRef.current.click()} disabled={busy} aria-label="Nhập file Excel (.xlsx, .xls, .csv)">
                                 <Icon name="upload" size={15} /><span>Nhập Excel</span>
                             </button>
                             <button type="button" className="qp-sample hidden items-center md:inline-flex" onClick={downloadSample} title="Tải file .xlsx mẫu 3 cột: Từ, Nghĩa, Ví dụ">File mẫu</button>
-                            <input ref={xlsRef} type="file" multiple accept=".xlsx,.xls,.csv" className="hidden" onChange={(e) => { const f = e.target.files; takeFiles(f).finally(() => { e.target.value = ''; }); }} />
                         </div>
-                    </div>
-                    <p className="qp-sub">Dán danh sách từ, câu trắc nghiệm, hoặc kéo file Excel vào ô bên dưới<button type="button" className="qp-sample md:hidden" onClick={downloadSample}>File mẫu</button></p>
+                    </div>}
+                    <input ref={xlsRef} type="file" multiple accept=".xlsx,.xls,.csv" className="hidden" onChange={(e) => { const f = e.target.files; takeFiles(f).finally(() => { e.target.value = ''; }); }} />
+                    <p className="qp-sub">Mỗi dòng "từ - nghĩa", hoặc cả đoạn câu hỏi trắc nghiệm. Có thể kéo file Excel thả vào ô.{bare && <button type="button" className="qp-sample" onClick={() => xlsRef.current && xlsRef.current.click()}>Chọn file</button>}<button type="button" className={'qp-sample' + (bare ? '' : ' md:hidden')} onClick={downloadSample}>File mẫu</button></p>
                     {!preview ? (
                         <>
                             <div className={'qp-drop' + (drag ? ' is-drag' : '')} {...dropZone}>
@@ -5373,54 +5405,14 @@
             );
         };
 
-        /* Xem trước Sổ từ khi còn trống: dữ liệu mẫu chỉ vẽ trên giao diện, không lưu IndexedDB, không bấm được.
-           Có từ thật đầu tiên là khối này biến mất (LibraryView chỉ vẽ nó khi items rỗng). */
-        const SAMPLE_ROWS = [
-            { group: 'Unit 1 · Jobs', type: 'n', word: 'colleague', ipa: '/ˈkɒliːɡ/', meaning: 'đồng nghiệp', example: 'My colleague helped me finish the report.' },
-            { group: 'Unit 1 · Jobs', type: 'v', word: 'negotiate', ipa: '/nɪˈɡəʊʃieɪt/', meaning: 'đàm phán', example: 'We negotiated a higher salary.' },
-            { group: 'Unit 1 · Jobs', type: 'n', word: 'deadline', ipa: '/ˈdedlaɪn/', meaning: 'hạn chót', example: 'The deadline is next Friday.' }
-        ];
-        const SamplePreview = () => (
-            <section className="sample-prev" aria-hidden="true">
-                <span className="sample-badge">Xem trước hiển thị</span>
-                <div className="sample-body">
-                    <div className="grp-head !cursor-default"><Icon name="chevronDown" size={16} /><span className="grp-dot" style={{ background: Sch.groupColor(SAMPLE_ROWS[0].group) }} /><span className="min-w-0 flex-1 truncate text-left">{SAMPLE_ROWS[0].group}</span><span className="grp-count tnum">3 mục</span></div>
-                    {/* Điện thoại: 2 thẻ 2 dòng */}
-                    <ul className="divide-y divide-line border-t border-line md:hidden">
-                        {SAMPLE_ROWS.slice(0, 2).map(r => (
-                            <li key={r.word} className="lib-row">
-                                <span className="lib-bar" style={{ background: Sch.groupColor(r.group) }} />
-                                <div className="min-w-0 flex-1">
-                                    <div className="flex items-start gap-2">
-                                        <span className="lib-word">{r.word}<span className="lib-tag">{r.type}</span></span>
-                                        <span className="ml-auto flex shrink-0 items-center gap-1 text-muted"><Icon name="volume" size={15} /><Icon name="play" size={15} /><Icon name="pen" size={15} /></span>
-                                    </div>
-                                    <p className="lib-mean mt-0.5">{r.meaning}</p>
-                                </div>
-                            </li>
-                        ))}
-                    </ul>
-                    {/* Màn rộng: bảng mẫu */}
-                    <table className="hidden w-full border-collapse text-sm md:table">
-                        <thead className="bg-surface2 text-xs text-ink2">
-                            <tr>{['#', 'Nhóm', 'Loại', 'Từ / Câu hỏi', 'Nghĩa / Đáp án', 'Ví dụ'].map(h => <th key={h} className="px-3 py-2 text-left font-semibold">{h}</th>)}</tr>
-                        </thead>
-                        <tbody>
-                            {SAMPLE_ROWS.map((r, i) => (
-                                <tr key={r.word} className="border-t border-line align-top">
-                                    <td className="px-3 py-2.5 text-xs text-muted tnum">{i + 1}</td>
-                                    <td className="px-3 py-2.5"><span className="inline-flex items-center gap-2"><span className="h-4 w-1 rounded" style={{ background: Sch.groupColor(r.group) }} />{r.group}</span></td>
-                                    <td className="px-3 py-2.5"><span className="lib-tag !ml-0">{r.type}</span></td>
-                                    <td className="px-3 py-2.5"><b className="font-semibold text-primary">{r.word}</b><p className="text-xs text-muted">{r.ipa}</p></td>
-                                    <td className="px-3 py-2.5">{r.meaning}</td>
-                                    <td className="px-3 py-2.5 text-ink2">{r.example}</td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
-            </section>
-        );
+        const START_ANCHOR = '__start';
+        const startDrafts = (group, anchor) => ({ anchor: anchor || START_ANCHOR, group: group || 'Unit 1', list: [newDraft(), newDraft(), newDraft()] });
+        /* Tên nhóm kế tiếp: Unit lớn nhất + 1, không có thì "Unit <số nhóm + 1>". */
+        const nextUnitName = (groups) => {
+            let top = 0;
+            (groups || []).forEach(([k]) => { const m = /^unit\s*(\d+)/i.exec(String(k || '')); if (m) top = Math.max(top, Number(m[1])); });
+            return 'Unit ' + ((top || (groups || []).filter(([k]) => k && k !== '__none').length) + 1);
+        };
         const LibraryView = ({ items, setItems, groups, groupFilter, setGroupFilter, onPractice, onWeak, onStudyFrom, onQuickVote, toast, mergeItems }) => {
             const [quick, setQuick] = useState(false);
             const [importBatches, setImportBatches] = useState(null);
@@ -5444,8 +5436,13 @@
             const [menu, setMenu] = useState(null);
             const [filterOpen, setFilterOpen] = useState(false);
             const [fundOpen, setFundOpen] = useState(false);
-            const [drafts, setDrafts] = useState(null);
+            const [drafts, setDrafts] = useState(() => (items.length ? null : startDrafts()));
             const menuBox = useRef(null);
+            /* Sổ trống: luôn có sẵn nhóm "Unit 1" với 3 dòng trống để gõ ngay. Có từ thật (lưu, dán, Excel) thì dọn khung trống đi. */
+            useEffect(() => {
+                if (!items.length && !drafts) setDrafts(startDrafts());
+                if (items.length && drafts && drafts.anchor === START_ANCHOR && !drafts.list.some(x => x.questionOrWord.trim() || x.answerOrMeaning.trim())) setDrafts(null);
+            }, [items.length, drafts]);
             useEffect(() => {
                 if (!menu) return undefined;
                 const close = (e) => { if (menuBox.current && !menuBox.current.contains(e.target)) setMenu(null); };
@@ -5535,6 +5532,12 @@
                 setDrafts(d => (d && d.anchor === g ? Object.assign({}, d, { list: d.list.concat([newDraft()]) }) : { anchor: g, group: g, list: [newDraft()] }));
             };
             const addRow = () => addRowTo(null);
+            const newGroup = () => {
+                const typed = drafts && drafts.list.some(x => x.questionOrWord.trim() || x.answerOrMeaning.trim());
+                if (typed) { toast('Lưu hoặc bỏ các dòng đang nhập trước khi tạo nhóm mới', 'info'); return; }
+                setDrafts(startDrafts(nextUnitName(groups), '__new'));
+                window.setTimeout(() => { const el = document.querySelector('.batch-add'); if (el) el.scrollIntoView({ block: 'center', behavior: 'smooth' }); }, 60);
+            };
             const setDraftList = (fn) => setDrafts(d => (d ? Object.assign({}, d, { list: typeof fn === 'function' ? fn(d.list) : fn }) : d));
             const saveDrafts = () => {
                 if (!drafts) return;
@@ -5552,11 +5555,11 @@
             const cancelDrafts = () => {
                 const typed = (drafts ? drafts.list : []).some(x => x.questionOrWord.trim() || x.answerOrMeaning.trim());
                 if (typed && !confirm('Bỏ các dòng đang nhập?')) return;
-                setDrafts(null);
+                setDrafts(items.length ? null : startDrafts());
             };
             const batchCard = drafts ? (
-                <BatchAdd drafts={drafts.list} setDrafts={setDraftList} group={drafts.group} groups={groups}
-                    onGroup={(v) => setDrafts(d => Object.assign({}, d, { group: v }))} onAI={(t) => aiDraft(t)} onSave={saveDrafts} onCancel={cancelDrafts} />
+                <BatchAdd drafts={drafts.list} setDrafts={setDraftList} group={drafts.group} groups={groups} autoFocus={!(drafts.anchor === START_ANCHOR && !items.length)}
+                    onGroup={(v) => setDrafts(d => Object.assign({}, d, { group: v }))} onAI={(t) => aiDraft(t)} onSave={saveDrafts} onCancel={items.length ? cancelDrafts : null} />
             ) : null;
             const draftsLoose = drafts && !secByKey.has(drafts.anchor);
             const groupHead = (sec) => (
@@ -5727,24 +5730,15 @@
                         </div>
                         <div className="relative flex shrink-0 items-center gap-2">
                             {groupFilter !== 'all' && <button type="button" onClick={() => onPractice(studyable, 'flash', Sch.groupLabel(groupFilter))} disabled={!studyable.length} className="btn btn-secondary btn-sm hidden sm:inline-flex"><Icon name="layers" size={14} /> Luyện nhóm này</button>}
-                            {items.length > 0 && <button type="button" onClick={() => setPassage(true)} className="btn-ai" title="Dán bài đọc hoặc đề thi, AI lọc từ mới kèm IPA và nghĩa">
-                                <Icon name="sparkles" size={15} /><span className="sm:hidden">Quét bài</span><span className="hidden sm:inline">AI quét bài đọc</span>
-                            </button>}
-                            <button type="button" onClick={() => setMenu(m => (m === 'add' ? null : 'add'))} aria-expanded={menu === 'add'} aria-haspopup="menu" className="btn btn-primary btn-sm"><Icon name="plus" size={15} /> Thêm từ</button>
+                            <button type="button" onClick={newGroup} className="btn btn-primary btn-sm whitespace-nowrap"><Icon name="plus" size={15} /> Tạo nhóm mới</button>
                             <button type="button" onClick={() => setMenu(m => (m === 'more' ? null : 'more'))} aria-expanded={menu === 'more'} aria-haspopup="menu" aria-label="Tùy chọn khác" className="btn btn-secondary btn-sm btn-icon !w-10">•••</button>
                             {menu && (
                                 <div role="menu" className="lib-menu">
-                                    {menu === 'add' ? (
-                                        <>
-                                            <button type="button" role="menuitem" onClick={() => runMenu(() => setQuick(true))}><Icon name="clipboard" size={16} /><span><b>Dán nhanh</b><small>Dán danh sách "từ - nghĩa", mỗi dòng một từ</small></span></button>
-                                            <button type="button" role="menuitem" onClick={() => runMenu(() => setPassage(true))}><Icon name="sparkles" size={16} /><span><b>AI quét bài đọc / đề thi</b><small>Dán bài, AI lọc từ mới kèm IPA</small></span></button>
-                                            <button type="button" role="menuitem" onClick={() => runMenu(() => fileRef.current && fileRef.current.click())}><Icon name="upload" size={16} /><span><b>Nhập từ file Excel</b><small>.xlsx, .xls hoặc .csv, tên file thành tên nhóm</small></span></button>
-                                            <button type="button" role="menuitem" onClick={() => runMenu(addRow)}><Icon name="plus" size={16} /><span><b>Thêm nhanh nhiều dòng</b><small>Gõ từ, Enter, gõ nghĩa, Enter sang dòng mới</small></span></button>
-                                        </>
-                                    ) : (
+                                    {menu === 'more' && (
                                         <>
                                             <button type="button" role="menuitem" disabled={!!aiAll || !items.length} onClick={() => runMenu(aiEverything)}><Icon name="sparkles" size={16} /><span><b>{aiAll ? 'AI ' + aiAll.done + '/' + aiAll.total : 'AI bổ sung tất cả'}</b><small>Điền nghĩa, IPA, ví dụ còn thiếu</small></span></button>
                                             <button type="button" role="menuitem" disabled={!items.length} onClick={() => runMenu(exportExcel)}><Icon name="sheet" size={16} /><span><b>Tải kho về Excel</b><small>Sao lưu toàn bộ kho</small></span></button>
+                                            <button type="button" role="menuitem" onClick={() => runMenu(downloadSample)}><Icon name="download" size={16} /><span><b>Tải file Excel mẫu</b><small>3 cột: Từ, Nghĩa, Ví dụ</small></span></button>
                                             <button type="button" role="menuitem" onClick={() => runMenu(() => window.dispatchEvent(new CustomEvent('edu-contribute')))}><Icon name="share" size={16} /><span><b>Gửi đề cho admin</b><small>Góp đề để mọi người cùng ôn</small></span></button>
                                             <button type="button" role="menuitem" className="is-danger" disabled={!items.length} onClick={() => runMenu(removeAll)}><Icon name="trash" size={16} /><span><b>Xóa hết từ trong bảng</b><small>Xóa toàn bộ {items.length} mục, không hoàn tác</small></span></button>
                                         </>
@@ -5758,7 +5752,23 @@
                     <FundStrip onOpen={() => setFundOpen(true)} onQuickVote={onQuickVote} />
                     {fundOpen && <Modal title="Mã quỹ & gói AI" onClose={() => setFundOpen(false)} size="lg"><FundBody toast={toast} kind="vocab" compact items={items} /></Modal>}
 
-                    {quick && <QuickPaste groups={groups} toast={toast} onLocked={() => setPaywall(true)} onAdd={(list) => confirmImport({ items: list, mode: 'append' })} />}
+                    <div className="import-bar" role="toolbar" aria-label="Nhập hàng loạt">
+                        <button type="button" className="imp-btn is-ai" onClick={() => setPassage(true)} title="Dán bài đọc hoặc đề thi, AI lọc từ mới kèm IPA và nghĩa">
+                            <Icon name="sparkles" size={16} /><span className="md:hidden">AI quét</span><span className="hidden md:inline">AI quét bài đọc</span>
+                        </button>
+                        <button type="button" className="imp-btn" onClick={() => setQuick(true)} title='Dán danh sách "từ - nghĩa", mỗi dòng một từ'>
+                            <Icon name="clipboard" size={16} /><span className="md:hidden">Dán nhanh</span><span className="hidden md:inline">Dán danh sách</span>
+                        </button>
+                        <button type="button" className="imp-btn" onClick={() => fileRef.current && fileRef.current.click()} title=".xlsx, .xls hoặc .csv, tên file thành tên nhóm">
+                            <Icon name="upload" size={16} /><span>Nhập Excel</span>
+                        </button>
+                        <button type="button" className="imp-sample" onClick={downloadSample} title="Tải file .xlsx mẫu 3 cột: Từ, Nghĩa, Ví dụ">File Excel mẫu</button>
+                    </div>
+                    {quick && (
+                        <Modal title="Dán danh sách" size="lg" onClose={() => setQuick(false)}>
+                            <QuickPaste bare groups={groups} toast={toast} onLocked={() => { setQuick(false); setPaywall(true); }} onAdd={(list) => { confirmImport({ items: list, mode: 'append' }); setQuick(false); }} />
+                        </Modal>
+                    )}
 
                     {items.length > 0 && <div className="mb-3">
                         <div className="flex items-center gap-2">
@@ -5802,39 +5812,16 @@
                     )}
 
                     {/* Điện thoại (<768px): danh sách thẻ 2 dòng, chạm để sửa. Màn rộng giữ bảng đầy đủ. */}
-                    {/* Sổ từ trống: 3 lối tạo từ ngay tại chỗ, như trang "Tạo học phần" của các web học lớn. */}
-                    {items.length === 0 && !drafts && (
-                        <>
-                        <section className="card p-4 sm:p-6" aria-label="Bắt đầu Sổ từ">
-                            <p className="text-lg font-bold">Bắt đầu Sổ từ của bạn</p>
-                            <p className="mt-1 text-sm text-ink2">Chọn cách nhanh nhất với bạn. Từ mới tự xếp theo nhóm, đúng thứ tự bài học.</p>
-                            <div className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-3">
-                                <button type="button" className="start-tile is-ai" onClick={() => setPassage(true)}>
-                                    <span className="start-ico"><Icon name="sparkles" size={20} /></span>
-                                    <b>AI quét bài đọc</b><small>Dán bài đọc hoặc đề thi, AI lọc từ mới kèm IPA và nghĩa</small>
-                                </button>
-                                <button type="button" className="start-tile" onClick={addRow}>
-                                    <span className="start-ico"><Icon name="plus" size={20} /></span>
-                                    <b>Gõ từng từ</b><small>Gõ 2 chữ là có gợi ý nghĩa, không tốn lượt AI</small>
-                                </button>
-                                <button type="button" className="start-tile" onClick={() => setQuick(true)}>
-                                    <span className="start-badge" aria-hidden="true">.XLSX / .CSV</span>
-                                    <span className="start-ico"><Icon name="clipboard" size={20} /></span>
-                                    <b>Dán danh sách / Excel</b><small>Mỗi dòng "từ - nghĩa", hoặc <span className="underline" role="link" onClick={(e) => { e.stopPropagation(); if (fileRef.current) fileRef.current.click(); }}>nhập file Excel</span></small>
-                                </button>
-                            </div>
-                        </section>
-                        <SamplePreview />
-                        </>
-                    )}
+                    {/* Sổ từ trống: bảng nhập trực tiếp nằm ngay giữa trang (nhóm Unit 1, 3 dòng trống). */}
+                    {items.length === 0 && batchCard}
 
                     {/* Điện thoại: mỗi nhóm là một khối đóng/mở, thẻ 2 dòng, chạm để sửa. */}
-                    <div className={'md:hidden' + (items.length === 0 && !drafts ? ' !hidden' : '')}>
+                    <div className={'md:hidden' + (items.length === 0 ? ' !hidden' : '')}>
                         {rows.length === 0 && !drafts ? (
-                            <div className="card"><Empty icon="layers" title="Chưa có mục nào ở đây">Bấm "Thêm từ" để bắt đầu.</Empty></div>
+                            <div className="card"><Empty icon="layers" title="Chưa có mục nào ở đây">Thử bỏ bớt bộ lọc, hoặc bấm "Tạo nhóm mới".</Empty></div>
                         ) : (
                             <div className="flex flex-col gap-2">
-                                {!wide && draftsLoose && batchCard}
+                                {items.length > 0 && !wide && draftsLoose && batchCard}
                                 {sections.map(sec => (
                                     <section key={'m:' + sec.key} className="card overflow-hidden">
                                         {groupHead(sec)}
@@ -5874,7 +5861,7 @@
                         )}
                     </div>
 
-                    <div className={'card hidden overflow-hidden pb-24' + (items.length === 0 && !drafts ? '' : ' md:block')}>
+                    <div className={'card hidden overflow-hidden pb-24' + (items.length === 0 ? '' : ' md:block')}>
                         <div className="overflow-x-auto" ref={tableBox}>
                             <table className="w-full min-w-[1080px] text-sm border-collapse">
                                 <caption className="sr-only">Bảng kho học</caption>
@@ -5892,10 +5879,10 @@
                                     </tr>
                                 </thead>
                                 {rows.length === 0 && !drafts ? (
-                                    <tbody><tr><td colSpan="9"><Empty icon="layers" title="Chưa có mục nào ở đây">Dùng "Dán nhanh" hoặc "Thêm dòng" để bắt đầu.</Empty></td></tr></tbody>
+                                    <tbody><tr><td colSpan="9"><Empty icon="layers" title="Chưa có mục nào ở đây">Thử bỏ bớt bộ lọc, hoặc bấm "Tạo nhóm mới".</Empty></td></tr></tbody>
                                 ) : (
                                     <>
-                                        {wide && draftsLoose && <tbody><tr><td colSpan="9" className="p-3">{pinned(batchCard)}</td></tr></tbody>}
+                                        {items.length > 0 && wide && draftsLoose && <tbody><tr><td colSpan="9" className="p-3">{pinned(batchCard)}</td></tr></tbody>}
                                         {sections.map(sec => (
                                             <tbody key={'t:' + sec.key}>
                                                 <tr className="grp-tr"><td colSpan="9" className="p-0">{groupHead(sec)}</td></tr>
