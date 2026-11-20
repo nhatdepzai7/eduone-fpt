@@ -276,7 +276,7 @@ const dropGone = (rows, gone) => {
 };
 
 /* Cài đặt học riêng của từng tài khoản (bản sắc, lịch, mốc, chuỗi ngày...). Chỉ nhận đúng các khóa này. */
-const PROFILE_KEYS = ['identity', 'student', 'habitDays', 'milestones', 'exams', 'weeklyPlan', 'nextWeeklyPlan', 'setupDone', 'recentPacks', 'eosTried', 'licenses', 'slotSource', 'qlang', 'skin'];
+const PROFILE_KEYS = ['identity', 'student', 'habitDays', 'milestones', 'exams', 'weeklyPlan', 'nextWeeklyPlan', 'setupDone', 'recentPacks', 'eosTried', 'licenses', 'slotSource', 'qlang', 'skin', 'clockStyle'];
 function cleanProfile(raw) {
     const out = {};
     if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return out;
