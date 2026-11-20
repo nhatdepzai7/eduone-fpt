@@ -260,18 +260,32 @@ function mergeVotes(cloud, guest) {
     return Array.from(map.values()).slice(0, 5000);
 }
 
+/* Cài đặt học riêng của từng tài khoản (bản sắc, lịch, mốc, chuỗi ngày...). Chỉ nhận đúng các khóa này. */
+const PROFILE_KEYS = ['identity', 'student', 'habitDays', 'milestones', 'exams', 'weeklyPlan', 'nextWeeklyPlan', 'setupDone', 'recentPacks', 'eosTried', 'licenses', 'slotSource', 'qlang'];
+function cleanProfile(raw) {
+    const out = {};
+    if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return out;
+    PROFILE_KEYS.forEach((key) => {
+        if (!Object.prototype.hasOwnProperty.call(raw, key)) return;
+        const text = JSON.stringify(raw[key]);
+        if (text !== undefined && text.length <= 60000) out[key] = JSON.parse(text);
+    });
+    return out;
+}
+
 async function readLib(env, sub) {
     const raw = await redisCommand(env, ['GET', 'fpass:lib:' + sub]);
-    if (!raw || typeof raw !== 'string') return { items: [], progress: [], votes: [] };
+    if (!raw || typeof raw !== 'string') return { items: [], progress: [], votes: [], profile: {} };
     try {
         const data = JSON.parse(raw);
         return {
             items: Array.isArray(data.items) ? data.items : [],
             progress: Array.isArray(data.progress) ? data.progress : [],
-            votes: Array.isArray(data.votes) ? data.votes : []
+            votes: Array.isArray(data.votes) ? data.votes : [],
+            profile: cleanProfile(data.profile)
         };
     } catch (e) {
-        return { items: [], progress: [], votes: [] };
+        return { items: [], progress: [], votes: [], profile: {} };
     }
 }
 
@@ -319,7 +333,9 @@ export async function loginGoogle(env, body) {
     const library = {
         items: mergeItems(cloud.items, guestLib.items),
         progress: mergeProgress(cloud.progress, guestLib.progress),
-        votes: mergeVotes(cloud.votes, guestLib.votes)
+        votes: mergeVotes(cloud.votes, guestLib.votes),
+        /* Bản trên mây thắng: máy khách chỉ lấp khóa tài khoản chưa có. */
+        profile: Object.assign({}, cleanProfile(guestLib.profile), cloud.profile)
     };
     await writeLib(env, user.sub, library);
     await redisCommand(env, [
@@ -353,6 +369,22 @@ export async function payAccount(env, req, body) {
     const askedOwner = asked && asked !== code ? await fundOwner(env, asked) : '';
     const sharedCode = askedOwner && askedOwner !== user.sub ? asked : '';
     return { fundCode: code, email: user.email, sharedCode };
+}
+
+/* Đồng bộ thường xuyên khi đang đăng nhập: gộp kho trên máy vào đúng tài khoản của phiên này. */
+export async function pushLibrary(env, req, body) {
+    const user = await userFromSession(env, req);
+    if (!user) bad('auth', 'Cần đăng nhập Google.');
+    const lib = body && body.library && typeof body.library === 'object' ? body.library : {};
+    const cloud = await readLib(env, user.sub);
+    const library = {
+        items: mergeItems(cloud.items, lib.items),
+        progress: mergeProgress(cloud.progress, lib.progress),
+        votes: mergeVotes(cloud.votes, lib.votes),
+        profile: Object.assign({}, cloud.profile, cleanProfile(lib.profile))
+    };
+    await writeLib(env, user.sub, library);
+    return { ok: true, email: user.email, items: library.items.length, votes: library.votes.length };
 }
 
 export async function currentAccount(env, req) {

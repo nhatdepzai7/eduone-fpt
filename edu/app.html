@@ -6928,8 +6928,61 @@
             window.dispatchEvent(new CustomEvent('edu-votes'));
         };
 
+        /* Mỗi email Google một kho riêng trên máy: sổ từ, tiến độ, phiếu bản sắc và cài đặt học không lẫn giữa các tài khoản.
+           'dataOwner' ghi email đang sở hữu dữ liệu trên máy; rỗng là khách chưa đăng nhập. */
+        const PROFILE_KEYS = ['identity', 'student', 'habitDays', 'milestones', 'exams', 'weeklyPlan', 'nextWeeklyPlan', 'setupDone', 'recentPacks', 'eosTried', 'licenses', 'slotSource', 'qlang'];
+        const LOCAL_KEYS = ['mission', 'libDrafts', 'hybridToday'];
+        const dataOwner = () => String(Store.prefs.get('dataOwner', '') || '').toLowerCase();
+        const profileSnapshot = () => {
+            const out = {};
+            PROFILE_KEYS.forEach((k) => { const v = Store.prefs.get(k, undefined); if (v !== undefined) out[k] = v; });
+            return out;
+        };
+        const applyProfile = (profile) => {
+            if (!profile || typeof profile !== 'object') return;
+            PROFILE_KEYS.forEach((k) => { if (Object.prototype.hasOwnProperty.call(profile, k)) Store.prefs.set(k, profile[k]); });
+            window.dispatchEvent(new CustomEvent('edu-identity'));
+        };
+        const wipeLocalAccount = async () => {
+            await Promise.all([Store.items.clear(), Store.progress.clear(), Store.identityVotes.clear()]);
+            PROFILE_KEYS.concat(LOCAL_KEYS).forEach((k) => Store.prefs.remove(k));
+        };
+        /* Đọc email trong mã Google (chỉ để biết có đổi tài khoản không; máy chủ mới là nơi xác minh). */
+        const emailOfCredential = (credential) => {
+            try {
+                const part = String(credential).split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
+                const text = decodeURIComponent(Array.from(atob(part)).map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join(''));
+                return String(JSON.parse(text).email || '').toLowerCase();
+            } catch (e) { return ''; }
+        };
+        const pushLibrary = async () => {
+            const token = googleToken();
+            if (!token) return false;
+            const snap = await librarySnapshot();
+            snap.library.profile = profileSnapshot();
+            const res = await fetch('/api/fund?action=push', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', Accept: 'application/json', Authorization: 'Bearer ' + token },
+                body: JSON.stringify({ library: snap.library })
+            });
+            if (res.status === 401) { Store.prefs.remove('googleToken'); noteAccount(); }
+            return res.ok;
+        };
+        window.EDU.pushLibrary = pushLibrary;
         const loginWithCredential = async (credential) => {
-            const guest = await librarySnapshot();
+            const target = emailOfCredential(credential);
+            const owner = dataOwner();
+            const switching = !!owner && !!target && owner !== target;
+            if (switching) {
+                let saved = false;
+                try { saved = await pushLibrary(); } catch (e) {}
+                if (!saved && !confirm('Chưa lưu được tiến độ mới nhất của ' + owner + ' lên tài khoản. Vẫn chuyển sang ' + target + '? Phần chưa lưu trên máy này sẽ mất.')) {
+                    throw new Error('Đã giữ nguyên tài khoản ' + owner + '.');
+                }
+            }
+            /* Đổi tài khoản: không gửi kho của người trước lên tài khoản mới. */
+            const guest = switching ? { fundCode: '', library: { items: [], progress: [], votes: [], profile: {} } } : await librarySnapshot();
+            if (!switching) guest.library.profile = profileSnapshot();
             const res = await fetch('/api/fund?action=login', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
@@ -6937,11 +6990,26 @@
             });
             const data = await res.json().catch(() => ({}));
             if (!res.ok) throw new Error(data.error || 'Chưa đăng nhập được Google.');
+            if (switching) { await wipeLocalAccount(); Store.prefs.remove('fund'); }
             Store.prefs.set('googleToken', data.token || '');
             Store.prefs.set('googleUser', data.user || null);
+            Store.prefs.set('dataOwner', String((data.user && data.user.email) || target || '').toLowerCase());
             await applyCloud(data);
+            applyProfile(data.library && data.library.profile);
             noteAccount();
+            /* Nạp lại để mọi màn (lịch, mốc, chuỗi) đọc đúng kho của tài khoản mới. */
+            if (switching) window.setTimeout(() => location.reload(), 400);
             return data;
+        };
+        /* Đăng xuất: lưu nốt lên tài khoản rồi xóa kho trên máy, máy trở về khách mới. */
+        const logoutGoogle = async () => {
+            let saved = false;
+            try { saved = await pushLibrary(); } catch (e) {}
+            if (!saved && !confirm('Chưa lưu được tiến độ mới nhất lên tài khoản. Vẫn đăng xuất? Phần chưa lưu trên máy này sẽ mất.')) return false;
+            await wipeLocalAccount();
+            ['googleToken', 'googleUser', 'dataOwner', 'fund'].forEach((k) => Store.prefs.remove(k));
+            location.reload();
+            return true;
         };
 
         const redeemGiftCode = async (code) => {
@@ -7068,6 +7136,7 @@
             };
             const [perm, setPerm] = useState(window.Notification ? Notification.permission : 'unsupported');
             const account = Store.prefs.get('googleUser', null);
+            const [leaving, setLeaving] = useState(false);
             const permLabel = perm === 'granted' ? 'Đã bật' : perm === 'denied' ? 'Bị chặn' : perm === 'unsupported' ? 'Không hỗ trợ' : 'Bật';
             return (
                 <Modal title="Cài đặt" onClose={onClose} footer={<><button type="button" className="btn btn-secondary" onClick={onClose}>Hủy</button><button type="button" className="btn btn-primary" onClick={save}>Lưu</button></>}>
@@ -7091,9 +7160,17 @@
                             </span>
                             <Icon name="right" size={16} className="text-muted" />
                         </button>
-                        {!account && (
+                        {account && account.email ? (
                             <div className="flex items-center justify-between gap-3 rounded-xl border border-line p-3">
-                                <span className="text-xs text-ink2">Chưa đăng nhập. Gói và lượt đang lưu tạm trên máy này.</span>
+                                <span className="min-w-0 text-xs text-ink2">Sổ từ, phiếu bản sắc và tiến độ đang lưu riêng cho <b className="break-all text-ink">{account.email}</b>.</span>
+                                <span className="flex shrink-0 gap-2">
+                                    <button type="button" className="btn btn-secondary btn-sm" onClick={onGoogle}>Đổi tài khoản</button>
+                                    <button type="button" className="btn btn-secondary btn-sm" disabled={leaving} onClick={async () => { setLeaving(true); const done = await logoutGoogle(); if (!done) setLeaving(false); }}>{leaving ? 'Đang lưu…' : 'Đăng xuất'}</button>
+                                </span>
+                            </div>
+                        ) : (
+                            <div className="flex items-center justify-between gap-3 rounded-xl border border-line p-3">
+                                <span className="text-xs text-ink2">Chưa đăng nhập. Sổ từ, phiếu và lượt đang lưu tạm trên máy này.</span>
                                 <button type="button" className="btn btn-secondary btn-sm shrink-0" onClick={onGoogle}>Đăng nhập Google</button>
                             </div>
                         )}
@@ -7135,6 +7212,34 @@
             const [googleOpen, setGoogleOpen] = useState(false);
             const [pendingGift, setPendingGift] = useState('');
             const [googleAccount, setGoogleAccount] = useState(() => Store.prefs.get('googleUser', null));
+            /* Người đã đăng nhập từ bản trước: kho trên máy thuộc về email đó. */
+            useEffect(() => {
+                const user = Store.prefs.get('googleUser', null);
+                if (user && user.email && !dataOwner()) Store.prefs.set('dataOwner', String(user.email).toLowerCase());
+            }, []);
+            /* Đang đăng nhập: gửi phiếu, tiến độ, sổ từ lên đúng tài khoản vài giây sau mỗi thay đổi, và khi rời tab. */
+            useEffect(() => {
+                if (!googleAccount || !googleAccount.email) return undefined;
+                let timer = 0;
+                let busy = false;
+                const run = () => {
+                    if (busy || !googleToken()) return;
+                    busy = true;
+                    pushLibrary().catch(() => {}).then(() => { busy = false; });
+                };
+                const soon = () => { window.clearTimeout(timer); timer = window.setTimeout(run, 4000); };
+                const hide = () => { if (document.visibilityState === 'hidden') { window.clearTimeout(timer); run(); } };
+                const events = ['edu-votes', 'edu-items-saved', 'edu-mission', 'edu-identity'];
+                events.forEach((ev) => window.addEventListener(ev, soon));
+                document.addEventListener('visibilitychange', hide);
+                const tick = window.setInterval(run, 120000);
+                return () => {
+                    window.clearTimeout(timer);
+                    window.clearInterval(tick);
+                    events.forEach((ev) => window.removeEventListener(ev, soon));
+                    document.removeEventListener('visibilitychange', hide);
+                };
+            }, [googleAccount && googleAccount.email]);
             const [googleReason, setGoogleReason] = useState('');
             const [guideOpen, setGuideOpen] = useState(false);
             const [setupOpen, setSetupOpen] = useState(false);
