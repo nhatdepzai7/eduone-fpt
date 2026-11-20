@@ -828,6 +828,16 @@
         .app-root[data-tier="obsidian"] .sched-card .src-opt.is-on { color: #6B4E14; box-shadow: 0 1px 3px rgba(15, 23, 42, .12), inset 0 0 0 1px rgba(217, 184, 113, .45); }
         .app-root[data-tier="obsidian"] h1 .text-primary { color: #8F7034; }
         .app-root[data-tier="obsidian"] .cmd-card :focus-visible { outline-color: #F2DDA4; }
+        /* Chất liệu thẻ đếm ngược Obsidian: mặt đồng hồ khắc chìm xoay rất chậm, hạt nhám đen, ánh kim theo chuột. Bản Eco không hiện. */
+        .cmd-dial, .cmd-grain, .cmd-spot { display: none; }
+        .app-root[data-tier="obsidian"] .cmd-dial { display: block; position: absolute; z-index: 0; top: -120px; right: -110px; width: 420px; height: 420px; stroke: #E5C98B; opacity: .08; pointer-events: none; -webkit-mask-image: radial-gradient(circle closest-side at 40% 60%, #000 55%, rgba(0, 0, 0, .6) 85%, transparent 104%); mask-image: radial-gradient(circle closest-side at 40% 60%, #000 55%, rgba(0, 0, 0, .6) 85%, transparent 104%); animation: dial-spin 120s linear infinite; will-change: transform; }
+        .app-root[data-tier="obsidian"] .cmd-grain { display: block; position: absolute; inset: 0; z-index: 0; opacity: .03; pointer-events: none; mix-blend-mode: screen; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 1 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); background-size: 160px 160px; }
+        @media (hover: hover) and (pointer: fine) {
+            .app-root[data-tier="obsidian"] .cmd-spot { display: block; position: absolute; inset: 0; z-index: 0; pointer-events: none; opacity: 0; background: radial-gradient(420px circle at var(--mx, 70%) var(--my, 20%), rgba(229, 201, 139, .07), transparent 60%); transition: opacity .5s ease; }
+            .app-root[data-tier="obsidian"] .cmd-card:hover .cmd-spot { opacity: 1; }
+        }
+        @keyframes dial-spin { to { transform: rotate(360deg); } }
+        @media (prefers-reduced-motion: reduce) { .app-root[data-tier="obsidian"] .cmd-dial { animation: none; } .app-root[data-tier="obsidian"] .cmd-spot { transition: none; } }
         @media (prefers-reduced-motion: reduce) { .ob-chip, .app-side[data-tier="obsidian"] .side-link svg { transition: none; } }
         @keyframes identity-cue {
             0% { box-shadow: 0 0 0 0 rgba(231, 197, 106, .55); }
@@ -4549,6 +4559,29 @@
             </ol>
         );
 
+        /* Mặt đồng hồ khắc chìm cho thẻ Obsidian: 2 vòng mảnh + 60 vạch giây, vạch 5 giây dài hơn. Bản Eco ẩn bằng CSS. */
+        const DIAL_TICKS = Array.from({ length: 60 }, (_, i) => {
+            const a = (i * 6 - 90) * Math.PI / 180;
+            const major = i % 5 === 0;
+            const r1 = major ? 80 : 86;
+            return { x1: 100 + r1 * Math.cos(a), y1: 100 + r1 * Math.sin(a), x2: 100 + 93 * Math.cos(a), y2: 100 + 93 * Math.sin(a), w: major ? 1.1 : 0.45 };
+        });
+        const ChronoDial = React.memo(() => (
+            <svg className="cmd-dial" viewBox="0 0 200 200" aria-hidden="true" focusable="false">
+                <circle cx="100" cy="100" r="97" fill="none" strokeWidth="0.6" />
+                <circle cx="100" cy="100" r="74" fill="none" strokeWidth="0.4" />
+                <circle cx="100" cy="100" r="40" fill="none" strokeWidth="0.3" strokeDasharray="0.6 2.4" />
+                {DIAL_TICKS.map((t, i) => <line key={i} x1={t.x1.toFixed(2)} y1={t.y1.toFixed(2)} x2={t.x2.toFixed(2)} y2={t.y2.toFixed(2)} strokeWidth={t.w} strokeLinecap="round" />)}
+            </svg>
+        ));
+        /* Vầng sáng theo chuột: chỉ đổi biến CSS trên thẻ, không render lại React. */
+        const moveSpot = (e) => {
+            const el = e.currentTarget;
+            const r = el.getBoundingClientRect();
+            el.style.setProperty('--mx', ((e.clientX - r.left) / r.width * 100).toFixed(1) + '%');
+            el.style.setProperty('--my', ((e.clientY - r.top) / r.height * 100).toFixed(1) + '%');
+        };
+
         const FocusCard = ({ plan, cur, now, cardCount, onAddFirst, onStart, onStudyNow, onSnooze, onBonus, onReceipt, onGate }) => {
             const slot = cur.slot;
             const nowD = new Date(now);
@@ -4586,7 +4619,10 @@
             const lateText = lateBy >= 60 ? Math.floor(lateBy / 60) + ' giờ' + (lateBy % 60 ? ' ' + (lateBy % 60) + ' phút' : '') : lateBy + ' phút';
             const onTimeLeft = live && !late ? Math.max(0, (startMin + 30) * 60000 - (nowD.getTime() - new Date(nowD).setHours(0, 0, 0, 0))) : 0;
             return (
-                <section className="cmd-card flex flex-col p-5 text-left sm:p-7" aria-label="Ca học hôm nay">
+                <section className="cmd-card flex flex-col p-5 text-left sm:p-7" aria-label="Ca học hôm nay" onPointerMove={moveSpot}>
+                    <ChronoDial />
+                    <span className="cmd-grain" aria-hidden="true" />
+                    <span className="cmd-spot" aria-hidden="true" />
                     <div className="relative z-10 flex flex-1 flex-col">
                         <div className="flex flex-wrap items-center gap-2">
                             <span className="cmd-pill bg-white/15 text-white"><Icon name="lock" size={13} /> Lịch hôm nay đã khóa</span>
