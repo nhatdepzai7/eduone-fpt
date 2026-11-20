@@ -1,6 +1,8 @@
 /**
  * Kho đề trên Redis.
- * Chính thức: fpass:exams + fpass:exam:{id}
+ * Chính thức: fpass:exams + fpass:exam:{id} (thông tin đề và thứ tự câu)
+ *             + fpass:examq:{id} (hash: mỗi câu hỏi là một field, sửa từng câu không phải ghi lại cả đề)
+ * Đề cũ còn mảng items trong fpass:exam:{id} vẫn đọc được; admin mở kho đề là tự chuyển sang dạng tách câu.
  * Chờ duyệt: fpass:pending + fpass:pending:{id}
  */
 
@@ -91,6 +93,7 @@ function cleanItem(raw, group) {
     let optionsVi = type === 'mcq' ? cleanOptions(d.optionsVi) : [];
     if (optionsVi.some(Boolean)) { while (optionsVi.length < 4) optionsVi.push(''); } else optionsVi = [];
     return compact({
+        id: questionId(d.id),
         type,
         ref: clip(d.ref, 40),
         group: clip(d.group || group, 80),
@@ -105,6 +108,32 @@ function cleanItem(raw, group) {
         wordType: clip(d.wordType, 24),
         ipa: clip(d.ipa, 80),
         exampleVi: clip(d.exampleVi, 1500)
+    });
+}
+
+const QID = /^q[a-z0-9]{6,24}$/;
+
+function questionId(value) {
+    const id = String(value || '').toLowerCase();
+    return QID.test(id) ? id : '';
+}
+
+let qSeq = 0;
+/* Mã câu tăng dần theo thời gian tạo nên sắp theo mã là đúng thứ tự thêm vào. */
+function newQuestionId() {
+    qSeq = (qSeq + 1) % 1296;
+    const bytes = new Uint8Array(2);
+    crypto.getRandomValues(bytes);
+    return 'q' + Date.now().toString(36) + qSeq.toString(36).padStart(2, '0') + Array.from(bytes).map((b) => b.toString(16).padStart(2, '0')).join('');
+}
+
+function withIds(items) {
+    const seen = new Set();
+    return items.map((item) => {
+        let id = item.id;
+        if (!id || seen.has(id)) id = newQuestionId();
+        seen.add(id);
+        return Object.assign({}, item, { id });
     });
 }
 
@@ -219,9 +248,13 @@ function courseCode(value, fallback) {
     return code.length >= 2 ? code : fallback;
 }
 
+function examType(subject, items) {
+    return subject === 'vocab' ? 'vocab' : (items.some((item) => item.type === 'mcq') ? 'mcq' : 'vocab');
+}
+
 function packRecord(input, items, id, kind) {
     const subject = subjectOf(input.subject);
-    const type = subject === 'vocab' ? 'vocab' : (items.some((item) => item.type === 'mcq') ? 'mcq' : 'vocab');
+    const type = examType(subject, items);
     const record = {
         id,
         name: clip(input.name, 80) || 'Đề hệ thống',
@@ -242,13 +275,135 @@ function call(env, args) {
     return redisCommand(env, args);
 }
 
+function pairs(result) {
+    const out = {};
+    const rows = Array.isArray(result) ? result : [];
+    for (let i = 0; i + 1 < rows.length; i += 2) out[rows[i]] = rows[i + 1];
+    return out;
+}
+
+async function readMeta(env, id) {
+    const raw = await call(env, ['GET', 'fpass:exam:' + id]);
+    if (!raw) return null;
+    try {
+        const data = JSON.parse(raw);
+        return data && data.id === id ? data : null;
+    } catch (e) {
+        return null;
+    }
+}
+
+/* Thứ tự lưu trong meta có thể lệch khi hai admin thêm câu cùng lúc: câu thiếu trong thứ tự được nối vào cuối theo mã. */
+async function readQuestions(env, id, meta) {
+    const map = pairs(await call(env, ['HGETALL', 'fpass:examq:' + id]));
+    const order = (Array.isArray(meta.order) ? meta.order : []).filter((qid) => map[qid]);
+    const known = new Set(order);
+    Object.keys(map).sort().forEach((qid) => { if (!known.has(qid)) order.push(qid); });
+    const items = [];
+    order.forEach((qid) => {
+        try {
+            const item = JSON.parse(map[qid]);
+            if (item && typeof item === 'object') items.push(Object.assign(item, { id: qid }));
+        } catch (e) {}
+    });
+    return items;
+}
+
+function publicExam(meta, items) {
+    return {
+        id: meta.id,
+        name: meta.name,
+        code: meta.code,
+        subject: meta.subject,
+        type: meta.type,
+        desc: meta.desc,
+        updated: meta.updated,
+        count: items.length,
+        items
+    };
+}
+
+/* Đề dạng cũ chưa có mã câu: gán mã theo vị trí để tiến độ học không đổi giữa các lần tải. */
+async function readOfficial(env, id) {
+    const meta = await readMeta(env, id);
+    if (!meta) return null;
+    if (Array.isArray(meta.items)) {
+        const items = meta.items.map((item, i) => Object.assign({}, item, { id: questionId(item.id) || (id + '-' + i) }));
+        return Object.assign(publicExam(meta, items), { legacy: true });
+    }
+    return publicExam(meta, await readQuestions(env, id, meta));
+}
+
+async function writeQuestions(env, id, items, fresh) {
+    if (fresh) await call(env, ['DEL', 'fpass:examq:' + id]);
+    for (let i = 0; i < items.length; i += 80) {
+        const args = ['HSET', 'fpass:examq:' + id];
+        items.slice(i, i + 80).forEach((item) => {
+            const body = Object.assign({}, item);
+            delete body.id;
+            args.push(item.id, JSON.stringify(body));
+        });
+        if (args.length > 2) await call(env, args);
+    }
+}
+
+async function writeMeta(env, meta, items) {
+    const record = {
+        id: meta.id,
+        name: meta.name,
+        code: meta.code,
+        subject: meta.subject,
+        type: examType(meta.subject, items),
+        desc: meta.desc,
+        updated: Date.now(),
+        count: items.length,
+        order: items.map((item) => item.id)
+    };
+    await call(env, ['SET', 'fpass:exam:' + meta.id, JSON.stringify(record)]);
+    return record;
+}
+
+async function storeExam(env, meta, items) {
+    const list = withIds(items);
+    if (JSON.stringify(list).length > LIMITS.official.json) throw bad('Bộ đề quá lớn.');
+    await writeQuestions(env, meta.id, list, true);
+    const record = await writeMeta(env, meta, list);
+    await call(env, ['SADD', 'fpass:exams', meta.id]);
+    return publicExam(record, list);
+}
+
+function legacyItems(meta) {
+    return meta.items.map((item) => Object.assign({}, item, { id: questionId(item.id) }));
+}
+
 export async function listOfficial(env) {
     const rawIds = await call(env, ['SMEMBERS', 'fpass:exams']);
     const ids = (Array.isArray(rawIds) ? rawIds : []).filter((id) => safeId(id));
     const packs = [];
     for (let i = 0; i < ids.length && packs.length < MAX_OFFICIAL; i++) {
-        const pack = await readStored(env, 'fpass:exam:', ids[i]);
-        if (pack) packs.push(pack);
+        const pack = await readOfficial(env, ids[i]);
+        if (pack) {
+            delete pack.legacy;
+            packs.push(pack);
+        }
+    }
+    packs.sort((a, b) => b.updated - a.updated);
+    return packs;
+}
+
+/* Cho trang quản trị: chuyển đề dạng cũ sang dạng tách câu trước khi trả về, để mã câu admin thấy là mã thật. */
+export async function listOfficialForAdmin(env) {
+    const rawIds = await call(env, ['SMEMBERS', 'fpass:exams']);
+    const ids = (Array.isArray(rawIds) ? rawIds : []).filter((id) => safeId(id));
+    const packs = [];
+    for (let i = 0; i < ids.length && packs.length < MAX_OFFICIAL; i++) {
+        let pack = await readOfficial(env, ids[i]);
+        if (!pack) continue;
+        if (pack.legacy) {
+            const meta = await readMeta(env, ids[i]);
+            pack = await storeExam(env, meta, legacyItems(meta));
+        }
+        packs.push(pack);
     }
     packs.sort((a, b) => b.updated - a.updated);
     return packs;
@@ -285,25 +440,97 @@ export async function saveOfficial(env, input) {
         const count = Number(await call(env, ['SCARD', 'fpass:exams'])) || 0;
         if (count >= MAX_OFFICIAL) throw bad('Kho đề đã đủ 25 bộ. Xóa bớt trước khi đăng thêm.');
     } else {
-        const exists = await readStored(env, 'fpass:exam:', id);
-        if (!exists) {
-            const err = new Error('missing');
-            err.code = 'missing';
-            throw err;
+        const exists = await readMeta(env, id);
+        if (!exists) throw missing();
+        /* Sửa tên, mã môn, mô tả mà không gửi lại nội dung: giữ nguyên từng câu đã sửa lẻ. */
+        if (!String(input.text || '').trim()) {
+            const current = await readOfficial(env, id);
+            return storeExam(env, metaFrom(input, id), current.items.map((item) => Object.assign({}, item, { id: questionId(item.id) })));
         }
     }
     const items = parseExamInput(input.text, subjectOf(input.subject), courseCode(input.code, ''), 'official');
-    const built = packRecord(input, items, id, 'official');
-    await call(env, ['SET', 'fpass:exam:' + id, built.json]);
-    await call(env, ['SADD', 'fpass:exams', id]);
-    return built.record;
+    return storeExam(env, metaFrom(input, id), items);
+}
+
+function missing(what) {
+    const err = new Error(what || 'missing');
+    err.code = 'missing';
+    return err;
+}
+
+function metaFrom(input, id) {
+    const subject = subjectOf(input.subject);
+    return {
+        id,
+        name: clip(input.name, 80) || 'Đề hệ thống',
+        code: courseCode(input.code, SUBJECTS[subject].label),
+        subject,
+        desc: clip(input.desc, 180) || ('Đề ' + SUBJECTS[subject].label + ' do admin đăng.')
+    };
 }
 
 export async function deleteOfficial(env, id) {
     const safe = safeId(id);
     if (!safe) throw bad('Mã đề không hợp lệ.');
     await call(env, ['DEL', 'fpass:exam:' + safe]);
+    await call(env, ['DEL', 'fpass:examq:' + safe]);
     await call(env, ['SREM', 'fpass:exams', safe]);
+}
+
+/* ---------- Ngân hàng câu hỏi: thêm, sửa, xóa từng câu ---------- */
+
+async function editableExam(env, examId) {
+    const id = safeId(examId);
+    if (!id) throw bad('Mã đề không hợp lệ.');
+    const meta = await readMeta(env, id);
+    if (!meta) throw missing();
+    if (Array.isArray(meta.items)) {
+        const stored = await storeExam(env, meta, legacyItems(meta));
+        return { meta: await readMeta(env, id), items: stored.items };
+    }
+    return { meta, items: await readQuestions(env, id, meta) };
+}
+
+export async function saveQuestion(env, examId, raw) {
+    const { meta, items } = await editableExam(env, examId);
+    const item = cleanItem(raw, meta.code);
+    if (!item) throw bad('Câu hỏi cần nội dung, ít nhất 2 lựa chọn và một đáp án đúng trỏ vào lựa chọn có chữ.');
+    const qid = questionId(raw && raw.id);
+    const index = qid ? items.findIndex((row) => row.id === qid) : -1;
+    if (qid && index < 0) throw missing('Câu này đã bị xóa.');
+    if (index < 0 && items.length >= LIMITS.official.items) throw bad('Đề đã đủ ' + LIMITS.official.items + ' câu.');
+    item.id = index >= 0 ? qid : newQuestionId();
+    const next = items.slice();
+    if (index >= 0) next[index] = item;
+    else next.push(item);
+    if (JSON.stringify(next).length > LIMITS.official.json) throw bad('Bộ đề quá lớn.');
+    await writeQuestions(env, meta.id, [item], false);
+    await writeMeta(env, meta, next);
+    return { item, count: next.length };
+}
+
+export async function addQuestions(env, examId, list) {
+    const { meta, items } = await editableExam(env, examId);
+    const incoming = (Array.isArray(list) ? list : []).slice(0, LIMITS.official.items).map((row) => cleanItem(Object.assign({}, row, { id: '' }), meta.code)).filter(Boolean);
+    if (!incoming.length) throw bad('Không có câu hợp lệ để thêm.');
+    if (items.length + incoming.length > LIMITS.official.items) throw bad('Thêm vào sẽ vượt ' + LIMITS.official.items + ' câu mỗi đề.');
+    const added = incoming.map((item) => Object.assign(item, { id: newQuestionId() }));
+    const next = items.concat(added);
+    if (JSON.stringify(next).length > LIMITS.official.json) throw bad('Bộ đề quá lớn.');
+    await writeQuestions(env, meta.id, added, false);
+    await writeMeta(env, meta, next);
+    return { added: added.length, count: next.length };
+}
+
+export async function deleteQuestion(env, examId, qidValue) {
+    const qid = questionId(qidValue);
+    if (!qid) throw bad('Mã câu không hợp lệ.');
+    const { meta, items } = await editableExam(env, examId);
+    const next = items.filter((row) => row.id !== qid);
+    if (next.length === items.length) throw missing('Câu này đã bị xóa.');
+    await call(env, ['HDEL', 'fpass:examq:' + meta.id, qid]);
+    await writeMeta(env, meta, next);
+    return { count: next.length };
 }
 
 export async function submitPending(env, input) {
@@ -347,19 +574,7 @@ export async function takePending(env, id) {
 export async function publishPending(env, pack) {
     const count = Number(await call(env, ['SCARD', 'fpass:exams'])) || 0;
     if (count >= MAX_OFFICIAL) throw bad('Kho đề đã đủ 25 bộ. Xóa bớt trước khi duyệt.');
-    const official = {
-        id: pack.id,
-        name: pack.name,
-        code: pack.code,
-        subject: pack.subject,
-        type: pack.type,
-        desc: pack.desc,
-        updated: Date.now(),
-        count: pack.items.length,
-        items: pack.items
-    };
-    await call(env, ['SET', 'fpass:exam:' + pack.id, JSON.stringify(official)]);
-    await call(env, ['SADD', 'fpass:exams', pack.id]);
+    const official = await storeExam(env, { id: pack.id, name: pack.name, code: pack.code, subject: subjectOf(pack.subject), desc: pack.desc }, pack.items);
     await rejectPending(env, pack.id);
     return official;
 }

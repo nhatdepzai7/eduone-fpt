@@ -27,7 +27,7 @@
 <body>
     <div id="root"></div>
     <script type="text/babel" data-presets="react">
-        const { useEffect, useState } = React;
+        const { useEffect, useMemo, useState } = React;
         const SUBJECTS = [
             ['eos', 'EOS'],
             ['fe', 'FE'],
@@ -155,7 +155,7 @@
                         <table className="w-full text-sm">
                             <caption className="text-left px-4 py-3 font-semibold">Mã quỹ</caption>
                             <thead className="text-left text-slate-500">
-                                <tr><th className="px-4 py-2">Mã quỹ</th><th className="px-4 py-2">Lượt đã cấp</th><th className="px-4 py-2">Còn lại</th><th className="px-4 py-2">Điền thẻ AI</th><th className="px-4 py-2">Quét bài đọc</th><th className="px-4 py-2">Tổng tiền đã nạp</th><th className="px-4 py-2">Cập nhật</th><th className="px-4 py-2">Cộng / trừ hoặc đặt lại</th></tr>
+                                <tr><th className="px-4 py-2">Mã quỹ · Tài khoản</th><th className="px-4 py-2">Lượt đã cấp</th><th className="px-4 py-2">Còn lại</th><th className="px-4 py-2">Điền thẻ AI</th><th className="px-4 py-2">Quét bài đọc</th><th className="px-4 py-2">Tổng tiền đã nạp</th><th className="px-4 py-2">Cập nhật</th><th className="px-4 py-2">Cộng / trừ hoặc đặt lại</th></tr>
                             </thead>
                             <tbody>
                                 {quotas.length ? quotas.map((row) => <QuotaRow key={row.code + ':' + row.balance + ':' + row.aiUsed + ':' + row.scans + ':' + row.aiCredits + ':' + row.scanGrant} row={row} busy={busy} onRun={run} />) : <tr><td className="px-4 py-6 text-slate-500" colSpan={8}>Chưa có mã quỹ nào được SePay cộng hoặc admin tạo.</td></tr>}
@@ -248,7 +248,7 @@
             const [next, setNext] = useState(String(row.balance));
             return (
                 <tr className="border-t border-slate-100 align-top">
-                    <td className="px-4 py-3 tnum font-semibold">{row.code}</td>
+                    <td className="px-4 py-3"><span className="tnum font-semibold">{row.code}</span>{row.email ? <span className="block text-xs text-slate-500 break-all">{row.email}</span> : <span className="block text-xs text-slate-400">chưa gắn tài khoản</span>}</td>
                     <td className="px-4 py-3 tnum">{row.balance}</td>
                     <td className="px-4 py-3 tnum">{row.remaining != null ? row.remaining : row.balance}</td>
                     <td className="px-4 py-3 tnum text-xs leading-5">{row.aiUnlimited ? <>Không giới hạn<br />đã ghi {row.aiUsed}</> : <>đã dùng {row.aiUsed}/{row.aiLimit}<br />còn {row.aiLeft} · cấp thêm {row.aiCredits}</>}</td>
@@ -269,7 +269,7 @@
 
         const blankExam = { id: '', name: '', code: '', subject: 'eos', text: '' };
 
-        const ExamTab = ({ token, onAuth }) => {
+        const ExamTab = ({ token, onAuth, onBank }) => {
             const [exams, setExams] = useState([]);
             const [pending, setPending] = useState([]);
             const [form, setForm] = useState(blankExam);
@@ -379,7 +379,8 @@
                     {info && <p className="text-sm text-emerald-800" role="status">{info}</p>}
                     <ExamTable title="Kho đề hệ thống" rows={exams} empty="Chưa có đề hệ thống." actions={(row) => (
                         <>
-                            <button type="button" className="min-h-[36px] px-3 rounded-lg border border-slate-300 font-semibold" onClick={() => setForm({ id: row.id, name: row.name, code: row.code, subject: row.subject || 'other', text: JSON.stringify({ items: row.items }, null, 2) })}>Sửa</button>
+                            <button type="button" className="min-h-[36px] px-3 rounded-lg bg-indigo-700 text-white font-semibold" onClick={() => onBank(row.id)}>Câu hỏi</button>
+                            <button type="button" className="min-h-[36px] px-3 rounded-lg border border-slate-300 font-semibold" onClick={() => setForm({ id: row.id, name: row.name, code: row.code, subject: row.subject || 'other', text: JSON.stringify({ items: row.items }, null, 2) })}>Sửa cả đề</button>
                             <button type="button" className="min-h-[36px] px-3 rounded-lg border border-rose-200 text-rose-700 font-semibold" onClick={() => { if (confirm('Xóa đề ' + row.code + '?')) act({ op: 'delete', id: row.id }, 'Đã xóa đề.'); }}>Xóa</button>
                         </>
                     )} />
@@ -676,8 +677,298 @@
             );
         };
 
+        /* ---------- Ngân hàng câu hỏi: mỗi câu lưu riêng trên Redis, sửa từng câu không phải tải lại file Word ---------- */
+        const LETTERS = ['A', 'B', 'C', 'D'];
+        const PAGE = 30;
+        const blankQuestion = (type) => ({ id: '', type: type || 'mcq', ref: '', group: '', questionOrWord: '', options: ['', '', '', ''], answerOrMeaning: 'A', explanationOrExample: '', keywords: [], questionVi: '', optionsVi: ['', '', '', ''], explanationVi: '', ipa: '', wordType: '', exampleVi: '' });
+        const fold = (text) => String(text || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/đ/g, 'd');
+        const haystack = (q) => fold([q.ref, q.group, q.questionOrWord, q.questionVi, q.answerOrMeaning, q.explanationOrExample, q.explanationVi].concat(q.options || [], q.optionsVi || [], q.keywords || []).join(' • '));
+
+        const QuestionEditor = ({ item, busy, onSave, onCancel }) => {
+            const [q, setQ] = useState(() => Object.assign(blankQuestion(item.type), item, {
+                options: LETTERS.map((_, i) => (item.options || [])[i] || ''),
+                optionsVi: LETTERS.map((_, i) => (item.optionsVi || [])[i] || ''),
+                keywords: Array.isArray(item.keywords) ? item.keywords : []
+            }));
+            const [kw, setKw] = useState(() => (Array.isArray(item.keywords) ? item.keywords : []).join(', '));
+            const set = (key, value) => setQ((prev) => Object.assign({}, prev, { [key]: value }));
+            const setOpt = (key, i, value) => setQ((prev) => Object.assign({}, prev, { [key]: prev[key].map((v, n) => (n === i ? value : v)) }));
+            const mcq = q.type === 'mcq';
+            const submit = (e) => {
+                e.preventDefault();
+                const keywords = kw.split(/[,;\n]/).map((k) => k.trim()).filter(Boolean);
+                const out = Object.assign({}, q, { keywords });
+                if (!mcq) { out.options = []; out.optionsVi = []; }
+                onSave(out);
+            };
+            const area = (key, label, rows) => (
+                <label className="text-sm font-medium block">{label}
+                    <textarea value={q[key] || ''} onChange={(e) => set(key, e.target.value)} rows={rows || 2} className="field mt-1" />
+                </label>
+            );
+            return (
+                <form onSubmit={submit} className="rounded-2xl border-2 border-indigo-200 bg-indigo-50/40 p-4 space-y-3" aria-label={item.id ? 'Sửa câu hỏi' : 'Thêm câu hỏi'}>
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                        <h3 className="font-semibold">{item.id ? 'Sửa câu ' + (q.ref || '') : 'Thêm câu mới'}</h3>
+                        <select value={q.type} onChange={(e) => set('type', e.target.value)} className="field w-auto" aria-label="Loại câu">
+                            <option value="mcq">Trắc nghiệm A–D</option>
+                            <option value="vocab">Từ vựng / tự luận ngắn</option>
+                        </select>
+                    </div>
+                    <div className="grid sm:grid-cols-2 gap-3">
+                        <label className="text-sm font-medium">Mã câu (tùy chọn)<input value={q.ref || ''} onChange={(e) => set('ref', e.target.value)} maxLength={40} className="field mt-1" placeholder="FIN202-001" /></label>
+                        <label className="text-sm font-medium">Chủ đề / phân loại<input value={q.group || ''} onChange={(e) => set('group', e.target.value)} maxLength={80} className="field mt-1" placeholder="Giá trị thời gian của tiền" /></label>
+                    </div>
+                    {mcq ? (
+                        <>
+                            <div className="grid sm:grid-cols-2 gap-3">
+                                {area('questionOrWord', 'Câu hỏi (English hoặc ngôn ngữ chính)', 3)}
+                                {area('questionVi', 'Câu hỏi tiếng Việt (tùy chọn)', 3)}
+                            </div>
+                            <fieldset className="space-y-2">
+                                <legend className="text-sm font-medium">Lựa chọn · chọn nút tròn ở đáp án đúng</legend>
+                                {LETTERS.map((L, i) => (
+                                    <div key={L} className="grid grid-cols-[auto_1fr] sm:grid-cols-[auto_1fr_1fr] gap-2 items-center">
+                                        <label className="inline-flex items-center gap-1.5 font-semibold w-14">
+                                            <input type="radio" name="answer" checked={q.answerOrMeaning === L} onChange={() => set('answerOrMeaning', L)} /> {L}
+                                        </label>
+                                        <input value={q.options[i]} onChange={(e) => setOpt('options', i, e.target.value)} className="field" aria-label={'Lựa chọn ' + L} placeholder={'Lựa chọn ' + L} />
+                                        <input value={q.optionsVi[i]} onChange={(e) => setOpt('optionsVi', i, e.target.value)} className="field col-start-2 sm:col-start-auto" aria-label={'Lựa chọn ' + L + ' tiếng Việt'} placeholder={'Tiếng Việt ' + L + ' (tùy chọn)'} />
+                                    </div>
+                                ))}
+                            </fieldset>
+                            <div className="grid sm:grid-cols-2 gap-3">
+                                {area('explanationOrExample', 'Giải thích', 3)}
+                                {area('explanationVi', 'Giải thích tiếng Việt (tùy chọn)', 3)}
+                            </div>
+                        </>
+                    ) : (
+                        <div className="grid sm:grid-cols-2 gap-3">
+                            {area('questionOrWord', 'Từ / câu hỏi', 2)}
+                            {area('answerOrMeaning', 'Nghĩa / đáp án', 2)}
+                            <label className="text-sm font-medium">IPA<input value={q.ipa || ''} onChange={(e) => set('ipa', e.target.value)} className="field mt-1" /></label>
+                            <label className="text-sm font-medium">Loại từ<input value={q.wordType || ''} onChange={(e) => set('wordType', e.target.value)} className="field mt-1" /></label>
+                            {area('explanationOrExample', 'Ví dụ / giải thích', 2)}
+                            {area('exampleVi', 'Ví dụ tiếng Việt', 2)}
+                        </div>
+                    )}
+                    <label className="text-sm font-medium block">Từ khóa (cách nhau bằng dấu phẩy) · sinh viên bấm Keyword sẽ thấy các từ này được tô
+                        <input value={kw} onChange={(e) => setKw(e.target.value)} className="field mt-1" placeholder="present value, discount rate" />
+                    </label>
+                    <div className="flex flex-wrap gap-2">
+                        <button type="submit" disabled={busy} className="min-h-[44px] px-4 rounded-xl bg-indigo-700 text-white font-semibold">{busy ? 'Đang lưu…' : 'Lưu câu này'}</button>
+                        <button type="button" onClick={onCancel} className="min-h-[44px] px-4 rounded-xl border border-slate-300 bg-white font-semibold">Hủy</button>
+                    </div>
+                </form>
+            );
+        };
+
+        const BankTab = ({ token, onAuth, startId, onGoExams }) => {
+            const [exams, setExams] = useState(null);
+            const [selId, setSelId] = useState(startId || '');
+            const [search, setSearch] = useState('');
+            const [topic, setTopic] = useState('all');
+            const [page, setPage] = useState(0);
+            const [editing, setEditing] = useState(null);
+            const [busy, setBusy] = useState(false);
+            const [error, setError] = useState('');
+            const [info, setInfo] = useState('');
+            const fail = (err) => { if (err.auth) onAuth(); else setError(err.message); };
+            const load = () => api(token, '/api/desk?action=exams').then((data) => {
+                const list = data.exams || [];
+                setExams(list);
+                setSelId((cur) => (cur && list.some((x) => x.id === cur) ? cur : (list[0] ? list[0].id : '')));
+            }).catch(fail);
+            useEffect(() => { load(); }, []);
+            useEffect(() => { setPage(0); setEditing(null); setTopic('all'); }, [selId]);
+            useEffect(() => { setPage(0); }, [search, topic]);
+            const exam = (exams || []).find((x) => x.id === selId) || null;
+            const items = exam ? exam.items : [];
+            const topics = useMemo(() => {
+                const m = new Map();
+                items.forEach((q) => { const k = q.group || ''; m.set(k, (m.get(k) || 0) + 1); });
+                return Array.from(m.entries()).sort((a, b) => a[0].localeCompare(b[0], 'vi'));
+            }, [items]);
+            const shown = useMemo(() => {
+                const needle = fold(search.trim());
+                return items.map((q, i) => ({ q, n: i + 1 })).filter(({ q }) => (topic === 'all' || (q.group || '') === topic) && (!needle || haystack(q).indexOf(needle) >= 0));
+            }, [items, search, topic]);
+            const pages = Math.max(1, Math.ceil(shown.length / PAGE));
+            const slice = shown.slice(page * PAGE, page * PAGE + PAGE);
+            const patchExam = (fn) => setExams((list) => list.map((x) => (x.id === selId ? fn(x) : x)));
+            const run = async (body, done) => {
+                setBusy(true); setError(''); setInfo('');
+                try {
+                    const res = await api(token, '/api/desk?action=exams', body);
+                    if (done) done(res);
+                    return res;
+                } catch (err) { fail(err); return null; } finally { setBusy(false); }
+            };
+            const saveItem = (item) => run({ op: 'q-save', id: selId, item }, (res) => {
+                patchExam((x) => {
+                    const at = x.items.findIndex((q) => q.id === res.item.id);
+                    const next = at >= 0 ? x.items.map((q) => (q.id === res.item.id ? res.item : q)) : x.items.concat(res.item);
+                    return Object.assign({}, x, { items: next, count: next.length, updated: Date.now() });
+                });
+                setEditing(null);
+                setInfo(item.id ? 'Đã lưu câu.' : 'Đã thêm câu. Đề hiện có ' + res.count + ' câu.');
+            });
+            const removeItem = (q, n) => {
+                if (!confirm('Xóa câu ' + (q.ref || ('#' + n)) + '? Không hoàn tác được.')) return;
+                run({ op: 'q-delete', id: selId, qid: q.id }, (res) => {
+                    patchExam((x) => Object.assign({}, x, { items: x.items.filter((row) => row.id !== q.id), count: res.count }));
+                    if (editing && editing.id === q.id) setEditing(null);
+                    setInfo('Đã xóa câu. Đề còn ' + res.count + ' câu.');
+                });
+            };
+            const appendWord = async (file) => {
+                if (!file) return;
+                setError(''); setInfo('');
+                if (!/\.docx$/i.test(file.name)) { setError('Chỉ nhận file Word .docx.'); return; }
+                if (file.size > 8000000) { setError('File Word lớn hơn 8MB.'); return; }
+                try {
+                    const parsed = await window.FPassWord.parseDocx(await file.arrayBuffer());
+                    if (!parsed.items.length) { setError('Không tách được câu nào. Xem mẫu Word: mỗi câu cần A. B. C. D. và Đáp án.'); return; }
+                    const note = parsed.problems && parsed.problems.length ? '\n' + parsed.problems.length + ' câu bị bỏ qua vì thiếu đáp án hoặc lựa chọn.' : '';
+                    if (!confirm('Tách được ' + parsed.items.length + ' câu từ ' + file.name + '. Thêm tất cả vào cuối đề ' + exam.code + '?' + note)) return;
+                    await run({ op: 'q-add', id: selId, items: parsed.items }, (res) => {
+                        setInfo('Đã thêm ' + res.added + ' câu. Đề hiện có ' + res.count + ' câu.');
+                    });
+                    await load();
+                } catch (err) {
+                    setError(err.message || 'Không đọc được file Word.');
+                }
+            };
+            if (exams === null) return <p className="text-slate-600">Đang tải ngân hàng câu hỏi…</p>;
+            if (!exams.length) {
+                return (
+                    <div className="bg-white rounded-2xl border border-slate-200 p-6">
+                        <p className="font-semibold">Chưa có đề nào.</p>
+                        <p className="text-sm text-slate-600 mt-1">Tải file Word ở tab Kho Đề Hệ Thống để tạo đề đầu tiên. Hệ thống tự tách từng câu, sau đó quay lại đây để sửa từng câu.</p>
+                        <button type="button" onClick={onGoExams} className="mt-3 min-h-[44px] px-4 rounded-xl bg-indigo-700 text-white font-semibold">Tới Kho Đề Hệ Thống</button>
+                    </div>
+                );
+            }
+            return (
+                <div className="space-y-4">
+                    <div className="bg-white rounded-2xl border border-slate-200 p-4 space-y-3">
+                        <div className="flex flex-wrap items-end gap-3">
+                            <label className="text-sm font-medium min-w-[220px] flex-1">Đề
+                                <select value={selId} onChange={(e) => setSelId(e.target.value)} className="field mt-1">
+                                    {exams.map((x) => <option key={x.id} value={x.id}>{x.code} · {x.name} ({x.count} câu)</option>)}
+                                </select>
+                            </label>
+                            <button type="button" disabled={busy || !exam} onClick={() => setEditing(blankQuestion(exam && exam.type === 'vocab' ? 'vocab' : 'mcq'))} className="min-h-[44px] px-4 rounded-xl bg-indigo-700 text-white font-semibold">+ Thêm câu</button>
+                            <label className="min-h-[44px] px-4 rounded-xl border border-slate-300 bg-white font-semibold inline-flex items-center cursor-pointer">
+                                Thêm câu từ file Word
+                                <input type="file" accept=".docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document" className="sr-only" onChange={(e) => { appendWord(e.target.files && e.target.files[0]); e.target.value = ''; }} />
+                            </label>
+                        </div>
+                        <div className="flex flex-wrap items-end gap-3">
+                            <label className="text-sm font-medium flex-1 min-w-[220px]">Tìm trong câu hỏi, lựa chọn, giải thích, mã câu
+                                <input value={search} onChange={(e) => setSearch(e.target.value)} className="field mt-1" placeholder="vd: present value, lãi kép, FIN202-015" />
+                            </label>
+                            <label className="text-sm font-medium min-w-[200px]">Chủ đề
+                                <select value={topic} onChange={(e) => setTopic(e.target.value)} className="field mt-1">
+                                    <option value="all">Tất cả ({items.length})</option>
+                                    {topics.map(([k, n]) => <option key={k} value={k}>{(k || 'Chưa phân loại') + ' (' + n + ')'}</option>)}
+                                </select>
+                            </label>
+                        </div>
+                        <p className="text-sm text-slate-600">Hiện {shown.length}/{items.length} câu. Sửa câu nào lưu câu đó, sinh viên tải lại trang là thấy bản mới.</p>
+                    </div>
+                    {error && <p className="text-sm text-rose-700" role="alert">{error}</p>}
+                    {info && <p className="text-sm text-emerald-800" role="status">{info}</p>}
+                    {editing && !editing.id && <QuestionEditor key="new" item={editing} busy={busy} onSave={saveItem} onCancel={() => setEditing(null)} />}
+                    <ol className="space-y-2">
+                        {slice.map(({ q, n }) => (
+                            <li key={q.id} className="bg-white rounded-2xl border border-slate-200 p-3">
+                                {editing && editing.id === q.id ? (
+                                    <QuestionEditor key={q.id} item={q} busy={busy} onSave={saveItem} onCancel={() => setEditing(null)} />
+                                ) : (
+                                    <div className="flex flex-wrap gap-3">
+                                        <span className="tnum text-sm font-semibold text-slate-500 w-10 shrink-0">#{n}</span>
+                                        <div className="min-w-0 flex-1">
+                                            <div className="flex flex-wrap gap-1.5 text-xs">
+                                                {q.ref && <span className="rounded-full bg-slate-100 px-2 py-0.5 tnum">{q.ref}</span>}
+                                                {q.group && <span className="rounded-full bg-indigo-50 text-indigo-800 px-2 py-0.5">{q.group}</span>}
+                                                {q.questionVi && <span className="rounded-full bg-emerald-50 text-emerald-800 px-2 py-0.5">Song ngữ</span>}
+                                                {(q.keywords || []).length > 0 && <span className="rounded-full bg-amber-50 text-amber-800 px-2 py-0.5">{q.keywords.length} keyword</span>}
+                                                {!q.explanationOrExample && <span className="rounded-full bg-rose-50 text-rose-700 px-2 py-0.5">Thiếu giải thích</span>}
+                                            </div>
+                                            <p className="mt-1.5 font-medium line-clamp-2">{q.questionOrWord}</p>
+                                            {q.type === 'mcq' ? (
+                                                <p className="mt-1 text-sm text-slate-600">Đáp án <b>{q.answerOrMeaning}</b>: {(q.options || [])[LETTERS.indexOf(q.answerOrMeaning)]}</p>
+                                            ) : <p className="mt-1 text-sm text-slate-600">{q.answerOrMeaning}</p>}
+                                        </div>
+                                        <div className="flex gap-2 items-start">
+                                            <button type="button" disabled={busy} onClick={() => setEditing(q)} className="min-h-[36px] px-3 rounded-lg border border-slate-300 font-semibold">Sửa</button>
+                                            <button type="button" disabled={busy} onClick={() => removeItem(q, n)} className="min-h-[36px] px-3 rounded-lg border border-rose-200 text-rose-700 font-semibold">Xóa</button>
+                                        </div>
+                                    </div>
+                                )}
+                            </li>
+                        ))}
+                    </ol>
+                    {!slice.length && <p className="text-slate-600">Không có câu nào khớp.</p>}
+                    {pages > 1 && (
+                        <nav className="flex items-center justify-center gap-2" aria-label="Trang câu hỏi">
+                            <button type="button" disabled={page === 0} onClick={() => setPage(page - 1)} className="min-h-[40px] px-3 rounded-lg border border-slate-300 bg-white font-semibold disabled:opacity-40">‹ Trước</button>
+                            <span className="tnum text-sm">Trang {page + 1}/{pages}</span>
+                            <button type="button" disabled={page >= pages - 1} onClick={() => setPage(page + 1)} className="min-h-[40px] px-3 rounded-lg border border-slate-300 bg-white font-semibold disabled:opacity-40">Sau ›</button>
+                        </nav>
+                    )}
+                </div>
+            );
+        };
+
+        /* ---------- Video hướng dẫn hiện ở trang chủ và trong /app ---------- */
+        const GuideTab = ({ token, onAuth }) => {
+            const [rows, setRows] = useState(null);
+            const [busy, setBusy] = useState(false);
+            const [error, setError] = useState('');
+            const [info, setInfo] = useState('');
+            useEffect(() => {
+                api(token, '/api/desk?action=guide').then((data) => {
+                    const list = (data.guide && data.guide.videos) || [];
+                    setRows(list.length ? list : [{ title: 'Bắt đầu trong 1 phút', url: '' }]);
+                }).catch((e) => { if (e.auth) onAuth(); else setError(e.message); });
+            }, []);
+            const set = (i, key, value) => setRows((list) => list.map((r, n) => (n === i ? Object.assign({}, r, { [key]: value }) : r)));
+            const save = async (e) => {
+                e.preventDefault();
+                setBusy(true); setError(''); setInfo('');
+                try {
+                    const data = await api(token, '/api/desk?action=guide', { videos: rows.filter((r) => r.url.trim()) });
+                    setRows(data.guide.videos.length ? data.guide.videos : [{ title: '', url: '' }]);
+                    setInfo('Đã lưu. Trang chủ và nút Video hướng dẫn trong /app hiện video này sau khoảng 1 phút.');
+                } catch (err) { if (err.auth) onAuth(); else setError(err.message); } finally { setBusy(false); }
+            };
+            if (!rows) return <p className="text-slate-600">{error || 'Đang tải…'}</p>;
+            return (
+                <form onSubmit={save} className="bg-white rounded-2xl border border-slate-200 p-4 space-y-3">
+                    <h2 className="font-semibold">Video hướng dẫn sử dụng</h2>
+                    <p className="text-sm text-slate-600">Dán link YouTube (cả Shorts), TikTok, Google Drive (đã bật chia sẻ "Bất kỳ ai có đường liên kết") hoặc link file .mp4. Video đầu tiên hiện mặc định.</p>
+                    {rows.map((r, i) => (
+                        <div key={i} className="grid sm:grid-cols-[1fr_2fr_auto] gap-2 items-end">
+                            <label className="text-sm font-medium">Tên video<input value={r.title} maxLength={60} onChange={(e) => set(i, 'title', e.target.value)} className="field mt-1" placeholder="Bắt đầu trong 1 phút" /></label>
+                            <label className="text-sm font-medium">Link<input value={r.url} maxLength={400} onChange={(e) => set(i, 'url', e.target.value)} className="field mt-1" placeholder="https://www.tiktok.com/@ban/video/123..." /></label>
+                            <button type="button" onClick={() => setRows(rows.filter((_, n) => n !== i))} className="min-h-[44px] px-3 rounded-xl border border-slate-300 font-semibold">Bỏ</button>
+                        </div>
+                    ))}
+                    <div className="flex flex-wrap gap-2">
+                        {rows.length < 8 && <button type="button" onClick={() => setRows(rows.concat({ title: '', url: '' }))} className="min-h-[44px] px-4 rounded-xl border border-slate-300 font-semibold">+ Thêm video</button>}
+                        <button type="submit" disabled={busy} className="min-h-[44px] px-4 rounded-xl bg-indigo-700 text-white font-semibold">{busy ? 'Đang lưu…' : 'Lưu video'}</button>
+                    </div>
+                    {error && <p className="text-sm text-rose-700" role="alert">{error}</p>}
+                    {info && <p className="text-sm text-emerald-800" role="status">{info}</p>}
+                </form>
+            );
+        };
+
         const Shell = ({ token, onLogout }) => {
             const [tab, setTab] = useState('quota');
+            const [bankId, setBankId] = useState('');
             const leave = async () => {
                 try { await api(token, '/api/desk?action=login', {}, 'DELETE'); } catch (e) {}
                 onLogout();
@@ -691,7 +982,7 @@
                             <h1 className="text-2xl font-bold">Quản trị</h1>
                         </div>
                         <div className="flex gap-2">
-                            <a href="/" className="min-h-[44px] px-4 inline-flex items-center rounded-xl border border-slate-300 bg-white font-semibold">Về trang học</a>
+                            <a href="/app" className="min-h-[44px] px-4 inline-flex items-center rounded-xl border border-slate-300 bg-white font-semibold">Về trang học</a>
                             <button type="button" onClick={leave} className="min-h-[44px] px-4 rounded-xl border border-slate-300 bg-white font-semibold">Đăng xuất</button>
                         </div>
                     </header>
@@ -700,9 +991,17 @@
                         <button type="button" role="tab" aria-selected={tab === 'visits'} className={tabClass('visits')} onClick={() => setTab('visits')}>Lượt truy cập</button>
                         <button type="button" role="tab" aria-selected={tab === 'feedback'} className={tabClass('feedback')} onClick={() => setTab('feedback')}>Phản hồi người dùng</button>
                         <button type="button" role="tab" aria-selected={tab === 'exams'} className={tabClass('exams')} onClick={() => setTab('exams')}>Kho Đề Hệ Thống</button>
+                        <button type="button" role="tab" aria-selected={tab === 'bank'} className={tabClass('bank')} onClick={() => setTab('bank')}>Ngân hàng câu hỏi</button>
                         <button type="button" role="tab" aria-selected={tab === 'gifts'} className={tabClass('gifts')} onClick={() => setTab('gifts')}>Giftcode PRO</button>
+                        <button type="button" role="tab" aria-selected={tab === 'guide'} className={tabClass('guide')} onClick={() => setTab('guide')}>Video hướng dẫn</button>
                     </div>
-                    {tab === 'quota' ? <QuotaTab token={token} onAuth={onLogout} /> : tab === 'visits' ? <VisitsTab token={token} onAuth={onLogout} /> : tab === 'feedback' ? <FeedbackTab token={token} onAuth={onLogout} /> : tab === 'gifts' ? <GiftTab token={token} onAuth={onLogout} /> : <ExamTab token={token} onAuth={onLogout} />}
+                    {tab === 'quota' ? <QuotaTab token={token} onAuth={onLogout} />
+                        : tab === 'visits' ? <VisitsTab token={token} onAuth={onLogout} />
+                        : tab === 'feedback' ? <FeedbackTab token={token} onAuth={onLogout} />
+                        : tab === 'gifts' ? <GiftTab token={token} onAuth={onLogout} />
+                        : tab === 'guide' ? <GuideTab token={token} onAuth={onLogout} />
+                        : tab === 'bank' ? <BankTab key={bankId} token={token} onAuth={onLogout} startId={bankId} onGoExams={() => setTab('exams')} />
+                        : <ExamTab token={token} onAuth={onLogout} onBank={(id) => { setBankId(id); setTab('bank'); }} />}
                 </main>
             );
         };

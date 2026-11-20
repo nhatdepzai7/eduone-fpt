@@ -3,7 +3,7 @@
  * POST /api/fund — trừ 1 lượt trên server, mọi trình duyệt cùng mã thấy cùng số.
  */
 
-import { authConfig, currentAccount, loginGoogle, redeemGift } from '../server/account.js';
+import { authConfig, currentAccount, loginGoogle, payAccount, redeemGift } from '../server/account.js';
 import { fundState, redisCommand, spendTurn } from '../server/ledger.js';
 
 const LOOKUPS_PER_WINDOW = 600;
@@ -92,10 +92,11 @@ async function handleRequest(req, env, body) {
 
     const queryText = (req.url || '').indexOf('?') >= 0 ? (req.url || '').slice((req.url || '').indexOf('?') + 1) : '';
     const action = new URLSearchParams(queryText).get('action') || '';
-    if (action === 'config' || action === 'login' || action === 'me' || action === 'redeem') {
+    if (action === 'config' || action === 'login' || action === 'me' || action === 'redeem' || action === 'pay') {
         try {
             if (action === 'config' && req.method === 'GET') return json(200, authConfig(env), extra);
             if (action === 'me' && req.method === 'GET') return json(200, await currentAccount(env, req), extra);
+            if (action === 'pay' && req.method === 'POST') return json(200, await payAccount(env, req, body || {}), extra);
             if (action === 'login' && req.method === 'POST') {
                 if (!body) return json(413, { error: 'Kho từ quá lớn để đồng bộ.' }, extra);
                 return json(200, await loginGoogle(env, body), extra);

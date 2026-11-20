@@ -102,9 +102,37 @@ async function scoreFund(env, code) {
     }
 }
 
-async function pickFund(env, current, guest) {
+/* Mỗi mã quỹ thuộc về một tài khoản Google. Lượt mua qua SePay cộng vào mã, nên mã gắn với ai thì lượt thuộc về người đó. */
+async function fundOwner(env, code) {
+    if (!code) return '';
+    const sub = await redisCommand(env, ['GET', 'fpass:fundowner:' + code]);
+    return typeof sub === 'string' ? sub : '';
+}
+
+async function claimFund(env, code, user) {
+    if (!code) return;
+    await redisCommand(env, ['SET', 'fpass:fundowner:' + code, user.sub, 'NX']);
+    if (await fundOwner(env, code) !== user.sub) return;
+    if (user.email) await redisCommand(env, ['SET', 'fpass:fundmail:' + code, user.email]);
+}
+
+function mintFund() {
+    const alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+    const list = new Uint8Array(8);
+    crypto.getRandomValues(list);
+    let out = '';
+    for (let i = 0; i < list.length; i++) out += alphabet[list[i] % alphabet.length];
+    return out;
+}
+
+/* Mã của máy khách chỉ được nhận khi chưa thuộc tài khoản khác. */
+async function pickFund(env, current, guest, sub) {
     const a = cleanCode(current);
-    const b = cleanCode(guest);
+    let b = cleanCode(guest);
+    if (b && sub) {
+        const owner = await fundOwner(env, b);
+        if (owner && owner !== sub) b = '';
+    }
     if (!a) return b;
     if (!b || a === b) return a;
     const left = await scoreFund(env, a);
@@ -272,11 +300,17 @@ export async function loginGoogle(env, body) {
     const guest = body && body.guest && typeof body.guest === 'object' ? body.guest : {};
     const guestLib = guest.library && typeof guest.library === 'object' ? guest.library : {};
     let user = await readUser(env, profile.sub);
+    /* Mã quỹ nhóm của người khác: tài khoản vẫn có mã riêng, nhưng máy này giữ mã nhóm để trừ lượt chung. */
+    const guestCode = cleanCode(guest.fundCode);
+    const guestOwner = guestCode ? await fundOwner(env, guestCode) : '';
+    const sharedCode = guestOwner && guestOwner !== profile.sub ? guestCode : '';
     if (!user) {
         user = { sub: profile.sub, email: profile.email, fundCode: '', tier: '', proUntil: 0 };
     }
     user.email = profile.email || user.email;
-    user.fundCode = await pickFund(env, user.fundCode, guest.fundCode);
+    user.fundCode = await pickFund(env, user.fundCode, guest.fundCode, user.sub);
+    if (!user.fundCode) user.fundCode = mintFund();
+    await claimFund(env, user.fundCode, user);
     const proOn = user.tier === 'OBSIDIAN_PRO' && (user.proUntil === -1 || user.proUntil > Date.now());
     if (proOn && user.fundCode) {
         await redisCommand(env, ['HSET', 'fpass:quota:' + user.fundCode, 'pro', '1', 'proUntil', String(user.proUntil)]);
@@ -300,7 +334,25 @@ export async function loginGoogle(env, body) {
     const token = randomToken(32);
     await redisCommand(env, ['SET', 'fpass:session:' + token, user.sub, 'EX', String(SESSION_TTL)]);
     const fund = user.fundCode ? await fundState(env, user.fundCode).catch(() => null) : null;
-    return { token, user: publicUser(user, fund ? { code: user.fundCode } : null), library, fundCode: user.fundCode, proUntil: fund ? fund.proUntil : (user.proUntil || 0) };
+    return { token, user: publicUser(user, fund ? { code: user.fundCode } : null), library, fundCode: user.fundCode, spendCode: sharedCode, proUntil: fund ? fund.proUntil : (user.proUntil || 0) };
+}
+
+/* Trước khi hiện mã QR: phải có phiên Google còn hạn. Trả về mã quỹ của tài khoản để nội dung chuyển khoản luôn là mã của người đó. */
+export async function payAccount(env, req, body) {
+    const user = await userFromSession(env, req);
+    if (!user) bad('auth', 'Cần đăng nhập Google trước khi thanh toán.');
+    let code = cleanCode(user.fundCode);
+    if (!code || (await fundOwner(env, code) || user.sub) !== user.sub) {
+        code = await pickFund(env, '', body && body.fundCode, user.sub);
+        if (!code) code = mintFund();
+        await redisCommand(env, ['HSET', 'fpass:user:' + user.sub, 'fundCode', code]);
+    }
+    await claimFund(env, code, user);
+    /* Máy đang dùng mã nhóm của người khác: lượt mua vẫn cộng vào mã riêng, báo để người mua biết. */
+    const asked = cleanCode(body && body.fundCode);
+    const askedOwner = asked && asked !== code ? await fundOwner(env, asked) : '';
+    const sharedCode = askedOwner && askedOwner !== user.sub ? asked : '';
+    return { fundCode: code, email: user.email, sharedCode };
 }
 
 export async function currentAccount(env, req) {
@@ -350,7 +402,7 @@ export async function redeemGift(env, req, body, ip) {
     if (!userOk || !ipOk) bad('rate', 'Nhập mã quá nhiều lần. Chờ 15 phút rồi thử lại.');
     const code = giftCodeOf(body && body.code);
     if (code.length < 4) bad('bad-gift', 'Mã không hợp lệ.');
-    user.fundCode = await pickFund(env, user.fundCode, body && body.fundCode);
+    user.fundCode = await pickFund(env, user.fundCode, body && body.fundCode, user.sub);
     if (!user.fundCode) bad('bad-code', 'Máy này chưa có mã quỹ để gắn gói PRO.');
     await redisCommand(env, ['HSET', 'fpass:user:' + user.sub, 'fundCode', user.fundCode]);
     const row = await redisCommand(env, [

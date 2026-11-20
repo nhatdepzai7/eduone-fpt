@@ -1,4 +1,4 @@
-import { DEFAULT_IDENTITY_LINE, IDENTITIES, MIN_ANSWERS, OBSIDIAN_IDENTITY, RANK_THRESHOLDS, VOTE_TYPES } from './identity-config.js';
+import { DEFAULT_IDENTITY_LINE, IDENTITIES, MIN_ANSWERS, OBSIDIAN_IDENTITY, RANK_THRESHOLDS, VOTE_TYPES } from './identity-config.js?v=ielts';
 
 const DAY = /^\d{4}-\d{2}-\d{2}$/;
 const MAX_WALK = 3660;
@@ -41,10 +41,13 @@ export function meetsAnswerThreshold(count) {
     return typeof count === 'number' && isFinite(count) && count >= MIN_ANSWERS;
 }
 
-/* eosMock hợp lệ về cấu trúc nhưng chưa được ghi ở bước này. */
+/* eosMock hợp lệ về cấu trúc nhưng chưa được ghi ở bước này.
+   Phiên của một ca học (slot: true) thành phiếu chỉ cần ít nhất 1 thẻ: "Chạm đáy 30s" giữ thói quen bằng 2 thẻ,
+   theo quy tắc 2 phút của Atomic Habits. Phiên tự do vẫn cần MIN_ANSWERS. */
 export function planVote(input, now) {
     if (!input || input.type === 'eosMock' || !isVoteType(input.type)) return null;
-    if (!meetsAnswerThreshold(input.answered)) return null;
+    const enough = input.slot ? (typeof input.answered === 'number' && input.answered >= 1) : meetsAnswerThreshold(input.answered);
+    if (!enough) return null;
     if (input.sessionId == null || input.sessionId === '') return null;
     const at = now instanceof Date ? now : new Date(now == null ? Date.now() : now);
     if (isNaN(at.getTime())) return null;
