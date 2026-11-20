@@ -121,7 +121,8 @@
         .ticket.is-idle .ticket-ic { color: #94A3B8; }
         .ticket.is-due { color: #1E293B; background: #FFFFFF; border-color: #CBD5E1; box-shadow: 0 1px 2px rgba(0, 0, 0, .04); cursor: pointer; transition: border-color .15s ease, box-shadow .15s ease; }
         .ticket.is-due:hover { border-color: #94A3B8; box-shadow: 0 1px 3px rgba(0, 0, 0, .08); }
-        .ticket.is-due:focus-visible { outline: 2px solid #4F46E5; outline-offset: 2px; }
+        .ticket.is-due:focus { outline: none; }
+        .ticket.is-due:focus-visible { outline: none; border-color: #6366F1; box-shadow: 0 0 0 3px rgba(99, 102, 241, .18); }
         .ticket.is-due .ticket-ic { color: #4F46E5; }
         .ticket-pulse { transform-box: fill-box; transform-origin: center; animation: ticket-pulse 2.2s cubic-bezier(.4, 0, .6, 1) infinite; }
         .ticket .ticket-chev { width: 14px; height: 14px; flex-shrink: 0; margin-right: -3px; color: #94A3B8; transition: transform .18s ease, color .18s ease; }
@@ -140,7 +141,7 @@
         .ticket.is-due.is-slipped:hover { border-color: #FB923C; }
         .ticket.is-due.is-slipped .ticket-ic, .ticket.is-due.is-slipped .ticket-go, .ticket.is-due.is-slipped:hover .ticket-chev { color: #EA580C; }
         .ticket.is-done .ticket-text { color: #064E3B; }
-        @keyframes ticket-breathe { 0%, 100% { box-shadow: 0 1px 2px rgba(0, 0, 0, .04), 0 0 0 0 rgba(79, 70, 229, 0); } 50% { box-shadow: 0 1px 2px rgba(0, 0, 0, .04), 0 0 0 4px rgba(79, 70, 229, .12); border-color: #A5B4FC; } }
+        @keyframes ticket-breathe { 0%, 100% { box-shadow: 0 1px 2px rgba(0, 0, 0, .04); } 50% { box-shadow: 0 1px 2px rgba(0, 0, 0, .04), 0 2px 12px rgba(79, 70, 229, .16); } }
         .reward-wrap { position: fixed; z-index: 70; top: 14px; left: 0; right: 0; display: flex; justify-content: center; padding: 0 16px; pointer-events: none; }
         .reward-toast { position: relative; display: flex; align-items: center; gap: 12px; width: 100%; max-width: 420px; padding: 12px 14px 14px; overflow: hidden; border-radius: 16px; background: #fff; border: 1px solid #A7F3D0; box-shadow: 0 12px 32px rgba(15, 23, 42, .14), 0 2px 6px rgba(5, 150, 105, .10); pointer-events: auto; animation: reward-in .45s cubic-bezier(.34, 1.4, .64, 1), reward-out .35s ease-in 3.15s forwards; }
         .reward-badge { display: inline-flex; width: 36px; height: 36px; flex-shrink: 0; align-items: center; justify-content: center; border-radius: 999px; background: #ECFDF5; box-shadow: 0 0 0 4px rgba(16, 185, 129, .12); animation: ticket-glow 1.6s ease-out; }
@@ -198,15 +199,19 @@
             .imp-btn { min-width: 0; height: 40px; padding: 0 6px; gap: 5px; font-size: 13px; }
             .imp-sample { display: none; }
         }
-        .batch-group { display: inline-flex; align-items: center; gap: 6px; min-width: 0; max-width: 20rem; flex: 1 1 10rem; padding: 2px 8px; border-radius: 8px; color: var(--muted); cursor: text; }
+        .batch-group { display: inline-flex; align-items: center; gap: 6px; min-width: 0; max-width: 100%; flex: 0 1 auto; padding: 2px 8px; border-radius: 8px; color: var(--muted); cursor: text; }
         .batch-group:hover, .batch-group:focus-within { background: var(--surface-2); }
-        .batch-group input { min-width: 0; flex: 1; border: 0; outline: 0; background: transparent; font-size: 15px; font-weight: 700; color: var(--ink); padding: 4px 0; }
+        .batch-group input { min-width: 0; width: auto; flex: 0 1 auto; field-sizing: content; border: 0; outline: 0; background: transparent; font-size: 15px; font-weight: 700; color: var(--ink); padding: 4px 0; }
         .batch-grid { display: grid; gap: 6px; grid-template-columns: minmax(0, 1fr) 4.25rem; }
         .batch-grid .batch-mean { grid-column: 1 / -1; }
         .batch-grid .batch-ex { display: none; }
         .batch-grid .batch-type { text-align: center; padding-left: 6px; padding-right: 6px; }
         .batch-acts { display: flex; flex-shrink: 0; flex-direction: column; gap: 4px; }
         .batch-cols { display: none; }
+        .batch-add, .batch-row, .batch-grid > * { min-width: 0; }
+        .saved-tag { display: inline-flex; align-items: center; gap: 4px; flex-shrink: 0; font-size: 11.5px; font-weight: 500; color: #94A3B8; white-space: nowrap; animation: saved-in .25s ease-out; }
+        .saved-tag svg { color: #94A3B8; }
+        @keyframes saved-in { from { opacity: 0; transform: translateY(-2px); } to { opacity: 1; transform: none; } }
         @media (min-width: 768px) {
             .batch-grid { grid-template-columns: minmax(0, 1.1fr) 4.5rem minmax(0, 1fr) minmax(0, 1.5fr); gap: 8px; }
             .batch-grid .batch-mean { grid-column: auto; }
@@ -250,7 +255,10 @@
         .ai-pin:hover:not(:disabled) { background: rgba(124, 58, 237, .16); }
         .ai-pin:disabled { opacity: .45; cursor: not-allowed; }
         .ai-pin.is-mini { height: 26px; padding: 0 8px; }
-        .ai-field:has(.ai-pin.is-mini) > .field { padding-right: 60px; }
+        .ai-field .ai-pin.is-mini { display: none; }
+        .ai-field:has(.ai-pin.is-mini) > .field { padding-right: 12px; }
+        .ai-field:focus-within .ai-pin.is-mini, .ai-field:has(> .field:not(:placeholder-shown)) .ai-pin.is-mini { display: inline-flex; }
+        .ai-field:focus-within:has(.ai-pin.is-mini) > .field, .ai-field:has(.ai-pin.is-mini):has(> .field:not(:placeholder-shown)) > .field { padding-right: 66px; }
         .ai-left { margin-left: 2px; padding: 0 6px; border-radius: 999px; background: rgba(124, 58, 237, .14); font-size: 11px; }
         .sg-list { position: fixed; z-index: 90; max-height: 280px; overflow-y: auto; margin: 0; padding: 4px; list-style: none; border-radius: 12px; background: var(--surface); border: 1px solid var(--border); box-shadow: 0 12px 32px rgba(15, 23, 42, .18); }
         .sg-item { display: flex; align-items: baseline; gap: 8px; padding: 8px 10px; border-radius: 8px; cursor: pointer; font-size: 14px; color: var(--ink); }
@@ -4895,7 +4903,7 @@
         const BATCH_PLAIN = { word: 'Từ tiếng Anh', type: 'Loại', meaning: 'Nghĩa tiếng Việt', example: 'Câu ví dụ (EN)' };
         const newDraft = () => ({ key: 'd' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6), questionOrWord: '', answerOrMeaning: '', wordType: '', ipa: '', explanationOrExample: '', exampleVi: '', keywords: [], open: false });
         /* Thẻ nhập nhanh nối vào cuối một Nhóm: gõ từ (có gợi ý), Enter sang nghĩa, Enter nữa là dòng mới. Lưu tất cả một lần. */
-        const BatchAdd = ({ drafts, setDrafts, group, onGroup, groups, onSave, onCancel, onAI, autoFocus = true }) => {
+        const BatchAdd = ({ drafts, setDrafts, group, onGroup, groups, onSave, onCancel, onAI, autoFocus = true, savedAt }) => {
             const refs = useRef({});
             const [focusKey, setFocusKey] = useState(() => (autoFocus && drafts[0] ? drafts[0].key : null));
             const [busyKey, setBusyKey] = useState(null);
@@ -4931,11 +4939,14 @@
                     <div className="flex flex-wrap items-center gap-2 border-b border-line px-3 py-2.5 sm:px-4">
                         <span className="grp-dot" style={{ background: group.trim() ? Sch.groupColor(group.trim()) : 'var(--border)' }} aria-hidden="true" />
                         <label className="batch-group">
-                            <input list={groupListId} value={group} maxLength={80} placeholder="Tên nhóm, vd Unit 1" aria-label="Tên nhóm (bấm để sửa)" onChange={(e) => onGroup(e.target.value)} />
+                            <input list={groupListId} value={group} maxLength={80} size={Math.max(6, Math.min(32, (group || '').length + 1))} placeholder="Tên nhóm, vd Unit 1" aria-label="Tên nhóm (bấm để sửa)" onChange={(e) => onGroup(e.target.value)} />
                             <Icon name="pen" size={13} />
                         </label>
                         <datalist id={groupListId}>{(groups || []).filter(([k]) => k !== '__none').map(([k]) => <option key={k} value={k} />)}</datalist>
-                        <p className="ml-auto hidden text-xs text-muted md:block"><Kbd>Enter</Kbd> sang ô kế / dòng mới · <Kbd>↓</Kbd> chọn gợi ý</p>
+                        <span className="ml-auto flex min-w-0 items-center gap-3">
+                            {savedAt ? <span key={savedAt} className="saved-tag"><Icon name="check" size={12} /> Đã tự lưu</span> : null}
+                            <span className="hidden min-w-0 truncate text-xs text-muted lg:inline"><Kbd>Enter</Kbd> sang ô kế / dòng mới · <Kbd>↓</Kbd> chọn gợi ý</span>
+                        </span>
                     </div>
                     <div className="batch-cols" aria-hidden="true"><span /><span>Từ tiếng Anh</span><span>Loại</span><span>Nghĩa tiếng Việt</span><span>Ví dụ</span><span /></div>
                     <ol className="divide-y divide-line">
@@ -5521,6 +5532,16 @@
         };
 
         const START_ANCHOR = '__start';
+        const DRAFT_KEY = 'libDrafts';
+        const loadDrafts = () => {
+            const d = Store.prefs.get(DRAFT_KEY, null);
+            if (!d || !Array.isArray(d.list) || !d.list.length || typeof d.group !== 'string') return null;
+            const list = d.list.slice(0, 200).map(x => Object.assign(newDraft(), {
+                questionOrWord: String(x.questionOrWord || ''), answerOrMeaning: String(x.answerOrMeaning || ''), wordType: String(x.wordType || ''),
+                ipa: String(x.ipa || ''), explanationOrExample: String(x.explanationOrExample || ''), exampleVi: String(x.exampleVi || '')
+            }));
+            return { anchor: typeof d.anchor === 'string' ? d.anchor : START_ANCHOR, group: d.group.slice(0, 80), list };
+        };
         const startDrafts = (group, anchor) => ({ anchor: anchor || START_ANCHOR, group: group || 'Unit 1', list: [newDraft(), newDraft(), newDraft()] });
         /* Tên nhóm kế tiếp: Unit lớn nhất + 1, không có thì "Unit <số nhóm + 1>". */
         const nextUnitName = (groups) => {
@@ -5551,7 +5572,34 @@
             const [menu, setMenu] = useState(null);
             const [filterOpen, setFilterOpen] = useState(false);
             const [fundOpen, setFundOpen] = useState(false);
-            const [drafts, setDrafts] = useState(() => (items.length ? null : startDrafts()));
+            const [drafts, setDrafts] = useState(() => loadDrafts() || (items.length ? null : startDrafts()));
+            const [draftSavedAt, setDraftSavedAt] = useState(0);
+            const [savedGroups, setSavedGroups] = useState(null);
+            /* Nháp trong bảng nhập tự lưu (mất điện, đóng tab vẫn còn), có nhãn "Đã tự lưu". */
+            useEffect(() => {
+                const typed = drafts && drafts.list.some(x => x.questionOrWord.trim() || x.answerOrMeaning.trim() || x.explanationOrExample.trim());
+                if (!typed) { Store.prefs.remove(DRAFT_KEY); setDraftSavedAt(0); return undefined; }
+                const t = window.setTimeout(() => { if (Store.prefs.set(DRAFT_KEY, drafts)) setDraftSavedAt(Date.now()); }, 500);
+                return () => window.clearTimeout(t);
+            }, [drafts]);
+            /* Mục trong sổ vừa ghi xuống IndexedDB: nhãn "Đã tự lưu" ở đầu nhóm trong 2.5 giây. */
+            useEffect(() => {
+                let t = 0;
+                const on = (e) => {
+                    window.clearTimeout(t);
+                    setSavedGroups(new Set((e.detail && e.detail.groups) || []));
+                    t = window.setTimeout(() => setSavedGroups(null), 2500);
+                };
+                window.addEventListener('edu-items-saved', on);
+                return () => { window.removeEventListener('edu-items-saved', on); window.clearTimeout(t); };
+            }, []);
+            /* Chốt phiếu khi sổ còn trống: không mở màn luyện tập rỗng, đưa con trỏ vào dòng 1. */
+            const voteOrStart = () => {
+                if (items.length) { onQuickVote && onQuickVote(); return; }
+                const el = document.querySelector('.batch-add input[aria-label="Từ tiếng Anh, dòng 1"]');
+                if (el) { el.scrollIntoView({ block: 'center', behavior: 'smooth' }); el.focus({ preventScroll: true }); }
+                toast('Thêm nhanh 1 từ đầu tiên để chốt phiếu hôm nay nhé!', 'info');
+            };
             const menuBox = useRef(null);
             /* Sổ trống: luôn có sẵn nhóm "Unit 1" với 3 dòng trống để gõ ngay. Có từ thật (lưu, dán, Excel) thì dọn khung trống đi. */
             useEffect(() => {
@@ -5673,7 +5721,7 @@
                 setDrafts(items.length ? null : startDrafts());
             };
             const batchCard = drafts ? (
-                <BatchAdd drafts={drafts.list} setDrafts={setDraftList} group={drafts.group} groups={groups} autoFocus={!(drafts.anchor === START_ANCHOR && !items.length)}
+                <BatchAdd drafts={drafts.list} setDrafts={setDraftList} group={drafts.group} groups={groups} autoFocus={!(drafts.anchor === START_ANCHOR && !items.length)} savedAt={draftSavedAt}
                     onGroup={(v) => setDrafts(d => Object.assign({}, d, { group: v }))} onAI={(t) => aiDraft(t)} onSave={saveDrafts} onCancel={items.length ? cancelDrafts : null} />
             ) : null;
             const draftsLoose = drafts && !secByKey.has(drafts.anchor);
@@ -5683,6 +5731,7 @@
                     <span className="grp-dot" style={{ background: sec.key ? Sch.groupColor(sec.key) : 'var(--border)' }} aria-hidden="true" />
                     <span className="min-w-0 flex-1 truncate text-left">{sec.label}</span>
                     {sec.sample && <span className="chip bg-surface2 text-muted">mẫu</span>}
+                    {savedGroups && savedGroups.has(sec.key || '') && <span className="saved-tag"><Icon name="check" size={12} /> Đã tự lưu</span>}
                     <span className="grp-count tnum">{sec.rows.length} {sec.rows.length > 1 ? 'mục' : 'mục'}</span>
                 </button>
             );
@@ -5864,7 +5913,7 @@
                         </div>
                     </div>
 
-                    <FundStrip onOpen={() => setFundOpen(true)} onQuickVote={onQuickVote} />
+                    <FundStrip onOpen={() => setFundOpen(true)} onQuickVote={voteOrStart} />
                     {fundOpen && <Modal title="Mã quỹ & gói AI" onClose={() => setFundOpen(false)} size="lg"><FundBody toast={toast} kind="vocab" compact items={items} /></Modal>}
 
                     <div className="import-bar" role="toolbar" aria-label="Nhập hàng loạt">
@@ -7206,7 +7255,14 @@
                 clearTimeout(saveTimer.current);
                 const prev = savedItems.current;
                 savedItems.current = list;
-                return Store.syncDiff(Store.items, prev, list).catch(e => {
+                return Store.syncDiff(Store.items, prev, list).then(() => {
+                    if (prev === list || !prev) return;
+                    const before = new Map(prev.map(t => [t.id, t]));
+                    const groups = new Set();
+                    list.forEach(t => { if (before.get(t.id) !== t) groups.add(t.group || ''); before.delete(t.id); });
+                    before.forEach(t => groups.add(t.group || ''));
+                    if (groups.size) window.dispatchEvent(new CustomEvent('edu-items-saved', { detail: { groups: Array.from(groups), at: Date.now() } }));
+                }).catch(e => {
                     savedItems.current = prev;
                     toast('Lỗi lưu dữ liệu: ' + (e && e.message), 'error');
                 });
