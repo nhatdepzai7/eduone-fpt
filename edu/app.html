@@ -115,6 +115,51 @@
         .fund-code { align-items: center; gap: 6px; min-height: 30px; padding: 0 8px; border-radius: 8px; color: var(--ink-2); }
         .fund-code:hover { background: var(--surface-2); color: var(--ink); }
         /* Pill phiếu hôm nay */
+        .bill-tabs { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 4px; padding: 4px; border-radius: 14px; background: #F1F5F9; }
+        .bill-tab { min-height: 38px; padding: 0 8px; border-radius: 10px; font-size: 13.5px; font-weight: 600; color: var(--ink-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .bill-tab:hover { color: var(--ink); }
+        .bill-tab[aria-selected="true"] { color: #312E81; background: #fff; box-shadow: 0 1px 3px rgba(15, 23, 42, .12); }
+        .bill-stat { display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 16px; border: 1px solid var(--border); background: var(--surface); }
+        .bill-stat.is-wrap { flex-wrap: wrap; }
+        .bill-stat.is-wrap > .flex-1 { flex-basis: 12rem; }
+        .bill-stat-btn { flex-shrink: 0; }
+        @media (max-width: 639px) { .bill-stat-btn { width: 100%; } }
+        .bill-stat-ic { display: inline-flex; width: 36px; height: 36px; flex-shrink: 0; align-items: center; justify-content: center; border-radius: 10px; color: #4338CA; background: #EEF2FF; }
+        .bill-stat-ic.is-eos { color: #1E3A8A; background: #DBEAFE; }
+        .bill-plans { display: grid; gap: 12px; margin-top: 16px; }
+        @media (min-width: 640px) { .bill-plans { grid-template-columns: 1.15fr 1fr; } }
+        .bill-eos { display: grid; gap: 12px; margin-top: 18px; }
+        @media (min-width: 640px) { .bill-eos { grid-template-columns: repeat(3, minmax(0, 1fr)); align-items: start; } }
+        .bill-plan { position: relative; display: block; width: 100%; text-align: left; padding: 16px; border-radius: 16px; border: 2px solid var(--border); background: #fff; transition: border-color .15s ease; }
+        button.bill-plan:hover { border-color: #A5B4FC; }
+        .bill-plan.is-main { border-color: #4338CA; box-shadow: 0 4px 14px rgba(67, 56, 202, .12); }
+        .bill-plan.is-on { border-color: #059669; background: #F0FDF4; }
+        .bill-plan.is-dark { border-color: rgba(216, 199, 160, .5); background: #10141F; }
+        .bill-pop { position: absolute; top: -11px; left: 50%; transform: translateX(-50%); white-space: nowrap; padding: 2px 9px; border-radius: 999px; font-size: 11px; font-weight: 700; color: #fff; background: #4338CA; }
+        .bill-tag { display: inline-flex; padding: 3px 9px; border-radius: 999px; font-size: 11px; font-weight: 700; letter-spacing: .02em; color: #4338CA; background: #E0E7FF; }
+        .bill-tag.is-gold { color: #E7C56A; background: rgba(231, 197, 106, .12); }
+        .bill-perks { margin-top: 10px; display: grid; gap: 6px; font-size: 13px; color: var(--ink-2); }
+        .bill-perks li { display: flex; gap: 6px; align-items: flex-start; }
+        .bill-perks svg { margin-top: 2px; flex-shrink: 0; color: #10B981; }
+        .bill-perks.is-dark { color: #CBD5E1; }
+        .bill-perks.is-dark svg { color: #E7C56A; }
+        .plan-cta.is-gold { color: #10141F; background: #E7C56A; border-color: #E7C56A; }
+        button.plan-cta { width: 100%; }
+        .bill-foot { margin-top: 16px; padding-top: 12px; border-top: 1px dashed var(--border); text-align: center; }
+        .bill-foot button { display: inline-flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 4px; font-size: 13px; color: var(--ink-2); }
+        .bill-foot button b { color: #4338CA; text-decoration: underline; text-underline-offset: 2px; }
+        .bill-foot button:hover b { color: #312E81; }
+        .code-box { padding: 14px; border-radius: 16px; border: 1px solid #C7D2FE; background: #F8FAFF; }
+        .code-note { margin-top: 10px; padding: 8px 12px; border-radius: 10px; font-size: 13px; }
+        .code-note.is-ok { color: #065F46; background: #ECFDF5; }
+        .code-note.is-err { color: #9F1239; background: #FFF1F2; }
+        .code-note.is-info { color: #1E3A8A; background: #EFF6FF; }
+        .code-login { margin-top: 12px; padding: 12px; border-radius: 12px; border: 1px solid rgba(216, 199, 160, .7); background: #FFFBEB; }
+        .shared-code { padding: 6px 12px; border-radius: 10px; font-weight: 700; letter-spacing: .08em; color: var(--ink); background: #F1F5F9; border: 1px dashed #94A3B8; }
+        .bill-history { max-height: 200px; overflow-y: auto; display: grid; gap: 4px; font-size: 13px; }
+        .hub-row { display: flex; width: 100%; align-items: center; gap: 12px; padding: 12px; border-radius: 12px; border: 1px solid #C7D2FE; background: #F8FAFF; }
+        .hub-row:hover { border-color: #818CF8; }
+        .bill-history li { display: flex; justify-content: space-between; gap: 12px; }
         .eos-strip { gap: 10px; padding: 0 6px 0 12px; }
         .eos-turns { display: inline-flex; align-items: center; gap: 6px; color: var(--ink); font-weight: 600; }
         .eos-turns svg { color: #1E3A8A; }
@@ -1539,7 +1584,7 @@
         const requireTurns = (toast, quiet) => {
             const n = E.Quota.balance();
             if (n < 1) {
-                toast('Quỹ lượt thi đã hết. Mua thêm gói hoặc dán mã quỹ được chia sẻ.', 'info');
+                toast('Hết lượt thi EOS. Mua thêm gói hoặc nhập mã dùng chung của nhóm.', 'info');
                 E.Quota.openShop();
                 return false;
             }
@@ -1754,374 +1799,6 @@
             );
         };
 
-        const FundBody = ({ toast, kind, compact = false, items = [] }) => {
-            const fund = useFund();
-            const eos = kind === 'eos';
-            const [picked, setPicked] = useState(null);
-            const [code, setCode] = useState(fund.code);
-            /* Mã quỹ đổi từ nơi khác (đăng nhập, mở QR) thì ô nhập theo mã mới. */
-            useEffect(() => { setCode(fund.code); }, [fund.code]);
-            const [incoming, setIncoming] = useState('');
-            const [syncing, setSyncing] = useState(false);
-            const [tools, setTools] = useState(false);
-            const [offer, setOffer] = useState(false);
-            const shelf = eos ? E.Quota.packs : [E.Quota.vocab];
-            const pack = shelf.find(p => p.id === picked);
-            const aiCap = fund.aiLimit || E.Quota.AI_FREE;
-            const aiLeft = Math.max(0, aiCap - (fund.aiUsed || 0));
-            const vocabOn = (fund.aiCredits || 0) > 0;
-            const bank = E.Quota.BANK;
-            const memo = E.Quota.memoOf(fund.code);
-            const when = (t) => new Date(t).toLocaleString('vi-VN', { hour: '2-digit', minute: '2-digit', day: '2-digit', month: '2-digit' });
-            const checkPay = (quiet) => {
-                setSyncing(true);
-                return E.Quota.sync().then((r) => {
-                    if (r.aiJustFunded) toast('Đã cộng 500 lượt điền thẻ và 30 lượt quét cho mã ' + r.code + '.', 'success');
-                    else if (r.aiJustUnlocked && !(r.added > 0)) toast('Đã bật trợ lý AI cho mã ' + r.code + '.', 'success');
-                    else if (r.added > 0) toast('Đã cộng ' + r.added + ' lượt từ chuyển khoản. Quỹ hiện có ' + r.balance + ' lượt.', 'success');
-                    else if (!quiet) toast('Chưa thấy giao dịch mới cho nội dung ' + E.Quota.memoOf(r.code) + '.', 'info');
-                }).catch((e) => {
-                    if (!quiet) toast(e.message || 'Chưa kiểm tra được thanh toán.', 'error');
-                }).finally(() => setSyncing(false));
-            };
-            useEffect(() => {
-                if (!picked) return undefined;
-                checkPay(true);
-                const id = setInterval(() => checkPay(true), 12000);
-                return () => clearInterval(id);
-            }, [picked, fund.code]);
-            const copyFund = () => {
-                copyText(fund.code).then(() => toast('Đã copy mã ' + fund.code + '. Máy khác dán mã này để dùng chung quỹ.', 'success')).catch(() => toast('Không copy được. Hãy chọn mã và copy tay.', 'error'));
-            };
-            const [giftCode, setGiftCode] = useState('');
-            const [giftBusy, setGiftBusy] = useState(false);
-            const askGift = (code) => {
-                window.dispatchEvent(new CustomEvent('edu-gift', { detail: { code: String(code || '').toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 24) } }));
-            };
-            const activateGift = async (raw) => {
-                const code = String(raw || '').toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 24);
-                if (code.length < 4) { toast('Mã Obsidian PRO cần từ 4 ký tự.', 'error'); return; }
-                if (!googleToken()) { askGift(code); return; }
-                setGiftBusy(true);
-                try {
-                    const gift = await redeemGiftCode(code);
-                    setGiftCode('');
-                    toast(gift.proUntil === -1 ? 'Đã mở Obsidian PRO vĩnh viễn.' : 'Đã mở Obsidian PRO.', 'success');
-                } catch (e) {
-                    if (e.needLogin) askGift(code);
-                    else toast(e.message, 'error');
-                } finally {
-                    setGiftBusy(false);
-                }
-            };
-            const useSharedCode = async () => {
-                const text = incoming.trim();
-                if (!text) return;
-                const cleaned = text.toUpperCase().replace(/[^A-Z0-9]/g, '');
-                if (!/^EDUF1\./i.test(text) && cleaned.length >= 4) {
-                    if (!googleToken()) {
-                        if (cleaned.length > 12) {
-                            setIncoming('');
-                            askGift(cleaned);
-                            return;
-                        }
-                        toast('Nếu đây là mã Obsidian PRO do admin cấp, dán vào ô Mã Obsidian PRO bên dưới. Ô này chỉ nhận mã quỹ lượt.', 'info');
-                    } else {
-                        setGiftBusy(true);
-                        try {
-                            const gift = await redeemGiftCode(cleaned);
-                            setIncoming('');
-                            toast(gift.proUntil === -1 ? 'Đã mở Obsidian PRO vĩnh viễn.' : 'Đã mở Obsidian PRO.', 'success');
-                            return;
-                        } catch (e) {
-                            if (e.needLogin) { setIncoming(''); askGift(cleaned); return; }
-                            if (!/Không có mã này/.test(e.message || '')) {
-                                toast(e.message, 'error');
-                                return;
-                            }
-                        } finally {
-                            setGiftBusy(false);
-                        }
-                    }
-                }
-                let saved;
-                try {
-                    saved = /^EDUF1\./i.test(text) ? E.Quota.importCode(text) : E.Quota.setCode(text);
-                } catch (e) {
-                    toast(e.message || 'Mã quỹ không hợp lệ.', 'error');
-                    return;
-                }
-                setIncoming('');
-                setCode(saved.code);
-                checkPay(true).then(() => {
-                    const now = E.Quota.read();
-                    toast('Máy này đang dùng mã ' + now.code + '. Còn ' + now.balance + ' lượt, trừ chung trên mọi trình duyệt.', 'success');
-                });
-            };
-            const saveCode = () => {
-                try { const saved = E.Quota.setCode(code); setCode(saved.code); checkPay(true); toast('Đã lưu mã quỹ ' + saved.code, 'success'); }
-                catch (e) { toast(e.message, 'error'); }
-            };
-            const vocabBenefits = (
-                <ul className="mt-3 space-y-1.5 text-sm text-ink2">
-                    <li className="flex items-start gap-2"><Icon name="check" size={16} className="mt-0.5 shrink-0 text-[#10B981]" /><span><b className="text-ink">+500 lượt AI Tự động điền thẻ</b> (Nghĩa sát ngữ cảnh, Câu ví dụ, Phiên âm IPA & Mẹo nhớ siêu tốc).</span></li>
-                    <li className="flex items-start gap-2"><Icon name="check" size={16} className="mt-0.5 shrink-0 text-[#10B981]" /><span><b className="text-ink">+30 lượt AI Quét Bài Đọc / Đề Thi</b> (Tự động highlight từ vựng đắt giá & Luyện đọc Shadowing).</span></li>
-                    <li className="flex items-start gap-2"><Icon name="check" size={16} className="mt-0.5 shrink-0 text-[#10B981]" /><span><b className="text-ink">Đồng bộ đa thiết bị qua Mã Quỹ</b> (Học mọi lúc trên cả Laptop & Điện thoại, không cần mua kèm lượt EOS).</span></li>
-                    <li className="flex items-start gap-2"><Icon name="check" size={16} className="mt-0.5 shrink-0 text-[#10B981]" /><span><b className="text-ink">Trải nghiệm Obsidian độc quyền</b> (Mở khóa giao diện thành viên cao cấp với nhận diện Obsidian riêng biệt, huy hiệu thành viên đặc quyền và không gian trải nghiệm Premium xuyên suốt FPass).</span></li>
-                </ul>
-            );
-            const vocabCard = (
-                <div className="rounded-2xl border-2 border-[#4338CA]/80 bg-gradient-to-br from-white to-indigo-50/30 p-4 shadow-sm">
-                    <span className="inline-flex rounded-full bg-indigo-100 px-2.5 py-1 text-xs font-semibold text-[#4338CA]">GÓI HỌC TỪ VỰNG & READING SIÊU TỐC • TIẾT KIỆM 50%</span>
-                    <h3 className="mt-2 text-lg font-bold text-ink">Gói Trợ Lý AI Từ Vựng & Đọc Hiểu Toàn Diện (Trọn Kỳ)</h3>
-                    <p className="mt-1 flex flex-wrap items-baseline gap-x-2 gap-y-1">
-                        <span className="text-2xl font-bold tnum text-ink">29.000đ</span>
-                        <span className="text-sm text-slate-400 line-through tnum">59.000đ</span>
-                        <span className="text-sm text-ink2">Chỉ bằng 1 cốc trà sữa cho cả học kỳ • Kích hoạt tự động sau 3 giây</span>
-                    </p>
-                    {vocabBenefits}
-                    {vocabOn ? (
-                        <p className="mt-3 inline-flex rounded-xl bg-white px-4 py-2 text-sm font-semibold text-[#4338CA]">Đã kích hoạt trên mã này</p>
-                    ) : (
-                        <button type="button" className="mt-3 inline-flex items-center justify-center gap-2 rounded-xl bg-[#4338CA] px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-all hover:bg-[#3730A3]" onClick={() => setPicked('vocab')}>Mở khóa ngay — 29.000đ (Quét QR tự động 3s)<Icon name="arrow" size={16} /></button>
-                    )}
-                </div>
-            );
-            const payBox = pack && (
-                <PayGate>
-                <div className="rounded-2xl border border-line p-4 flex flex-wrap gap-4 items-center">
-                    <img src={E.Quota.qrUrl(pack.price, fund.code)} alt={'VietQR ' + bank.name + ' ' + bank.account} className="w-40 h-40 rounded-xl border border-line object-contain bg-white" />
-                    <div className="min-w-0 flex-1">
-                        <p className="font-semibold">Chuyển khoản {pack.name}</p>
-                        <p className="text-sm text-ink2 mt-1">{bank.name} · {bank.bin}</p>
-                        <p className="text-sm text-ink2 tnum">Số tài khoản: <b className="text-ink">{bank.account}</b></p>
-                        <p className="text-sm text-ink2">Chủ tài khoản: <b className="text-ink">{bank.holder}</b></p>
-                        <p className="text-sm text-ink2 tnum">Số tiền: <b className="text-ink">{vnd(pack.price)}</b></p>
-                        <p className="text-sm text-ink2 tnum">Nội dung: <b className="text-ink">{memo}</b></p>
-                        <p className="text-xs text-muted mt-2">{pack.id === 'vocab' ? 'SePay cộng 500 lượt điền thẻ và 30 lượt quét bài đọc khi tiền vào đúng 29.000đ và đúng nội dung. Gói này không cộng lượt EOS.' : 'SePay cộng đúng ' + pack.turns + ' lượt EOS và bật trợ lý AI khi tiền vào đúng số tiền và nội dung. Lượt không tự cộng nếu bấm nút khi chưa có giao dịch.'}</p>
-                        <p className="text-xs mt-2 flex flex-wrap gap-x-3 gap-y-1">
-                            <button type="button" className="font-semibold text-primary underline underline-offset-2" onClick={() => openLegal('id')}>Chính sách bảo lưu Mã Quỹ</button>
-                            <button type="button" className="font-semibold text-primary underline underline-offset-2" onClick={openSupport}>Ghi sai nội dung? Liên hệ hỗ trợ cộng lượt</button>
-                        </p>
-                        <button type="button" className="btn btn-primary mt-3" disabled={syncing} onClick={() => checkPay(false)}>{syncing ? 'Đang kiểm tra…' : 'Kiểm tra chuyển khoản'}</button>
-                    </div>
-                </div>
-                </PayGate>
-            );
-            if (compact && !eos) {
-                const obsidian = obsidianOf(fund);
-                const account = readAccount();
-                const unlimited = !!(fund.aiUnlocked && !obsidian);
-                const openMembership = () => window.dispatchEvent(new CustomEvent('edu-membership'));
-                return (
-                    <div className="space-y-3">
-                        <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2 rounded-2xl border border-slate-200 bg-white px-4 py-2.5 shadow-sm">
-                            <div className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1 text-xs text-slate-700">
-                                {account ? (
-                                    <span className="inline-flex items-center gap-1 font-medium" title={'Mã quỹ ' + fund.code}>Tài khoản: <b className="text-ink">{account.email}</b></span>
-                                ) : (
-                                    <button type="button" onClick={() => askLogin('save')} className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2.5 py-1 font-semibold text-amber-800 hover:bg-amber-100">Chưa đăng nhập · lượt chỉ lưu trên máy này</button>
-                                )}
-                                <span className="inline-flex items-center gap-1 font-medium">
-                                    Mã quỹ: <b className="tnum text-ink">{fund.code}</b>
-                                    <button type="button" onClick={copyFund} aria-label={'Copy mã ' + fund.code} className="inline-flex h-6 w-6 items-center justify-center rounded-md text-slate-500 hover:bg-slate-100 hover:text-slate-800"><Icon name="copy" size={13} /></button>
-                                </span>
-                                <span aria-hidden="true" className="text-slate-300">•</span>
-                                {obsidian ? (
-                                    <button type="button" onClick={openMembership} aria-label="Mở thẻ thành viên Obsidian" className="inline-flex h-7 items-center gap-2 rounded-full border border-[#D8C7A0]/60 bg-[#10141F] px-2.5 text-[11px] text-white shadow-sm">
-                                        <Icon name="gem" size={13} className="text-[#D8C7A0]" />
-                                        <span className="font-semibold tracking-wide">PRO MEMBER</span>
-                                        <span className="text-[#D8C7A0]">Đang hoạt động</span>
-                                        <span className="tnum">{proLive(fund) ? 'AI không giới hạn' : 'AI ' + aiLeft + '/' + aiCap}</span>
-                                    </button>
-                                ) : unlimited ? (
-                                    <span className="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-1 font-medium text-slate-700">AI tự điền: đang mở</span>
-                                ) : (
-                                    <span className="inline-flex items-center rounded-full bg-indigo-50 px-2.5 py-1 font-medium text-[#4338CA]">AI tự điền: {aiLeft}/{aiCap} miễn phí</span>
-                                )}
-                                <span aria-hidden="true" className="text-slate-300">•</span>
-                                <span className="font-medium">EOS: <b className="tnum text-ink">{fund.balance}</b> lượt</span>
-                                <LivingIdentityBadge items={items} />
-                            </div>
-                            <div className="flex shrink-0 flex-wrap items-center gap-2">
-                                <button type="button" aria-expanded={tools} onClick={() => setTools(v => !v)} className="rounded-xl bg-slate-100 px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-200">Đổi mã / Lịch sử quỹ</button>
-                                {!obsidian && (
-                                    <button type="button" onClick={() => { setPicked('vocab'); setOffer(true); }} className="rounded-xl bg-[#4338CA] px-3.5 py-1.5 text-xs font-semibold text-white shadow-sm hover:bg-[#3730A3]">Mở khóa gói AI 29k ↗</button>
-                                )}
-                            </div>
-                        </div>
-                        {tools && (
-                            <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-                                <div className="grid gap-4 sm:grid-cols-2">
-                                    <div>
-                                        <label className="text-sm">
-                                            <span className="label">Mã quỹ</span>
-                                            <span className="flex gap-2">
-                                                <input value={code} onChange={(e) => setCode(e.target.value.toUpperCase())} maxLength={12} className="field w-32 uppercase" aria-label="Mã quỹ lượt" />
-                                                <button type="button" className="btn btn-secondary btn-sm" onClick={saveCode}>Lưu</button>
-                                            </span>
-                                        </label>
-                                        <p className="mb-2 mt-4 text-sm font-semibold">Lịch sử quỹ</p>
-                                        {fund.history.length ? (
-                                            <ul className="max-h-40 space-y-1 overflow-y-auto text-sm">
-                                                {fund.history.slice(0, 12).map(ev => (
-                                                    <li key={ev.id} className="flex justify-between gap-3 tnum">
-                                                        <span className="truncate text-ink2">{when(ev.t)} · {ev.kind === 'buy' ? ev.note : 'Nộp EOS'}</span>
-                                                        <span className={ev.delta > 0 ? 'text-success' : 'text-danger'}>{ev.delta > 0 ? '+' : ''}{ev.delta}</span>
-                                                    </li>
-                                                ))}
-                                            </ul>
-                                        ) : <p className="text-sm text-muted">Chưa có lần mua hoặc lần nộp EOS.</p>}
-                                    </div>
-                                    <div>
-                                        <p className="mb-2 text-sm font-semibold">Dùng chung mã này</p>
-                                        <p className="mb-2 text-xs text-muted">Chỉ dán mã quỹ lượt EOS. Mã admin cấp PRO không dán vào đây.</p>
-                                        <label className="block"><span className="label">Dán mã quỹ</span>
-                                            <textarea value={incoming} onChange={(e) => setIncoming(e.target.value)} rows={2} className="field text-xs" placeholder="Dán mã ngắn hoặc EDUF1...." />
-                                        </label>
-                                        <button type="button" className="btn btn-secondary btn-sm mt-2" disabled={!incoming.trim()} onClick={useSharedCode}>Dùng mã này</button>
-                                    </div>
-                                </div>
-                                <div className="mt-4 rounded-xl border border-[#D8C7A0]/50 bg-[#10141F] p-3 text-white">
-                                    <p className="text-sm font-semibold text-[#D8C7A0]">Mã Obsidian PRO</p>
-                                    <p className="mt-1 text-xs text-slate-300">Dán mã admin cấp vào đây. Cần đăng nhập Google trước khi kích hoạt.</p>
-                                    <div className="mt-2 flex gap-2">
-                                        <input value={giftCode} onChange={(e) => setGiftCode(e.target.value.toUpperCase())} maxLength={24} className="field uppercase bg-white text-ink" placeholder="EARLYBIRD" aria-label="Mã Obsidian PRO" />
-                                        <button type="button" className="btn btn-secondary btn-sm shrink-0" disabled={!giftCode.trim() || giftBusy} onClick={() => activateGift(giftCode)}>{giftBusy ? '…' : 'Kích hoạt'}</button>
-                                    </div>
-                                </div>
-                            </div>
-                        )}
-                        {offer && !obsidian && (
-                            <Modal title="Mở khóa gói AI từ vựng" onClose={() => { setOffer(false); setPicked(null); }} size="lg">
-                                {fund.aiUnlocked && !vocabOn ? (
-                                    <p className="rounded-xl bg-indigo-50 px-3 py-2 text-sm text-[#4338CA]">Mã này đã có trợ lý AI từ gói EOS.</p>
-                                ) : vocabOn ? (
-                                    <p className="rounded-xl bg-indigo-50 px-3 py-2 text-sm font-semibold text-[#4338CA]">Đã kích hoạt trên mã này</p>
-                                ) : (
-                                    <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
-                                        <div className="min-w-0 flex-1">
-                                            <span className="inline-flex rounded-full bg-indigo-100 px-2.5 py-1 text-xs font-semibold text-[#4338CA]">GÓI HỌC TỪ VỰNG & READING SIÊU TỐC • TIẾT KIỆM 50%</span>
-                                            <h3 className="mt-2 text-base font-bold text-ink">Gói Trợ Lý AI Từ Vựng & Đọc Hiểu Toàn Diện (Trọn Kỳ)</h3>
-                                            <p className="mt-1 flex flex-wrap items-baseline gap-x-2">
-                                                <span className="text-2xl font-bold tnum text-ink">29.000đ</span>
-                                                <span className="text-sm text-slate-400 line-through tnum">59.000đ</span>
-                                            </p>
-                                            <p className="mt-1 text-xs text-ink2">Chỉ bằng 1 cốc trà sữa cho cả học kỳ • Kích hoạt tự động sau 3 giây</p>
-                                            {vocabBenefits}
-                                        </div>
-                                        <div className="w-full shrink-0 sm:w-60"><PayGate compact>
-                                        <div className="w-full rounded-xl border border-slate-200 bg-white p-3">
-                                            <img src={E.Quota.qrUrl(29000, fund.code)} alt={'VietQR ' + bank.name + ' ' + bank.account} className="mx-auto h-36 w-36 rounded-lg border border-line bg-white object-contain" />
-                                            <p className="mt-2 text-center text-sm font-semibold tnum text-ink">29.000đ</p>
-                                            <p className="text-center text-xs tnum text-ink2">{memo}</p>
-                                            <p className="text-center text-[11px] text-muted">{bank.name} · {bank.account}</p>
-                                            <button type="button" className="btn btn-primary mt-2 w-full whitespace-nowrap" disabled={syncing} onClick={() => checkPay(false)}>{syncing ? 'Đang kiểm tra…' : 'Kiểm tra chuyển khoản'}</button>
-                                        </div>
-                                        </PayGate></div>
-                                    </div>
-                                )}
-                            </Modal>
-                        )}
-                    </div>
-                );
-            }
-            return (
-                <div className="space-y-4">
-                    <div className="flex flex-wrap items-end justify-between gap-3">
-                        <div>
-                            <p className="text-[11px] font-semibold uppercase tracking-wider text-muted">{eos ? 'Ôn thi EOS & Toàn diện' : 'Kho học liệu của tôi'}</p>
-                            <p className="mt-1 flex flex-wrap items-center gap-2">
-                                {eos
-                                    ? <span className="text-3xl font-bold tnum text-ink">{fund.balance} <span className="text-base font-semibold text-ink2">lượt EOS</span></span>
-                                    : <span className="chip bg-indigo-50 text-[#4338CA]"><Icon name="sparkles" size={14} className="text-[#4338CA]" />{fund.aiUnlocked ? 'AI đang mở' : 'AI: ' + aiLeft + '/' + aiCap + (vocabOn ? '' : ' miễn phí')}</span>}
-                                {eos && <span className="chip bg-indigo-50 text-[#4338CA]"><Icon name="sparkles" size={14} className="text-[#4338CA]" />{fund.aiUnlocked ? 'AI đang mở' : 'AI kèm theo gói'}</span>}
-                            </p>
-                            <p className="text-sm text-ink2">{eos
-                                ? <>Mã <b className="text-ink">{fund.code}</b> trừ chung khi nộp phòng thi, trên mọi trình duyệt.</>
-                                : <>Mã <b className="text-ink">{fund.code}</b>. Tạo thẻ tay và nhập file không giới hạn. Trợ lý AI điền miễn phí 100 lượt đầu. Phòng thi EOS còn <b className="text-ink tnum">{fund.balance}</b> lượt — mua thêm ở Kho Src Qua Môn.</>}</p>
-                        </div>
-                        <label className="text-sm">
-                            <span className="label">Mã quỹ</span>
-                            <span className="flex gap-2">
-                                <input value={code} onChange={(e) => setCode(e.target.value.toUpperCase())} maxLength={12} className="field w-32 uppercase" aria-label="Mã quỹ lượt" />
-                                <button type="button" className="btn btn-secondary btn-sm" onClick={() => { try { const saved = E.Quota.setCode(code); setCode(saved.code); checkPay(true); toast('Đã lưu mã quỹ ' + saved.code, 'success'); } catch (e) { toast(e.message, 'error'); } }}>Lưu</button>
-                            </span>
-                        </label>
-                    </div>
-                    {eos && fund.balance < 5 && (
-                        <p className="text-sm rounded-xl px-3 py-2 bg-warn-soft text-warn">
-                            {fund.balance === 0
-                                ? 'Chưa có lượt phòng thi. Chọn một gói bên dưới. Lượt mua xong không bị xóa khi hết môn.'
-                                : 'Còn ' + fund.balance + ' lượt EOS. Mua thêm trước khi xuống 0 — số mới cộng thẳng vào số đang có.'}
-                        </p>
-                    )}
-                    {!eos && !vocabOn && !fund.aiUnlocked && (
-                        <p className="text-sm font-medium text-ink">Nâng cấp Trợ lý AI Từ Vựng — Giải phóng 100% thời gian tự tra từ điển, bóc tách bài đọc IELTS & giáo trình chỉ trong 1 giây.</p>
-                    )}
-                    {eos ? (
-                        <div className="grid items-start gap-3 pt-3 sm:grid-cols-3">
-                            {E.Quota.packs.map(p => {
-                                const featured = p.id === 'group';
-                                const on = picked === p.id;
-                                const frame = featured
-                                    ? 'relative z-10 border-2 border-[#4338CA] bg-white shadow-md sm:scale-[1.04] ' + (on ? 'bg-primary-soft' : '')
-                                    : (on ? 'border-2 border-primary bg-primary-soft' : 'border-2 border-line hover:border-primary');
-                                return (
-                                    <button key={p.id} type="button" onClick={() => setPicked(p.id)} className={'relative text-left rounded-2xl p-4 transition-colors ' + frame}>
-                                        {featured && <span className="absolute -top-2.5 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full bg-[#4338CA] px-2 py-0.5 text-[11px] font-semibold text-white">Phổ biến nhất</span>}
-                                        <span className="block text-xs font-semibold uppercase tracking-wide text-muted">{p.who}</span>
-                                        <span className="block font-bold mt-1">{p.name}</span>
-                                        <span className="block text-lg font-bold tnum mt-2">{p.turns} lượt</span>
-                                        <span className="block text-sm tnum mt-1">{vnd(p.price)}{p.off ? <span className="text-success"> · giảm {Math.round(p.off * 100)}%</span> : ''}</span>
-                                        {p.off ? <span className="block text-xs text-muted line-through tnum">{vnd(p.list)}</span> : <span className="block text-xs text-muted">Giá tiêu chuẩn {vnd(E.Quota.UNIT)}/lượt</span>}
-                                        <span className="mt-3 block text-xs font-medium text-ink2">✓ Tặng kèm trợ lý AI từ vựng</span>
-                                        <span className={'plan-cta' + (on ? ' is-on' : featured ? ' is-featured' : '')}>{on ? 'Đã chọn · quét QR bên dưới' : 'Chọn gói'}</span>
-                                    </button>
-                                );
-                            })}
-                        </div>
-                    ) : fund.aiUnlocked && !vocabOn ? (
-                        <p className="rounded-xl bg-indigo-50 px-3 py-2 text-sm text-[#4338CA]">Mã này đã có trợ lý AI từ gói EOS.</p>
-                    ) : vocabCard}
-                    {payBox}
-                    <div className="grid sm:grid-cols-2 gap-3">
-                        <div>
-                            <p className="text-sm font-semibold mb-2">Lịch sử quỹ</p>
-                            {fund.history.length ? (
-                                <ul className="text-sm space-y-1 max-h-40 overflow-y-auto">
-                                    {fund.history.slice(0, 12).map(ev => (
-                                        <li key={ev.id} className="flex justify-between gap-3 tnum">
-                                            <span className="text-ink2 truncate">{when(ev.t)} · {ev.kind === 'buy' ? ev.note : 'Nộp EOS'}</span>
-                                            <span className={ev.delta > 0 ? 'text-success' : 'text-danger'}>{ev.delta > 0 ? '+' : ''}{ev.delta}</span>
-                                        </li>
-                                    ))}
-                                </ul>
-                            ) : <p className="text-sm text-muted">Chưa có lần mua hoặc lần nộp EOS.</p>}
-                        </div>
-                        <div>
-                            <p className="text-sm font-semibold mb-2">Dùng chung mã này</p>
-                            <p className="text-xs text-muted mb-2">Chỉ dán mã quỹ lượt EOS. Mã admin cấp PRO không dán vào đây.</p>
-                            <div className="flex flex-wrap gap-2">
-                                <button type="button" className="btn btn-secondary btn-sm" onClick={copyFund}>Copy mã {fund.code}</button>
-                            </div>
-                            <label className="block mt-2"><span className="label">Dán mã quỹ</span>
-                                <textarea value={incoming} onChange={(e) => setIncoming(e.target.value)} rows={2} className="field text-xs" placeholder="Dán mã ngắn hoặc EDUF1...." />
-                            </label>
-                            <button type="button" className="btn btn-secondary btn-sm mt-2" disabled={!incoming.trim()} onClick={useSharedCode}>Dùng mã này</button>
-                            <div className="mt-4 rounded-xl border border-[#D8C7A0]/50 bg-[#10141F] p-3 text-white">
-                                <p className="text-sm font-semibold text-[#D8C7A0]">Mã Obsidian PRO</p>
-                                <p className="mt-1 text-xs text-slate-300">Dán mã admin cấp vào đây. Cần đăng nhập Google trước khi kích hoạt.</p>
-                                <div className="mt-2 flex gap-2">
-                                    <input value={giftCode} onChange={(e) => setGiftCode(e.target.value.toUpperCase())} maxLength={24} className="field uppercase bg-white text-ink" placeholder="EARLYBIRD" aria-label="Mã Obsidian PRO" />
-                                    <button type="button" className="btn btn-secondary btn-sm shrink-0" disabled={!giftCode.trim() || giftBusy} onClick={() => activateGift(giftCode)}>{giftBusy ? '…' : 'Kích hoạt'}</button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            );
-        };
         const WORD_TYPES = ['n', 'v', 'adj', 'adv', 'prep', 'conj', 'pron', 'phr', 'idiom'];
         /* Thanh trạng thái quỹ 1 dòng cho Sổ từ: bấm vào mới mở chi tiết đổi mã / nâng cấp. */
         const AI_SCARCE = 15;
@@ -2153,9 +1830,6 @@
             }, [votes && votes.confirmedToday]);
             return (
                 <div className="fund-strip">
-                    <button type="button" className="fund-code hidden sm:inline-flex" onClick={onOpen} aria-label={'Mã quỹ ' + fund.code + ', mở chi tiết mã quỹ và gói AI'}>
-                        <Icon name="key" size={14} /> <b className="tnum">{fund.code}</b>
-                    </button>
                     {!votes ? (
                         <span className="ticket is-idle">
                             <svg className="ticket-ic" viewBox="0 0 16 16" fill="none" aria-hidden="true"><circle cx="8" cy="8" r="6.5" stroke="currentColor" strokeWidth="1.5" /></svg>
@@ -2206,59 +1880,306 @@
                 </div>
             );
         };
-        const FundPanel = ({ toast, kind = 'vocab', compact = false, items }) => (
-            compact ? (
-                <div className="mb-4">
-                    <FundBody toast={toast} kind={kind} compact items={items} />
-                </div>
-            ) : (
-                <section className="card p-4 sm:p-5 mb-4">
-                    <FundBody toast={toast} kind={kind} />
-                </section>
-            )
-        );
-        const FundShop = ({ toast, onClose }) => (
-            <Modal title="Quỹ lượt thi" onClose={onClose} size="lg">
-                <FundBody toast={toast} kind="eos" />
-            </Modal>
-        );
-
-        const AiUnlockModal = ({ toast, onClose }) => {
+        /* Gói cước & Nhập mã: một Modal trung tâm cho gói AI 29k / PRO, lượt EOS, nhập mã và ví nhóm.
+           Mọi nút nâng cấp, nạp lượt, nhập mã đều mở đúng tab của Modal này. */
+        const openBilling = (tab) => window.dispatchEvent(new CustomEvent('edu-billing', { detail: { tab: tab || 'ai' } }));
+        const BILL_TABS = [
+            ['ai', 'Gói AI & PRO', 'AI & PRO'],
+            ['eos', 'Lượt thi EOS', 'Lượt EOS'],
+            ['code', 'Nhập mã & Ví nhóm', 'Nhập mã']
+        ];
+        const cleanRedeem = (raw) => String(raw || '').toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 24);
+        /* Hỏi máy chủ mã thuộc loại nào. Mạng lỗi thì đoán theo độ dài: mã quỹ tối đa 12 ký tự. */
+        const classifyCode = async (code) => {
+            try {
+                const res = await fetch('/api/fund?action=classify', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+                    body: JSON.stringify({ code })
+                });
+                const data = await res.json().catch(() => ({}));
+                if (res.status === 429) { const e = new Error(data.error || 'Nhập mã quá nhiều lần. Chờ 15 phút rồi thử lại.'); e.stop = true; throw e; }
+                if (res.ok && ['pro', 'fund', 'new', 'unknown'].indexOf(data.kind) >= 0) return data.kind;
+            } catch (e) { if (e.stop) throw e; }
+            return code.length > 12 ? 'pro' : 'offline';
+        };
+        const BillingHub = ({ toast, tab: start = 'ai', onClose }) => {
             const fund = useFund();
-            const [pay, setPay] = useState(null);
+            const account = useAccount();
+            const [tab, setTab] = useState(start);
+            useEffect(() => { setTab(start); }, [start]);
+            const [picked, setPicked] = useState(null);
             const [syncing, setSyncing] = useState(false);
-            const offer = pay === 'basic' ? E.Quota.packs.find(p => p.id === 'basic') : E.Quota.vocab;
-            const checkPay = () => {
+            const [entry, setEntry] = useState('');
+            const [busy, setBusy] = useState(false);
+            const [loginFor, setLoginFor] = useState('');
+            const [confirmNew, setConfirmNew] = useState('');
+            const [note, setNote] = useState(null);
+            const [showCode, setShowCode] = useState(false);
+            const entryRef = useRef(null);
+            const aiCap = fund.aiLimit || E.Quota.AI_FREE;
+            const aiLeft = Math.max(0, aiCap - (fund.aiUsed || 0));
+            const vocabOn = (fund.aiCredits || 0) > 0;
+            const pro = proLive(fund);
+            const bank = E.Quota.BANK;
+            const memo = E.Quota.memoOf(fund.code);
+            const pack = picked === 'vocab' ? E.Quota.vocab : E.Quota.packs.find(p => p.id === picked);
+            const when = (t) => new Date(t).toLocaleString('vi-VN', { hour: '2-digit', minute: '2-digit', day: '2-digit', month: '2-digit' });
+            const pickTab = (id) => { setTab(id); setPicked(null); };
+            const goCode = () => { pickTab('code'); window.setTimeout(() => { if (entryRef.current) entryRef.current.focus(); }, 40); };
+            const checkPay = (quiet) => {
                 setSyncing(true);
-                E.Quota.sync().then((r) => {
-                    if (r.aiUnlocked || r.aiJustUnlocked || r.aiJustFunded) {
-                        toast(r.added > 0 ? 'Đã cộng ' + r.added + ' lượt EOS và bật trợ lý AI.' : (r.aiJustFunded ? 'Đã cộng 500 lượt điền và 30 lượt quét.' : 'Đã bật trợ lý AI.'), 'success');
-                        onClose();
-                    } else toast('Chưa thấy giao dịch mới cho nội dung ' + E.Quota.memoOf(r.code) + '.', 'info');
-                }).catch((e) => toast(e.message || 'Chưa kiểm tra được thanh toán.', 'error')).finally(() => setSyncing(false));
+                return E.Quota.sync().then((r) => {
+                    if (r.aiJustFunded) toast('Đã cộng 500 lượt điền thẻ và 30 lượt quét bài đọc.', 'success');
+                    else if (r.aiJustUnlocked && !(r.added > 0)) toast('Đã bật trợ lý AI.', 'success');
+                    else if (r.added > 0) toast('Đã cộng ' + r.added + ' lượt EOS. Hiện có ' + r.balance + ' lượt.', 'success');
+                    else if (!quiet) toast('Chưa thấy giao dịch mới với nội dung ' + E.Quota.memoOf(r.code) + '.', 'info');
+                }).catch((e) => {
+                    if (!quiet) toast(e.message || 'Chưa kiểm tra được thanh toán.', 'error');
+                }).finally(() => setSyncing(false));
             };
-            return (
-                <Modal title="Mở trợ lý AI từ vựng cho cả học kỳ" onClose={onClose}>
-                    <p className="text-sm leading-relaxed text-ink2">Tự tra từ điển 100 từ tiếp theo sẽ lấy mất của bạn ~3 giờ đồng hồ. Gói trọn kỳ cộng 500 lượt điền thẻ và 30 lượt quét bài đọc, chỉ 29.000đ.</p>
-                    {!pay ? (
-                        <>
-                            <button type="button" className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[#4338CA] px-6 py-3 font-semibold text-white shadow-sm transition-all hover:bg-[#3730A3]" onClick={() => setPay('vocab')}>Mở khóa ngay — 29.000đ (Quét QR tự động 3s)<Icon name="arrow" size={16} /></button>
-                            <button type="button" className="mt-3 block w-full text-center text-xs text-muted underline underline-offset-2" onClick={() => setPay('basic')}>Sinh viên FPT cần thi EOS? Chọn Gói Cơ Bản (100k - 20 lượt EOS + Tặng Free gói AI này) ↗</button>
-                        </>
+            useEffect(() => {
+                if (!picked) return undefined;
+                checkPay(true);
+                const id = setInterval(() => checkPay(true), 12000);
+                return () => clearInterval(id);
+            }, [picked, fund.code]);
+            const copyShared = () => {
+                copyText(fund.code).then(() => toast('Đã copy mã dùng chung ' + fund.code + '.', 'success')).catch(() => toast('Không copy được. Hãy chọn mã và copy tay.', 'error'));
+            };
+            const proDone = (gift) => {
+                setEntry(''); setLoginFor('');
+                const text = gift.proUntil === -1 ? 'Đã mở Obsidian PRO vĩnh viễn cho tài khoản này.' : 'Đã mở Obsidian PRO cho tài khoản này.';
+                setNote({ tone: 'ok', text });
+                toast(text, 'success');
+            };
+            const linkFund = (text) => {
+                let saved;
+                try { saved = /^EDUF1\./i.test(text) ? E.Quota.importCode(text) : E.Quota.setCode(text); }
+                catch (e) { setNote({ tone: 'err', text: e.message || 'Mã dùng chung không hợp lệ.' }); return; }
+                setEntry(''); setConfirmNew('');
+                setNote({ tone: 'info', text: 'Đang đồng bộ lượt của mã ' + saved.code + '…' });
+                checkPay(true).then(() => {
+                    const now = E.Quota.read();
+                    setNote({ tone: 'ok', text: 'Đã liên kết mã dùng chung ' + now.code + ': ' + now.balance + ' lượt EOS, trừ chung với cả nhóm.' });
+                    toast('Đã liên kết mã dùng chung ' + now.code + '.', 'success');
+                });
+            };
+            const redeemPro = async (code) => {
+                if (!googleToken()) { setLoginFor(code); return; }
+                try { proDone(await redeemGiftCode(code)); }
+                catch (e) {
+                    if (e.needLogin) setLoginFor(code);
+                    else setNote({ tone: 'err', text: e.message });
+                }
+            };
+            /* Tự nhận diện: mã PRO / voucher thì kích hoạt PRO, mã quỹ thì chuyển máy sang quỹ đó và đồng bộ lượt. */
+            const apply = async (e) => {
+                if (e) e.preventDefault();
+                const text = entry.trim();
+                if (!text || busy) return;
+                setNote(null); setLoginFor(''); setConfirmNew('');
+                if (/^EDUF1\./i.test(text)) { linkFund(text); return; }
+                const code = cleanRedeem(text);
+                if (code.length < 4) { setNote({ tone: 'err', text: 'Mã cần từ 4 chữ hoặc số.' }); return; }
+                if (code === fund.code) { setNote({ tone: 'info', text: 'Máy này đang dùng đúng mã này rồi.' }); return; }
+                setBusy(true);
+                try {
+                    const kind = await classifyCode(code);
+                    if (kind === 'pro') await redeemPro(code);
+                    else if (kind === 'fund') linkFund(code);
+                    else if (kind === 'new' || kind === 'offline') setConfirmNew({ code, offline: kind === 'offline' });
+                    else setNote({ tone: 'err', text: 'Không tìm thấy mã này. Kiểm tra lại từng ký tự, hoặc liên hệ hỗ trợ.' });
+                } catch (err) {
+                    setNote({ tone: 'err', text: err.message || 'Chưa kiểm tra được mã.' });
+                } finally {
+                    setBusy(false);
+                }
+            };
+            const afterLogin = async (user, err) => {
+                if (err) { toast(err.message, 'error'); return; }
+                const code = loginFor;
+                if (!code) return;
+                setBusy(true);
+                try { proDone(await redeemGiftCode(code)); }
+                catch (e) { setLoginFor(''); setNote({ tone: 'err', text: e.message }); }
+                finally { setBusy(false); }
+            };
+            const codeLink = (
+                <p className="bill-foot">
+                    <button type="button" onClick={goCode}><Icon name="key" size={14} /> Bạn đã có mã kích hoạt / mã dùng chung? <b>Nhập tại đây</b></button>
+                </p>
+            );
+            const payBox = pack && (
+                <PayGate>
+                    <div className="mt-4 flex flex-wrap items-center gap-4 rounded-2xl border border-line p-4">
+                        <img src={E.Quota.qrUrl(pack.price, fund.code)} alt={'VietQR ' + bank.name + ' ' + bank.account} className="h-40 w-40 rounded-xl border border-line bg-white object-contain" />
+                        <div className="min-w-0 flex-1 text-sm text-ink2">
+                            <p className="font-semibold text-ink">Chuyển khoản {pack.name}</p>
+                            <p className="mt-1">{bank.name} · {bank.bin}</p>
+                            <p className="tnum">Số tài khoản: <b className="text-ink">{bank.account}</b></p>
+                            <p>Chủ tài khoản: <b className="text-ink">{bank.holder}</b></p>
+                            <p className="tnum">Số tiền: <b className="text-ink">{vnd(pack.price)}</b></p>
+                            <p className="tnum">Nội dung: <b className="text-ink">{memo}</b></p>
+                            <p className="mt-2 text-xs text-muted">{pack.id === 'vocab' ? 'Tự cộng 500 lượt điền thẻ và 30 lượt quét bài đọc khi tiền vào đúng 29.000đ và đúng nội dung.' : 'Tự cộng đúng ' + pack.turns + ' lượt EOS và bật trợ lý AI khi tiền vào đúng số tiền và nội dung.'}</p>
+                            <p className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-xs">
+                                <button type="button" className="font-semibold text-primary underline underline-offset-2" onClick={() => openLegal('pay')}>Chính sách thanh toán</button>
+                                <button type="button" className="font-semibold text-primary underline underline-offset-2" onClick={openSupport}>Ghi sai nội dung? Liên hệ hỗ trợ</button>
+                            </p>
+                            <button type="button" className="btn btn-primary mt-3" disabled={syncing} onClick={() => checkPay(false)}>{syncing ? 'Đang kiểm tra…' : 'Kiểm tra chuyển khoản'}</button>
+                        </div>
+                    </div>
+                </PayGate>
+            );
+            const aiStatus = pro ? 'AI không giới hạn' : fund.aiUnlocked ? 'Trợ lý AI đang mở' : vocabOn ? 'Còn ' + aiLeft + ' lượt AI' : 'Còn ' + aiLeft + '/' + aiCap + ' lượt AI miễn phí';
+            const tabAi = (
+                <div>
+                    <div className="bill-stat is-wrap">
+                        <span className="bill-stat-ic"><Icon name="sparkles" size={18} /></span>
+                        <span className="min-w-0 flex-1">
+                            <b className="block text-ink">{aiStatus}</b>
+                            <span className="text-xs text-ink2">{account ? 'Gắn với tài khoản ' + account.email : 'Đang lưu tạm trên máy này. Đăng nhập Google để giữ quyền lợi khi đổi máy.'}</span>
+                        </span>
+                        {pro ? <span className="eos-pro">PRO</span> : !account ? <button type="button" className="btn btn-secondary btn-sm bill-stat-btn" onClick={() => askLogin('save')}>Đăng nhập Google</button> : null}
+                    </div>
+                    {pro ? (
+                        <div className="mt-4 rounded-2xl border border-[#D8C7A0]/60 bg-[#10141F] p-4 text-white">
+                            <p className="flex items-center gap-2 font-semibold text-[#E7C56A]"><Icon name="gem" size={16} /> Obsidian PRO đang hoạt động</p>
+                            <p className="mt-1 text-sm text-slate-300">{fund.proUntil === -1 ? 'Vĩnh viễn' : fund.proUntil ? 'Đến ' + new Date(fund.proUntil).toLocaleDateString('vi-VN') : 'Đang mở'} · AI điền thẻ và quét bài đọc không giới hạn, giao diện thành viên Obsidian.</p>
+                        </div>
                     ) : (
-                        <PayGate>
-                        <div className="mt-4 flex flex-wrap items-center gap-4">
-                            <img src={E.Quota.qrUrl(offer.price, fund.code)} alt={'VietQR ' + offer.price + ' đồng'} className="h-40 w-40 rounded-xl border border-line bg-white object-contain" />
-                            <div className="min-w-0 flex-1 text-sm text-ink2">
-                                <p className="font-semibold text-ink">{offer.name}</p>
-                                <p className="tnum mt-1">Số tiền: <b className="text-ink">{vnd(offer.price)}</b></p>
-                                <p className="tnum">Nội dung: <b className="text-ink">{E.Quota.memoOf(fund.code)}</b></p>
-                                <button type="button" className="btn btn-primary mt-3" disabled={syncing} onClick={checkPay}>{syncing ? 'Đang kiểm tra…' : 'Kiểm tra chuyển khoản'}</button>
-                                <button type="button" className="mt-2 block text-xs text-muted underline underline-offset-2" onClick={() => setPay(null)}>Chọn lại</button>
+                        <div className="bill-plans">
+                            <div className={'bill-plan is-main' + (picked === 'vocab' ? ' is-on' : '')}>
+                                <span className="bill-tag">Trọn học kỳ · tiết kiệm 50%</span>
+                                <p className="mt-2 font-bold text-ink">Gói AI Từ vựng & Đọc hiểu</p>
+                                <p className="mt-1 flex flex-wrap items-baseline gap-x-2"><span className="text-2xl font-bold tnum text-ink">29.000đ</span><span className="text-sm text-slate-400 line-through tnum">59.000đ</span></p>
+                                <ul className="bill-perks">
+                                    <li><Icon name="check" size={14} />+500 lượt AI tự điền thẻ (nghĩa, ví dụ, IPA, mẹo nhớ)</li>
+                                    <li><Icon name="check" size={14} />+30 lượt AI quét bài đọc / đề thi</li>
+                                    <li><Icon name="check" size={14} />Giao diện thành viên Obsidian</li>
+                                </ul>
+                                {vocabOn ? <span className="plan-cta is-on">Đã kích hoạt</span>
+                                    : fund.aiUnlocked ? <span className="plan-cta is-on">Đã có AI từ gói EOS</span>
+                                    : <button type="button" className={'plan-cta ' + (picked === 'vocab' ? 'is-on' : 'is-featured')} onClick={() => setPicked('vocab')}>{picked === 'vocab' ? 'Đã chọn · quét QR bên dưới' : 'Thanh toán 29.000đ'}</button>}
+                            </div>
+                            <div className="bill-plan is-dark">
+                                <span className="bill-tag is-gold">Thành viên</span>
+                                <p className="mt-2 flex items-center gap-1.5 font-bold text-white"><Icon name="gem" size={15} className="text-[#E7C56A]" /> Obsidian PRO</p>
+                                <p className="mt-1 text-sm text-slate-300">AI không giới hạn, mở bằng mã thành viên hoặc voucher do admin cấp.</p>
+                                <ul className="bill-perks is-dark">
+                                    <li><Icon name="check" size={14} />AI điền thẻ và quét bài không giới hạn</li>
+                                    <li><Icon name="check" size={14} />Gắn với tài khoản Google, đổi máy vẫn còn</li>
+                                </ul>
+                                <button type="button" className="plan-cta is-gold" onClick={goCode}>Nhập mã PRO</button>
                             </div>
                         </div>
-                        </PayGate>
                     )}
+                    {payBox}
+                    <p className="mt-3 text-xs text-muted">Cần thi EOS? Mỗi gói lượt thi đều tặng kèm trợ lý AI. <button type="button" className="font-semibold text-primary underline underline-offset-2" onClick={() => pickTab('eos')}>Xem gói EOS</button></p>
+                    {codeLink}
+                </div>
+            );
+            const tabEos = (
+                <div>
+                    <div className="bill-stat">
+                        <span className="bill-stat-ic is-eos"><Icon name="monitor" size={18} /></span>
+                        <span className="min-w-0 flex-1"><b className="block text-ink"><span className="tnum text-xl">{fund.balance}</span> lượt thi EOS</b><span className="text-xs text-ink2">Lượt mua xong không hết hạn theo môn.</span></span>
+                    </div>
+                    <div className="bill-eos">
+                        {E.Quota.packs.map(p => {
+                            const featured = p.id === 'group';
+                            const on = picked === p.id;
+                            return (
+                                <button key={p.id} type="button" onClick={() => setPicked(p.id)} className={'bill-plan' + (featured ? ' is-main' : '') + (on ? ' is-on' : '')}>
+                                    {featured && <span className="bill-pop">Phổ biến nhất</span>}
+                                    <span className="block text-xs font-semibold uppercase tracking-wide text-muted">{p.who}</span>
+                                    <span className="mt-1 block font-bold text-ink">{p.name}</span>
+                                    <span className="mt-2 block text-lg font-bold tnum text-ink">{p.turns} lượt</span>
+                                    <span className="mt-1 block text-sm tnum">{vnd(p.price)}{p.off ? <span className="text-success"> · giảm {Math.round(p.off * 100)}%</span> : ''}</span>
+                                    {p.off ? <span className="block text-xs text-muted line-through tnum">{vnd(p.list)}</span> : <span className="block text-xs text-muted">{vnd(E.Quota.UNIT)}/lượt</span>}
+                                    <span className="mt-2 block text-xs font-medium text-ink2">✓ Tặng kèm trợ lý AI</span>
+                                    <span className={'plan-cta' + (on ? ' is-on' : featured ? ' is-featured' : '')}>{on ? 'Đã chọn · quét QR bên dưới' : 'Chọn gói'}</span>
+                                </button>
+                            );
+                        })}
+                    </div>
+                    {payBox}
+                    {codeLink}
+                </div>
+            );
+            const tabCode = (
+                <div>
+                    <form className="code-box" onSubmit={apply}>
+                        <label className="label" htmlFor="uni-code">Nhập mã</label>
+                        <div className="flex gap-2">
+                            <input id="uni-code" ref={entryRef} value={entry} onChange={(e) => { setEntry(e.target.value); setNote(null); setConfirmNew(''); }} maxLength={400}
+                                className="field min-w-0 flex-1" placeholder="Dán mã quỹ EOS, mã Obsidian PRO hoặc voucher..." autoComplete="off" spellCheck={false} data-autofocus={start === 'code' ? '' : undefined} />
+                            <button type="submit" className="btn btn-primary shrink-0" disabled={!entry.trim() || busy}>{busy ? 'Đang kiểm tra…' : 'Áp dụng'}</button>
+                        </div>
+                        <p className="mt-1.5 text-xs text-muted">Tự nhận diện loại mã: mã PRO / voucher mở Obsidian PRO, mã dùng chung của nhóm thì đồng bộ lượt EOS.</p>
+                        {note && <p className={'code-note is-' + note.tone} role="status">{note.text}</p>}
+                        {confirmNew && (
+                            <div className="code-note is-info">
+                                <p>{confirmNew.offline
+                                    ? <>Chưa kiểm tra được mã <b>{confirmNew.code}</b> với máy chủ. Vẫn dùng nó làm mã dùng chung của nhóm?</>
+                                    : <>Mã <b>{confirmNew.code}</b> chưa có lượt nào. Dùng nó làm mã dùng chung mới cho nhóm?</>}</p>
+                                <button type="button" className="btn btn-secondary btn-sm mt-2" onClick={() => linkFund(confirmNew.code)}>Vẫn dùng mã này</button>
+                            </div>
+                        )}
+                        {loginFor && (
+                            <div className="code-login">
+                                <p className="font-semibold text-ink">Mã Obsidian PRO hợp lệ</p>
+                                <p className="mt-0.5 text-sm text-ink2">Đăng nhập Google để lưu PRO vào tài khoản. Đổi máy vẫn còn nguyên.</p>
+                                <GoogleButton className="mt-3" width={280} onDone={afterLogin} />
+                            </div>
+                        )}
+                    </form>
+                    <div className="mt-4 rounded-2xl border border-line p-4">
+                        <p className="font-semibold text-ink">Mã dùng chung (Nhóm / Lớp)</p>
+                        <p className="mt-0.5 text-xs text-ink2">Chỉ dùng khi bạn chia sẻ gói Phòng KTX / Cả lớp với bạn bè mà không cần chung tài khoản Google.</p>
+                        {account || showCode ? (
+                            <div className="mt-3 flex flex-wrap items-center gap-2">
+                                <span className="shared-code tnum">{fund.code}</span>
+                                <button type="button" className="btn btn-secondary btn-sm" onClick={copyShared}><Icon name="copy" size={14} /> Copy</button>
+                                <span className="text-xs text-ink2"><b className="tnum text-ink">{fund.balance}</b> lượt EOS trừ chung</span>
+                            </div>
+                        ) : (
+                            <div className="mt-3 rounded-xl bg-amber-50 px-3 py-2.5 text-sm text-amber-900">
+                                <p>Bạn đang dùng thử chưa đăng nhập. Lượt và gói đang lưu tạm trên máy này.</p>
+                                <div className="mt-2 flex flex-wrap items-center gap-3">
+                                    <button type="button" className="btn btn-primary btn-sm" onClick={() => askLogin('save')}>Đăng nhập Google để đồng bộ</button>
+                                    <button type="button" className="text-xs font-medium text-amber-900 underline underline-offset-2" onClick={() => setShowCode(true)}>Hiện mã dùng chung</button>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                    <div className="mt-4">
+                        <p className="mb-2 text-sm font-semibold text-ink">Lịch sử quỹ</p>
+                        {fund.history.length ? (
+                            <ul className="bill-history">
+                                {fund.history.slice(0, 20).map(ev => (
+                                    <li key={ev.id}>
+                                        <span className="min-w-0 truncate text-ink2">{when(ev.t)} · {ev.kind === 'buy' ? ev.note : 'Nộp EOS'}</span>
+                                        <span className={'tnum ' + (ev.delta > 0 ? 'text-success' : 'text-danger')}>{ev.delta > 0 ? '+' : ''}{ev.delta}</span>
+                                    </li>
+                                ))}
+                            </ul>
+                        ) : <p className="text-sm text-muted">Chưa có lần mua hoặc lần nộp EOS.</p>}
+                    </div>
+                </div>
+            );
+            return (
+                <Modal title="Gói cước & Nhập mã" size="lg" onClose={onClose}>
+                    <div role="tablist" aria-label="Gói cước & Nhập mã" className="bill-tabs">
+                        {BILL_TABS.map(([id, label, short]) => (
+                            <button key={id} id={'bill-' + id} type="button" role="tab" aria-selected={tab === id} aria-controls="bill-panel" className="bill-tab" onClick={() => pickTab(id)}>
+                                <span className="hidden sm:inline">{label}</span><span className="sm:hidden">{short}</span>
+                            </button>
+                        ))}
+                    </div>
+                    <div id="bill-panel" role="tabpanel" aria-labelledby={'bill-' + tab} className="pt-4">
+                        {tab === 'ai' ? tabAi : tab === 'eos' ? tabEos : tabCode}
+                    </div>
                 </Modal>
             );
         };
@@ -2283,7 +2204,7 @@
                         <div className="space-y-3 text-sm text-ink2 leading-relaxed">
                             <p className="font-semibold text-ink">Mã quỹ là định danh của số lượt, không phải tài khoản ngân hàng.</p>
                             <p>Mỗi trình duyệt chưa từng lưu mã được cấp một mã 8 ký tự. Máy đã lưu mã, kể cả mã đã nhận tiền, giữ nguyên mã đó. Mã hợp lệ dài 4–12 chữ hoặc số. Số còn lại bằng số lượt đã cấp trừ số lần nộp bài, ghi trên server và dùng chung cho mọi máy đang nhập đúng mã.</p>
-                            <p>Muốn học trên máy tính và điện thoại bằng cùng một gói, hãy copy mã ngắn ở mục Kho của tôi, rồi trên máy mới dán vào ô «Dán mã quỹ» và bấm «Dùng mã này». Mã dài EDUF1 cũ vẫn nhận được, sau đó số còn lại lấy từ server. Ai có mã đều có thể tiêu lượt của mã đó.</p>
+                            <p>Muốn học trên máy tính và điện thoại bằng cùng một gói, hãy đăng nhập cùng tài khoản Google. Muốn chia lượt cho cả nhóm mà không chung tài khoản, copy «Mã dùng chung» ở mục Gói & Nhập mã, rồi trên máy kia dán vào ô Nhập mã và bấm «Áp dụng». Mã dài EDUF1 cũ vẫn nhận được, sau đó số còn lại lấy từ server. Ai có mã đều có thể tiêu lượt của mã đó.</p>
                             <p>Nội dung chuyển khoản phải là <b className="text-ink">EDU</b>, một dấu cách, rồi đúng mã. Ví dụ <b className="text-ink">EDU LOP10A</b>. Viết dính như EDUCHUNG thì hệ thống không nhận.</p>
                             <p>Trước khi xóa dữ liệu trang, xóa cache hoặc mở tab ẩn danh, hãy chụp hoặc copy mã. Xóa trình duyệt không xóa số lượt trên server, nhưng máy mới chỉ lấy lại được số đó khi bạn còn giữ mã. Tab ẩn danh có thể không giữ mã sau khi đóng.</p>
                         </div>
@@ -5656,7 +5577,6 @@
             const [aiAll, setAiAll] = useState(null);
             const [aiRow, setAiRow] = useState(null);
             const [tease, setTease] = useState(null);
-            const [paywall, setPaywall] = useState(false);
             const [passage, setPassage] = useState(() => takeGo('reading'));
             useEffect(() => {
                 const open = () => setPassage(true);
@@ -5666,7 +5586,6 @@
             const [importHint, setImportHint] = useState(() => takeGo('import'));
             const [menu, setMenu] = useState(null);
             const [filterOpen, setFilterOpen] = useState(false);
-            const [fundOpen, setFundOpen] = useState(false);
             const [drafts, setDrafts] = useState(() => loadDrafts() || (items.length ? null : startDrafts()));
             const [draftSavedAt, setDraftSavedAt] = useState(0);
             const [savedGroups, setSavedGroups] = useState(null);
@@ -5847,7 +5766,7 @@
             const aiDraft = async (t) => {
                 if (!AI.ready()) { toast('AI chỉ chạy khi mở trang qua web, không mở file trực tiếp.', 'info'); return null; }
                 if (!String(t.questionOrWord || '').trim()) { toast('Nhập từ trước đã', 'error'); return null; }
-                if (t.type !== 'mcq' && !E.Quota.aiFillAllowed()) { setPaywall(true); return null; }
+                if (t.type !== 'mcq' && !E.Quota.aiFillAllowed()) { openBilling('ai'); return null; }
                 try {
                     if (t.type === 'mcq') {
                         const ex = await AI.explain(t);
@@ -5861,7 +5780,7 @@
                     else toast('AI chưa trả kết quả, thử lại sau', 'error');
                     return e;
                 } catch (e) {
-                    if (e && e.code === 'ai-locked' && t.type !== 'mcq') { setPaywall(true); return null; }
+                    if (e && e.code === 'ai-locked' && t.type !== 'mcq') { openBilling('ai'); return null; }
                     toast(e.message, 'error');
                     return null;
                 }
@@ -5896,7 +5815,7 @@
 
             const aiEverything = async () => {
                 if (!AI.ready()) { toast('AI chỉ chạy khi mở trang qua web, không mở file trực tiếp.', 'info'); return; }
-                if (!E.Quota.aiFillAllowed()) { setPaywall(true); return; }
+                if (!E.Quota.aiFillAllowed()) { openBilling('ai'); return; }
                 const need = items.filter(t => t.type === 'vocab' && t.questionOrWord && (!t.ipa || !t.explanationOrExample || !t.answerOrMeaning));
                 if (!need.length) { toast('Tất cả từ đã đủ thông tin', 'info'); return; }
                 if (!confirm('AI bổ sung thông tin cho ' + need.length + ' từ?')) return;
@@ -5904,7 +5823,7 @@
                 setAiAll({ done: 0, total: need.length });
                 for (let i = 0; i < need.length; i += 10) {
                     const chunk = need.slice(i, i + 10);
-                    try { applyEnrich(await AI.enrichVocab(chunk)); } catch (e) { if (e && e.code === 'ai-locked') setPaywall(true); else toast(e.message, 'error'); break; }
+                    try { applyEnrich(await AI.enrichVocab(chunk)); } catch (e) { if (e && e.code === 'ai-locked') openBilling('ai'); else toast(e.message, 'error'); break; }
                     done += chunk.length;
                     setAiAll({ done, total: need.length });
                 }
@@ -6007,8 +5926,7 @@
                         </div>
                     </div>
 
-                    <FundStrip onOpen={() => setFundOpen(true)} onQuickVote={voteOrStart} />
-                    {fundOpen && <Modal title="Mã quỹ & gói AI" onClose={() => setFundOpen(false)} size="lg"><FundBody toast={toast} kind="vocab" compact items={items} /></Modal>}
+                    <FundStrip onOpen={() => openBilling('ai')} onQuickVote={voteOrStart} />
 
                     <div className="import-bar" role="toolbar" aria-label="Nhập hàng loạt">
                         <button type="button" className="imp-btn is-ai" onClick={() => setPassage(true)} title="Dán bài đọc hoặc đề thi, AI lọc từ mới kèm IPA và nghĩa">
@@ -6024,7 +5942,7 @@
                     </div>
                     {quick && (
                         <Modal title="Dán danh sách" size="lg" onClose={() => setQuick(false)}>
-                            <QuickPaste bare groups={groups} toast={toast} onLocked={() => { setQuick(false); setPaywall(true); }} onAdd={(list) => { confirmImport({ items: list, mode: 'append' }); setQuick(false); }} />
+                            <QuickPaste bare groups={groups} toast={toast} onLocked={() => { setQuick(false); openBilling('ai'); }} onAdd={(list) => { confirmImport({ items: list, mode: 'append' }); setQuick(false); }} />
                         </Modal>
                     )}
 
@@ -6192,7 +6110,7 @@
                                                                 <>
                                                                     <p className="pointer-events-none select-none blur-[4px] text-ink">nghĩa tiếng Việt ngắn</p>
                                                                     <p className="pointer-events-none select-none blur-[4px] text-xs text-ink2">A clear example sentence. · /aɪˈpiːeɪ/</p>
-                                                                    <button type="button" className="relative z-10 mt-1 rounded-lg bg-ink px-2 py-1 text-[11px] font-semibold text-white" onClick={() => setPaywall(true)}>🔒 Mở khóa kết quả (29k)</button>
+                                                                    <button type="button" className="relative z-10 mt-1 rounded-lg bg-ink px-2 py-1 text-[11px] font-semibold text-white" onClick={() => openBilling('ai')}>🔒 Mở khóa kết quả (29k)</button>
                                                                 </>
                                                             )}
                                                         </div>
@@ -6231,7 +6149,6 @@
                     {editing && <ItemEditor item={editing} groups={groups}
                         onClose={() => setEditing(null)}
                         onAI={aiDraft} onSave={(t) => { setItems(prev => prev.map(x => (x.id === t.id ? t : x))); setEditing(null); toast('Đã lưu', 'success'); }} />}
-                    {paywall && <AiUnlockModal toast={toast} onClose={() => setPaywall(false)} />}
                 </div>
             );
         };
@@ -6547,19 +6464,15 @@
         /* Thanh trạng thái mảnh của Kho đề: lượt EOS, mã, PRO. Bảng giá, lịch sử, dùng chung mã nằm trong Modal "Nạp lượt / Quản lý quỹ". */
         const EosStatusBar = ({ toast }) => {
             const fund = useFund();
-            const [open, setOpen] = useState(false);
             const pro = proLive(fund);
             const low = fund.balance < 5;
             return (
                 <>
                     <div className="fund-strip eos-strip">
                         <span className={'eos-turns' + (low ? ' is-low' : '')}><Icon name="monitor" size={15} /><b className="tnum">{fund.balance}</b> lượt EOS</span>
-                        <span className="fund-sep hidden sm:inline" aria-hidden="true" />
-                        <span className="hidden items-center gap-1.5 text-ink2 sm:inline-flex"><Icon name="key" size={14} /><b className="tnum text-ink">{fund.code}</b></span>
                         {pro ? <span className="eos-pro">PRO</span> : fund.aiUnlocked ? <span className="eos-ai"><Icon name="sparkles" size={12} />AI đang mở</span> : null}
-                        <button type="button" className="eos-manage" onClick={() => setOpen(true)}><span className="sm:hidden">Nạp lượt</span><span className="hidden sm:inline">Nạp lượt / Quản lý quỹ</span><Icon name="right" size={14} /></button>
+                        <button type="button" className="eos-manage" onClick={() => openBilling('eos')}><span className="sm:hidden">Nạp lượt</span><span className="hidden sm:inline">Nạp lượt / Quản lý quỹ</span><Icon name="right" size={14} /></button>
                     </div>
-                    {open && <Modal title="Nạp lượt / Quản lý quỹ" size="lg" onClose={() => setOpen(false)}><FundBody toast={toast} kind="eos" /></Modal>}
                 </>
             );
         };
@@ -6998,7 +6911,7 @@
             );
         };
 
-        const SettingsModal = ({ onClose, toast, muted, setMuted, onGoogle, onRedeem }) => {
+        const SettingsModal = ({ onClose, toast, muted, setMuted, onGoogle }) => {
             const [usage, setUsage] = useState(null);
             const [studentName, setStudentName] = useState(Store.prefs.get('student', '') || '');
             useEffect(() => { Store.estimate().then(setUsage); }, []);
@@ -7008,9 +6921,6 @@
                 onClose();
             };
             const [perm, setPerm] = useState(window.Notification ? Notification.permission : 'unsupported');
-            const [fundCode, setFundCode] = useState((E.Quota.read() || {}).code || '');
-            const [shared, setShared] = useState('');
-            const [gift, setGift] = useState('');
             const account = Store.prefs.get('googleUser', null);
             const permLabel = perm === 'granted' ? 'Đã bật' : perm === 'denied' ? 'Bị chặn' : perm === 'unsupported' ? 'Không hỗ trợ' : 'Bật';
             return (
@@ -7027,37 +6937,20 @@
                             <span><span className="font-semibold text-sm block">Thông báo khi đến giờ</span><span className="text-xs text-ink2">{perm === 'denied' ? 'Bị chặn trong cài đặt trình duyệt' : 'Báo khi một ca học bắt đầu'}</span></span>
                             <button type="button" className="btn btn-secondary btn-sm" disabled={perm !== 'default'} onClick={() => Notification.requestPermission().then(setPerm)}><Icon name="bell" size={14} /> {permLabel}</button>
                         </div>
-                        <div className="rounded-xl border border-line p-3">
-                            <p className="text-sm font-semibold">Mã Obsidian PRO</p>
-                            <p className="text-xs text-ink2 mt-1">{account && account.email ? 'Đang đăng nhập ' + account.email + '.' : 'Cần đăng nhập Google trước khi nhập mã.'}</p>
-                            {!account && <button type="button" className="btn btn-secondary btn-sm mt-2" onClick={onGoogle}>Lưu kho từ với Google</button>}
-                            <div className="mt-2 flex gap-2">
-                                <input value={gift} onChange={(e) => setGift(e.target.value.toUpperCase())} maxLength={24} className="field uppercase" placeholder="EARLYBIRD" aria-label="Mã giftcode" />
-                                <button type="button" className="btn btn-secondary btn-sm" disabled={!gift.trim()} onClick={() => onRedeem(gift.trim())}>Kích hoạt</button>
+                        <button type="button" className="hub-row" onClick={() => { onClose(); openBilling('code'); }}>
+                            <span className="bill-stat-ic"><Icon name="gem" size={18} /></span>
+                            <span className="min-w-0 flex-1 text-left">
+                                <b className="block text-sm text-ink">Gói & Nhập mã</b>
+                                <span className="text-xs text-ink2">Gói AI 29k, Obsidian PRO, lượt EOS, nhập mã / voucher</span>
+                            </span>
+                            <Icon name="right" size={16} className="text-muted" />
+                        </button>
+                        {!account && (
+                            <div className="flex items-center justify-between gap-3 rounded-xl border border-line p-3">
+                                <span className="text-xs text-ink2">Chưa đăng nhập. Gói và lượt đang lưu tạm trên máy này.</span>
+                                <button type="button" className="btn btn-secondary btn-sm shrink-0" onClick={onGoogle}>Đăng nhập Google</button>
                             </div>
-                        </div>
-                        <div className="rounded-xl border border-line p-3">
-                            <p className="text-sm font-semibold">Mã quỹ cũ</p>
-                            <p className="text-xs text-ink2 mt-1">Dùng khi cần dán mã lượt từ máy khác. Kho từ thì lưu bằng Google ở trên.</p>
-                            <label className="mt-2 block text-sm"><span className="label">Mã quỹ</span>
-                                <span className="flex gap-2">
-                                    <input value={fundCode} onChange={(e) => setFundCode(e.target.value.toUpperCase())} maxLength={12} className="field uppercase" aria-label="Mã quỹ lượt" />
-                                    <button type="button" className="btn btn-secondary btn-sm" onClick={() => { try { const saved = E.Quota.setCode(fundCode); setFundCode(saved.code); E.Quota.sync(); toast('Đã lưu mã quỹ ' + saved.code, 'success'); } catch (e) { toast(e.message, 'error'); } }}>Lưu</button>
-                                </span>
-                            </label>
-                            <label className="mt-2 block text-sm"><span className="label">Dán mã quỹ hoặc EDUF1</span>
-                                <textarea value={shared} onChange={(e) => setShared(e.target.value)} rows={2} className="field text-xs" />
-                            </label>
-                            <button type="button" className="btn btn-secondary btn-sm mt-2" disabled={!shared.trim()} onClick={() => {
-                                try {
-                                    const saved = /^EDUF1\./i.test(shared.trim()) ? E.Quota.importCode(shared.trim()) : E.Quota.setCode(shared.trim());
-                                    setFundCode(saved.code);
-                                    setShared('');
-                                    E.Quota.sync();
-                                    toast('Máy này đang dùng mã ' + saved.code + '.', 'success');
-                                } catch (e) { toast(e.message || 'Mã quỹ không hợp lệ.', 'error'); }
-                            }}>Dùng mã này</button>
-                        </div>
+                        )}
                         <p className="text-xs text-muted tnum">Dung lượng bộ nhớ trình duyệt: {usage && usage.quota ? (usage.usage / 1048576).toFixed(1) + ' MB / ' + (usage.quota / 1048576).toFixed(0) + ' MB' : 'trình duyệt không báo số liệu'}</p>
                     </div>
                 </Modal>
@@ -7101,8 +6994,7 @@
             const [setupOpen, setSetupOpen] = useState(false);
             const [setupDone, setSetupDone] = useState(() => !!Store.prefs.get('setupDone', false));
             const account = useAccount();
-            const [fundShop, setFundShop] = useState(false);
-            const [upgradeOpen, setUpgradeOpen] = useState(false);
+            const [billing, setBilling] = useState(null);
             const [legalTab, setLegalTab] = useState(null);
             const [supportOpen, setSupportOpen] = useState(false);
             const [feedbackOpen, setFeedbackOpen] = useState(false);
@@ -7116,8 +7008,8 @@
             const [welcomeHold, setWelcomeHold] = useState(false);
             const obsidianWas = useRef(null);
             useEffect(() => {
-                const open = () => setFundShop(true);
-                const openUpgrade = () => setUpgradeOpen(true);
+                const open = () => setBilling('eos');
+                const openUpgrade = () => setBilling('ai');
                 const showMember = () => { if (obsidianOf(E.Quota.read())) setMemberOpen(true); };
                 const showLegal = (e) => {
                     setSupportOpen(false);
@@ -7156,6 +7048,8 @@
                     setGoogleReason((e && e.detail && e.detail.reason) || 'save');
                     setGoogleOpen(true);
                 };
+                const openHub = (e) => { setSettingsOpen(false); setBilling((e && e.detail && e.detail.tab) || 'ai'); };
+                window.addEventListener('edu-billing', openHub);
                 window.addEventListener('edu-login', login);
                 window.addEventListener('edu-fund-shop', open);
                 window.addEventListener('edu-upgrade', openUpgrade);
@@ -7164,6 +7058,7 @@
                 window.addEventListener('fpass-legal', showLegal);
                 window.addEventListener('fpass-support', showSupport);
                 return () => {
+                    window.removeEventListener('edu-billing', openHub);
                     window.removeEventListener('edu-login', login);
                     window.removeEventListener('edu-fund-shop', open);
                     window.removeEventListener('edu-upgrade', openUpgrade);
@@ -7725,8 +7620,8 @@
                 else if (go === 'reading' || go === 'import') dispatch({ type: 'TAB', tab: 'library', force: true });
                 else if (go === 'exams') dispatch({ type: 'SWITCH_MODE', mode: 'bank', force: true });
                 else if (go === 'eos') dispatch({ type: 'SHELF', force: true });
-                else if (go === 'pro') setUpgradeOpen(true);
-                else if (go === 'eos-pay') setFundShop(true);
+                else if (go === 'pro') setBilling('ai');
+                else if (go === 'eos-pay') setBilling('eos');
                 else if (go === 'video') setGuideOpen(true);
                 else if (go === 'legal-id' || go === 'legal-pay' || go === 'legal-study') setLegalTab(go.slice(6));
             }, [loaded, planReady]);
@@ -7888,7 +7783,7 @@
                 if (nav.busy && !confirm('Bạn đang giữa một ca / phòng thi. Thoát ra?')) return;
                 setSession(null);
                 setSettingsOpen(false);
-                setFundShop(false);
+                setBilling(null);
                 setLegalTab(null);
                 setSupportOpen(false);
                 setFeedbackOpen(false);
@@ -7924,8 +7819,9 @@
                                     </button>
                                 )}
                                 <button type="button" className="btn btn-ghost btn-icon hidden sm:inline-flex lg:hidden" onClick={() => setGuideOpen(true)} aria-label="Video hướng dẫn"><Icon name="play" size={16} /></button>
+                                <button type="button" className="btn btn-ghost btn-icon lg:hidden" onClick={() => setBilling('ai')} aria-label="Gói & Nhập mã" title="Gói & Nhập mã"><Icon name="gem" size={16} /></button>
                                 <button type="button" className="btn btn-ghost btn-icon hidden sm:inline-flex" onClick={() => setMuted(!muted)} aria-pressed={!muted} aria-label={muted ? 'Bật âm thanh' : 'Tắt âm thanh'}><Icon name={muted ? 'mute' : 'volume'} /></button>
-                                <button type="button" className={'btn btn-sm min-w-0 ' + (googleAccount && googleAccount.email ? 'btn-secondary' : 'btn-primary')} onClick={() => { setPendingGift(''); setGoogleReason('save'); setGoogleOpen(true); }}>
+                                <button type="button" className={'btn btn-sm ' + (googleAccount && googleAccount.email ? 'min-w-0 btn-secondary' : 'shrink-0 whitespace-nowrap btn-primary')} onClick={() => { setPendingGift(''); setGoogleReason('save'); setGoogleOpen(true); }}>
                                     <span className="block max-w-[150px] truncate sm:max-w-[200px]">{googleAccount && googleAccount.email ? googleAccount.email : 'Đăng nhập'}</span>
                                 </button>
                                 <button type="button" className="btn btn-ghost btn-icon" onClick={() => setSettingsOpen(true)} aria-label="Cài đặt"><Icon name="sliders" /></button>
@@ -7958,6 +7854,7 @@
                         ) : <p className="px-3 text-xs leading-5 text-muted">Môn bạn thi thử sẽ hiện ở đây để mở lại nhanh.</p>}
                         <p className="side-head">Khác</p>
                         <div className="flex flex-col gap-1">
+                            <button type="button" className="side-link" onClick={() => setBilling('ai')}><Icon name="gem" size={18} /> Gói & Nhập mã</button>
                             <button type="button" className="side-link" onClick={() => setGuideOpen(true)}><Icon name="play" size={18} /> Video hướng dẫn</button>
                             <button type="button" className="side-link" onClick={openSupport}><Icon name="headset" size={18} /> Hỗ trợ & FAQ</button>
                             <button type="button" className="side-link" onClick={openFeedback}><Icon name="bulb" size={18} /> Góp ý</button>
@@ -8042,16 +7939,7 @@
                             </div>
                         </div>
                     </footer>
-                    {settingsOpen && <SettingsModal onClose={() => setSettingsOpen(false)} toast={toast} muted={muted} setMuted={setMuted} onGoogle={() => { setSettingsOpen(false); setPendingGift(''); setGoogleReason('save'); setGoogleOpen(true); }} onRedeem={(code) => {
-                        redeemGiftCode(code).then((gift) => {
-                            setGoogleAccount(Store.prefs.get('googleUser', null));
-                            toast(gift.proUntil === -1 ? 'Đã mở Obsidian PRO vĩnh viễn.' : 'Đã mở Obsidian PRO.', 'success');
-                            setSettingsOpen(false);
-                        }).catch((e) => {
-                            if (e.needLogin) { setPendingGift(code); setSettingsOpen(false); setGoogleOpen(true); return; }
-                            toast(e.message, 'error');
-                        });
-                    }} />}
+                    {settingsOpen && <SettingsModal onClose={() => setSettingsOpen(false)} toast={toast} muted={muted} setMuted={setMuted} onGoogle={() => { setSettingsOpen(false); setPendingGift(''); setGoogleReason('save'); setGoogleOpen(true); }} />}
                     {googleOpen && <GoogleSaveModal pendingCode={pendingGift} reason={googleReason} toast={toast} onClose={() => { setGoogleOpen(false); setPendingGift(''); }} onDone={(user) => {
                         setGoogleAccount(user);
                         setGoogleOpen(false);
@@ -8067,8 +7955,7 @@
                             onLater={() => setKick(null)} />
                     )}
                     {setupOpen && <SetupWizard week={week} groups={groups} onSave={applySetup} onClose={() => setSetupOpen(false)} />}
-                    {fundShop && <FundShop toast={toast} onClose={() => setFundShop(false)} />}
-                    {upgradeOpen && <AiUnlockModal toast={toast} onClose={() => setUpgradeOpen(false)} />}
+                    {billing && <BillingHub toast={toast} tab={billing} onClose={() => setBilling(null)} />}
                     {legalTab && <LegalModal tab={legalTab} onClose={() => setLegalTab(null)} onSupport={openSupport} />}
                     {contribOpen && <ContributeModal pack={null} toast={toast} onClose={() => setContribOpen(false)} />}
                     <SupportDock open={supportOpen} toast={toast} returnTo={helpReturn} onOpen={(el) => { helpReturn.current = el || document.activeElement; setFeedbackOpen(false); setSupportOpen(true); }} onClose={() => setSupportOpen(false)} onFeedback={openFeedback} />
