@@ -122,9 +122,9 @@
         .mission-dot { width: 6px; height: 6px; flex-shrink: 0; border-radius: 999px; background: #F97316; animation: mission-breathe 2.4s ease-in-out infinite; }
         .mission-clock { flex-shrink: 0; padding: 2px 8px; border-radius: 999px; font-size: 12px; font-weight: 600; line-height: 18px; color: #B45309; background: #FEF3C7; border: 1px solid #FDE68A; font-variant-numeric: tabular-nums; font-feature-settings: 'tnum' 1; }
         .mission-body { display: flex; align-items: center; gap: 12px; margin-top: 8px; }
-        .mission-duck { position: relative; display: inline-flex; width: 48px; height: 48px; flex-shrink: 0; }
-        .mission-face { display: block; width: 48px; height: 48px; overflow: hidden; border-radius: 50%; border: 1.5px solid #C7D2FE; background: #E0E7FF; transition: transform .2s ease; }
-        .mission-face img { display: block; width: 100%; height: 100%; object-fit: cover; transform: scale(2.1); transform-origin: 50% 18%; }
+        .mission-duck { position: relative; display: inline-flex; width: 72px; height: 72px; flex-shrink: 0; }
+        .mission-face { display: block; width: 72px; height: 72px; overflow: hidden; border-radius: 12px; border: 1.5px solid #C7D2FE; background: #E0E7FF; transition: transform .2s ease; }
+        .mission-face img { display: block; width: 100%; height: 100%; object-fit: cover; }
         .mission:has(.mission-cta:hover) .mission-face, .mission:has(.mission-cta:focus-visible) .mission-face { transform: rotate(-6deg) scale(1.05); }
         .mission-badge { position: absolute; right: -6px; bottom: -4px; padding: 0 5px; border-radius: 999px; font-size: 10.5px; font-weight: 700; line-height: 16px; color: #78350F; background: #FBBF24; border: 2px solid #fff; font-variant-numeric: tabular-nums; }
         .mission-copy { min-width: 0; flex: 1; }
@@ -1955,7 +1955,7 @@
                         </div>
                         <div className="mission-body">
                             <span className="mission-duck">
-                                <span className="mission-face"><img src={DUCK_SRC} alt="Con vịt đang chờ bạn chốt phiếu" width="48" height="48" decoding="async" /></span>
+                                <span className="mission-face"><img src={DUCK_SRC} alt="Con vịt đang chờ bạn chốt phiếu" width="72" height="72" decoding="async" /></span>
                                 <b className="mission-badge tnum" aria-label={'Đã lật ' + mission + ' trên ' + MISSION_GOAL + ' thẻ'}>{mission}/{MISSION_GOAL}</b>
                             </span>
                             <div className="mission-copy">
