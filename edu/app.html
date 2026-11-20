@@ -6907,9 +6907,28 @@
             library: {
                 items: (await Store.items.all()).filter((t) => !(String(t.id || '').indexOf('starter-') === 0 && !(t.reviewCount > 0))).slice(0, 4000),
                 progress: (await Store.progress.all()).slice(0, 8000),
-                votes: (await Store.identityVotes.all()).slice(0, 5000)
+                votes: (await Store.identityVotes.all()).slice(0, 5000),
+                gone: goneItems()
             }
         });
+        /* Từ đã xóa khi đang đăng nhập: nhớ mã để tài khoản xóa theo, không gộp lại ở lần đồng bộ sau. */
+        const goneItems = () => { const v = Store.prefs.get('goneItems', []); return Array.isArray(v) ? v : []; };
+        const noteGone = (ids) => {
+            if (!ids.length || !Store.prefs.get('dataOwner', '')) return;
+            const set = new Set(goneItems());
+            ids.forEach((id) => { if (id && String(id).indexOf('starter-') !== 0) set.add(String(id)); });
+            Store.prefs.set('goneItems', Array.from(set).slice(-6000));
+        };
+        /* Máy khác của cùng tài khoản đã xóa từ: xóa theo trên máy này. */
+        const dropGoneLocal = async (gone) => {
+            if (!Array.isArray(gone) || !gone.length) return false;
+            const set = new Set(gone);
+            const ids = (await Store.items.all()).map((t) => t.id).filter((id) => set.has(id));
+            if (!ids.length) return false;
+            await Store.items.deleteMany(ids);
+            window.dispatchEvent(new CustomEvent('edu-library'));
+            return true;
+        };
 
         const applyCloud = async (data) => {
             /* spendCode: máy này đang dùng mã nhóm của người khác thì giữ mã đó để trừ lượt chung. */
@@ -6920,6 +6939,7 @@
             const until = data && data.proUntil;
             if (until === -1 || Number(until) > 0) E.Quota.noteAi({ proUntil: until, aiUnlocked: until === -1 || Number(until) > Date.now() });
             const lib = data && data.library || {};
+            await dropGoneLocal(lib.gone);
             if (Array.isArray(lib.items) && lib.items.length) await Store.items.putMany(lib.items.map((row) => Sch.normalizeItem(row)));
             if (Array.isArray(lib.progress) && lib.progress.length) await Store.progress.putMany(lib.progress.filter((row) => row && row.id));
             if (Array.isArray(lib.votes) && lib.votes.length) await Store.identityVotes.putMany(lib.votes.filter((row) => row && row.id && row.sessionId));
@@ -6931,7 +6951,7 @@
         /* Mỗi email Google một kho riêng trên máy: sổ từ, tiến độ, phiếu bản sắc và cài đặt học không lẫn giữa các tài khoản.
            'dataOwner' ghi email đang sở hữu dữ liệu trên máy; rỗng là khách chưa đăng nhập. */
         const PROFILE_KEYS = ['identity', 'student', 'habitDays', 'milestones', 'exams', 'weeklyPlan', 'nextWeeklyPlan', 'setupDone', 'recentPacks', 'eosTried', 'licenses', 'slotSource', 'qlang'];
-        const LOCAL_KEYS = ['mission', 'libDrafts', 'hybridToday'];
+        const LOCAL_KEYS = ['mission', 'libDrafts', 'hybridToday', 'goneItems'];
         const dataOwner = () => String(Store.prefs.get('dataOwner', '') || '').toLowerCase();
         const profileSnapshot = () => {
             const out = {};
@@ -6966,6 +6986,14 @@
                 body: JSON.stringify({ library: snap.library })
             });
             if (res.status === 401) { Store.prefs.remove('googleToken'); noteAccount(); }
+            if (res.ok) {
+                const data = await res.json().catch(() => ({}));
+                /* Tài khoản đã giữ các mã xóa: bỏ khỏi danh sách chờ (trừ mã mới xóa trong lúc gửi). */
+                const sent = new Set(snap.library.gone || []);
+                const left = goneItems().filter((id) => !sent.has(id));
+                if (left.length) Store.prefs.set('goneItems', left); else Store.prefs.remove('goneItems');
+                await dropGoneLocal(data.gone);
+            }
             return res.ok;
         };
         window.EDU.pushLibrary = pushLibrary;
@@ -7525,6 +7553,7 @@
                     const groups = new Set();
                     list.forEach(t => { if (before.get(t.id) !== t) groups.add(t.group || ''); before.delete(t.id); });
                     before.forEach(t => groups.add(t.group || ''));
+                    noteGone(Array.from(before.keys()));
                     if (groups.size) window.dispatchEvent(new CustomEvent('edu-items-saved', { detail: { groups: Array.from(groups), at: Date.now() } }));
                 }).catch(e => {
                     savedItems.current = prev;
