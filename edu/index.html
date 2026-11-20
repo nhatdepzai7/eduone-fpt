@@ -6,7 +6,7 @@
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; media-src 'self' https:; frame-src https://www.youtube-nocookie.com https://www.tiktok.com https://drive.google.com; connect-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
     <meta name="referrer" content="strict-origin-when-cross-origin">
     <meta name="theme-color" content="#F8FAFC">
-    <meta name="description" content="FPass: giả lập phòng thi chuẩn EOS và lộ trình ôn tiếng Anh chia ca chống trì hoãn cho sinh viên FPT. Luyện đề bấm giờ, tự gom câu sai, ôn cấp tốc trước kỳ FE.">
+    <meta name="description" content="FPass: hệ thống ôn luyện cấp tốc mọi môn cho sinh viên FPT. Phòng thi giả lập chuẩn EOS, kho câu hỏi bám sát đề, dịch song ngữ, gợi ý keyword và ca học ngắn tự ôn câu sai trước kỳ FE.">
     <title>FPass · Giả lập phòng thi EOS, ôn cấp tốc FE</title>
     <link rel="icon" href="/public/stickers/logo.png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -101,10 +101,10 @@
             <div class="mx-auto grid max-w-6xl items-stretch gap-10 px-4 pb-14 pt-10 md:pb-20 md:pt-16 lg:grid-cols-[1.15fr_.85fr] lg:gap-12">
                 <div class="flex flex-col justify-center">
                     <p class="inline-flex items-center gap-2 self-start rounded-full bg-white px-3 py-1.5 text-sm font-semibold text-indigo-700 shadow-sm ring-1 ring-indigo-100">
-                        <span class="live-dot" aria-hidden="true"></span> Hệ thống ôn luyện Tiếng Anh & Giả lập EOS cho sinh viên FPT
+                        <span class="live-dot" aria-hidden="true"></span> Hệ thống ôn luyện cấp tốc cho sinh viên FPT
                     </p>
-                    <h1 class="mt-5 text-[clamp(1.3rem,6.8vw,2.15rem)] font-extrabold leading-[1.12] tracking-tight sm:text-[2.6rem] lg:text-[2.45rem] xl:text-[2.85rem]"><span class="whitespace-nowrap">Giả lập phòng thi EOS.</span><br><span class="text-indigo-700 whitespace-nowrap">Học tiếng Anh hết trì hoãn.</span></h1>
-                    <p class="mt-5 max-w-xl text-lg leading-relaxed text-slate-600">Mô phỏng sát giao diện thi thật EOS kết hợp AI dịch bài đọc song ngữ, lọc từ vựng và chia 3 ca học ngắn mỗi ngày — giúp sinh viên FPT ôn thi cấp tốc và tự động nhớ sâu câu sai.</p>
+                    <h1 class="mt-5 text-[clamp(1.3rem,6.8vw,2.15rem)] font-extrabold leading-[1.12] tracking-tight sm:text-[2.6rem] lg:text-[2.45rem] xl:text-[2.85rem]"><span class="whitespace-nowrap">Giả lập phòng thi EOS.</span><br><span class="text-indigo-700 whitespace-nowrap">Ôn cấp tốc mọi môn FPT.</span></h1>
+                    <p class="mt-5 max-w-xl text-lg leading-relaxed text-slate-600">Kho câu hỏi bám sát cấu trúc đề, lý thuyết tổng quan từng chủ đề và phòng thi giả lập chuẩn EOS. Tích hợp dịch song ngữ, gợi ý keyword và chia nhỏ lộ trình tự ôn câu sai — giúp sinh viên FPT nắm chắc kiến thức mọi môn học.</p>
                     <div class="mt-8 flex flex-col gap-3 sm:flex-row">
                         <a href="/app?mode=eos" class="cta cta-main text-base">Thi thử EOS & Học ngay
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
@@ -125,19 +125,19 @@
 
                     <div id="mp-eos" role="tabpanel" aria-labelledby="mt-eos" class="mt-4 flex flex-1 flex-col">
                         <div class="flex items-center justify-between rounded-xl bg-[#1E3A8A] px-3 py-2 text-white">
-                            <span class="text-sm font-semibold">ENG102 · Câu 12/50</span>
+                            <span class="text-sm font-semibold">CSI104 · Câu 12/50</span>
                             <span class="tnum rounded-lg bg-white/15 px-2 py-0.5 text-sm font-semibold" aria-label="Thời gian còn lại"><span aria-hidden="true">⏱</span> <span id="demo-exam">44:15</span></span>
                         </div>
                         <div class="mt-3 flex gap-1" aria-hidden="true">
                             <span class="qdot is-done">9</span><span class="qdot is-done">10</span><span class="qdot is-flag">11</span><span class="qdot is-now">12</span><span class="qdot">13</span><span class="qdot">14</span><span class="qdot">15</span>
                         </div>
-                        <p class="mt-4 font-semibold leading-snug" id="demo-q">Choose the word <span class="kw">closest in meaning</span> to <span class="kw">reluctant</span>.</p>
-                        <p class="mt-1 hidden text-sm text-slate-500" id="demo-vi">Chọn từ gần nghĩa nhất với “reluctant” (miễn cưỡng).</p>
+                        <p class="mt-4 font-semibold leading-snug" id="demo-q">Which component of the <span class="kw">CPU</span> performs <span class="kw">arithmetic and logical operations</span>?</p>
+                        <p class="mt-1 hidden text-sm text-slate-500" id="demo-vi">Thành phần nào của CPU thực hiện các phép toán số học và logic?</p>
                         <div class="mt-3 grid gap-2 text-sm" role="radiogroup" aria-label="Chọn đáp án thử" id="demo-opts">
-                            <button type="button" role="radio" aria-checked="false" class="opt" data-ok="0"><b>A</b><span>eager<i class="opt-vi"> · háo hức</i></span></button>
-                            <button type="button" role="radio" aria-checked="true" class="opt is-picked" data-ok="1"><b>B</b><span>unwilling<i class="opt-vi"> · không sẵn lòng</i></span></button>
-                            <button type="button" role="radio" aria-checked="false" class="opt" data-ok="0"><b>C</b><span>careful<i class="opt-vi"> · cẩn thận</i></span></button>
-                            <button type="button" role="radio" aria-checked="false" class="opt" data-ok="0"><b>D</b><span>curious<i class="opt-vi"> · tò mò</i></span></button>
+                            <button type="button" role="radio" aria-checked="false" class="opt" data-ok="0"><b>A</b><span>Control Unit<i class="opt-vi"> · khối điều khiển</i></span></button>
+                            <button type="button" role="radio" aria-checked="true" class="opt is-picked" data-ok="1"><b>B</b><span>ALU<i class="opt-vi"> · khối số học và logic</i></span></button>
+                            <button type="button" role="radio" aria-checked="false" class="opt" data-ok="0"><b>C</b><span>Register<i class="opt-vi"> · thanh ghi</i></span></button>
+                            <button type="button" role="radio" aria-checked="false" class="opt" data-ok="0"><b>D</b><span>Cache memory<i class="opt-vi"> · bộ nhớ đệm</i></span></button>
                         </div>
                         <p class="mt-3 hidden rounded-xl px-3 py-2 text-sm font-semibold" id="demo-result" role="status" aria-live="polite"></p>
                         <div class="mt-auto flex flex-wrap items-center gap-2 pt-4">
@@ -188,14 +188,14 @@
                     <span class="tile bg-indigo-600 text-white"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="13" rx="2"/><path d="M8 21h8M12 17v4M7 9h5M7 12h3"/><circle cx="16.5" cy="10.5" r="2"/></svg></span>
                     <p class="mt-5 text-xs font-bold uppercase tracking-widest text-indigo-700">Chế độ 1</p>
                     <h3 class="mt-1 text-2xl font-extrabold tracking-tight">Giả lập phòng thi thực chiến chuẩn EOS</h3>
-                    <p class="mt-3 text-slate-600">Mô phỏng sát giao diện, áp lực đồng hồ đếm ngược và quy trình nộp bài như phòng thi thật tại FPT để rèn tâm lý vững vàng trước kỳ thi FE.</p>
+                    <p class="mt-3 text-slate-600">Mô phỏng sát giao diện thi thật, áp lực đồng hồ đếm ngược, bảng trạng thái câu hỏi và quy trình nộp bài như tại phòng thi FPT.</p>
                     <a class="cta cta-main mt-6 self-start" href="/app?mode=eos">Vào phòng thi thử →</a>
                 </article>
                 <article class="bento bento-main">
                     <span class="tile bg-blue-600 text-white"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2.5M9 2h6"/></svg></span>
                     <p class="mt-5 text-xs font-bold uppercase tracking-widest text-blue-700">Chế độ 2</p>
-                    <h3 class="mt-1 text-2xl font-extrabold tracking-tight">Chia nhỏ lộ trình & Tự động ôn lại câu sai</h3>
-                    <p class="mt-3 text-slate-600">Chia nhỏ kiến thức thành các ca học ngắn chống trì hoãn, tự động gom các câu làm sai vào thẻ nhắc ôn lại cho tới khi nhớ hẳn.</p>
+                    <h3 class="mt-1 text-2xl font-extrabold tracking-tight">Chia nhỏ lộ trình, tự động ôn lại câu sai</h3>
+                    <p class="mt-3 text-slate-600">Chia nhỏ mục tiêu thành các ca học ngắn chống trì hoãn, tự động gom các câu làm sai vào thẻ nhắc ôn lại cho tới khi nắm chắc.</p>
                     <a class="cta mt-6 self-start bg-blue-600 text-white hover:bg-blue-700" href="/app?mode=english">Bắt đầu ca học ngắn →</a>
                 </article>
             </div>
@@ -204,22 +204,22 @@
                 <article class="bento">
                     <span class="tile bg-indigo-50 text-indigo-600"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5a2 2 0 0 1 2-2h12v18H6a2 2 0 0 1-2-2z"/><path d="M8 7h6M8 11h6M8 15h4"/></svg></span>
                     <h3 class="mt-4 text-lg font-bold">Kho câu hỏi bám sát cấu trúc đề</h3>
-                    <p class="mt-2 text-slate-600">Hệ thống câu hỏi được nghiên cứu và phân loại chuẩn theo cấu trúc, dạng bài thực tế của từng môn học tại FPT.</p>
+                    <p class="mt-2 text-slate-600">Ngân hàng câu hỏi phong phú, được nghiên cứu và phân loại chuẩn theo cấu trúc, dạng bài thực tế của từng môn học.</p>
                     <a class="go" href="/app?mode=eos">Xem kệ đề →</a>
                 </article>
                 <article class="bento">
                     <span class="tile bg-blue-50 text-blue-600"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h8M8 3v2M5.5 5c.8 3 3 5.5 6 7M10.5 5c-.8 3-3 5.5-6 7"/><path d="M13 21l4-9 4 9M14.5 18h5"/></svg></span>
-                    <h3 class="mt-4 text-lg font-bold">Trình dịch song ngữ, gợi ý Keyword & Đáp án chi tiết</h3>
-                    <p class="mt-2 text-slate-600">Tích hợp dịch song ngữ ngay trên câu hỏi, bôi đậm từ khóa nhận diện đáp án nhanh và giải thích cặn kẽ từng lựa chọn.</p>
+                    <h3 class="mt-4 text-lg font-bold">Trình dịch song ngữ, gợi ý keyword & đáp án chi tiết</h3>
+                    <p class="mt-2 text-slate-600">Hỗ trợ dịch song ngữ ngay trên câu hỏi chuyên ngành, bôi đậm từ khóa nhận diện nhanh và giải thích chi tiết từng đáp án.</p>
                     <a class="go" href="/app?mode=eos">Thử một đề song ngữ →</a>
                 </article>
                 <article class="bento">
                     <span class="tile bg-violet-50 text-violet-600"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 5h7a3 3 0 0 1 3 3v12a2 2 0 0 0-2-2H2zM22 5h-7a3 3 0 0 0-3 3v12a2 2 0 0 1 2-2h8z"/></svg></span>
                     <div class="mt-4 flex flex-wrap items-center gap-2">
-                        <h3 class="text-lg font-bold">Lý thuyết tổng quan theo từng chủ đề</h3>
+                        <h3 class="text-lg font-bold">Lý thuyết tổng quan cho mỗi chủ đề</h3>
                         <span class="rounded-full bg-amber-50 px-2.5 py-0.5 text-xs font-bold text-amber-700 ring-1 ring-amber-200">Đang biên soạn</span>
                     </div>
-                    <p class="mt-2 text-slate-600">Tóm tắt cô đọng kiến thức nền tảng cho từng chủ đề của môn học để tra cứu nhanh trước khi luyện đề.</p>
+                    <p class="mt-2 text-slate-600">Hệ thống hóa kiến thức cốt lõi cô đọng theo từng chương/chủ đề của môn học để nắm nhanh nền tảng trước khi luyện đề.</p>
                     <a class="go" href="#video">Xem video hướng dẫn trong lúc chờ →</a>
                 </article>
             </div>
@@ -349,7 +349,7 @@
                 });
             });
 
-            /* Khung ENG102 bấm thử được: chọn A-D, Keyword, VI / EN và Nộp bài thử đều chạy ngay trên trang chủ. */
+            /* Khung CSI104 bấm thử được: chọn A-D, Keyword, VI / EN và Nộp bài thử đều chạy ngay trên trang chủ. */
             var q = document.getElementById('demo-q');
             var qVi = document.getElementById('demo-vi');
             var optsBox = document.getElementById('demo-opts');
@@ -407,8 +407,8 @@
                 });
                 result.className = 'mt-3 rounded-xl px-3 py-2 text-sm font-semibold ' + (right ? 'bg-emerald-50 text-emerald-800' : 'bg-rose-50 text-rose-800');
                 result.textContent = right
-                    ? 'Đúng · 10/10 điểm. “Reluctant” = miễn cưỡng, gần nghĩa nhất với “unwilling”.'
-                    : (chosen ? 'Sai · 0/10 điểm. ' : 'Chưa chọn đáp án. ') + 'Đáp án đúng là B “unwilling”. Câu này sẽ vào thẻ ôn ở ca học sau.';
+                    ? 'Đúng · 10/10 điểm. ALU (Arithmetic Logic Unit) là khối tính toán số học và logic của CPU.'
+                    : (chosen ? 'Sai · 0/10 điểm. ' : 'Chưa chọn đáp án. ') + 'Đáp án đúng là B “ALU”. Câu này sẽ vào thẻ ôn ở ca học sau.';
                 submit.textContent = 'Làm lại';
                 graded = true;
             });
