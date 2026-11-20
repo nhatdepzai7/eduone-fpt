@@ -59,6 +59,37 @@
         .cmd-go:disabled { opacity: .6; cursor: not-allowed; transform: none; }
         .cmd-link { display: inline-flex; align-items: center; gap: 6px; min-height: 44px; padding: 0 12px; border-radius: 12px; font-size: 14px; font-weight: 600; color: #E0E7FF; }
         .cmd-link:hover { background: rgba(255, 255, 255, .12); color: #fff; }
+        .cmd-alt { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 52px; padding: 0 18px; border-radius: 16px; background: rgba(255, 255, 255, .12); color: #fff; font-weight: 700; font-size: 15px; border: 1px solid rgba(255, 255, 255, .3); transition: background .15s ease; }
+        .cmd-alt:hover { background: rgba(255, 255, 255, .22); }
+        .slot-path { position: relative; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+        .slot-path::before { content: ""; position: absolute; left: 16.66%; right: 16.66%; top: 17px; height: 3px; border-radius: 3px; background: rgba(255, 255, 255, .22); }
+        .slot-node { position: relative; display: flex; flex-direction: column; align-items: center; text-align: center; min-width: 0; }
+        .slot-dot { width: 36px; height: 36px; border-radius: 999px; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 14px; background: #3F3B9A; color: #C7D2FE; box-shadow: 0 0 0 3px rgba(255, 255, 255, .16); }
+        .slot-node.is-done .slot-dot { background: #10B981; color: #fff; box-shadow: 0 0 0 3px rgba(16, 185, 129, .35); }
+        .slot-node.is-now .slot-dot { background: #fff; color: #312E81; animation: nowRing 1.8s ease-in-out infinite; }
+        .slot-node.is-off .slot-dot { opacity: .45; }
+        .slot-time { margin-top: 6px; font-size: 13px; font-weight: 700; color: #fff; }
+        .slot-name { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 11px; font-weight: 500; color: #C7D2FE; }
+        @keyframes nowRing { 0%, 100% { box-shadow: 0 0 0 4px rgba(255, 255, 255, .35); } 50% { box-shadow: 0 0 0 9px rgba(255, 255, 255, .06); } }
+        .pillar { display: flex; flex-direction: column; align-items: flex-start; gap: 12px; height: 100%; text-align: left; border-radius: 20px; padding: 16px; background: var(--surface); border: 1px solid var(--border); box-shadow: 0 1px 2px rgba(15, 23, 42, .04); transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease; }
+        .pillar:hover { transform: translateY(-2px); box-shadow: 0 16px 30px -20px rgba(15, 23, 42, .4); border-color: #C7D2FE; }
+        .pillar-ic { width: 44px; height: 44px; border-radius: 14px; display: flex; align-items: center; justify-content: center; }
+        .pillar-go { margin-top: auto; display: inline-flex; align-items: center; gap: 4px; font-size: 13px; font-weight: 700; }
+        .app-nav { display: flex; gap: 2px; padding: 4px; border-radius: 16px; background: var(--surface-2); border: 1px solid var(--border); }
+        .app-nav button { position: relative; display: inline-flex; align-items: center; gap: 8px; min-height: 40px; padding: 0 14px; border-radius: 12px; font-size: 14px; font-weight: 600; color: var(--ink-2); }
+        .app-nav button[aria-current="page"] { background: var(--surface); color: var(--ink); box-shadow: 0 1px 3px rgba(15, 23, 42, .14); }
+        .app-nav button[aria-current="page"] svg { color: var(--primary); }
+        .app-nav button:hover:not([aria-current="page"]) { color: var(--ink); }
+        .nav-dot { position: absolute; top: 6px; right: 6px; width: 8px; height: 8px; border-radius: 999px; background: #EF4444; box-shadow: 0 0 0 2px var(--surface-2); }
+        .bnav { position: fixed; left: 0; right: 0; bottom: 0; z-index: 40; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); background: rgba(255, 255, 255, .96); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); border-top: 1px solid var(--border); padding-bottom: env(safe-area-inset-bottom); }
+        .bnav button { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; min-height: 58px; font-size: 11px; font-weight: 600; color: var(--muted); }
+        .bnav button[aria-current="page"] { color: var(--primary); }
+        .bnav button[aria-current="page"]::before { content: ""; position: absolute; top: 0; left: 28%; right: 28%; height: 3px; border-radius: 0 0 3px 3px; background: var(--primary); }
+        .bnav .nav-dot { top: 8px; right: calc(50% - 18px); box-shadow: 0 0 0 2px #fff; }
+        @media (min-width: 1024px) { .bnav { display: none; } }
+        @media (max-width: 1023px) { body .help-dock { bottom: calc(70px + env(safe-area-inset-bottom)); } }
+        body:has(.eos-shell) .bnav { display: none; }
+        @media (prefers-reduced-motion: reduce) { .slot-node.is-now .slot-dot { animation: none; } .pillar:hover { transform: none; } }
         .guide-frame { position: relative; width: 100%; aspect-ratio: 16 / 9; border-radius: 16px; overflow: hidden; background: #0F172A; }
         .guide-frame.is-tall { aspect-ratio: 9 / 16; max-width: 340px; margin: 0 auto; }
         .guide-frame iframe, .guide-frame video { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
@@ -295,6 +326,9 @@
         .obsidian-head .btn-ghost { color: #C6CBD4; }
         .obsidian-head .btn-ghost:hover:not(:disabled) { background: #202637; }
         .obsidian-head .tab { color: #C6CBD4; }
+        .obsidian-head .app-nav { background: #202637; border-color: #2A3142; }
+        .obsidian-head .app-nav button { color: #C6CBD4; }
+        .obsidian-head .app-nav button[aria-current="page"] { background: #F8F9FC; color: #0B192C; }
         .obsidian-head .tab[aria-selected="true"] { background: #F8F9FC; color: #10141F; }
         .obsidian-head .tab:hover:not([aria-selected="true"]) { background: #202637; color: #F8F9FC; }
         .obsidian-card { position: relative; overflow: hidden; border-radius: 18px; border: 1px solid rgba(216, 199, 160, .6); background: linear-gradient(145deg, #202637 0%, #10141F 58%, #161b28 100%); color: #F8F9FC; box-shadow: 0 16px 36px rgba(16, 20, 31, .18); }
@@ -1207,8 +1241,13 @@
             const [note, setNote] = useState('');
             const [round, setRound] = useState(0);
             const [moved, setMoved] = useState(null);
+            const asked = useRef(false);
             useEffect(() => {
-                if (!account) { setState('login'); return undefined; }
+                if (!account) {
+                    setState('login');
+                    if (!asked.current) { asked.current = true; askLogin('pay'); }
+                    return undefined;
+                }
                 let alive = true;
                 setState('checking');
                 fetch('/api/fund?action=pay', {
@@ -1315,71 +1354,6 @@
         };
 
         /* Thẻ đầu màn hình Hôm nay: giờ tới ca kế, trạng thái khóa lịch, một nút học. */
-        const TodayCommand = ({ plan, cur, now, onStudyNow, onVideo, onSetup, account, setupDone, cardCount }) => {
-            const [hello, setHello] = useState(() => !Store.prefs.get('welcomed', false));
-            const slot = cur.slot;
-            const nowD = new Date(now);
-            const msUntil = (s) => { const d = new Date(nowD); d.setHours(0, 0, 0, 0); return Math.max(0, d.getTime() + Plan.triggerMin(s) * 60000 - nowD.getTime()); };
-            const firstSlot = plan.slots.find(s => !s.nghi);
-            let label = '';
-            let big = '';
-            let live = false;
-            if (cur.kind === 'ALL_DONE') {
-                label = 'Hôm nay đã xong cả ' + plan.slots.filter(s => !s.nghi).length + ' ca';
-                big = 'Hoàn thành';
-            } else if (cur.kind === 'GATE') {
-                label = 'Ca ' + slot.id + ' · ' + slot.anchorLabel + ' · bước kiểm tra cuối ca';
-                big = 'Pha 2';
-            } else if (cur.kind === 'ON_TIME_ACTIVE' || cur.kind === 'LATE_RECOVERY') {
-                label = 'Ca ' + slot.id + ' · ' + slot.anchorLabel + (cur.kind === 'LATE_RECOVERY' ? ' · đang trễ giờ' : ' · đang trong giờ');
-                big = 'Đến giờ';
-                live = true;
-            } else if (slot) {
-                label = 'Ca ' + slot.id + ' · ' + slot.anchorLabel + ' bắt đầu sau';
-                big = Plan.fmtCountdown(msUntil(slot));
-            }
-            const n = slot ? Math.min(slot.baseCardCount || 8, Math.max(cardCount, 1)) : Math.min(8, Math.max(cardCount, 1));
-            const dismiss = () => { Store.prefs.set('welcomed', true); setHello(false); };
-            return (
-                <section className="cmd-card mb-4 p-5 text-left sm:p-6" aria-label="Ca học hôm nay">
-                    <div className="relative z-10">
-                        <div className="flex flex-wrap items-center gap-2">
-                            <span className="cmd-pill bg-white/15 text-white"><Icon name="lock" size={13} /> Lịch hôm nay đã khóa</span>
-                            <span className="text-xs text-indigo-200">Sửa lịch sẽ áp dụng từ 00:00 ngày mai</span>
-                        </div>
-                        <p className="mt-4 text-sm font-semibold text-indigo-100">{label}</p>
-                        <p className="tnum mt-1 flex items-center gap-3 text-5xl font-semibold tracking-tight sm:text-6xl" role="timer" aria-live="off">
-                            {live && <span className="h-3 w-3 rounded-full bg-[#F87171] pulse-rec" aria-hidden="true" />}{big}
-                        </p>
-                        {cur.kind === 'ALL_DONE' && firstSlot && <p className="mt-1 text-sm text-indigo-100">Ca đầu tiên ngày mai lúc {firstSlot.time}.</p>}
-                        <div className="mt-4 flex gap-2" aria-label="Các ca hôm nay">
-                            {plan.slots.map(s => (
-                                <span key={s.id} className={'cmd-slot ' + (s.status === 'done' ? 'is-done' : (slot && s.id === slot.id ? 'is-now' : ''))}>
-                                    {s.nghi ? 'Nghỉ' : Plan.hhmmOf(Plan.triggerMin(s))}{s.status === 'done' ? ' ✓' : ''}
-                                    <span className="block text-[10px] font-medium opacity-80">{s.anchorLabel}</span>
-                                </span>
-                            ))}
-                        </div>
-                        <div className="mt-5 flex flex-wrap items-center gap-2">
-                            <button type="button" className="cmd-go" onClick={onStudyNow} disabled={!cardCount}>
-                                <Icon name="play" size={18} /> {cardCount ? 'Học ngay ' + n + ' thẻ' : 'Kho chưa có thẻ'}
-                            </button>
-                            <button type="button" className="cmd-link" onClick={onVideo}><Icon name="play" size={15} /> Video hướng dẫn</button>
-                            {!setupDone && (
-                                <button type="button" className="cmd-link" onClick={onSetup}><Icon name="calendar" size={15} /> {account ? 'Đặt giờ học riêng' : 'Đăng nhập để đặt giờ riêng'}</button>
-                            )}
-                        </div>
-                        {hello && (
-                            <div className="mt-4 flex flex-wrap items-center gap-3 rounded-2xl bg-white/10 px-4 py-3 text-sm text-indigo-50">
-                                <span className="min-w-0 flex-1">Lần đầu dùng FPass? Lịch 3 ca và bộ thẻ mẫu đã sẵn sàng. Bấm <b>Học ngay</b> để thử, chưa cần đăng ký.</span>
-                                <button type="button" className="rounded-lg bg-white/15 px-3 py-1.5 font-semibold text-white hover:bg-white/25" onClick={dismiss}>Đã hiểu</button>
-                            </div>
-                        )}
-                    </div>
-                </section>
-            );
-        };
-
         /* Chỉ mở sau khi đăng nhập Google: chọn giờ cho 3 ca, số thẻ mỗi ca và nhóm thẻ. */
         const SetupWizard = ({ week, groups, onSave, onClose }) => {
             const base = (week && week.days && week.days.monday) || Plan.defaultWeek().days.monday;
@@ -2775,7 +2749,7 @@
                         Object.keys(map).forEach(id => { patch[id] = { recallPrompt: map[id] }; });
                         if (Object.keys(patch).length) onPatch(patch);
                     })
-                    .catch(() => { if (mounted.current) setNote('Không soạn được câu hỏi gợi nhớ, đang dùng nghĩa tiếng Việt.'); })
+                    .catch(() => {})
                     .finally(() => { if (mounted.current) setPreparing(false); });
                 return undefined;
             }, []);
@@ -3772,28 +3746,236 @@
             );
         };
 
-        /* ---------- Hôm nay ---------- */
-        const TodayView = (p) => {
-            const { plan, planReady, week, nextWeek, now, items, itemsById, groups, session, cur, minimal, setMinimal, saveWeek, addItems, finishGate, snooze, enterEarly, askNotify, bonus, closeSession, startSession, review, patch, toast, finishSlot, openLibrary, onBurst, onStudyNow, onVideo, onSetup, account, setupDone } = p;
-            const [editOpen, setEditOpen] = useState(() => takeGo('plan'));
-            const editRef = useRef(null);
-            useEffect(() => { if (editOpen && editRef.current) editRef.current.scrollIntoView({ block: 'start', behavior: 'smooth' }); }, [planReady]);
-            if (!planReady || !plan) return <p className="text-center text-muted py-16">Đang mở ngày hôm nay…</p>;
-            const cmd = <TodayCommand plan={plan} cur={cur} now={now} onStudyNow={onStudyNow} onVideo={onVideo} onSetup={onSetup} account={account} setupDone={setupDone} cardCount={items.filter(Sch.isFilled).length} />;
+        /* ---------- Tổng quan (Home Dashboard) ----------
+           Mở /app là thấy toàn cảnh: thẻ tâm điểm ca học (đồng hồ + khóa lịch + 2 lựa chọn), 3 bước cho người mới,
+           4 lối vào các trụ cột. Màn lật thẻ chỉ mở khi người dùng bấm bắt đầu, và luôn có nút về Tổng quan. */
+        const greetOf = (d) => { const h = d.getHours(); return h < 11 ? 'Chào buổi sáng' : h < 14 ? 'Chào buổi trưa' : h < 18 ? 'Chào buổi chiều' : 'Chào buổi tối'; };
 
-            const active = plan.slots.filter(s => !s.nghi);
-            const doneCount = active.filter(s => s.status === 'done').length;
+        const SlotPath = ({ slots, activeId }) => (
+            <ol className="slot-path" aria-label="Các ca hôm nay">
+                {slots.map(s => {
+                    const done = s.status === 'done';
+                    const now = !done && !s.nghi && s.id === activeId;
+                    return (
+                        <li key={s.id} className={'slot-node' + (done ? ' is-done' : '') + (now ? ' is-now' : '') + (s.nghi ? ' is-off' : '')} aria-current={now ? 'step' : undefined}>
+                            <span className="slot-dot">{done ? <Icon name="check" size={16} stroke={3} /> : s.nghi ? <Icon name="x" size={14} /> : s.id}</span>
+                            <span className="slot-time tnum">{s.nghi ? 'Nghỉ' : Plan.hhmmOf(Plan.triggerMin(s))}</span>
+                            <span className="slot-name">{s.anchorLabel}{done ? ' · xong' : ''}</span>
+                        </li>
+                    );
+                })}
+            </ol>
+        );
+
+        const FocusCard = ({ plan, cur, now, cardCount, onStart, onStudyNow, onSnooze, onBonus, onReceipt, onGate }) => {
+            const slot = cur.slot;
             const nowD = new Date(now);
-            const msUntil = (slot) => { const d = new Date(nowD); d.setHours(0, 0, 0, 0); return Math.max(0, d.getTime() + Plan.triggerMin(slot) * 60000 - nowD.getTime()); };
-            const statusLine = active.length > 0 && doneCount < active.length
-                ? <p className="text-center text-sm text-muted mb-4">Hôm nay chưa xong · đã hoàn thành {doneCount}/{active.length} việc</p> : null;
-            const editor = (
-                <div className="mt-8 text-center scroll-mt-24" ref={editRef}>
-                    <button type="button" onClick={() => setEditOpen(v => !v)} aria-expanded={editOpen} className="btn btn-ghost btn-sm"><Icon name="calendar" size={14} /> Sửa lịch tuần</button>
-                    {editOpen && <PlanEditor week={week} nextWeek={nextWeek} groups={groups} onSave={saveWeek} toast={toast} />}
+            const msUntil = (s) => { const d = new Date(nowD); d.setHours(0, 0, 0, 0); return Math.max(0, d.getTime() + Plan.triggerMin(s) * 60000 - nowD.getTime()); };
+            const live = cur.kind === 'ON_TIME_ACTIVE' || cur.kind === 'LATE_RECOVERY';
+            const late = cur.kind === 'LATE_RECOVERY';
+            const firstSlot = plan.slots.find(s => !s.nghi);
+            let label = '';
+            let big = '';
+            if (cur.kind === 'ALL_DONE') {
+                label = 'Hôm nay đã xong cả ' + plan.slots.filter(s => !s.nghi).length + ' ca';
+                big = 'Hoàn thành';
+            } else if (cur.kind === 'GATE') {
+                label = 'Ca ' + slot.id + ' · ' + slot.anchorLabel + ' · bước đọc sách cuối ca';
+                big = 'Pha 2';
+            } else if (live) {
+                label = 'Ca ' + slot.id + ' · ' + slot.anchorLabel + (late ? ' · đang trễ giờ' : ' · đã đến giờ học');
+                big = late ? 'Trễ giờ' : 'Đến giờ';
+            } else if (slot) {
+                label = 'Ca ' + slot.id + ' · ' + slot.anchorLabel + ' bắt đầu sau';
+                big = Plan.fmtCountdown(msUntil(slot));
+            }
+            const full = slot ? Plan.cardLimit(slot, live ? cur.kind : 'ON_TIME_ACTIVE', false) : 0;
+            const lean = slot ? Math.min(2, slot.baseCardCount || 8) : 2;
+            const quick = Math.min(8, Math.max(cardCount, 1));
+            const resume = live && slot.deckIds && slot.deckIds.length && !slot.cardsDone;
+            return (
+                <section className="cmd-card p-5 text-left sm:p-7" aria-label="Ca học hôm nay">
+                    <div className="relative z-10">
+                        <div className="flex flex-wrap items-center gap-2">
+                            <span className="cmd-pill bg-white/15 text-white"><Icon name="lock" size={13} /> Lịch hôm nay đã khóa</span>
+                            <span className="text-xs text-indigo-200">Sửa lịch chỉ áp dụng từ 00:00 ngày mai</span>
+                        </div>
+                        <p className="mt-5 text-sm font-semibold text-indigo-100">{label}</p>
+                        <p className="tnum mt-1 flex items-center gap-3 text-5xl font-semibold tracking-tight sm:text-6xl" role="timer" aria-live="off">
+                            {live && <span className="h-3 w-3 shrink-0 rounded-full bg-[#F87171] pulse-rec" aria-hidden="true" />}{big}
+                        </p>
+                        {cur.kind === 'ALL_DONE' && firstSlot && <p className="mt-1 text-sm text-indigo-100">Ca đầu tiên ngày mai lúc {firstSlot.time}. Không nợ thẻ sang mai.</p>}
+                        <div className="mt-6"><SlotPath slots={plan.slots} activeId={slot && slot.id} /></div>
+
+                        <div className="mt-6 flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
+                            {live && (
+                                <>
+                                    <button type="button" className="cmd-go" onClick={() => onStart(false)}><Icon name="play" size={18} /> {resume ? 'Học tiếp' : 'Học đủ'} ca {slot.id} · {full} thẻ</button>
+                                    <button type="button" className="cmd-alt" onClick={() => onStart(true)}><Icon name="zap" size={17} /> Chạm đáy 30s · {lean} thẻ</button>
+                                </>
+                            )}
+                            {cur.kind === 'GATE' && <button type="button" className="cmd-go" onClick={onGate}><Icon name="book" size={18} /> Tiếp tục pha 2</button>}
+                            {cur.kind === 'ALL_DONE' && (
+                                <>
+                                    <button type="button" className="cmd-go" onClick={onBonus} disabled={!cardCount}><Icon name="plus" size={18} /> Còn hứng? Thêm 5 thẻ</button>
+                                    <button type="button" className="cmd-alt" onClick={onReceipt}><Icon name="copy" size={16} /> Copy phiếu hoàn thành</button>
+                                </>
+                            )}
+                            {!live && slot && cur.kind !== 'GATE' && cur.kind !== 'ALL_DONE' && (
+                                <button type="button" className="cmd-go" onClick={onStudyNow} disabled={!cardCount}>
+                                    <Icon name="play" size={18} /> {!cardCount ? 'Kho chưa có thẻ' : cur.early ? 'Vào sớm ca ' + slot.id + ' · ' + full + ' thẻ' : 'Học ngay ' + quick + ' thẻ'}
+                                </button>
+                            )}
+                            {cur.kind === 'ON_TIME_ACTIVE' && !slot.snoozedOnce && <button type="button" className="cmd-link" onClick={() => onSnooze(slot.id)}><Icon name="clock" size={15} /> Đang dở tay? Lùi 15 phút</button>}
+                        </div>
+                        <p className="mt-3 text-xs leading-5 text-indigo-200">
+                            {live ? 'Bận quá thì bấm Chạm đáy: ' + lean + ' thẻ trong 30 giây vẫn tính là giữ chuỗi hôm nay.'
+                                : cur.kind === 'ALL_DONE' ? 'Điểm dừng rõ ràng. Mai app sẽ gõ chuông đúng giờ.'
+                                    : cur.kind === 'GATE' ? 'Đọc xong phần sách của ca rồi quay lại kiểm tra nhanh.'
+                                        : 'Đến giờ, app gõ chuông và nháy tiêu đề tab để nhắc. Có thể treo tab cả ngày.'}
+                        </p>
+                    </div>
+                </section>
+            );
+        };
+
+        /* 3 bước cho người mới: học thử, thi thử EOS, đăng nhập lưu tiến độ. Ẩn được, tự ẩn khi xong cả 3. */
+        const StarterSteps = ({ studied, triedEos, account, onStudy, onEos, onLogin, onHide }) => {
+            const steps = [
+                { done: studied, title: 'Học thử 8 thẻ mẫu', desc: 'Lật thẻ, chấm Nhớ / Quên. Mất khoảng 1 phút.', cta: 'Học thử', run: onStudy, icon: 'layers' },
+                { done: triedEos, title: 'Thi thử EOS 10 câu', desc: 'Giao diện như phòng thi thật, miễn phí, không cần đăng nhập.', cta: 'Vào phòng thi', run: onEos, icon: 'monitor' },
+                { done: !!account, title: 'Đăng nhập Google', desc: 'Lưu kho từ, chuỗi ngày học và đặt giờ 3 ca của riêng bạn.', cta: 'Đăng nhập', run: onLogin, icon: 'shield' }
+            ];
+            const n = steps.filter(s => s.done).length;
+            return (
+                <section className="card h-full p-5" aria-label="Bắt đầu với FPass">
+                    <div className="flex items-start justify-between gap-3">
+                        <div>
+                            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-primary">Lần đầu dùng FPass?</p>
+                            <h2 className="mt-1 text-lg font-bold text-ink">Bắt đầu trong 3 bước</h2>
+                        </div>
+                        <button type="button" className="btn btn-ghost btn-sm -mr-2 text-muted" onClick={onHide}>Ẩn</button>
+                    </div>
+                    <div className="mt-3 flex items-center gap-3" aria-label={'Đã xong ' + n + ' trên 3 bước'}>
+                        <div className="h-2 flex-1 overflow-hidden rounded-full bg-surface2"><div className="h-full rounded-full bg-primary transition-all" style={{ width: (n / 3 * 100) + '%' }} /></div>
+                        <span className="tnum text-xs font-semibold text-ink2">{n}/3</span>
+                    </div>
+                    <ol className="mt-4 space-y-2">
+                        {steps.map((s, i) => (
+                            <li key={i} className={'flex flex-wrap items-center gap-3 rounded-2xl border p-3 ' + (s.done ? 'border-green-200 bg-success-soft' : 'border-line bg-surface')}>
+                                <span className={'flex h-9 w-9 shrink-0 items-center justify-center rounded-xl ' + (s.done ? 'bg-success text-white' : 'bg-primary-soft text-primary')}>
+                                    <Icon name={s.done ? 'check' : s.icon} size={17} stroke={s.done ? 3 : 2} />
+                                </span>
+                                <span className="min-w-[55%] flex-1">
+                                    <span className={'block text-sm font-semibold ' + (s.done ? 'text-success' : 'text-ink')}>{s.title}</span>
+                                    <span className="block text-xs leading-5 text-ink2">{s.desc}</span>
+                                </span>
+                                {!s.done && <button type="button" className="btn btn-secondary btn-sm ml-12 shrink-0 min-[440px]:ml-0" onClick={s.run}>{s.cta}</button>}
+                            </li>
+                        ))}
+                    </ol>
+                </section>
+            );
+        };
+
+        const TodayStats = ({ plan, items, queued }) => {
+            const active = plan.slots.filter(s => !s.nghi);
+            const done = active.filter(s => s.status === 'done').length;
+            const cards = plan.slots.reduce((a, s) => a + (s.cardsDone || 0), 0);
+            const filled = items.filter(Sch.isFilled).length;
+            const weak = items.filter(t => Sch.isFilled(t) && Sch.isWeak(t)).length;
+            const box = (value, text, tone) => (
+                <div className={'rounded-2xl p-4 ' + tone}>
+                    <p className="tnum text-3xl font-bold leading-none">{value}</p>
+                    <p className="mt-2 text-xs font-medium text-ink2">{text}</p>
                 </div>
             );
-            const hero = <IdentityToday canBurst={items.filter(Sch.isFilled).length >= 5} onBurst={onBurst} />;
+            return (
+                <section className="card h-full p-5" aria-label="Số liệu hôm nay">
+                    <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted">Hôm nay</p>
+                    <div className="mt-3 grid grid-cols-2 gap-3">
+                        {box(done + '/' + active.length, 'ca đã hoàn thành', 'bg-primary-soft text-primary')}
+                        {box(cards, 'lượt thẻ đã học', 'bg-success-soft text-success')}
+                        {box(filled, 'thẻ trong sổ từ', 'bg-surface2 text-ink')}
+                        {box(queued + weak, 'câu sai / từ yếu chờ ôn', 'bg-warn-soft text-warn')}
+                    </div>
+                </section>
+            );
+        };
+
+        const PILLARS = [
+            { key: 'eos', short: 'Bấm giờ · song ngữ · keyword', icon: 'monitor', tone: 'bg-indigo-100 text-indigo-700', go: 'text-indigo-700', title: 'Phòng thi giả lập EOS', desc: 'Bấm giờ, nộp bài như thật. Dịch song ngữ và gợi ý keyword ngay trên câu hỏi.', tag: 'Thi thử 10 câu miễn phí', cta: 'Vào phòng thi' },
+            { key: 'vocab', short: 'Lọc từ · IPA · Excel', icon: 'sparkles', tone: 'bg-emerald-100 text-emerald-700', go: 'text-emerald-700', title: 'Sổ từ & AI quét bài đọc', desc: 'Dán bài đọc, AI lọc từ mới kèm phát âm IPA. Nhập / xuất Excel.', tag: 'Tự tạo thẻ', cta: 'Mở sổ từ' },
+            { key: 'bank', short: 'Đề theo môn · lý thuyết', icon: 'layers', tone: 'bg-amber-100 text-amber-700', go: 'text-amber-700', title: 'Kho đề & lý thuyết theo môn', desc: 'Đề bám sát cấu trúc từng môn FPT, chia chặng, câu sai tự vào thẻ ôn.', tag: 'Lý thuyết: đang biên soạn', cta: 'Xem kho đề' },
+            { key: 'video', short: 'Xem cách dùng app', icon: 'play', tone: 'bg-rose-100 text-rose-700', go: 'text-rose-700', title: 'Video hướng dẫn', desc: 'Vài phút để biết hết cách dùng: lịch 3 ca, phòng thi, sổ từ AI.', tag: 'Xem lúc nào cũng được', cta: 'Xem video' }
+        ];
+
+        const PillarGrid = ({ onOpen }) => (
+            <section aria-labelledby="pillars-title" className="mt-8">
+                <div className="mb-3 flex items-end justify-between gap-3">
+                    <h2 id="pillars-title" className="text-lg font-bold text-ink sm:text-xl">Mọi thứ để qua môn, ở một chỗ</h2>
+                </div>
+                <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+                    {PILLARS.map(p => (
+                        <button key={p.key} type="button" className="pillar" onClick={() => onOpen(p.key)}>
+                            <span className="flex w-full items-center justify-between gap-2">
+                                <span className={'pillar-ic ' + p.tone}><Icon name={p.icon} size={22} /></span>
+                                <span className="hidden rounded-full bg-surface2 px-2.5 py-1 text-[11px] font-semibold text-ink2 sm:inline">{p.tag}</span>
+                            </span>
+                            <span>
+                                <span className="block text-[15px] font-bold leading-snug text-ink sm:text-base">{p.title}</span>
+                                <span className="mt-1 hidden text-sm leading-6 text-ink2 sm:block">{p.desc}</span>
+                                <span className="mt-1 block text-xs leading-5 text-ink2 sm:hidden">{p.short}</span>
+                            </span>
+                            <span className={'pillar-go ' + p.go}>{p.cta} <Icon name="arrow" size={15} /></span>
+                        </button>
+                    ))}
+                </div>
+            </section>
+        );
+
+        const ScheduleCard = ({ plan, cur, week, nextWeek, groups, saveWeek, toast, askNotify, onSetup, account, setupDone, editOpen, setEditOpen, editRef }) => {
+            const slot = cur.slot;
+            const p2 = (slot && slot.phase2_externalTask) || {};
+            const perm = window.Notification ? Notification.permission : 'denied';
+            return (
+                <section className="card h-full p-5 scroll-mt-24" aria-label="Lịch tuần" ref={editRef}>
+                    <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted">Lịch học</p>
+                    <div className="my-3 grid grid-cols-7 gap-1 text-center text-xs" aria-label="Ngày trong tuần">
+                        {Plan.WEEK.map(k => (
+                            <span key={k} aria-current={k === plan.dayKey ? 'date' : undefined} className={'rounded-full py-1 ' + (k === plan.dayKey ? 'bg-ink font-semibold text-white' : 'text-muted')}>
+                                {String(Plan.WEEK_LABEL[k] || '').replace('Thứ ', 'T').replace('Chủ nhật', 'CN')}
+                            </span>
+                        ))}
+                    </div>
+                    {slot && cur.kind !== 'ALL_DONE' && (
+                        <div className="rounded-2xl bg-surface2 p-4">
+                            <p className="text-xs font-semibold text-muted">Ca {slot.id} · {Plan.MODE_LABEL[slot.mode]} · {slot.baseCardCount} thẻ</p>
+                            <p className="mt-1 font-semibold text-ink">{Plan.hhmmOf(Plan.triggerMin(slot))} · {slot.anchorLabel} · {Sch.groupLabel(slot.group)}</p>
+                            <p className="mt-1 text-sm text-ink2 text-flow">{p2.hasExternal ? (p2.bookTitle + ' — ' + p2.taskDetail) : (p2.classSyncNote || 'Ca này chỉ học trên app')}</p>
+                        </div>
+                    )}
+                    {plan.slots.some(s => s.dienTam) && <p className="mt-3 text-sm text-warn text-flow">Một vài phần sách hôm nay đang là buổi ôn tạm. Sửa lịch ngày mai nếu khác.</p>}
+                    <div className="mt-4 flex flex-wrap gap-2">
+                        {!setupDone && <button type="button" className="btn btn-primary btn-sm" onClick={onSetup}><Icon name="calendar" size={14} /> {account ? 'Đặt giờ 3 ca của bạn' : 'Đăng nhập để đặt giờ riêng'}</button>}
+                        <button type="button" onClick={() => setEditOpen(v => !v)} aria-expanded={editOpen} className="btn btn-secondary btn-sm"><Icon name="pen" size={14} /> Sửa lịch tuần</button>
+                        {perm === 'default' && <button type="button" onClick={askNotify} className="btn btn-ghost btn-sm"><Icon name="bell" size={14} /> Bật nhắc khi đến giờ</button>}
+                    </div>
+                    {!account && <p className="mt-3 text-xs text-muted">Đang dùng lịch mẫu 3 ca. Đăng nhập Google để đặt giờ riêng và giữ lịch trên mọi máy.</p>}
+                    {editOpen && <div className="mt-4"><PlanEditor week={week} nextWeek={nextWeek} groups={groups} onSave={saveWeek} toast={toast} /></div>}
+                </section>
+            );
+        };
+
+        const TodayView = (p) => {
+            const { plan, planReady, week, nextWeek, now, items, itemsById, groups, session, cur, saveWeek, addItems, finishGate, snooze, askNotify, bonus, closeSession, startSession, review, patch, toast, finishSlot, onBurst, onStudyNow, onStart, onPillar, onLogin, onSetup, account, setupDone } = p;
+            const [editOpen, setEditOpen] = useState(() => takeGo('plan'));
+            const [starterHidden, setStarterHidden] = useState(() => !!Store.prefs.get('starterHidden', false));
+            const editRef = useRef(null);
+            useEffect(() => { if (editOpen && editRef.current) editRef.current.scrollIntoView({ block: 'start', behavior: 'smooth' }); }, [planReady, editOpen]);
+            if (!planReady || !plan) return <p className="text-center text-muted py-16">Đang mở ngày hôm nay…</p>;
+            const slot = cur.slot;
+            const filled = items.filter(Sch.isFilled).length;
 
             const renderSession = () => {
                 if (session.mode === 'burst') {
@@ -3807,10 +3989,34 @@
                 return <FlashSession key={session.id} items={items} session={session} onReview={review} onPatch={patch} onFinish={finishSlot} onClose={closeSession} onRestart={startSession} toast={toast} />;
             };
 
-            if (cur.kind === 'ALL_DONE') {
+            /* Màn học: chỉ mở khi người dùng bấm bắt đầu. Luôn có nút về Tổng quan; ca đang dở thì quay lại học tiếp được. */
+            const studying = session && session.mode !== 'eos' && ((session.slotId && slot && session.slotId === slot.id && cur.kind !== 'GATE') || session.home);
+            if (studying) {
+                const inSlot = !!session.slotId;
+                return (
+                    <div className="max-w-3xl mx-auto">
+                        <div className="mb-4 flex flex-wrap items-center gap-2 rounded-2xl bg-[#312E81] px-2 py-2 text-sm text-white shadow-sm sm:px-3" role="status">
+                            <button type="button" onClick={closeSession} className="inline-flex min-h-[40px] items-center gap-1.5 rounded-xl bg-white/15 px-3 font-semibold hover:bg-white/25"><Icon name="back" size={15} /> Tổng quan</button>
+                            {inSlot && <span className="ml-1 h-2.5 w-2.5 rounded-full bg-[#F87171] pulse-rec" aria-hidden="true" />}
+                            <b className="min-w-0 truncate">{inSlot ? 'Ca ' + slot.id + ' · ' + slot.anchorLabel + (session.lean ? ' · Chạm đáy' : '') : session.title}</b>
+                            {inSlot && <span className="ml-auto hidden items-center gap-1.5 pr-2 text-indigo-200 sm:inline-flex"><Icon name="lock" size={13} /> Lịch hôm nay đã khóa</span>}
+                        </div>
+                        {inSlot && (
+                            <div className="flex flex-wrap items-center justify-center gap-2 mb-4">
+                                <span className="chip bg-surface2 text-ink2">Pha 1 · {session.ids.length} thẻ · {Sch.groupLabel(slot.group)}</span>
+                                {cur.kind === 'LATE_RECOVERY' && <span className="chip bg-warn-soft text-warn"><Icon name="alert" size={12} /> Trễ giờ · rút gọn còn {session.ids.length} thẻ</span>}
+                                {!session.lean && session.ids.length > 2 && <button type="button" onClick={() => onStart(true)} className="btn btn-ghost btn-sm"><Icon name="zap" size={14} /> Chạm đáy: chỉ 2 thẻ</button>}
+                            </div>
+                        )}
+                        {renderSession()}
+                    </div>
+                );
+            }
+
+            const receipt = () => {
                 const total = plan.slots.reduce((a, s) => a + (s.cardsDone || 0), 0);
                 const kept = plan.slots.reduce((a, s) => a + (s.remembered || 0), 0);
-                const receipt = [
+                const text = [
                     'Phiếu hoàn thành ' + plan.date + ' · ' + (Plan.WEEK_LABEL[plan.dayKey] || ''),
                     ...plan.slots.map(s => {
                         if (s.nghi) return s.id + '. Nghỉ · ' + s.anchorLabel;
@@ -3821,99 +4027,50 @@
                     }),
                     'Tổng: ' + total + ' lượt thẻ, ' + kept + ' câu/từ đã nạp vào não'
                 ].join('\n');
-                return (
-                    <div className="max-w-xl mx-auto text-center">
-                        {cmd}
-                        <IdentityToday canBurst={items.filter(Sch.isFilled).length >= 5} onBurst={onBurst} />
-                        <DayStrip dayKey={plan.dayKey} />
-                        <div className="card p-6 sm:p-8 enter">
-                            <div className="mx-auto w-14 h-14 rounded-2xl bg-success text-white flex items-center justify-center mb-4"><Icon name="check" size={28} /></div>
-                            <h2 className="text-3xl font-bold">Hôm nay xong</h2>
-                            <p className="text-ink2 mt-2">Điểm dừng rõ ràng. Không nợ thẻ sang ngày mai.</p>
-                            <div className="grid grid-cols-2 gap-3 mt-6">
-                                <div className="rounded-xl bg-primary-soft p-4"><p className="text-3xl font-bold text-primary tnum">{total}</p><p className="text-sm text-ink2">lượt thẻ đã xử lý</p></div>
-                                <div className="rounded-xl bg-success-soft p-4"><p className="text-3xl font-bold text-success tnum">{kept}</p><p className="text-sm text-ink2">câu / từ đã nạp vào não</p></div>
-                            </div>
-                            <div className="flex flex-wrap justify-center gap-2 mt-6">
-                                <button type="button" className="btn btn-primary" onClick={() => copyText(receipt).then(() => toast('Đã copy phiếu hoàn thành', 'success')).catch(() => toast('Trình duyệt chặn clipboard', 'error'))}><Icon name="copy" /> Copy phiếu hoàn thành</button>
-                                <button type="button" className="btn btn-secondary" onClick={bonus}>Còn hứng? Thêm 5 thẻ ngoài lịch</button>
-                            </div>
-                        </div>
-                        {session && !session.slotId && <div className="mt-6 text-left">{renderSession()}</div>}
-                        {editor}
-                    </div>
-                );
-            }
+                copyText(text).then(() => toast('Đã copy phiếu hoàn thành', 'success')).catch(() => toast('Trình duyệt chặn clipboard', 'error'));
+            };
+            const studied = items.some(t => (t.reviewCount || 0) > 0) || plan.slots.some(s => s.cardsDone > 0);
+            const triedEos = !!Store.prefs.get('eosTried', false);
+            const showStarter = !starterHidden && !(studied && triedEos && account);
+            const hideStarter = () => { Store.prefs.set('starterHidden', true); setStarterHidden(true); };
+            const active = plan.slots.filter(s => !s.nghi);
+            const doneCount = active.filter(s => s.status === 'done').length;
+            const dateText = new Date(now).toLocaleDateString('vi-VN', { weekday: 'long', day: '2-digit', month: '2-digit' });
+            const name = account && account.name ? String(account.name).split(' ').slice(-1)[0] : '';
 
-            const slot = cur.slot;
-            if (!slot) return <p className="text-center text-muted py-16">Đang mở ngày hôm nay…</p>;
-            const p2 = slot.phase2_externalTask || {};
-
-            if (cur.kind === 'GATE') {
-                return (
-                    <div className="max-w-xl mx-auto">
-                        {cmd}
-                        <SlotTrack slots={plan.slots} activeId={slot.id} />
-                        <FlowBridge slot={slot} items={items} addItems={addItems} finishGate={finishGate} toast={toast} now={now} />
-                    </div>
-                );
-            }
-
-            const inSession = session && session.slotId === slot.id;
-            if (inSession) {
-                return (
-                    <div className="max-w-3xl mx-auto">
-                        <div className="mb-3 flex flex-wrap items-center gap-2 rounded-2xl bg-[#312E81] px-4 py-2.5 text-sm text-white shadow-sm" role="status">
-                            <span className="h-2.5 w-2.5 rounded-full bg-[#F87171] pulse-rec" aria-hidden="true" />
-                            <b>Ca {slot.id} · {slot.anchorLabel} đang diễn ra</b>
-                            <span className="ml-auto inline-flex items-center gap-1.5 text-indigo-200"><Icon name="lock" size={13} /> Lịch hôm nay đã khóa</span>
-                        </div>
-                        <SlotTrack slots={plan.slots} activeId={slot.id} />
-                        <div className="flex flex-wrap items-center justify-center gap-2 mb-4">
-                            <span className="chip bg-surface2 text-ink2">Pha 1 · {session.ids.length} thẻ · {Sch.groupLabel(slot.group)}</span>
-                            {cur.kind === 'LATE_RECOVERY' && <span className="chip bg-warn-soft text-warn"><Icon name="alert" size={12} /> Trễ giờ · rút gọn còn {session.ids.length} thẻ</span>}
-                            {cur.kind === 'ON_TIME_ACTIVE' && !slot.snoozedOnce && <button type="button" onClick={() => snooze(slot.id)} className="btn btn-ghost btn-sm"><Icon name="clock" size={14} /> Đang dở tay — Lùi 15 phút (1 lần)</button>}
-                            {cur.kind === 'LATE_RECOVERY' && !minimal && <button type="button" onClick={() => setMinimal(true)} className="btn btn-secondary btn-sm"><Icon name="zap" size={14} /> Nút chạm đáy: 2 thẻ trong 30 giây</button>}
-                        </div>
-                        {renderSession()}
-                        <div className="mt-6">{hero}</div>
-                    </div>
-                );
-            }
-
-            if (cur.kind === 'ON_TIME_ACTIVE' || cur.kind === 'LATE_RECOVERY') {
-                return (
-                    <div className="max-w-xl mx-auto text-center">
-                        {cmd}
-                        {statusLine}
-                        <Empty icon="layers" title={'Ca ' + slot.id + ' · ' + slot.anchorLabel + ' chưa có thẻ'}>Nhóm "{Sch.groupLabel(slot.group)}" đang trống.</Empty>
-                        <button type="button" onClick={openLibrary} className="btn btn-primary">Mở kho để thêm thẻ vào nhóm này</button>
-                        <div className="mt-6">{hero}</div>
-                        {editor}
-                    </div>
-                );
-            }
-
-            const perm = window.Notification ? Notification.permission : 'denied';
             return (
-                <div className="max-w-xl mx-auto text-center">
-                    {cmd}
-                    {plan.slots.some(s => s.dienTam) && <p className="text-sm text-warn mb-4 text-flow">Một vài phần sách hôm nay đang là buổi ôn tạm. Sửa lịch ngày mai nếu khác.</p>}
-                    {statusLine}
-                    <div className="card p-5 sm:p-6 mb-4 text-left">
-                        <p className="text-xs font-semibold uppercase tracking-wider text-muted mb-2">Ca tiếp theo · {Plan.MODE_LABEL[slot.mode]} · {slot.baseCardCount} thẻ</p>
-                        <p className="text-xl font-semibold">{Plan.hhmmOf(Plan.triggerMin(slot))} · {slot.anchorLabel}</p>
-                        <p className="text-ink2 mt-1 text-flow">{Sch.groupLabel(slot.group)}</p>
-                        <p className="text-sm text-muted mt-3 text-flow">{p2.hasExternal ? (p2.bookTitle + ' — ' + p2.taskDetail) : (p2.classSyncNote || 'Ca này chỉ học trên app')}</p>
-                        <p className="text-xs text-muted mt-4">Đến giờ, thẻ đầu tiên tự bật lên, không cần bấm Bắt đầu. Có thể treo tab cả ngày.</p>
-                        <div className="mt-4 flex flex-wrap gap-2">
-                            {cur.early && <button type="button" onClick={() => enterEarly(slot)} className="btn btn-secondary"><Icon name="play" /> Vào làm sớm ca này</button>}
-                            {perm === 'default' && <button type="button" onClick={askNotify} className="btn btn-ghost"><Icon name="bell" /> Bật thông báo khi đến giờ</button>}
+                <div className="mx-auto max-w-6xl">
+                    <div className="mb-4 flex flex-wrap items-end justify-between gap-2">
+                        <div>
+                            <p className="text-sm font-medium capitalize text-muted">{dateText}</p>
+                            <h1 className="mt-0.5 text-2xl font-extrabold tracking-tight text-ink sm:text-3xl">{greetOf(new Date(now))}{name ? ', ' + name : ''}</h1>
+                        </div>
+                        <p className="text-sm text-ink2">Hôm nay: <b className="tnum text-ink">{doneCount}/{active.length}</b> ca · <b className="tnum text-ink">{filled}</b> thẻ trong sổ</p>
+                    </div>
+                    <div className="grid gap-4 lg:grid-cols-12">
+                        <div className="lg:col-span-7">
+                            <FocusCard plan={plan} cur={cur} now={now} cardCount={filled} onStart={onStart} onStudyNow={onStudyNow} onSnooze={snooze} onBonus={bonus} onReceipt={receipt}
+                                onGate={() => { const el = document.getElementById('flow-bridge'); if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' }); }} />
+                        </div>
+                        <div className="lg:col-span-5">
+                            {showStarter
+                                ? <StarterSteps studied={studied} triedEos={triedEos} account={account} onStudy={onStudyNow} onEos={() => onPillar('eos')} onLogin={onLogin} onHide={hideStarter} />
+                                : <TodayStats plan={plan} items={items} queued={(Store.prefs.get(EOS_QUEUE, []) || []).length} />}
                         </div>
                     </div>
-                    <DayStrip dayKey={plan.dayKey} />
-                    {hero}
-                    {editor}
+                    {cur.kind === 'GATE' && slot && (
+                        <div id="flow-bridge" className="mx-auto mt-6 max-w-xl scroll-mt-24">
+                            <FlowBridge slot={slot} items={items} addItems={addItems} finishGate={finishGate} toast={toast} now={now} />
+                        </div>
+                    )}
+                    <PillarGrid onOpen={onPillar} />
+                    <div className="mt-8 grid gap-4 lg:grid-cols-12">
+                        <div className="lg:col-span-7 [&>section]:mb-0 [&>section]:h-full"><IdentityToday canBurst={filled >= 5} onBurst={onBurst} /></div>
+                        <div className="lg:col-span-5">
+                            <ScheduleCard plan={plan} cur={cur} week={week} nextWeek={nextWeek} groups={groups} saveWeek={saveWeek} toast={toast} askNotify={askNotify}
+                                onSetup={onSetup} account={account} setupDone={setupDone} editOpen={editOpen} setEditOpen={setEditOpen} editRef={editRef} />
+                        </div>
+                    </div>
                 </div>
             );
         };
@@ -5261,6 +5418,7 @@
             const openTrial = () => {
                 const free = pack.type === 'mcq' ? pack.items.filter(t => t.type === 'mcq') : vocabAsMcq(pack.items);
                 if (free.length < 5) { toast('Bộ đề này chưa đủ 5 câu free để thi thử', 'info'); return; }
+                Store.prefs.set('eosTried', true);
                 const n = Math.min(10, free.length);
                 setRun({ kind: 'eos', trial: true, pool: free, count: n, minutes: Math.max(5, Math.round(n * 1.2)), key: Date.now() });
                 setView('eos');
@@ -5409,38 +5567,6 @@
             if (!t) return '';
             const s = t.type === 'mcq' ? t.questionOrWord : Sch.recallPromptOf(t);
             return s.length > 90 ? s.slice(0, 88) + '…' : s;
-        };
-
-        const ModeSwitch = ({ mode, onChange, slotDue, obsidian = false }) => {
-            const opts = [
-                { id: 'self', icon: 'pen', label: 'Sổ tay & Lịch học', short: 'Sổ tay', badge: obsidian ? 'Obsidian · PRO' : 'Tự tạo thẻ · AI điền · Free' },
-                { id: 'bank', icon: 'layers', label: 'Kho Src Qua Môn', short: 'Kho Src', badge: 'FE · EOS · PT · IELTS' }
-            ];
-            const onKey = (e) => {
-                if (['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].indexOf(e.key) < 0) return;
-                e.preventDefault();
-                const next = mode === 'self' ? 'bank' : 'self';
-                onChange(next);
-                const el = document.getElementById('mode-' + next);
-                if (el) el.focus();
-            };
-            return (
-                <div role="radiogroup" aria-label="Chế độ học" onKeyDown={onKey} className="relative grid grid-cols-2 p-1 rounded-2xl bg-surface2 border border-line w-full sm:w-auto">
-                    <span aria-hidden="true" className="absolute top-1 bottom-1 left-1 rounded-xl bg-surface shadow-sm border border-line transition-transform duration-200 ease-out" style={{ width: 'calc(50% - 4px)', transform: mode === 'bank' ? 'translateX(100%)' : 'none' }} />
-                    {opts.map(o => (
-                        <button key={o.id} id={'mode-' + o.id} type="button" role="radio" aria-checked={mode === o.id} tabIndex={mode === o.id ? 0 : -1} onClick={() => onChange(o.id)}
-                            className={'relative z-10 flex items-center justify-center gap-2 px-3 sm:px-4 min-h-[44px] rounded-xl text-sm font-semibold transition-colors ' + (mode === o.id ? 'text-ink' : 'text-ink2 hover:text-ink')}>
-                            <Icon name={o.icon} size={16} className={mode === o.id ? 'text-primary' : ''} />
-                            <span className="text-left leading-tight">
-                                <span className="hidden md:inline">{o.label}</span><span className="md:hidden">{o.short}</span>
-                                <span className={'block text-[10px] font-medium ' + (mode === o.id ? 'text-primary' : 'text-muted')}>{o.badge}</span>
-                            </span>
-                            {o.id === 'self' && slotDue && <span className="absolute top-1 right-1.5 w-2.5 h-2.5 rounded-full bg-danger ring-2 ring-surface2" aria-hidden="true" />}
-                            {o.id === 'self' && slotDue && <span className="sr-only">, có ca học đến giờ</span>}
-                        </button>
-                    ))}
-                </div>
-            );
         };
 
         const googleToken = () => Store.prefs.get('googleToken', '') || '';
@@ -5667,7 +5793,8 @@
         };
 
         const App = () => {
-            const [nav, dispatch] = useReducer(Nav.reduce, Store.prefs.get('mode', 'self'), Nav.initial);
+            /* Mở /app luôn vào Tổng quan, không nhảy thẳng vào màn đang dở lần trước. */
+            const [nav, dispatch] = useReducer(Nav.reduce, 'self', Nav.initial);
             const [items, setItems] = useState([]);
             const [loaded, setLoaded] = useState(false);
             const [toasts, setToasts] = useState([]);
@@ -5964,7 +6091,6 @@
                 if (plan) Store.prefs.set('hybridToday', plan);
             }, [plan]);
             useEffect(() => { if (nextWeek && Plan.isValidWeek(nextWeek)) Store.prefs.set('nextWeeklyPlan', nextWeek); }, [nextWeek]);
-            useEffect(() => { Store.prefs.set('mode', nav.mode); }, [nav.mode]);
 
             /* ---------- Giải mã các bộ đề đã có license ---------- */
             useEffect(() => {
@@ -6090,8 +6216,23 @@
                 const pool = queued.slice(0, 4).concat(Sch.shuffle(items.filter(t => Sch.isFilled(t) && queued.slice(0, 4).indexOf(t) < 0)));
                 if (!pool.length) { dispatch({ type: 'TAB', tab: 'library' }); toast('Kho chưa có thẻ. Thêm vài từ trước nhé.', 'info'); return; }
                 noteStudyStart();
-                setSession({ id: Date.now(), title: 'Học nhanh ' + Math.min(8, pool.length) + ' thẻ', mode: 'flash', voteType: 'flashcard', ids: pool.slice(0, 8).map(t => t.id), slotId: null });
-                dispatch({ type: 'TAB', tab: 'practice' });
+                setSession({ id: Date.now(), title: 'Học nhanh ' + Math.min(8, pool.length) + ' thẻ', mode: 'flash', voteType: 'flashcard', ids: pool.slice(0, 8).map(t => t.id), slotId: null, home: true });
+                dispatch({ type: 'TAB', tab: 'today', force: true });
+                window.scrollTo(0, 0);
+            };
+            /* Bắt đầu ca đang đến giờ: học đủ ca, hoặc Chạm đáy (2 thẻ) để giữ chuỗi. */
+            const startSlot = (lean) => {
+                const slotNow = cur.slot;
+                if (!slotNow || !(cur.kind === 'ON_TIME_ACTIVE' || cur.kind === 'LATE_RECOVERY')) { studyNow(); return; }
+                const limit = lean ? Math.min(2, slotNow.baseCardCount || 8) : Plan.cardLimit(slotNow, cur.kind, false);
+                const ids = deckFor(slotNow, limit);
+                if (!ids.length) { dispatch({ type: 'TAB', tab: 'library', force: true }); toast('Nhóm "' + Sch.groupLabel(slotNow.group) + '" chưa có thẻ. Thêm vài thẻ trước nhé.', 'info'); return; }
+                setMinimal(!!lean);
+                const mode = sessionModeOf(slotNow.mode);
+                noteStudyStart();
+                setSession({ id: Date.now(), title: 'Ca ' + slotNow.id + ' · ' + slotNow.anchorLabel, mode: lean ? 'flash' : mode, voteType: voteTypeFor(lean ? 'flash' : mode), ids, slotId: slotNow.id, lean: !!lean });
+                dispatch({ type: 'TAB', tab: 'today', force: true });
+                window.scrollTo(0, 0);
             };
             const openSetup = () => {
                 if (!readAccount()) { setPendingGift(''); setGoogleReason('setup'); setGoogleOpen(true); return; }
@@ -6190,12 +6331,15 @@
                 const mode = sessionModeOf(slot.mode);
                 noteStudyStart();
                 setSession({ id: Date.now(), title: 'Ca ' + slot.id + ' · ' + slot.anchorLabel, mode: mode, voteType: voteTypeFor(mode), ids, slotId: slot.id });
+                dispatch({ type: 'TAB', tab: 'today', force: true });
+                window.scrollTo(0, 0);
             };
             const bonus = () => {
                 const ids = Sch.shuffle(items.filter(Sch.isFilled)).slice(0, 5).map(t => t.id);
                 if (!ids.length) { toast('Chưa có thẻ để học thêm', 'error'); return; }
                 noteStudyStart();
-                setSession({ id: Date.now(), title: 'Thêm 5 thẻ', mode: 'flash', voteType: 'flashcard', ids, slotId: null });
+                setSession({ id: Date.now(), title: 'Thêm 5 thẻ', mode: 'flash', voteType: 'flashcard', ids, slotId: null, home: true });
+                window.scrollTo(0, 0);
             };
             const askNotify = () => {
                 if (!window.Notification) { toast('Trình duyệt này không có thông báo', 'error'); return; }
@@ -6203,8 +6347,6 @@
             };
 
             const goDone = useRef(false);
-            /* Mở từ trang chủ tới kệ đề / kho: chưa tự bung ca học cho tới khi người dùng tự quay về Hôm nay. */
-            const goHold = useRef('');
             useEffect(() => {
                 if (!loaded || !planReady || goDone.current) return;
                 goDone.current = true;
@@ -6212,51 +6354,35 @@
                 go = readGo();
                 if (!go) return;
                 try { history.replaceState(null, '', location.pathname); } catch (e) {}
-                if (['reading', 'import', 'exams', 'eos'].indexOf(go) >= 0) goHold.current = 'pending';
                 if (go === 'today' || go === 'plan') dispatch({ type: 'TAB', tab: 'today', force: true });
                 else if (go === 'reading' || go === 'import') dispatch({ type: 'TAB', tab: 'library', force: true });
                 else if (go === 'exams') dispatch({ type: 'SWITCH_MODE', mode: 'bank', force: true });
-                else if (go === 'eos') dispatch({ type: 'SHELF' });
+                else if (go === 'eos') dispatch({ type: 'SHELF', force: true });
                 else if (go === 'pro') setUpgradeOpen(true);
                 else if (go === 'eos-pay') setFundShop(true);
                 else if (go === 'video') setGuideOpen(true);
                 else if (go === 'legal-id' || go === 'legal-pay' || go === 'legal-study') setLegalTab(go.slice(6));
             }, [loaded, planReady]);
-            useEffect(() => {
-                const home = nav.mode === 'self' && nav.tab === 'today';
-                if (goHold.current === 'pending' && !home) goHold.current = 'away';
-                else if (goHold.current === 'away' && home) goHold.current = '';
-            }, [nav.mode, nav.tab]);
 
             const cur = plan ? Plan.currentSlot(plan.slots, new Date(now)) : { kind: 'NONE', slot: null };
             const live = plan && plan.date === Plan.dayKeyOf(new Date(now)) && (cur.kind === 'ON_TIME_ACTIVE' || cur.kind === 'LATE_RECOVERY');
             const liveLimit = live ? Plan.cardLimit(cur.slot, cur.kind, minimal) : 0;
 
-            /* ---------- Zero-Click Entry: đến giờ là bung thẳng thẻ s1 ---------- */
+            /* ---------- Đến giờ: gõ chuông và báo, không tự mở màn học. Người dùng bấm bắt đầu trên Tổng quan. ---------- */
             useEffect(() => {
-                if (!live || !loaded || goHold.current) return;
+                if (!live || !loaded) return;
                 const slot = cur.slot;
-                const ids = deckFor(slot, liveLimit);
-                const first = itemsById.get(ids[0]);
-                const key = plan.date + '-' + slot.id + '-' + (slot.snoozedOnce ? 's' + slot.snoozeMin : 'n') + '-' + cur.kind + '-' + liveLimit;
-                if (!alerted.current[key]) {
-                    alerted.current[key] = true;
-                    Sfx.knock();
-                    if (document.hidden && window.Notification && Notification.permission === 'granted' && first) {
-                        try {
-                            const n = new Notification('Đến giờ ca ' + slot.id + ' · ' + slot.anchorLabel, { body: '[1/' + ids.length + '] ' + promptOf(first), tag: 'ca-hoc-' + slot.id });
-                            n.onclick = () => { window.focus(); n.close(); };
-                        } catch (e) {}
-                    }
+                const key = plan.date + '-' + slot.id + '-' + (slot.snoozedOnce ? 's' + slot.snoozeMin : 'n') + '-' + cur.kind;
+                if (alerted.current[key]) return;
+                alerted.current[key] = true;
+                Sfx.knock();
+                if (document.hidden && window.Notification && Notification.permission === 'granted') {
+                    try {
+                        const n = new Notification('Đến giờ ca ' + slot.id + ' · ' + slot.anchorLabel, { body: 'Mở FPass: học đủ ca, hoặc Chạm đáy 30 giây để giữ chuỗi.', tag: 'ca-hoc-' + slot.id });
+                        n.onclick = () => { window.focus(); n.close(); };
+                    } catch (e) {}
                 }
-                if (!ids.length) return;
-                const same = session && session.slotId === slot.id && session.ids.length === ids.length && session.ids[0] === ids[0];
-                if (same) return;
-                const mode = sessionModeOf(slot.mode);
-                noteStudyStart();
-                setSession({ id: Date.now(), title: 'Ca ' + slot.id + ' · ' + slot.anchorLabel, mode: mode, voteType: voteTypeFor(mode), ids, slotId: slot.id });
-                dispatch({ type: 'ZERO_CLICK' });
-            }, [now, plan, items, minimal, session, loaded, nav.mode, nav.tab]);
+            }, [now, plan, live, loaded]);
 
             /* ---------- Treo tab cả ngày: nháy document.title bằng nội dung thẻ s1 ---------- */
             const s1 = live ? itemsById.get(((cur.slot.deckIds && cur.slot.deckIds.length) ? cur.slot.deckIds : [])[0]) : null;
@@ -6315,14 +6441,34 @@
                 };
             };
 
-            const switchMode = (m) => {
-                if (m === nav.mode) return;
+            const navItems = [
+                { k: 'today', icon: 'home', label: 'Tổng quan', short: 'Tổng quan' },
+                { k: 'library', icon: 'book', label: 'Sổ từ', short: 'Sổ từ' },
+                { k: 'practice', icon: 'target', label: 'Luyện tập', short: 'Luyện tập' },
+                { k: 'bank', icon: 'monitor', label: 'Kho đề EOS', short: 'Kho đề' }
+            ];
+            const navNow = nav.mode === 'bank' ? 'bank' : nav.tab;
+            const slotDue = live && navNow !== 'today';
+            const goNav = (k) => {
                 if (nav.busy && !confirm('Bạn đang giữa một ca / phòng thi. Thoát ra?')) return;
-                dispatch({ type: 'SWITCH_MODE', mode: m, force: true });
+                if (k === 'bank') {
+                    dispatch(nav.mode === 'bank' ? { type: 'SHELF', force: true } : { type: 'SWITCH_MODE', mode: 'bank', force: true });
+                } else {
+                    /* Về Tổng quan là thoát màn học; ca đang dở vẫn học tiếp được từ thẻ tâm điểm. */
+                    if (k === 'today') setSession(null);
+                    else if (k === 'library') setSession(s => (s && s.slotId ? s : null));
+                    dispatch({ type: 'TAB', tab: k, force: true });
+                }
+                window.scrollTo(0, 0);
             };
-
-            const focusMode = nav.mode === 'self' && nav.tab === 'today' && session && session.slotId;
-            const tabs = [['today', 'home', 'Hôm nay'], ['library', 'list', 'Kho của tôi'], ['practice', 'target', 'Luyện tự do']];
+            /* Lối vào 4 trụ cột từ Tổng quan. */
+            const openPillar = (key) => {
+                if (key === 'video') { setGuideOpen(true); return; }
+                if (key === 'vocab') { dispatch({ type: 'TAB', tab: 'library', force: true }); window.scrollTo(0, 0); return; }
+                if (key === 'eos') window.__fpassGo = 'eos';
+                dispatch({ type: 'SHELF', force: true });
+                window.scrollTo(0, 0);
+            };
             const pack = nav.packId ? packById.get(nav.packId) : null;
             const screenNow = (() => {
                 const bits = [];
@@ -6339,7 +6485,7 @@
             };
             const goHome = () => {
                 if (nav.busy && !confirm('Bạn đang giữa một ca / phòng thi. Thoát ra?')) return;
-                setSession(s => (s && s.slotId ? s : null));
+                setSession(null);
                 setSettingsOpen(false);
                 setFundShop(false);
                 setLegalTab(null);
@@ -6354,43 +6500,38 @@
                 <div className="min-h-screen flex flex-col">
                     <a href="#main" className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[70] btn btn-primary">Bỏ qua tới nội dung</a>
                     <header className={'sticky top-0 z-30 border-b ' + (obsidian ? 'obsidian-head border-[#202637]' : 'border-line')} style={obsidian ? undefined : { background: 'rgba(226,232,240,.9)', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)' }}>
-                        <div className="max-w-7xl mx-auto px-4 py-3 flex flex-wrap items-center gap-3">
-                            <button type="button" onClick={goHome} aria-label="Về trang chủ" className="flex items-center gap-3 mr-auto border-0 bg-transparent p-0 text-left cursor-pointer">
+                        <div className="max-w-7xl mx-auto flex items-center gap-2 px-4 py-2.5 sm:gap-3">
+                            <button type="button" onClick={goHome} aria-label="Về Tổng quan" className="flex shrink-0 items-center gap-2.5 border-0 bg-transparent p-0 text-left cursor-pointer">
                                 <span className={obsidian ? 'inline-flex rounded-xl bg-[#F8F9FC] px-1.5 py-1' : ''}>
-                                    <img src="/public/stickers/logo.png" alt="" className="h-12 w-auto object-contain" />
+                                    <img src="/public/stickers/logo.png" alt="" className="h-9 w-auto object-contain sm:h-10" />
                                 </span>
                                 <span className="flex flex-col justify-center">
-                                    <span className={'text-2xl font-extrabold leading-none ' + (obsidian ? 'text-[#F8F9FC]' : 'text-[#0B192C]')}>FPass</span>
-                                    <span className={'mt-1 text-sm font-medium leading-none tracking-wide ' + (obsidian ? 'text-[#C6CBD4]' : 'text-slate-500')}>Học đúng giờ · thi chắc qua</span>
+                                    <span className={'text-xl font-extrabold leading-none sm:text-2xl ' + (obsidian ? 'text-[#F8F9FC]' : 'text-[#0B192C]')}>FPass</span>
+                                    <span className={'mt-1 hidden text-xs font-medium leading-none tracking-wide xl:block ' + (obsidian ? 'text-[#C6CBD4]' : 'text-slate-500')}>Học đúng giờ · thi chắc qua</span>
                                 </span>
                             </button>
-                            <div className="order-last w-full sm:order-none sm:w-auto"><ModeSwitch mode={nav.mode} onChange={switchMode} slotDue={live && nav.mode === 'bank'} obsidian={obsidian} /></div>
-                            <div className="flex items-center gap-1">
+                            <nav aria-label="Mục chính" className="app-nav mx-auto hidden lg:flex">
+                                {navItems.map(it => (
+                                    <button key={it.k} type="button" aria-current={navNow === it.k ? 'page' : undefined} onClick={() => goNav(it.k)}>
+                                        <Icon name={it.icon} size={16} /> {it.label}
+                                        {it.k === 'today' && slotDue && <><span className="nav-dot" aria-hidden="true" /><span className="sr-only">, có ca học đến giờ</span></>}
+                                    </button>
+                                ))}
+                            </nav>
+                            <div className="ml-auto flex min-w-0 items-center gap-1 lg:ml-0">
                                 {obsidian && (
-                                    <button type="button" onClick={() => setMemberOpen(true)} className="mr-1 inline-flex items-center gap-1.5 rounded-full border border-[#D8C7A0]/70 bg-[#202637] px-3 py-1.5 text-xs font-semibold tracking-wide text-[#F8F9FC]">
+                                    <button type="button" onClick={() => setMemberOpen(true)} className="mr-1 hidden items-center gap-1.5 rounded-full border border-[#D8C7A0]/70 bg-[#202637] px-3 py-1.5 text-xs font-semibold tracking-wide text-[#F8F9FC] sm:inline-flex">
                                         <Icon name="gem" size={14} className="text-[#D8C7A0]" /> Obsidian
                                     </button>
                                 )}
-                                <button type="button" className="btn btn-ghost btn-sm" onClick={() => setGuideOpen(true)} aria-label="Video hướng dẫn"><Icon name="play" size={16} /><span className="hidden sm:inline">Hướng dẫn</span></button>
-                                <button type="button" className="btn btn-ghost btn-icon" onClick={() => setMuted(!muted)} aria-pressed={!muted} aria-label={muted ? 'Bật âm thanh' : 'Tắt âm thanh'}><Icon name={muted ? 'mute' : 'volume'} /></button>
-                                <button type="button" className={'btn btn-sm ' + (googleAccount && googleAccount.email ? 'btn-secondary' : 'btn-primary')} onClick={() => { setPendingGift(''); setGoogleReason('save'); setGoogleOpen(true); }}>{googleAccount && googleAccount.email ? googleAccount.email : 'Đăng nhập Google'}</button>
+                                <button type="button" className="btn btn-ghost btn-sm hidden sm:inline-flex" onClick={() => setGuideOpen(true)} aria-label="Video hướng dẫn"><Icon name="play" size={16} /><span className="hidden xl:inline">Hướng dẫn</span></button>
+                                <button type="button" className="btn btn-ghost btn-icon hidden sm:inline-flex" onClick={() => setMuted(!muted)} aria-pressed={!muted} aria-label={muted ? 'Bật âm thanh' : 'Tắt âm thanh'}><Icon name={muted ? 'mute' : 'volume'} /></button>
+                                <button type="button" className={'btn btn-sm min-w-0 ' + (googleAccount && googleAccount.email ? 'btn-secondary' : 'btn-primary')} onClick={() => { setPendingGift(''); setGoogleReason('save'); setGoogleOpen(true); }}>
+                                    <span className="block max-w-[150px] truncate sm:max-w-[200px]">{googleAccount && googleAccount.email ? googleAccount.email : 'Đăng nhập'}</span>
+                                </button>
                                 <button type="button" className="btn btn-ghost btn-icon" onClick={() => setSettingsOpen(true)} aria-label="Cài đặt"><Icon name="sliders" /></button>
                             </div>
                         </div>
-                        {nav.mode === 'self' && (
-                            <div className="max-w-7xl mx-auto px-4 pb-2">
-                                {focusMode && (
-                                    <p className={'text-sm flex items-center gap-2 min-h-[32px] mb-1 ' + (obsidian ? 'text-[#C6CBD4]' : 'text-ink2')}><span className="w-2 h-2 rounded-full bg-danger pulse-rec" /> Đang trong {session.title}</p>
-                                )}
-                                    <nav role="tablist" aria-label="Mục Sổ tay & Lịch học" className="flex flex-wrap gap-1">
-                                        {tabs.map(([k, ic, l]) => (
-                                            <button key={k} type="button" role="tab" aria-selected={nav.tab === k} className="tab" onClick={() => { if (k === 'library') setSession(s => (s && s.slotId ? s : null)); dispatch({ type: 'TAB', tab: k }); }}>
-                                                <Icon name={ic} size={16} /> {l}
-                                            </button>
-                                        ))}
-                                    </nav>
-                            </div>
-                        )}
                     </header>
 
                     <main id="main" className="flex-1 w-full max-w-7xl mx-auto px-4 py-6">
@@ -6399,10 +6540,11 @@
                         ) : nav.mode === 'self' ? (
                             nav.tab === 'today' ? (
                                 <TodayView plan={plan} planReady={planReady} week={week} nextWeek={nextWeek} now={now} items={items} itemsById={itemsById} groups={groups}
-                                    session={session} cur={cur} minimal={minimal} setMinimal={setMinimal} saveWeek={saveWeek} addItems={addItems} finishGate={finishGate}
-                                    snooze={snooze} enterEarly={enterEarly} askNotify={askNotify} bonus={bonus} closeSession={() => setSession(null)} startSession={restartSession} onBurst={startQuickBurst}
-                                    review={review} patch={patch} toast={toast} finishSlot={finishSlot} openLibrary={() => dispatch({ type: 'TAB', tab: 'library' })}
-                                    onStudyNow={studyNow} onVideo={() => setGuideOpen(true)} onSetup={openSetup} account={account} setupDone={setupDone} />
+                                    session={session} cur={cur} saveWeek={saveWeek} addItems={addItems} finishGate={finishGate}
+                                    snooze={snooze} askNotify={askNotify} bonus={bonus} closeSession={() => { setSession(null); setMinimal(false); window.scrollTo(0, 0); }} startSession={restartSession} onBurst={startQuickBurst}
+                                    review={review} patch={patch} toast={toast} finishSlot={finishSlot}
+                                    onStudyNow={studyNow} onStart={startSlot} onPillar={openPillar} onLogin={() => { setPendingGift(''); setGoogleReason('save'); setGoogleOpen(true); }}
+                                    onSetup={openSetup} account={account} setupDone={setupDone} />
                             ) : nav.tab === 'library' ? (
                                 <LibraryView items={items} setItems={setItems} groups={groups} groupFilter={groupFilter} setGroupFilter={setGroupFilter}
                                     onPractice={startPractice} onWeak={startWeak} onStudyFrom={studyFrom} toast={toast} mergeItems={mergeItems} />
@@ -6424,8 +6566,16 @@
                         )}
                     </main>
 
+                    <nav aria-label="Mục chính" className="bnav">
+                        {navItems.map(it => (
+                            <button key={it.k} type="button" aria-current={navNow === it.k ? 'page' : undefined} onClick={() => goNav(it.k)}>
+                                <Icon name={it.icon} size={20} /> {it.short}
+                                {it.k === 'today' && slotDue && <><span className="nav-dot" aria-hidden="true" /><span className="sr-only">, có ca học đến giờ</span></>}
+                            </button>
+                        ))}
+                    </nav>
                     <footer className="border-t border-[#1E293B] bg-[#0F172A] text-slate-200">
-                        <div className="max-w-7xl mx-auto px-4 pt-4 pb-20 sm:pb-4 sm:pr-40 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+                        <div className="max-w-7xl mx-auto px-4 pt-4 pb-24 lg:pb-4 sm:pr-40 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                             <div>
                                 <p className="text-[13px] font-normal text-[#9ca3af]">© 2026 FPass · @nvn.n07</p>
                                 <p className="mt-1 inline-flex items-center gap-2 text-xs text-slate-300">
