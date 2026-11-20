@@ -1206,6 +1206,7 @@
             const [state, setState] = useState(account ? 'checking' : 'login');
             const [note, setNote] = useState('');
             const [round, setRound] = useState(0);
+            const [moved, setMoved] = useState(null);
             useEffect(() => {
                 if (!account) { setState('login'); return undefined; }
                 let alive = true;
@@ -1232,6 +1233,7 @@
                         try { E.Quota.setCode(data.fundCode); } catch (e) {}
                         E.Quota.sync().catch(() => {});
                     }
+                    if (data.sharedCode) setMoved({ shared: data.sharedCode, own: data.fundCode });
                     setState('ready');
                 }).catch(() => {
                     if (!alive) return;
@@ -1240,7 +1242,17 @@
                 });
                 return () => { alive = false; };
             }, [account && account.email, round]);
-            if (state === 'ready') return children;
+            if (state === 'ready') {
+                if (!moved) return children;
+                return (
+                    <>
+                        <div className="mb-3 rounded-xl border border-amber-300 bg-amber-50 p-3 text-sm text-ink" role="status">
+                            Bạn đang dùng mã quỹ chung <b className="tnum">{moved.shared}</b>. Lượt mua sau đây cộng vào mã riêng <b className="tnum">{moved.own}</b> của tài khoản bạn; app đã chuyển sang mã riêng. Muốn dùng lại lượt nhóm, dán lại mã <b className="tnum">{moved.shared}</b>.
+                        </div>
+                        {children}
+                    </>
+                );
+            }
             if (state === 'checking') return <div className="pay-gate text-sm text-ink2" role="status">Đang kiểm tra tài khoản…</div>;
             if (state === 'error') {
                 return (
@@ -1425,6 +1437,8 @@
             const eos = kind === 'eos';
             const [picked, setPicked] = useState(null);
             const [code, setCode] = useState(fund.code);
+            /* Mã quỹ đổi từ nơi khác (đăng nhập, mở QR) thì ô nhập theo mã mới. */
+            useEffect(() => { setCode(fund.code); }, [fund.code]);
             const [incoming, setIncoming] = useState('');
             const [syncing, setSyncing] = useState(false);
             const [tools, setTools] = useState(false);
@@ -5441,8 +5455,10 @@
         });
 
         const applyCloud = async (data) => {
-            if (data && data.fundCode) {
-                try { E.Quota.setCode(data.fundCode); } catch (e) {}
+            /* spendCode: máy này đang dùng mã nhóm của người khác thì giữ mã đó để trừ lượt chung. */
+            const keep = data && (data.spendCode || data.fundCode);
+            if (keep) {
+                try { E.Quota.setCode(keep); } catch (e) {}
             }
             const until = data && data.proUntil;
             if (until === -1 || Number(until) > 0) E.Quota.noteAi({ proUntil: until, aiUnlocked: until === -1 || Number(until) > Date.now() });

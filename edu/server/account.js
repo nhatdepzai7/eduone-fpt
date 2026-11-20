@@ -300,6 +300,10 @@ export async function loginGoogle(env, body) {
     const guest = body && body.guest && typeof body.guest === 'object' ? body.guest : {};
     const guestLib = guest.library && typeof guest.library === 'object' ? guest.library : {};
     let user = await readUser(env, profile.sub);
+    /* Mã quỹ nhóm của người khác: tài khoản vẫn có mã riêng, nhưng máy này giữ mã nhóm để trừ lượt chung. */
+    const guestCode = cleanCode(guest.fundCode);
+    const guestOwner = guestCode ? await fundOwner(env, guestCode) : '';
+    const sharedCode = guestOwner && guestOwner !== profile.sub ? guestCode : '';
     if (!user) {
         user = { sub: profile.sub, email: profile.email, fundCode: '', tier: '', proUntil: 0 };
     }
@@ -330,7 +334,7 @@ export async function loginGoogle(env, body) {
     const token = randomToken(32);
     await redisCommand(env, ['SET', 'fpass:session:' + token, user.sub, 'EX', String(SESSION_TTL)]);
     const fund = user.fundCode ? await fundState(env, user.fundCode).catch(() => null) : null;
-    return { token, user: publicUser(user, fund ? { code: user.fundCode } : null), library, fundCode: user.fundCode, proUntil: fund ? fund.proUntil : (user.proUntil || 0) };
+    return { token, user: publicUser(user, fund ? { code: user.fundCode } : null), library, fundCode: user.fundCode, spendCode: sharedCode, proUntil: fund ? fund.proUntil : (user.proUntil || 0) };
 }
 
 /* Trước khi hiện mã QR: phải có phiên Google còn hạn. Trả về mã quỹ của tài khoản để nội dung chuyển khoản luôn là mã của người đó. */
@@ -344,7 +348,11 @@ export async function payAccount(env, req, body) {
         await redisCommand(env, ['HSET', 'fpass:user:' + user.sub, 'fundCode', code]);
     }
     await claimFund(env, code, user);
-    return { fundCode: code, email: user.email };
+    /* Máy đang dùng mã nhóm của người khác: lượt mua vẫn cộng vào mã riêng, báo để người mua biết. */
+    const asked = cleanCode(body && body.fundCode);
+    const askedOwner = asked && asked !== code ? await fundOwner(env, asked) : '';
+    const sharedCode = askedOwner && askedOwner !== user.sub ? asked : '';
+    return { fundCode: code, email: user.email, sharedCode };
 }
 
 export async function currentAccount(env, req) {
