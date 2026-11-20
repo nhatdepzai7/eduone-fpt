@@ -7,7 +7,7 @@
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' file: 'unsafe-inline' 'unsafe-eval' https://unpkg.com https://cdn.tailwindcss.com https://cdn.sheetjs.com https://accounts.google.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com; font-src https://fonts.gstatic.com; img-src 'self' file: data: blob: https://img.vietqr.io https://accounts.google.com; media-src 'self' blob: https:; worker-src blob:; frame-src https://accounts.google.com https://www.youtube-nocookie.com https://www.tiktok.com https://drive.google.com; connect-src 'self' https://accounts.google.com https://*.workers.dev https://*.vercel.app https://*.netlify.app https://*.supabase.co http://localhost:* http://127.0.0.1:*; object-src 'none'; base-uri 'none'; form-action 'none'">
     <meta name="referrer" content="no-referrer">
     <meta name="theme-color" content="#F5F6F8">
-    <title>FPass · Học đúng giờ, thi chắc qua</title>
+    <title>FPass — Đúng nhịp học, vững phòng thi</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
@@ -6892,7 +6892,7 @@
             );
         };
         /* ===================== APP ROOT ===================== */
-        const BASE_TITLE = 'FPass · Học đúng giờ, thi chắc qua';
+        const BASE_TITLE = 'FPass — Đúng nhịp học, vững phòng thi';
 
         const promptOf = (t) => {
             if (!t) return '';
@@ -8054,10 +8054,7 @@
                                 <span className={obsidian ? 'inline-flex rounded-xl bg-[#F8F9FC] px-1.5 py-1' : ''}>
                                     <img src="/public/stickers/logo.png" alt="" className="h-9 w-auto object-contain sm:h-10" />
                                 </span>
-                                <span className="flex flex-col justify-center">
-                                    <span className={'text-xl font-extrabold leading-none sm:text-2xl ' + (obsidian ? 'text-[#F8F9FC]' : 'text-[#0B192C]')}>FPass</span>
-                                    <span className={'mt-1 hidden text-xs font-medium leading-none tracking-wide xl:block ' + (obsidian ? 'text-[#C6CBD4]' : 'text-slate-500')}>Học đúng giờ · thi chắc qua</span>
-                                </span>
+                                <span className={'text-xl font-extrabold leading-none sm:text-2xl ' + (obsidian ? 'text-[#F8F9FC]' : 'text-[#0B192C]')}>FPass</span>
                             </button>
                             <div className="ml-auto flex min-w-0 items-center gap-1">
                                 {/* Liên hệ: Zalo + hotline trên màn rộng, một nút mở khung Hỗ trợ trên điện thoại. */}
@@ -8171,7 +8168,8 @@
                     <footer className="border-t border-[#1E293B] bg-[#0F172A] text-slate-200">
                         <div className="max-w-7xl mx-auto px-4 pt-4 pb-24 lg:pb-4 sm:pr-40 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                             <div>
-                                <p className="text-[13px] font-normal text-[#9ca3af]">© 2026 FPass · @nvn.n07</p>
+                                <p className="text-sm font-semibold text-slate-100">FPass <span className="font-normal text-slate-400">— Đúng nhịp học, vững phòng thi</span></p>
+                                <p className="mt-1 text-[13px] font-normal text-[#9ca3af]">© 2026 FPass · @nvn.n07</p>
                                 <p className="mt-1 inline-flex items-center gap-2 text-xs text-slate-300">
                                     <span className="foot-live" aria-hidden="true" />
                                     Hệ thống cấp lượt tự động 24/7: Hoạt động ổn định
