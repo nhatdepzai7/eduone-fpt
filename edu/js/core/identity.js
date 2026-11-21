@@ -41,11 +41,11 @@ export function meetsAnswerThreshold(count) {
     return typeof count === 'number' && isFinite(count) && count >= MIN_ANSWERS;
 }
 
-/* eosMock hợp lệ về cấu trúc nhưng chưa được ghi ở bước này.
+/* eosMock: bài thi thử EOS nộp hợp lệ (app chỉ gửi khi đã trả lời ít nhất nửa đề) tính như 1 ca, gửi kèm slot: true.
    Phiên của một ca học (slot: true) thành phiếu chỉ cần ít nhất 1 thẻ: "Chạm đáy 30s" giữ thói quen bằng 2 thẻ,
    theo quy tắc 2 phút của Atomic Habits. Phiên tự do vẫn cần MIN_ANSWERS. */
 export function planVote(input, now) {
-    if (!input || input.type === 'eosMock' || !isVoteType(input.type)) return null;
+    if (!input || !isVoteType(input.type)) return null;
     const lean = Number(input.lean) || 0;
     const enough = input.slot
         ? (typeof input.answered === 'number' && input.answered >= 1)
