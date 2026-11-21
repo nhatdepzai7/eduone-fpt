@@ -1139,10 +1139,12 @@
             .ck-pet .pet-heart { opacity: .92; }
             .ck-buddy { transition: none; }
         }
-        /* Pill lời thoại: kính mờ, bên trái pet, tự mờ đi */
-        .ck-pet-say { position: absolute; top: 4%; right: calc(100% + 6px); width: max-content; padding: 6px 11px; border-radius: 12px; font-size: 12.5px; font-weight: 600; line-height: 1.4; white-space: normal; text-align: left; color: #F8FAFC; background: rgba(15, 23, 42, .62); -webkit-backdrop-filter: blur(10px) saturate(1.3); backdrop-filter: blur(10px) saturate(1.3); box-shadow: 0 8px 22px -12px rgba(2, 6, 23, .6), inset 0 0 0 1px rgba(255, 255, 255, .14); opacity: 0; transform: translateX(6px) scale(.96); transform-origin: 100% 50%; transition: opacity .3s ease, transform .3s ease; pointer-events: none; }
-        .ck-pet-say::after { content: ""; position: absolute; top: 12px; right: -4px; width: 8px; height: 8px; background: inherit; transform: rotate(45deg); border-radius: 2px; }
+        /* Pill lời thoại: kính mờ, bên phải pet (chỗ trống, không che số); hết chỗ thì sang trái */
+        .ck-pet-say { position: absolute; bottom: 42%; left: calc(100% + 4px); width: max-content; padding: 6px 11px; border-radius: 12px; font-size: 12.5px; font-weight: 600; line-height: 1.4; white-space: normal; text-align: left; color: #F8FAFC; background: rgba(15, 23, 42, .62); -webkit-backdrop-filter: blur(10px) saturate(1.3); backdrop-filter: blur(10px) saturate(1.3); box-shadow: 0 8px 22px -12px rgba(2, 6, 23, .6), inset 0 0 0 1px rgba(255, 255, 255, .14); opacity: 0; transform: translateX(-6px) scale(.96); transform-origin: 0 100%; transition: opacity .3s ease, transform .3s ease; pointer-events: none; }
+        .ck-pet-say::after { content: ""; position: absolute; bottom: 9px; left: -4px; width: 8px; height: 8px; background: inherit; transform: rotate(45deg); border-radius: 2px; }
         .ck-pet.is-say .ck-pet-say { opacity: 1; transform: none; }
+        .ck-pet.is-left .ck-pet-say { left: auto; right: calc(100% + 6px); transform-origin: 100% 50%; }
+        .ck-pet.is-left .ck-pet-say::after { left: auto; right: -4px; }
         .ck-pet-say:empty { display: none; }
         .ck.fg-dark .ck-pet-say, .ck-perch.fg-dark .ck-pet-say { color: #0F172A; background: rgba(255, 255, 255, .82); box-shadow: 0 8px 22px -14px rgba(15, 23, 42, .45), inset 0 0 0 1px rgba(15, 23, 42, .08); }
         [data-tier="obsidian"] .ck.fg-light .ck-pet-say, [data-tier="obsidian"] .ck-perch.fg-light .ck-pet-say { color: #F6EBD0; background: rgba(12, 11, 9, .7); box-shadow: 0 8px 22px -12px rgba(0, 0, 0, .7), inset 0 0 0 1px rgba(229, 201, 139, .3); }
@@ -5530,7 +5532,7 @@
             const hearts = 3 - missed;
             const pack = (mood, message) => ({ mood, message, done, total, level, hearts, missedDays: missed });
             if (justCompletedSession || (total > 0 && done >= total)) {
-                if (rescued) return pack('happy', 'Đã đón bạn nhỏ về nhà! Phụ kiện vẫn nguyên vẹn nhé.');
+                if (rescued) return pack('happy', 'Bạn nhỏ về nhà rồi! Vui quá, mình học tiếp cùng nhau nhé.');
                 return pack('happy', total > 0 && done >= total ? 'Trọn ' + total + '/' + total + ' bữa rồi, đỉnh thật sự!' : 'No căng! Đã chốt ' + done + '/' + total + ' bữa hôm nay.');
             }
             if (missed >= 3) return pack('missing', 'Bỏ đói 3 ngày nên sang phòng bên xin pate rồi. Hoàn thành 1 ca học để đón về nhé.');
@@ -5614,30 +5616,40 @@
                 ))}
             </span>
         );
-        /* Con pet ngồi trên số. interactive: bấm/rê chuột để nghe pet nói (pill kính mờ, có 3 tim), tự hiện 4 giây khi đói, thức khuya, vừa no;
-           5 giây khi đã bỏ đi. Lúc bỏ đi, bấm bát/mảnh giấy là vào học 1 ca (onAction). */
+        /* Con pet ngồi trên số. interactive: lời thoại (pill kính mờ, có 3 tim) hiện sẵn bên phải pet; bấm pet để tắt/bật.
+           Lúc bỏ đi, bấm vào lời nhắn là vào học 1 ca (onAction). */
         const Pet = ({ kind, mood, level, message, interactive, autoSay, hearts, onAction, still }) => {
-            const [say, setSay] = useState(false);
-            const [hover, setHover] = useState(false);
+            /* Lời thoại hiện sẵn; bấm pet 1 lần để tắt, 1 lần nữa để bật (nhớ lựa chọn). */
+            const [say, setSay] = useState(() => {
+                try { return localStorage.getItem('edu.petSay') !== 'off'; } catch (e) { return true; }
+            });
             const [boop, setBoop] = useState(0);
             const [room, setRoom] = useState(240);
+            const [toLeft, setToLeft] = useState(false);
             const box = useRef(null);
             const measure = () => {
                 const el = box.current;
                 if (!el) return;
-                const card = el.closest('.cmd-card') || document.body;
-                const left = el.getBoundingClientRect().left - card.getBoundingClientRect().left - 14;
-                setRoom(Math.max(120, Math.min(250, Math.round(left))));
+                const card = (el.closest('.cmd-card') || document.body).getBoundingClientRect();
+                const r = el.getBoundingClientRect();
+                const right = card.right - r.right - 12;
+                const left = r.left - card.left - 20;
+                const flip = right < 96 && left > right;
+                setToLeft(flip);
+                setRoom(Math.max(96, Math.min(250, Math.round(flip ? left : right))));
             };
             useEffect(() => {
-                if (!interactive || !autoSay || !message) return undefined;
-                const long = mood === 'missing';
-                if (!long && mood !== 'hungry' && mood !== 'late-night' && mood !== 'happy') return undefined;
+                if (!interactive) return undefined;
                 measure();
-                setSay(true);
-                const t = setTimeout(() => setSay(false), long ? 5200 : 4200);
-                return () => clearTimeout(t);
-            }, [mood, interactive, autoSay]);
+                const t = setTimeout(measure, 400);
+                window.addEventListener('resize', measure);
+                return () => { clearTimeout(t); window.removeEventListener('resize', measure); };
+            }, [interactive]);
+            const toggleSay = () => setSay(v => {
+                const next = !v;
+                { try { localStorage.setItem('edu.petSay', next ? 'on' : 'off'); } catch (e) { } }
+                return next;
+            });
             useEffect(() => {
                 if (!boop) return undefined;
                 const t = setTimeout(() => setBoop(0), 520);
@@ -5647,14 +5659,13 @@
             const gone = mood === 'missing';
             const art = gone ? <PetGone still={still} /> : <PetArt kind={kind} mood={mood} level={level} still={still} />;
             if (!interactive) return <span className={'ck-pet is-still' + (gone ? ' is-gone' : '')}>{art}</span>;
-            const open = say || hover;
+            const open = say && !!message;
             const act = gone && onAction ? onAction : null;
             return (
-                <span ref={box} className={'ck-pet' + (gone ? ' is-gone' : '') + (boop ? ' is-boop' : '') + (open ? ' is-say' : '')}>
-                    <button type="button" className="ck-pet-btn" aria-label={(gone ? 'Bát rỗng và mảnh giấy nhắn: ' : 'Bạn nhỏ: ') + message + (typeof hearts === 'number' ? ' Còn ' + hearts + '/3 tim.' : '') + (act ? ' Bấm để bắt đầu học.' : '')}
-                        onClick={() => { measure(); setBoop(Date.now()); if (act) { act(); return; } setSay(v => !v); }}
-                        onMouseEnter={() => { measure(); setHover(true); }} onMouseLeave={() => setHover(false)}
-                        onFocus={() => { measure(); setHover(true); }} onBlur={() => { setHover(false); setSay(false); }}>
+                <span ref={box} className={'ck-pet' + (gone ? ' is-gone' : '') + (boop ? ' is-boop' : '') + (open ? ' is-say' : '') + (toLeft ? ' is-left' : '')}>
+                    <button type="button" className="ck-pet-btn" aria-label={(gone ? 'Bát rỗng và mảnh giấy nhắn: ' : 'Bạn nhỏ: ') + message + (typeof hearts === 'number' ? ' Còn ' + hearts + '/3 tim.' : '') + (act ? ' Bấm lời nhắn để bắt đầu học.' : '')}
+                        aria-pressed={open} title={open ? 'Bấm để tắt lời thoại' : 'Bấm để nghe bạn nhỏ nói'}
+                        onClick={() => { measure(); setBoop(Date.now()); toggleSay(); }}>
                         {art}
                     </button>
                     <span className={'ck-pet-say' + (act ? ' is-action' : '')} role="status" style={{ maxWidth: room + 'px' }} onClick={act || undefined}>
@@ -5740,7 +5751,7 @@
                 const today = dayKey(new Date());
                 if (Store.prefs.get('petRescuedOn', '') === today) return;
                 Store.prefs.set('petRescuedOn', today);
-                if (enabled && toast) toast('Đã đón bạn nhỏ về nhà! Phụ kiện vẫn nguyên vẹn nhé.', 'success', 3800);
+                if (enabled && toast) toast('Bạn nhỏ về nhà rồi! Vui quá, mình học tiếp cùng nhau nhé.', 'success', 3800);
             }, [rescued]);
             const askQuit = (go) => {
                 const need = enabled && quitHub.open && quitHub.answered >= 1 && quitHub.remaining > 0 && PET_NEEDS_FOOD.indexOf(state.mood) >= 0;
