@@ -1054,6 +1054,8 @@
         .ck-head { margin: 18px 0 8px; font-size: 11px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
         .ck-drop { display: flex; align-items: center; gap: 12px; padding: 12px; border-radius: 14px; border: 1.5px dashed #C7D2FE; background: #F8FAFF; color: #4F46E5; transition: border-color .15s ease, background .15s ease; }
         .ck-drop.is-drag { border-color: #4F46E5; background: #EEF2FF; }
+        .ck-drop.is-locked { border-style: solid; border-color: #E9DDBF; background: linear-gradient(135deg, #FFFBF0, #F8F4EA); color: #9A7B36; }
+        .ck-lock-tag { display: inline-flex; align-items: center; gap: 3px; margin-left: 6px; padding: 1px 7px; border-radius: 999px; font-size: 10px; letter-spacing: .04em; color: #8A6A22; background: #F6ECD2; vertical-align: 1px; }
         .ck-drop-acts { display: flex; flex-wrap: wrap; gap: 8px; flex-shrink: 0; }
         @media (max-width: 479px) { .ck-drop { flex-wrap: wrap; } .ck-drop-acts { width: 100%; } .ck-drop-acts .btn { flex: 1 1 0; justify-content: center; } }
         .ck-faces { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
@@ -2023,7 +2025,8 @@
                 ['+' + (fund.aiCredits || 0) + ' lượt AI tự động điền thẻ', 'Bổ sung nghĩa sát ngữ cảnh, câu ví dụ, phiên âm IPA và mẹo ghi nhớ thông minh.'],
                 ['+' + (fund.scanGrant || 0) + ' lượt AI quét bài đọc / đề thi', 'Tự động nhận diện từ vựng quan trọng, highlight nội dung và hỗ trợ luyện đọc Shadowing.'],
                 ['Đồng bộ đa thiết bị qua Mã Quỹ (' + fund.code + ')', 'Học tập liền mạch trên Laptop và Điện thoại, không cần mua kèm lượt EOS.'],
-                ['Không gian Obsidian & Đặc quyền định danh', 'Mở khóa giao diện thành viên cao cấp với nhận diện Obsidian độc quyền, huy hiệu định danh độc bản và trải nghiệm nâng cấp tinh tế xuyên suốt hệ sinh thái FPass.']
+                ['Không gian Obsidian & Đặc quyền định danh', 'Mở khóa giao diện thành viên cao cấp với nhận diện Obsidian độc quyền, huy hiệu định danh độc bản và trải nghiệm nâng cấp tinh tế xuyên suốt hệ sinh thái FPass.'],
+                ['Ảnh nền đồng hồ tùy chỉnh', 'Đặt ảnh của riêng bạn làm nền đồng hồ đếm ngược, chỉnh độ tối lớp phủ; chữ tự đổi màu theo ảnh để luôn dễ đọc.']
             ];
             return (
                 <Modal title="My Membership" onClose={onClose} size="lg" badge="Obsidian" tone="obsidian">
@@ -2792,6 +2795,7 @@
                                     <li><Icon name="check" size={14} />+500 lượt AI tự điền thẻ (nghĩa, ví dụ, IPA, mẹo nhớ)</li>
                                     <li><Icon name="check" size={14} />+30 lượt AI quét bài đọc / đề thi</li>
                                     <li><Icon name="check" size={14} />Giao diện thành viên Obsidian</li>
+                                    <li><Icon name="check" size={14} />Ảnh nền đồng hồ tùy chỉnh</li>
                                 </ul>
                                 {vocabOn ? <span className="plan-cta is-on">Đã kích hoạt</span>
                                     : fund.aiUnlocked ? <span className="plan-cta is-on">Đã có AI từ gói EOS</span>
@@ -2803,6 +2807,7 @@
                                 <p className="mt-1 text-sm text-slate-300">AI không giới hạn, mở bằng mã thành viên hoặc voucher do admin cấp.</p>
                                 <ul className="bill-perks is-dark">
                                     <li><Icon name="check" size={14} />AI điền thẻ và quét bài không giới hạn</li>
+                                    <li><Icon name="check" size={14} />Giao diện Obsidian + ảnh nền đồng hồ tùy chỉnh</li>
                                     <li><Icon name="check" size={14} />Gắn với tài khoản Google, đổi máy vẫn còn</li>
                                 </ul>
                                 <button type="button" className="plan-cta is-gold" onClick={goCode}>Nhập mã PRO</button>
@@ -6129,7 +6134,7 @@
             </span>
             );
         };
-        const ClockStudio = ({ photo, tier, busy, onPick, onRemove, onClose, sample, pet }) => {
+        const ClockStudio = ({ photo, photoOk, tier, busy, onPick, onRemove, onClose, sample, pet }) => {
             const style = useClockStyle();
             const kind = resolveBuddy(style, tier);
             const shown = dimPhoto(photo, style.dim);
@@ -6167,7 +6172,19 @@
                     )}
                     {look.plate && <p className="mt-2 text-xs text-ink2">Màu này gần với nền nên app tự lót tấm kính mờ sau số để vẫn đọc rõ.</p>}
 
-                    <p className="ck-head">Ảnh nền</p>
+                    <p className="ck-head">Ảnh nền {!photoOk && <span className="ck-lock-tag"><Icon name="gem" size={11} /> Obsidian</span>}</p>
+                    {!photoOk ? (
+                        <div className="ck-drop is-locked">
+                            <Icon name="lock" size={20} />
+                            <span className="min-w-0 flex-1 text-left">
+                                <b className="block text-sm text-ink">Ảnh nền riêng dành cho thành viên Obsidian</b>
+                                <span className="text-xs text-ink2">Đặt ảnh của bạn làm nền đồng hồ, chữ tự đổi màu cho dễ đọc. Có trong gói AI 29.000đ hoặc Obsidian PRO.</span>
+                            </span>
+                            <span className="ck-drop-acts">
+                                <button type="button" className="btn btn-primary btn-sm" onClick={() => { onClose(); openBilling('ai'); }}><Icon name="gem" size={14} /> Mở khóa</button>
+                            </span>
+                        </div>
+                    ) : (
                     <div className={'ck-drop' + (drag ? ' is-drag' : '')} onDragOver={(e) => { e.preventDefault(); setDrag(true); }} onDragLeave={() => setDrag(false)} onDrop={onDrop}>
                         <Icon name="image" size={22} />
                         <span className="min-w-0 flex-1 text-left">
@@ -6187,6 +6204,7 @@
                         <input ref={input} type="file" accept="image/*" className="sr-only" tabIndex={-1} aria-hidden="true"
                             onChange={(e) => { const f = e.target.files && e.target.files[0]; e.target.value = ''; if (f) onPick(f); }} />
                     </div>
+                    )}
                     {photo && (
                         <>
                             <label className="ck-dim">
@@ -6297,9 +6315,13 @@
         };
 
         const FocusCard = ({ plan, cur, now, cardCount, onAddFirst, onStart, onStudyNow, onSnooze, onBonus, onReceipt, onGate, toast }) => {
-            const photo = useHeroPhoto();
+            const savedPhoto = useHeroPhoto();
             const clockStyle = useClockStyle();
-            const tierNow = skinOf(useFund(), useSkinPref());
+            const fundNow = useFund();
+            const tierNow = skinOf(fundNow, useSkinPref());
+            /* Ảnh nền riêng là quyền lợi Obsidian: hết gói thì ảnh vẫn lưu trên máy nhưng tạm ẩn, lên gói lại là hiện. */
+            const photoOk = obsidianOf(fundNow);
+            const photo = photoOk ? savedPhoto : null;
             const shown = dimPhoto(photo, clockStyle.dim);
             const look = clockLook(clockStyle, tierNow, shown);
             const petNow = usePetNow();
@@ -6307,6 +6329,7 @@
             const [photoBusy, setPhotoBusy] = useState(false);
             const pickPhoto = async (file) => {
                 if (!file) return;
+                if (!photoOk) { openBilling('ai'); return; }
                 setPhotoBusy(true);
                 try {
                     const next = await preparePhoto(file);
@@ -6366,7 +6389,7 @@
                     <FlowLines />
                     {photo && <span className="cmd-photo-scrim" aria-hidden="true" />}
                     <div className="cmd-photo-btns">
-                        <button type="button" className="cmd-photo-btn is-label" onClick={() => setStudio(true)} aria-label="Tùy chỉnh đồng hồ: ảnh nền, kiểu số, màu số" title="Ảnh nền, kiểu số, màu số">
+                        <button type="button" className="cmd-photo-btn is-label" onClick={() => setStudio(true)} aria-label={photoOk ? 'Tùy chỉnh đồng hồ: ảnh nền, kiểu số, màu số' : 'Tùy chỉnh đồng hồ: kiểu số, màu số, bạn nhỏ'} title={photoOk ? 'Ảnh nền, kiểu số, màu số' : 'Kiểu số, màu số, bạn nhỏ'}>
                             <Icon name="image" size={15} /> <span>Tùy chỉnh</span>
                         </button>
                     </div>
@@ -6437,7 +6460,7 @@
                         </dl></div>
                     </div>
                 </section>
-                {studio && <ClockStudio photo={photo} tier={tierNow} busy={photoBusy} pet={petState} sample={big && /\d/.test(big) ? big : '12:34:56'} onPick={pickPhoto}
+                {studio && <ClockStudio photo={photo} photoOk={photoOk} tier={tierNow} busy={photoBusy} pet={petState} sample={big && /\d/.test(big) ? big : '12:34:56'} onPick={pickPhoto}
                     onRemove={() => { savePhoto(null); if (toast) toast('Đã xóa ảnh, đồng hồ về nền mặc định', 'info'); }} onClose={() => setStudio(false)} />}
                 </>
             );
