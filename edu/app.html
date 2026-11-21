@@ -1054,6 +1054,21 @@
         .ck-head { margin: 18px 0 8px; font-size: 11px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
         .ck-drop { display: flex; align-items: center; gap: 12px; padding: 12px; border-radius: 14px; border: 1.5px dashed #C7D2FE; background: #F8FAFF; color: #4F46E5; transition: border-color .15s ease, background .15s ease; }
         .ck-drop.is-drag { border-color: #4F46E5; background: #EEF2FF; }
+        /* Khung cắt ảnh */
+        .crop-frame { position: relative; overflow: hidden; margin: 0 auto; max-width: 100%; border-radius: 16px; background: #0F172A; cursor: grab; touch-action: none; user-select: none; -webkit-user-select: none; outline: none; }
+        .crop-frame:focus-visible { box-shadow: 0 0 0 3px #A5B4FC; }
+        .crop-frame.is-drag { cursor: grabbing; }
+        .crop-frame img { position: absolute; left: 0; top: 0; max-width: none; pointer-events: none; will-change: transform; }
+        .crop-dim { position: absolute; inset: 0; background: rgba(10, 12, 18, var(--bg-dim, .4)); pointer-events: none; }
+        .crop-wait { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; color: #fff; }
+        .crop-grid { position: absolute; inset: 0; pointer-events: none; opacity: 0; transition: opacity .2s ease; box-shadow: inset 0 0 0 1.5px rgba(255, 255, 255, .7); border-radius: inherit; }
+        .crop-frame.is-drag .crop-grid, .crop-frame:hover .crop-grid { opacity: 1; }
+        .crop-grid i { position: absolute; background: rgba(255, 255, 255, .45); }
+        .crop-grid i:nth-child(1) { left: 33.33%; top: 0; bottom: 0; width: 1px; } .crop-grid i:nth-child(2) { left: 66.66%; top: 0; bottom: 0; width: 1px; }
+        .crop-grid i:nth-child(3) { top: 33.33%; left: 0; right: 0; height: 1px; } .crop-grid i:nth-child(4) { top: 66.66%; left: 0; right: 0; height: 1px; }
+        .crop-ghost { position: absolute; left: 7%; top: 30%; font: 700 clamp(28px, 11vw, 54px)/1 'Be Vietnam Pro', system-ui, sans-serif; letter-spacing: .02em; color: rgba(255, 255, 255, .55); text-shadow: 0 2px 10px rgba(0, 0, 0, .3); pointer-events: none; }
+        .crop-zoom { display: flex; align-items: center; gap: 6px; margin: 12px 0 6px; }
+        .crop-zoom input { flex: 1; accent-color: #4F46E5; }
         .ck-drop.is-locked { border-style: solid; border-color: #E9DDBF; background: linear-gradient(135deg, #FFFBF0, #F8F4EA); color: #9A7B36; }
         .ck-lock-tag { display: inline-flex; align-items: center; gap: 3px; margin-left: 6px; padding: 1px 7px; border-radius: 999px; font-size: 10px; letter-spacing: .04em; color: #8A6A22; background: #F6ECD2; vertical-align: 1px; }
         .ck-drop-acts { display: flex; flex-wrap: wrap; gap: 8px; flex-shrink: 0; }
@@ -1378,6 +1393,9 @@
             chevronUp: <path d="m18 15-6-6-6 6" />,
             back: <><path d="m12 19-7-7 7-7" /><path d="M19 12H5" /></>,
             plus: <><path d="M5 12h14" /><path d="M12 5v14" /></>,
+            zoomIn: <><circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" /><path d="M11 8v6" /><path d="M8 11h6" /></>,
+            zoomOut: <><circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" /><path d="M8 11h6" /></>,
+            crop: <><path d="M6 2v14a2 2 0 0 0 2 2h14" /><path d="M18 22V8a2 2 0 0 0-2-2H2" /></>,
             home: <><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" /><path d="M9 22V12h6v10" /></>,
             clock: <><circle cx="12" cy="12" r="10" /><path d="M12 6v6l4 2" /></>,
             timer: <><path d="M10 2h4" /><path d="m12 14 3-3" /><circle cx="12" cy="14" r="8" /></>,
@@ -5078,6 +5096,13 @@
                 let src = encode(1400, 0.82);
                 if (src.length > 1400000) src = encode(1100, 0.72);
                 if (src.length > 1400000) src = encode(900, 0.65);
+                return Object.assign(photoTone(img), { src, at: Date.now() });
+            } finally {
+                URL.revokeObjectURL(url);
+            }
+        };
+        const photoTone = (img) => {
+            {
                 /* Độ sáng cảm nhận ở vùng có chữ: 62% bên trái ảnh, có trọng số cho vùng giữa-dưới (đồng hồ, nút). */
                 const W = 48, H = 32;
                 const sc = document.createElement('canvas');
@@ -5099,11 +5124,133 @@
                 const lum = sum / wsum;
                 /* Ngưỡng theo độ sáng tuyến tính (~0.36 ≈ xám 63%), và nếu phần lớn vùng chữ là mảng rất sáng thì cũng dùng chữ mực. */
                 const tone = lum > 0.36 || bright / wsum > 0.55 ? 'light' : 'dark';
-                return { src, tone, lum: Math.round(lum * 1000) / 1000, at: Date.now() };
-            } finally {
-                URL.revokeObjectURL(url);
+                return { tone, lum: Math.round(lum * 1000) / 1000 };
             }
         };
+        /* Cắt / phóng to ảnh nền như Facebook: kéo để căn, kéo thanh, lăn chuột hoặc chụm 2 ngón để phóng to.
+           crop = { cx, cy, z }: tâm khung theo tỉ lệ ảnh (0..1) và mức phóng (1 = vừa khung). Lưu lại để chỉnh lại sau mà không mất chất lượng. */
+        const clampCrop = (c, iw, ih, fw, fh) => {
+            const z = Math.max(1, Math.min(4, c.z || 1));
+            const s = Math.max(fw / iw, fh / ih) * z;
+            const hx = fw / (2 * iw * s), hy = fh / (2 * ih * s);
+            return { z, cx: Math.max(hx, Math.min(1 - hx, c.cx == null ? 0.5 : c.cx)), cy: Math.max(hy, Math.min(1 - hy, c.cy == null ? 0.5 : c.cy)) };
+        };
+        const bakeCrop = async (src, crop, aspect) => {
+            const img = await loadImage(src);
+            const iw = img.naturalWidth, ih = img.naturalHeight;
+            const c = clampCrop(crop, iw, ih, aspect, 1);
+            const s = Math.max(aspect / iw, 1 / ih) * c.z;
+            const vw = aspect / s, vh = 1 / s;
+            const k = Math.min(1400 / Math.max(vw, vh), 2);
+            const out = document.createElement('canvas');
+            out.width = Math.max(1, Math.round(vw * k));
+            out.height = Math.max(1, Math.round(vh * k));
+            const g = out.getContext('2d');
+            g.imageSmoothingQuality = 'high';
+            g.drawImage(img, c.cx * iw - vw / 2, c.cy * ih - vh / 2, vw, vh, 0, 0, out.width, out.height);
+            let data = out.toDataURL('image/jpeg', 0.82);
+            if (data.length > 1100000) data = out.toDataURL('image/jpeg', 0.68);
+            return Object.assign(photoTone(out), { src: data, crop: c, aspect, at: Date.now() });
+        };
+        const PhotoCropper = ({ src, aspect, init, dim, onCancel, onSave }) => {
+            const frame = useRef(null);
+            const [img, setImg] = useState(null);
+            const [fw, setFw] = useState(320);
+            const [crop, setCrop] = useState(init || { cx: 0.5, cy: 0.5, z: 1 });
+            const [drag, setDrag] = useState(false);
+            const [busy, setBusy] = useState(false);
+            const pts = useRef(new Map());
+            const pinch = useRef(null);
+            const ratio = Math.max(0.45, Math.min(2.4, aspect || 1.5));
+            const fh = fw / ratio;
+            useEffect(() => { let off = false; loadImage(src).then(i => { if (!off) setImg(i); }).catch(() => onCancel()); return () => { off = true; }; }, [src]);
+            useEffect(() => {
+                const el = frame.current;
+                if (!el) return undefined;
+                const fit = () => { const box = el.parentElement ? el.parentElement.clientWidth : el.clientWidth; setFw(Math.max(200, Math.min(box || 320, window.innerHeight * 0.52 * ratio))); };
+                fit();
+                const ro = window.ResizeObserver ? new ResizeObserver(fit) : null;
+                if (ro && el.parentElement) ro.observe(el.parentElement);
+                window.addEventListener('resize', fit);
+                return () => { if (ro) ro.disconnect(); window.removeEventListener('resize', fit); };
+            }, [ratio]);
+            const iw = img ? img.naturalWidth : 1, ih = img ? img.naturalHeight : 1;
+            const c = img ? clampCrop(crop, iw, ih, fw, fh) : crop;
+            const s = Math.max(fw / iw, fh / ih) * (c.z || 1);
+            const w = iw * s, h = ih * s;
+            const set = (next) => setCrop(prev => clampCrop(Object.assign({}, prev, typeof next === 'function' ? next(prev) : next), iw, ih, fw, fh));
+            const down = (e) => {
+                if (!img) return;
+                try { e.currentTarget.setPointerCapture(e.pointerId); } catch (err) { }
+                pts.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
+                if (pts.current.size === 2) {
+                    const [a, b] = Array.from(pts.current.values());
+                    pinch.current = { d: Math.hypot(a.x - b.x, a.y - b.y), z: c.z };
+                }
+                setDrag(true);
+            };
+            const move = (e) => {
+                const p = pts.current.get(e.pointerId);
+                if (!p) return;
+                const dx = e.clientX - p.x, dy = e.clientY - p.y;
+                pts.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
+                if (pts.current.size >= 2 && pinch.current) {
+                    const [a, b] = Array.from(pts.current.values());
+                    const d = Math.hypot(a.x - b.x, a.y - b.y);
+                    set({ z: pinch.current.z * d / Math.max(1, pinch.current.d) });
+                    return;
+                }
+                set(prev => ({ cx: prev.cx - dx / w, cy: prev.cy - dy / h }));
+            };
+            const up = (e) => {
+                pts.current.delete(e.pointerId);
+                if (pts.current.size < 2) pinch.current = null;
+                if (!pts.current.size) setDrag(false);
+            };
+            const wheel = (e) => { e.preventDefault(); set(prev => ({ z: prev.z * (e.deltaY < 0 ? 1.08 : 1 / 1.08) })); };
+            useEffect(() => {
+                const el = frame.current;
+                if (!el) return undefined;
+                el.addEventListener('wheel', wheel, { passive: false });
+                return () => el.removeEventListener('wheel', wheel);
+            });
+            const key = (e) => {
+                const step = e.shiftKey ? 0.05 : 0.015;
+                const map = { ArrowLeft: { cx: c.cx - step }, ArrowRight: { cx: c.cx + step }, ArrowUp: { cy: c.cy - step }, ArrowDown: { cy: c.cy + step }, '+': { z: c.z * 1.1 }, '=': { z: c.z * 1.1 }, '-': { z: c.z / 1.1 } };
+                if (map[e.key]) { e.preventDefault(); set(map[e.key]); }
+            };
+            const save = async () => {
+                if (!img || busy) return;
+                setBusy(true);
+                try { await onSave(c, ratio); } finally { setBusy(false); }
+            };
+            return (
+                <Modal title="Chỉnh ảnh nền" onClose={onCancel} layer="top" footer={<>
+                    <button type="button" className="btn btn-secondary" onClick={onCancel}>Hủy</button>
+                    <button type="button" className="btn btn-primary" onClick={save} disabled={!img || busy}>{busy ? <Icon name="loader" size={16} className="animate-spin" /> : <Icon name="check" size={16} />} Lưu</button>
+                </>}>
+                    <div ref={frame} className={'crop-frame' + (drag ? ' is-drag' : '')} style={{ width: fw + 'px', height: fh + 'px', '--bg-dim': (dim == null ? 40 : dim) / 100 }}
+                        tabIndex={0} role="application" aria-label="Khung cắt ảnh. Kéo hoặc dùng phím mũi tên để căn, phím + và - để phóng to thu nhỏ."
+                        onPointerDown={down} onPointerMove={move} onPointerUp={up} onPointerCancel={up} onKeyDown={key}>
+                        {img ? <img src={src} alt="" draggable="false" style={{ width: w + 'px', height: h + 'px', transform: 'translate(' + (fw / 2 - c.cx * w) + 'px,' + (fh / 2 - c.cy * h) + 'px)' }} />
+                            : <span className="crop-wait"><Icon name="loader" size={20} className="animate-spin" /></span>}
+                        <span className="crop-dim" aria-hidden="true" />
+                        <span className="crop-grid" aria-hidden="true"><i /><i /><i /><i /></span>
+                        <span className="crop-ghost" aria-hidden="true">12:34</span>
+                    </div>
+                    <div className="crop-zoom">
+                        <button type="button" className="btn btn-ghost btn-icon" onClick={() => set({ z: c.z / 1.15 })} disabled={c.z <= 1.001} aria-label="Thu nhỏ"><Icon name="zoomOut" size={18} /></button>
+                        <input type="range" min="1" max="4" step="0.01" value={c.z} onChange={(e) => set({ z: Number(e.target.value) })} aria-label="Phóng to" aria-valuetext={Math.round(c.z * 100) + '%'} />
+                        <button type="button" className="btn btn-ghost btn-icon" onClick={() => set({ z: c.z * 1.15 })} disabled={c.z >= 3.999} aria-label="Phóng to"><Icon name="zoomIn" size={18} /></button>
+                    </div>
+                    <p className="flex items-center justify-between gap-3 text-xs text-ink2">
+                        <span>Kéo để căn, chụm 2 ngón hoặc lăn chuột để phóng to.</span>
+                        <button type="button" className="shrink-0 font-semibold text-[#4338CA] hover:underline" onClick={() => setCrop({ cx: 0.5, cy: 0.5, z: 1 })}>Đặt lại</button>
+                    </p>
+                </Modal>
+            );
+        };
+
         const savePhoto = (v) => {
             if (v) Store.prefs.set(PHOTO_KEY, v); else Store.prefs.remove(PHOTO_KEY);
             if (v && !readPhoto()) throw new Error('Bộ nhớ trình duyệt đầy, chưa lưu được ảnh.');
@@ -6134,7 +6281,7 @@
             </span>
             );
         };
-        const ClockStudio = ({ photo, photoOk, tier, busy, onPick, onRemove, onClose, sample, pet }) => {
+        const ClockStudio = ({ photo, photoOk, tier, busy, onPick, onRemove, onCrop, onClose, sample, pet }) => {
             const style = useClockStyle();
             const kind = resolveBuddy(style, tier);
             const shown = dimPhoto(photo, style.dim);
@@ -6195,6 +6342,11 @@
                             <button type="button" className="btn btn-secondary btn-sm" disabled={busy} onClick={() => input.current && input.current.click()}>
                                 {busy ? <Icon name="loader" size={14} className="animate-spin" /> : <Icon name="upload" size={14} />} {photo ? 'Đổi ảnh' : 'Chọn ảnh'}
                             </button>
+                            {photo && onCrop && (
+                                <button type="button" className="btn btn-secondary btn-sm" disabled={busy} onClick={onCrop} title="Cắt, căn và phóng to ảnh">
+                                    <Icon name="crop" size={14} /> Cắt ảnh
+                                </button>
+                            )}
                             {photo && (
                                 <button type="button" className="btn btn-danger btn-sm" disabled={busy} onClick={onRemove} title="Xóa ảnh, về nền mặc định">
                                     <Icon name="trash" size={14} /> Xóa ảnh
@@ -6327,14 +6479,28 @@
             const petNow = usePetNow();
             const [studio, setStudio] = useState(false);
             const [photoBusy, setPhotoBusy] = useState(false);
+            const [cropJob, setCropJob] = useState(null);
+            const cardRef = useRef(null);
+            const cardAspect = () => { const el = cardRef.current; return el && el.clientHeight ? el.clientWidth / el.clientHeight : 1.5; };
+            const openCrop = () => { if (photo) setCropJob({ src: photo.orig || photo.src, init: photo.orig ? photo.crop : null, isNew: false }); };
+            const saveCrop = async (crop, aspect) => {
+                try {
+                    const baked = await bakeCrop(cropJob.src, crop, aspect);
+                    try { savePhoto(Object.assign(baked, { orig: cropJob.src })); }
+                    catch (e) { savePhoto(baked); }
+                    setCropJob(null);
+                    if (toast) toast(cropJob.isNew ? (dimPhoto(baked, clockStyle.dim).tone === 'dark' ? 'Đã đặt ảnh nền · chữ trắng cho dễ đọc' : 'Đã đặt ảnh nền · chữ đậm cho dễ đọc') : 'Đã cập nhật khung ảnh', 'success');
+                } catch (err) {
+                    if (toast) toast((err && err.message) || 'Chưa lưu được ảnh.', 'error');
+                }
+            };
             const pickPhoto = async (file) => {
                 if (!file) return;
                 if (!photoOk) { openBilling('ai'); return; }
                 setPhotoBusy(true);
                 try {
                     const next = await preparePhoto(file);
-                    savePhoto(next);
-                    if (toast) toast(dimPhoto(next, clockStyle.dim).tone === 'dark' ? 'Đã đặt ảnh nền · chữ trắng cho dễ đọc' : 'Đã đặt ảnh nền · chữ đậm cho dễ đọc', 'success');
+                    setCropJob({ src: next.src, init: null, isNew: true });
                 } catch (err) {
                     if (toast) toast((err && err.message) || 'Chưa đặt được ảnh nền.', 'error');
                 } finally {
@@ -6383,7 +6549,7 @@
             const lightText = shown ? shown.tone === 'dark' : tierNow !== 'ivory';
             return (
                 <>
-                <section className={'cmd-card flex flex-col p-5 text-left sm:p-7' + (shown ? ' has-photo photo-' + shown.tone : '')} aria-label="Ca học hôm nay" onPointerMove={moveSpot}
+                <section ref={cardRef} className={'cmd-card flex flex-col p-5 text-left sm:p-7' + (shown ? ' has-photo photo-' + shown.tone : '')} aria-label="Ca học hôm nay" onPointerMove={moveSpot}
                     style={shown ? { backgroundImage: 'url("' + shown.src + '")', '--bg-dim': clockStyle.dim / 100 } : undefined}>
                     <ChronoDial />
                     <FlowLines />
@@ -6461,7 +6627,8 @@
                     </div>
                 </section>
                 {studio && <ClockStudio photo={photo} photoOk={photoOk} tier={tierNow} busy={photoBusy} pet={petState} sample={big && /\d/.test(big) ? big : '12:34:56'} onPick={pickPhoto}
-                    onRemove={() => { savePhoto(null); if (toast) toast('Đã xóa ảnh, đồng hồ về nền mặc định', 'info'); }} onClose={() => setStudio(false)} />}
+                    onRemove={() => { savePhoto(null); if (toast) toast('Đã xóa ảnh, đồng hồ về nền mặc định', 'info'); }} onCrop={openCrop} onClose={() => setStudio(false)} />}
+                {cropJob && <PhotoCropper src={cropJob.src} init={cropJob.init} aspect={cardAspect()} dim={clockStyle.dim} onCancel={() => setCropJob(null)} onSave={saveCrop} />}
                 </>
             );
         };
