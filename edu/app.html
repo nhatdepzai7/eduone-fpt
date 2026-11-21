@@ -968,13 +968,15 @@
         .cmd-card.has-photo { background-size: cover !important; background-position: center !important; }
         .cmd-card.has-photo::after, .cmd-card.has-photo .cmd-dial, .cmd-card.has-photo .cmd-flow { display: none !important; }
         .cmd-photo-scrim { position: absolute; inset: 0; z-index: 0; pointer-events: none; }
-        .cmd-card.photo-dark .cmd-photo-scrim { background: linear-gradient(100deg, rgba(2, 6, 23, .62) 0%, rgba(2, 6, 23, .38) 50%, rgba(2, 6, 23, .14) 100%), linear-gradient(0deg, rgba(2, 6, 23, .45), rgba(2, 6, 23, 0) 45%); }
-        .cmd-card.photo-light .cmd-photo-scrim { background: linear-gradient(100deg, rgba(255, 255, 255, .78) 0%, rgba(255, 255, 255, .5) 50%, rgba(255, 255, 255, .18) 100%), linear-gradient(0deg, rgba(255, 255, 255, .6), rgba(255, 255, 255, 0) 45%); }
+        /* Lớp phủ chống chói: độ tối do người dùng kéo (--bg-dim 0–0.75), đậm dần về đáy thẻ nơi có nút và tóm tắt ngày */
+        .cmd-card.has-photo .cmd-photo-scrim { background: linear-gradient(180deg, rgba(10, 12, 18, calc(var(--bg-dim, .4) * .85)) 0%, rgba(10, 12, 18, var(--bg-dim, .4)) 55%, rgba(10, 12, 18, min(.92, calc(var(--bg-dim, .4) * 1.15))) 100%); }
+        .app-root .cmd-card.photo-dark [role="timer"], .app-root .cmd-card.photo-dark h2, .app-root .cmd-card.photo-dark .text-indigo-100 { text-shadow: 0 2px 12px rgba(0, 0, 0, .35); }
+        .app-root .cmd-card.photo-light [role="timer"], .app-root .cmd-card.photo-light h2, .app-root .cmd-card.photo-light .text-indigo-100 { text-shadow: 0 2px 12px rgba(255, 255, 255, .45); }
         /* Ảnh tối: chữ trắng */
         .app-root .cmd-card.photo-dark { color: #FFFFFF; box-shadow: 0 24px 44px -26px rgba(2, 6, 23, .7); }
         .app-root .cmd-card.photo-dark .text-indigo-100 { color: rgba(255, 255, 255, .9); }
         .app-root .cmd-card.photo-dark .text-indigo-200 { color: rgba(255, 255, 255, .78); }
-        .app-root .cmd-card.photo-dark .text-white, .app-root .cmd-card.photo-dark [role="timer"] { color: #FFFFFF; text-shadow: 0 2px 18px rgba(0, 0, 0, .45); }
+        .app-root .cmd-card.photo-dark .text-white, .app-root .cmd-card.photo-dark [role="timer"] { color: #FFFFFF; }
         .app-root .cmd-card.photo-dark .cmd-pill.bg-white\/15 { background: rgba(255, 255, 255, .18); color: #fff; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .3); }
         .app-root .cmd-card.photo-dark .cmd-go { color: #0F172A; background: #FFFFFF; box-shadow: 0 12px 24px -12px rgba(0, 0, 0, .6); }
         .app-root .cmd-card.photo-dark .cmd-go svg { color: #4F46E5; }
@@ -993,7 +995,7 @@
         .app-root .cmd-card.photo-light { color: #0F172A; box-shadow: 0 24px 44px -28px rgba(15, 23, 42, .45), inset 0 0 0 1px rgba(15, 23, 42, .08); }
         .app-root .cmd-card.photo-light .text-indigo-100 { color: #1E293B; }
         .app-root .cmd-card.photo-light .text-indigo-200 { color: #334155; }
-        .app-root .cmd-card.photo-light .text-white, .app-root .cmd-card.photo-light [role="timer"] { color: #0F172A; text-shadow: 0 1px 14px rgba(255, 255, 255, .7); }
+        .app-root .cmd-card.photo-light .text-white, .app-root .cmd-card.photo-light [role="timer"] { color: #0F172A; }
         .app-root .cmd-card.photo-light .cmd-pill.bg-white\/15 { background: rgba(255, 255, 255, .75); color: #0F172A; box-shadow: inset 0 0 0 1px rgba(15, 23, 42, .12); }
         .app-root .cmd-card.photo-light .cmd-go { color: #fff; background: #0F172A; box-shadow: 0 12px 24px -12px rgba(15, 23, 42, .6); }
         .app-root .cmd-card.photo-light .cmd-go svg { color: #fff; }
@@ -1063,38 +1065,147 @@
         .ck-face-demo.tier-eco { background-image: linear-gradient(135deg, #312E81 0%, #4338CA 55%, #6366F1 100%); }
         .ck-face-demo.tier-obsidian { background-image: linear-gradient(155deg, #18171B 0%, #08080A 100%); }
         .ck-face-demo.tier-ivory { background-image: linear-gradient(140deg, #EEF2FF 0%, #F5F3FF 36%, #FDF2F8 70%, #FFF7ED 100%); }
-        .ck-face-demo.has-photo.photo-dark::before { content: ""; position: absolute; inset: 0; background: rgba(2, 6, 23, .4); }
-        .ck-face-demo.has-photo.photo-light::before { content: ""; position: absolute; inset: 0; background: rgba(255, 255, 255, .45); }
+        .ck-face-demo.has-photo::before { content: ""; position: absolute; inset: 0; background: rgba(10, 12, 18, var(--bg-dim, .4)); }
         .ck-colors { display: flex; flex-wrap: wrap; gap: 8px; }
         .ck-color { display: inline-flex; align-items: center; justify-content: center; width: 34px; height: 34px; border-radius: 999px; background: var(--sw, #fff); box-shadow: inset 0 0 0 1px rgba(15, 23, 42, .15); transition: transform .12s ease; }
         .ck-color:hover { transform: scale(1.08); }
         .ck-color.is-on { box-shadow: inset 0 0 0 1px rgba(15, 23, 42, .15), 0 0 0 2px #fff, 0 0 0 4px #4F46E5; }
         .ck-color.is-auto { background: conic-gradient(#FFFFFF 0 50%, #0F172A 50% 100%); }
         .ck-color.is-auto span { display: inline-flex; align-items: center; justify-content: center; width: 20px; height: 20px; border-radius: 999px; background: #fff; color: #4F46E5; font-size: 11px; font-weight: 800; box-shadow: 0 1px 2px rgba(15, 23, 42, .2); }
-        /* Bạn nhỏ bám trên đồng hồ: ngồi trên mép số, hai chân chạm nhẹ đỉnh số */
-        .ck { position: relative; }
-        .ck.has-buddy { margin-top: 1em; }
-        .ck-buddy { position: absolute; z-index: 2; right: .12em; bottom: calc(100% - .26em); width: 1.44em; height: 1.2em; overflow: visible; pointer-events: none; filter: drop-shadow(0 .03em .05em rgba(15, 23, 42, .28)); }
-        .ck.has-plate .ck-buddy { bottom: calc(100% - .3em); }
-        .ck.fg-light .ck-buddy { filter: drop-shadow(0 0 .035em rgba(255, 255, 255, .55)) drop-shadow(0 .04em .06em rgba(0, 0, 0, .35)); }
-        .ck[data-face="flip"] .ck-buddy { bottom: calc(100% - .2em); }
-        .ck-buddy .b-eyes, .ck-buddy .b-head, .ck-buddy .b-ear-l, .ck-buddy .b-ear-r, .ck-buddy .b-tail { transform-box: fill-box; }
-        .ck-buddy .b-eyes { transform-origin: center; animation: b-blink 4.6s ease-in-out infinite; }
-        .ck-buddy .b-head { transform-origin: 50% 100%; animation: b-bob 3.2s ease-in-out infinite; }
-        .ck-buddy .b-ear-l { transform-origin: 70% 100%; animation: b-ear-l 5.5s ease-in-out infinite; }
-        .ck-buddy .b-ear-r { transform-origin: 30% 100%; animation: b-ear-r 5.5s ease-in-out infinite 1.4s; }
-        .ck-buddy .b-tail { transform-origin: 0% 100%; animation: b-tail 2.6s ease-in-out infinite; }
+        /* ===== Pet đồng hành: ngồi trên mép số, hai bàn tay chạm nhẹ đỉnh số ===== */
+        .ck, .ck-perch { position: relative; }
+        .ck-perch { display: inline-block; }
+        .ck.has-buddy, .ck-perch.has-buddy { margin-top: 1em; }
+        .ck-perch.has-buddy { margin-top: 1.35em; }
+        .ck-pet { position: absolute; z-index: 3; right: .12em; bottom: calc(100% - .26em); width: 1.44em; height: 1.2em; color: #475569; -webkit-text-stroke: 0; text-shadow: none; letter-spacing: normal; font-family: 'Be Vietnam Pro', system-ui, sans-serif; font-weight: 600; line-height: 1.35; }
+        .ck-perch .ck-pet { right: -.2em; bottom: calc(100% - .3em); width: 1.86em; height: 1.55em; }
+        .ck.has-plate .ck-pet { bottom: calc(100% - .32em); }
+        .ck[data-face="flip"] .ck-pet { bottom: calc(100% - .2em); }
+        .ck.fg-light .ck-pet, .ck-perch.fg-light .ck-pet { color: #E2E8F0; }
+        .ck-pet.is-still { pointer-events: none; }
+        .ck-pet-btn { display: block; width: 100%; height: 100%; padding: 0; border: 0; background: none; cursor: pointer; border-radius: 40%; -webkit-tap-highlight-color: transparent; }
+        .ck-pet-btn:focus-visible { outline: 2px solid currentColor; outline-offset: 2px; }
+        .ck-buddy { display: block; width: 100%; height: 100%; overflow: visible; transform-origin: 50% 92%; transition: transform .25s cubic-bezier(.3, 1.4, .5, 1); filter: drop-shadow(0 .03em .05em rgba(15, 23, 42, .28)); }
+        .ck.fg-light .ck-buddy, .ck-perch.fg-light .ck-buddy { filter: drop-shadow(0 0 .035em rgba(255, 255, 255, .55)) drop-shadow(0 .04em .06em rgba(0, 0, 0, .35)); }
+        .ck.fg-light .ck-buddy.b-blackcat, .ck-perch.fg-light .ck-buddy.b-blackcat { filter: drop-shadow(0 0 .05em rgba(229, 201, 139, .55)) drop-shadow(0 .04em .06em rgba(0, 0, 0, .45)); }
+        .ck-pet-btn:hover .ck-buddy { transform: translateY(-1.5%) scale(1.04); }
+        .ck-pet.is-boop .ck-buddy { animation: pet-boop .5s cubic-bezier(.3, 1.4, .5, 1); }
+        /* Màu phụ kiện theo giao diện: Eco xám đậm, Obsidian champagne */
+        .ck-buddy { --pet-acc: #334155; --pet-cap: #312E81; --pet-cap-line: #1E1B4B; --pet-tassel: #E5C98B; --pet-phone: #334155; --pet-pad: #A5B4FC; }
+        [data-tier="obsidian"] .ck-buddy { --pet-acc: #E5C98B; --pet-cap: #1C1917; --pet-cap-line: #E5C98B; --pet-phone: #1C1917; --pet-pad: #E5C98B; }
+        [data-tier="ivory"] .ck-buddy { --pet-acc: #B08A3E; --pet-cap: #312E81; --pet-cap-line: #1E1B4B; --pet-phone: #312E81; --pet-pad: #E5C98B; }
+        .ck-buddy.b-blackcat { --pet-acc: #E5C98B; }
+        .pet-glass { stroke: var(--pet-acc); }
+        .pet-phones path { stroke: var(--pet-phone); }
+        .pet-phones rect { fill: var(--pet-phone); stroke: var(--pet-cap-line); }
+        .pet-phones .pet-phones-pad { fill: var(--pet-pad); stroke: none; }
+        .pet-cap path { fill: var(--pet-cap); stroke: var(--pet-cap-line); }
+        .pet-cap .pet-tassel { fill: none; stroke: var(--pet-tassel); }
+        .pet-tassel-end { fill: var(--pet-tassel); }
+        /* Chuyển động vi mô: chỉ transform/opacity */
+        .ck-buddy .b-eyes, .ck-buddy .b-head, .ck-buddy .b-ear-l, .ck-buddy .b-ear-r, .ck-buddy .b-tail, .ck-buddy .pet-icon > *, .ck-buddy .pet-z text { transform-box: fill-box; }
+        .ck-buddy .b-eyes { transform-origin: center; animation: b-blink 7s ease-in-out infinite; }
+        .ck-buddy .b-eyes.is-slow { animation-duration: 9s; }
+        .ck-buddy .b-head { transform-origin: 50% 100%; animation: b-bob 4s ease-in-out infinite; }
+        .ck-buddy .b-ear-l { transform-origin: 70% 100%; animation: b-ear-l 6.5s ease-in-out infinite; }
+        .ck-buddy .b-ear-r { transform-origin: 30% 100%; animation: b-ear-r 6.5s ease-in-out infinite 1.6s; }
+        .ck-buddy .b-tail { transform-origin: 0% 100%; animation: b-tail 3.2s ease-in-out infinite; }
         .ck-buddy.b-duck .b-ear-l { transform-origin: 50% 100%; }
-        @keyframes b-blink { 0%, 44%, 50%, 92%, 100% { transform: scaleY(1); } 47%, 95% { transform: scaleY(.12); } }
-        @keyframes b-bob { 0%, 100% { transform: translateY(0) rotate(0); } 30% { transform: translateY(-1.5px) rotate(-3deg); } 65% { transform: translateY(0) rotate(2.5deg); } }
-        @keyframes b-ear-l { 0%, 80%, 100% { transform: rotate(0); } 84% { transform: rotate(-12deg); } 88% { transform: rotate(4deg); } 92% { transform: rotate(-6deg); } }
-        @keyframes b-ear-r { 0%, 80%, 100% { transform: rotate(0); } 84% { transform: rotate(12deg); } 88% { transform: rotate(-4deg); } 92% { transform: rotate(6deg); } }
-        @keyframes b-tail { 0%, 100% { transform: rotate(0); } 50% { transform: rotate(-14deg); } }
-        @media (prefers-reduced-motion: reduce) { .ck-buddy * { animation: none !important; } }
+        .ck-buddy .b-face { animation: b-bob 4s ease-in-out infinite; transform-box: view-box; transform-origin: 60px 88px; }
+        .ck-pet .pet-heart { transform-origin: 50% 100%; animation: pet-heart 1.9s cubic-bezier(.2, .8, .3, 1) both; }
+        .ck-pet .pet-heart.is-2 { animation-delay: .35s; }
+        .ck-pet .pet-z text { animation: pet-z 3.6s ease-in-out infinite; }
+        .ck-pet .pet-z text.is-2 { animation-delay: 1.2s; }
+        .ck-pet .pet-steam { animation: pet-steam 2.8s ease-in-out infinite; }
+        .ck-pet .pet-sweat { transform-origin: 50% 0; animation: pet-sweat 3s ease-in-out infinite; }
+        .ck-pet .pet-twinkle { transform-origin: center; animation: pet-twinkle 3.4s ease-in-out infinite; }
+        .ck-pet .pet-blush.is-warm ellipse { transform-box: fill-box; transform-origin: center; animation: pet-warm 1.2s ease-out both; }
+        @keyframes b-blink { 0%, 46%, 50%, 100% { transform: scaleY(1); } 48% { transform: scaleY(.1); } }
+        @keyframes b-bob { 0%, 100% { transform: translateY(0); } 45% { transform: translateY(-1.2px); } }
+        @keyframes b-ear-l { 0%, 82%, 100% { transform: rotate(0); } 86% { transform: rotate(-10deg); } 90% { transform: rotate(3deg); } 94% { transform: rotate(-5deg); } }
+        @keyframes b-ear-r { 0%, 82%, 100% { transform: rotate(0); } 86% { transform: rotate(10deg); } 90% { transform: rotate(-3deg); } 94% { transform: rotate(5deg); } }
+        @keyframes b-tail { 0%, 100% { transform: rotate(0); } 50% { transform: rotate(-12deg); } }
+        @keyframes pet-heart { 0% { opacity: 0; transform: translateY(8px) scale(.4); } 55% { opacity: 1; transform: translateY(-3px) scale(1.1); } 100% { opacity: .92; transform: translateY(-1px) scale(1); } }
+        @keyframes pet-z { 0%, 100% { opacity: .35; transform: translate(0, 0); } 50% { opacity: .85; transform: translate(1.5px, -2.5px); } }
+        @keyframes pet-steam { 0%, 100% { opacity: .15; transform: translateY(1px); } 50% { opacity: .6; transform: translateY(-1.5px); } }
+        @keyframes pet-sweat { 0%, 70%, 100% { opacity: .95; transform: translateY(0); } 85% { opacity: .6; transform: translateY(2px); } }
+        @keyframes pet-twinkle { 0%, 100% { opacity: .3; transform: scale(.8); } 50% { opacity: 1; transform: scale(1.2); } }
+        @keyframes pet-warm { 0% { transform: scale(.6); opacity: .4; } 100% { transform: scale(1); opacity: 1; } }
+        @keyframes pet-boop { 0% { transform: scale(1); } 30% { transform: scale(1.12, .9); } 60% { transform: scale(.95, 1.06); } 100% { transform: scale(1); } }
+        /* Treo tab: dừng hết chuyển động khi tab bị ẩn */
+        .edu-hidden .ck-pet *, .edu-hidden .ck-pet { animation-play-state: paused !important; }
+        @media (prefers-reduced-motion: reduce) {
+            .ck-buddy *, .ck-pet .ck-buddy { animation: none !important; }
+            .ck-pet .pet-heart { opacity: .92; }
+            .ck-buddy { transition: none; }
+        }
+        /* Pill lời thoại: kính mờ, bên trái pet, tự mờ đi */
+        .ck-pet-say { position: absolute; top: 4%; right: calc(100% + 6px); width: max-content; padding: 6px 11px; border-radius: 12px; font-size: 12.5px; font-weight: 600; line-height: 1.4; white-space: normal; text-align: left; color: #F8FAFC; background: rgba(15, 23, 42, .62); -webkit-backdrop-filter: blur(10px) saturate(1.3); backdrop-filter: blur(10px) saturate(1.3); box-shadow: 0 8px 22px -12px rgba(2, 6, 23, .6), inset 0 0 0 1px rgba(255, 255, 255, .14); opacity: 0; transform: translateX(6px) scale(.96); transform-origin: 100% 50%; transition: opacity .3s ease, transform .3s ease; pointer-events: none; }
+        .ck-pet-say::after { content: ""; position: absolute; top: 12px; right: -4px; width: 8px; height: 8px; background: inherit; transform: rotate(45deg); border-radius: 2px; }
+        .ck-pet.is-say .ck-pet-say { opacity: 1; transform: none; }
+        .ck-pet-say:empty { display: none; }
+        .ck.fg-dark .ck-pet-say, .ck-perch.fg-dark .ck-pet-say { color: #0F172A; background: rgba(255, 255, 255, .82); box-shadow: 0 8px 22px -14px rgba(15, 23, 42, .45), inset 0 0 0 1px rgba(15, 23, 42, .08); }
+        [data-tier="obsidian"] .ck.fg-light .ck-pet-say, [data-tier="obsidian"] .ck-perch.fg-light .ck-pet-say { color: #F6EBD0; background: rgba(12, 11, 9, .7); box-shadow: 0 8px 22px -12px rgba(0, 0, 0, .7), inset 0 0 0 1px rgba(229, 201, 139, .3); }
+        @media (prefers-reduced-motion: reduce) { .ck-pet-say { transition: opacity .2s linear; transform: none; } }
+        /* Bảng chọn pet + xem thử trạng thái */
         .ck-buddies { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
         .ck-buddies .ck-face-demo { height: 100px; align-items: flex-end; padding-bottom: 10px; }
         .ck-buddies .ck-face-demo .ck { font-size: 30px; }
         .ck-buddies .ck-face-demo .ck.has-buddy { margin-top: 0; }
+        .ck-buddies .ck-off { display: flex; flex-direction: column; align-items: center; gap: 4px; color: var(--muted); font-size: 11px; font-weight: 600; }
+        .ck-moods { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+        .ck-mood { padding: 5px 11px; border-radius: 999px; font-size: 12px; font-weight: 600; color: var(--ink-2); background: var(--surface); box-shadow: inset 0 0 0 1px var(--border); transition: background .15s ease, color .15s ease; }
+        .ck-mood:hover { box-shadow: inset 0 0 0 1px #A5B4FC; }
+        .ck-mood.is-on { color: #fff; background: #4F46E5; box-shadow: none; }
+        .ck-mini .ck { margin-top: 6px; }
+        .ck-mini .ck.has-buddy { margin-top: .95em; }
+        .ck-switch { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 10px; padding: 10px 12px; border-radius: 12px; background: var(--surface-2, #F8FAFC); font-size: 13px; color: var(--ink); }
+        .ck-switch input { width: 18px; height: 18px; accent-color: #4F46E5; }
+        .ck-dim { display: flex; align-items: center; gap: 12px; margin-top: 10px; font-size: 13px; color: var(--ink); }
+        .ck-dim input[type="range"] { flex: 1; accent-color: #4F46E5; }
+        .ck-dim output { min-width: 3ch; font-variant-numeric: tabular-nums; font-weight: 700; color: #4F46E5; text-align: right; }
+        /* ===== 3 tim & hậu quả leo thang ===== */
+        .ck-buddy.is-static, .ck-buddy.is-static * { animation: none !important; transition: none !important; }
+        .ck-buddy.mood-sulking .pet-body { filter: brightness(.9) saturate(.82); }
+        .pet-acc.is-dim > g { opacity: .25; }
+        .pet-lock rect, .pet-lock path { stroke: var(--pet-acc); }
+        .pet-lock rect { fill: var(--pet-acc); }
+        .ck-pet .pet-anger { transform-box: fill-box; transform-origin: center; animation: pet-anger 1.1s ease-in-out 2; }
+        @keyframes pet-anger { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.18); } }
+        .ck-buddy.b-gone { color: #94A3B8; }
+        .ck.fg-light .ck-buddy.b-gone, .ck-perch.fg-light .ck-buddy.b-gone { color: #E2E8F0; }
+        .ck-pet.is-gone .ck-pet-btn:hover .ck-buddy { transform: translateY(-1.5%) rotate(-2deg); }
+        .pet-hearts { display: flex; gap: 3px; margin-top: 5px; }
+        .pet-hearts svg { width: 12px; height: 11px; fill: none; stroke: currentColor; stroke-width: 1.4; color: #F9A8D4; }
+        .pet-hearts svg.on { fill: currentColor; }
+        .ck.fg-dark .pet-hearts svg, .ck-perch.fg-dark .pet-hearts svg, .pet-sum .pet-hearts svg, .pet-eos .pet-hearts svg { color: #DB2777; }
+        [data-tier="obsidian"] .pet-hearts svg { color: #E5C98B; }
+        [data-tier="obsidian"] .ck.fg-dark .pet-hearts svg, [data-tier="obsidian"] .pet-sum .pet-hearts svg { color: #B08A3E; }
+        [data-tier="ivory"] .pet-hearts svg { color: #B08A3E; }
+        .pet-badge .pet-hearts { margin-top: 0; }
+        .ck-pet-say.is-action { pointer-events: auto; cursor: pointer; }
+        .pet-say-cta { display: block; margin-top: 5px; font-size: 11.5px; font-weight: 700; opacity: .9; text-decoration: underline; text-underline-offset: 2px; }
+        /* Thanh tiến độ có pet: pet tĩnh nhỏ thay chỗ sticker Jack, thanh hạ thấp lại cho gọn */
+        .jack-evo.has-pet .jack-track { margin: 34px 16px 0 !important; }
+        .pet-rider { position: absolute; top: 50%; width: 30px; height: 25px; margin-left: -15px; transform: translateY(-90%); transition: left .45s ease; pointer-events: none; z-index: 2; }
+        .pet-rider .ck-buddy { filter: drop-shadow(0 1px 1px rgba(15, 23, 42, .25)); }
+        @media (prefers-reduced-motion: reduce) { .pet-rider { transition: none; } }
+        /* Tổng kết phiên, sảnh chờ thi, kết quả thi, hộp "Khoan đã" */
+        .pet-sum { display: flex; align-items: center; gap: 12px; margin: 0 0 18px; padding: 10px 14px 10px 10px; border-radius: 16px; background: #F8FAFC; box-shadow: inset 0 0 0 1px var(--border, #E2E8F0); }
+        .pet-sum-art { width: 56px; height: 47px; flex: none; }
+        .pet-badge { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-top: 6px; padding: 3px 9px; border-radius: 999px; font-size: 11.5px; font-weight: 700; color: #9D174D; background: #FCE7F3; }
+        [data-tier="obsidian"] .pet-badge, [data-tier="ivory"] .pet-badge { color: #7A5A1E; background: #F6EBD0; }
+        .pet-lobby { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; padding: 8px 12px 8px 8px; border-radius: 14px; background: #F8FAFC; font-size: 13px; line-height: 1.4; color: var(--ink-2, #334155); box-shadow: inset 0 0 0 1px var(--border, #E2E8F0); }
+        .pet-lobby-art { width: 44px; height: 37px; flex: none; }
+        .pet-lobby.is-compact { margin: 0; max-width: 300px; font-size: 12px; }
+        @media (max-width: 639px) { .pet-lobby.is-compact { max-width: none; width: 100%; } }
+        .pet-eos { display: flex; align-items: center; gap: 12px; max-width: 640px; margin-top: 12px; padding: 10px 12px; border: 2px groove #fff; background: #F5F3EA; }
+        .pet-eos-art { width: 56px; height: 47px; flex: none; }
+        .pet-eos-msg { margin: 0; font-weight: 700; }
+        .pet-eos-note { margin: 4px 0 0; font-size: 12px; color: #555; }
+        .pet-quit { display: flex; flex-direction: column; align-items: center; gap: 10px; text-align: center; }
+        .pet-quit-art { width: 84px; height: 70px; }
+        .pet-quit p { margin: 0; font-size: 15px; font-weight: 600; line-height: 1.45; color: var(--ink, #0F172A); }
         .skin-swatch.is-classic i:nth-child(3) { background: linear-gradient(135deg, #E2E8F0, #E2E8F0 55%, #4338CA 55%); }
         @keyframes identity-cue {
             0% { box-shadow: 0 0 0 0 rgba(231, 197, 106, .55); }
@@ -1161,7 +1272,7 @@
 
     <!-- ===================== UI KIT ===================== -->
     <script type="text/babel" data-presets="react" data-type="module">
-        import { IDENTITIES, dayKey, identityLine, planVote, shiftDay, summarize } from './js/core/identity.js?v=mission';
+        import { IDENTITIES, dayKey, identityLine, planVote, shiftDay, summarize } from './js/core/identity.js?v=pet3';
         const { useState, useEffect, useRef, useMemo, useReducer } = React;
         const E = window.EDU;
         /* /app?go=... từ trang chủ: đọc một lần trước khi vẽ, component nào cần thì lấy qua takeGo(). */
@@ -3160,7 +3271,9 @@
             </div>
         );
 
-        const JackEvolveBar = ({ value, max }) => {
+        const JackEvolveBar = ({ value, max, cheer }) => {
+            const petBar = usePetNow();
+            const rider = !!(petBar && petBar.enabled);
             const pct = max > 0 ? Math.max(0, Math.min(100, Math.round((value / max) * 100))) : 0;
             const tier = jackTier(pct);
             const stage = JACK_STAGES[tier];
@@ -3172,7 +3285,7 @@
                 setPop((n) => n + 1);
             }, [tier]);
             return (
-                <div className="jack-evo">
+                <div className={'jack-evo' + (rider ? ' has-pet' : '')}>
                     <div className="jack-evo-top">
                         <span className="text-xs font-semibold text-ink">{stage.label}</span>
                         <span className="tnum text-xs text-muted">{pct}%</span>
@@ -3180,9 +3293,11 @@
                     <div className="jack-track" role="progressbar" aria-valuenow={pct} aria-valuemin={0} aria-valuemax={100} aria-label={'Jack: ' + stage.label}>
                         <div className="jack-fill" style={{ width: pct + '%' }} />
                         {[0, 25, 60, 100].map((mark) => <span key={mark} className={'jack-mark' + (pct >= mark ? ' on' : '')} style={{ left: mark + '%' }} />)}
-                        <span key={stage.kind + '-' + pop} className={'jack-runner' + (pop ? ' jack-evolve' : '')} style={{ left: pct + '%' }}>
-                            <span className="jack-sticker"><JackSticker kind={stage.kind} src={stage.src} /></span>
-                        </span>
+                        {rider ? <PetRider pct={pct} cheer={cheer} /> : (
+                            <span key={stage.kind + '-' + pop} className={'jack-runner' + (pop ? ' jack-evolve' : '')} style={{ left: pct + '%' }}>
+                                <span className="jack-sticker"><JackSticker kind={stage.kind} src={stage.src} /></span>
+                            </span>
+                        )}
                     </div>
                     <div className="jack-labels">
                         {JACK_STAGES.map((item, i) => <span key={item.kind} className={i === tier ? 'is-now' : ''}>{item.label}</span>)}
@@ -3259,6 +3374,10 @@
             const cardRef = useRef(null);
             const finished = useRef(false);
             const mounted = useMounted();
+            const petB = usePetNow();
+            const [cheerB, noteB] = useCheer();
+            useQuitTrack(Object.keys(s.firstTry || {}).length, s.batches.reduce((n, b) => n + b.length, 0), s.phase === 'done');
+            const exitB = onExit ? () => (petB ? petB.askQuit(onExit) : onExit()) : undefined;
             const orders = useMemo(() => {
                 const m = {};
                 ids.forEach(id => {
@@ -3314,6 +3433,7 @@
                 setFb({ ok, chosen, id });
                 if (ok) Sfx.correct(); else Sfx.wrong();
                 if (s.firstTry[id] === undefined && onReview) onReview(id, ok);
+                noteB(ok);
                 if (inputRef.current) inputRef.current.blur();
             };
             const continueResult = () => {
@@ -3376,7 +3496,7 @@
                         else return false;
                     }
                 },
-                Escape: () => { if (onExit) onExit(); }
+                Escape: () => { if (exitB) exitB(); }
             });
 
             const clearedN = batch.filter(id => s.cleared.indexOf(id) >= 0).length;
@@ -3391,14 +3511,14 @@
                     <div className="flex flex-wrap items-center gap-2">
                         {timerMin ? <Elapsed startedAt={s.startedAt} limitMin={timerMin} /> : null}
                         <HighlightButton on={hl} onToggle={toggleHl} locked={!canHighlight} bilingual={bilingual} />
-                        {onExit && <button type="button" className="btn btn-ghost btn-sm" onClick={onExit}><Icon name="x" size={14} /> Thoát <Kbd>Esc</Kbd></button>}
+                        {onExit && <button type="button" className="btn btn-ghost btn-sm" onClick={exitB}><Icon name="x" size={14} /> Thoát <Kbd>Esc</Kbd></button>}
                     </div>
                 </div>
                     <div className="drill-progress">
                         <span className="text-xs text-ink2 tnum">
                             Băng đạn <b className="text-ink">{s.b + 1}/{s.batches.length}</b> · Đã nắm <b className={clearedN === batch.length && batch.length ? 'text-success' : 'text-ink'}>{clearedN}/{batch.length}</b>
                     </span>
-                        <JackEvolveBar value={s.cleared.length} max={totalQ} />
+                        <JackEvolveBar value={s.cleared.length} max={totalQ} cheer={cheerB} />
                     </div>
                 </div>
             );
@@ -3416,6 +3536,7 @@
                         <JackEvolveBar value={st.total} max={st.total || 1} />
                         <div className="w-12 h-12 rounded-2xl bg-success-soft text-success flex items-center justify-center mb-3 mt-4"><Icon name="trophy" size={24} /></div>
                         <h2 className="text-2xl font-bold">Sạch toàn bộ {st.total} câu</h2>
+                        <div className="mt-4"><PetSummary /></div>
                         <p className="text-muted mt-1">Đúng ngay lần đầu {st.firstTryCorrect}/{st.total} · thời gian {Plan.fmtCountdown(st.elapsedMs)}</p>
                         {missed.length > 0 && (
                             <div className="mt-5 space-y-2">
@@ -3617,6 +3738,10 @@
             const mounted = useMounted();
             const t = byId.get(ids[index]) || null;
             const isMcq = !!(t && t.type === 'mcq');
+            const petF = usePetNow();
+            const [cheerF, noteF] = useCheer();
+            useQuitTrack(known.length + forgot.length, ids.length, done);
+            const closeF = () => (petF ? petF.askQuit(onClose) : onClose());
 
             useEffect(() => {
                 setTyped('');
@@ -3695,6 +3820,7 @@
             const gradeFlash = (ok) => {
                 if (!t || done || held) return;
                 onReview(t.id, ok);
+                noteF(ok);
                 const counts = mark(t.id, ok);
                 if (ok) {
                     next(counts);
@@ -3709,6 +3835,7 @@
                 setResult(Object.assign({ ok }, extra || {}));
                 if (ok) Sfx.correct(); else Sfx.wrong();
                 onReview(t.id, ok, extra && extra.kind);
+                noteF(ok);
                 mark(t.id, ok);
                 if (t.type !== 'mcq') speak(t.questionOrWord);
             };
@@ -3769,6 +3896,7 @@
                     <div className="card p-6 sm:p-8 max-w-2xl mx-auto enter">
                         <p className="text-sm text-muted">{session.title}</p>
                         <h2 className="text-2xl font-bold mb-5">Hết bộ thẻ</h2>
+                        <PetSummary />
                         <div className="grid grid-cols-3 gap-3 mb-5">
                             <div className="rounded-xl bg-success-soft p-4 text-center"><div className="text-3xl font-bold text-success tnum">{known.length}</div><div className="text-sm text-ink2">Đã nhớ</div></div>
                             <div className="rounded-xl bg-danger-soft p-4 text-center"><div className="text-3xl font-bold text-danger tnum">{forgot.length}</div><div className="text-sm text-ink2">Cần ôn</div></div>
@@ -3810,10 +3938,10 @@
                                 </div>
                             )}
                             <HighlightButton on={hl} onToggle={() => setHl(v => !v)} bilingual={bilingual} />
-                            {!isSlot && <button type="button" className="btn btn-ghost btn-sm" onClick={onClose}><Icon name="x" size={14} /> Kết thúc</button>}
+                            {!isSlot && <button type="button" className="btn btn-ghost btn-sm" onClick={closeF}><Icon name="x" size={14} /> Kết thúc</button>}
                         </div>
                     </div>
-                    <JackEvolveBar value={known.length + forgot.length} max={ids.length} />
+                    <JackEvolveBar value={known.length + forgot.length} max={ids.length} cheer={cheerF} />
                     <div className="h-4" />
 
                     {!t ? (
@@ -4055,6 +4183,8 @@
             const submitted = useRef(false);
             const charging = useRef(false);
             const [paying, setPaying] = useState(false);
+            const petE = usePetNow();
+            const [meal, setMeal] = useState(null);
             const now = useNow(1000, !result);
             const left = endAt - now;
             const examCode = useMemo(() => eosExamCode(title), [title]);
@@ -4093,6 +4223,10 @@
                 setTab('mcq');
                 if (auto) setTimeUp(true);
                 setResult(r);
+                /* Nộp hợp lệ (trả lời ít nhất nửa đề) = 1 ca / 1 bữa lớn hôm nay. Tắt pet vẫn tính. */
+                const valid = paper.length > 0 && answeredCount >= Math.ceil(paper.length / 2);
+                if (valid && petE) petE.creditMeal({ sessionId: 'eos-' + startedAt.current, answered: answeredCount, correct: r.correct });
+                setMeal({ valid, credited: valid && !!petE });
                 if (auto && toast) toast('Hết giờ — hệ thống đã tự nộp bài', 'info');
             };
 
@@ -4303,6 +4437,7 @@
                             </div>
                             {trial ? <p style={{ marginTop: 10 }}>Đây là bản thi thử 10 câu lấy từ Chặng 1. Đề đầy đủ 30–50 câu trộn cả 3 chặng dùng lượt EOS.</p> : null}
                         </fieldset>
+                        <PetEosResult correct={result.correct} total={result.total} wrongCount={Math.max(0, result.total - result.correct)} valid={!!(meal && meal.valid)} credited={!!(meal && meal.credited)} onReviewWrong={() => setReviewing('wrong')} />
                     </div>
                 );
             } else if (tab === 'blank') {
@@ -4417,6 +4552,7 @@
             return (
                 <Modal title="Phòng thi giả lập EOS" onClose={onClose}
                     footer={<><button type="button" className="btn btn-secondary" onClick={onClose}>Hủy</button><button type="button" className="btn btn-primary" onClick={() => onStart(n, Math.max(5, Math.round(n * 1.2)))} data-autofocus><Icon name="play" /> Vào phòng thi</button></>}>
+                    <PetLobby />
                     <p className="text-sm text-ink2 mb-3">Trộn ngẫu nhiên câu hỏi và thứ tự đáp án. Hết giờ hệ thống tự nộp bài. Câu sai và câu cắm cờ tự vào thẻ ôn của Ca học 3 buổi.</p>
                     <p className="label">Số câu</p>
                     <div className="flex flex-wrap gap-2" role="radiogroup" aria-label="Số câu">
@@ -4927,8 +5063,10 @@
             const v = Store.prefs.get(CLOCK_KEY, null) || {};
             const face = CLOCK_FACES.some(f => f.key === v.face) ? v.face : 'mono';
             const color = CLOCK_COLORS.some(c => c.key === v.color) ? v.color : 'auto';
-            const buddy = CLOCK_BUDDIES.some(b => b.key === v.buddy) ? v.buddy : 'none';
-            return { face, color, buddy };
+            const buddy = v.buddy === 'auto' || CLOCK_BUDDIES.some(b => b.key === v.buddy) ? v.buddy : 'auto';
+            const acc = v.acc !== false;
+            const dim = Number.isFinite(Number(v.dim)) && v.dim !== null && v.dim !== '' ? Math.max(0, Math.min(75, Math.round(Number(v.dim)))) : 40;
+            return { face, color, buddy, acc, dim };
         };
         const useClockStyle = () => {
             const [v, setV] = useState(readClock);
@@ -4961,11 +5099,14 @@
             const lightFg = fgLum > 0.4;
             return { hex, plate, lightFg, ratio: Math.round(ratio * 10) / 10 };
         };
-        /* Bạn nhỏ bám trên đồng hồ: thú vẽ tay bằng SVG, ngồi trên mép số, hai chân thả xuống chạm nhẹ đỉnh số (không che mặt số).
-           Mắt chớp, tai/đuôi động nhẹ; tắt chuyển động nếu máy bật giảm chuyển động. */
+        /* ===== Pet đồng hành 3 bữa (Ambient Study Companion) =====
+           Mỗi con chỉ vẽ phần thân cố định (đầu, tai, đuôi, 2 bàn tay bám số) trên cùng một khung 120×100.
+           Mắt, miệng, má và icon cảm xúc do PetMoodLayer vẽ; kính, tai nghe, mũ tốt nghiệp do PetAccessoryLayer vẽ,
+           cả hai dùng chung cho mọi con nhờ bảng neo tọa độ PET_ANCHORS. Đổi con vật không đổi trạng thái no/đói hay phụ kiện. */
         const CLOCK_BUDDIES = [
-            { key: 'none', label: 'Không' },
+            { key: 'none', label: 'Tắt bạn nhỏ' },
             { key: 'cat', label: 'Mèo cam' },
+            { key: 'blackcat', label: 'Mèo đen' },
             { key: 'bunny', label: 'Thỏ bông' },
             { key: 'bear', label: 'Gấu nâu' },
             { key: 'duck', label: 'Vịt vàng' },
@@ -4975,55 +5116,57 @@
             { key: 'penguin', label: 'Cánh cụt' }
         ];
         const BO = '#3B2F2F';
-        const bEyes = (lx, rx, y, r) => (
-            <g className="b-eyes">
-                <ellipse cx={lx} cy={y} rx={r} ry={r * 1.25} fill="#2B211D" />
-                <ellipse cx={rx} cy={y} rx={r} ry={r * 1.25} fill="#2B211D" />
-                <circle cx={lx + r * 0.35} cy={y - r * 0.45} r={r * 0.38} fill="#fff" />
-                <circle cx={rx + r * 0.35} cy={y - r * 0.45} r={r * 0.38} fill="#fff" />
-            </g>
-        );
-        const bCheeks = (lx, rx, y, c) => <g opacity=".65"><ellipse cx={lx} cy={y} rx="6" ry="3.6" fill={c || '#FF9AA8'} /><ellipse cx={rx} cy={y} rx="6" ry="3.6" fill={c || '#FF9AA8'} /></g>;
-        const bSmile = (y) => <path d={'M54 ' + y + ' q3 4 6 0 q3 4 6 0'} fill="none" stroke={BO} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />;
-        const bPaws = (fill, toes) => (
+        const GOLD = '#E5C98B';
+        /* Neo khuôn mặt: ex mắt trái/phải, ey cao mắt, er bán kính mắt, eye màu mắt, iris (mắt mèo đen), ink nét miệng/mi,
+           my cao miệng, mw rộng miệng (0 = mỏ, không vẽ miệng), ck má trái/phải, cy cao má, blush màu má,
+           head [cx, cy, rx, ry] khối đầu, hatY đỉnh đầu (chỗ đội mũ), cupY cao tai nghe. */
+        const PET_ANCHORS = {
+            cat: { ex: [47, 73], ey: 58, er: 4, my: 67, mw: 12, ck: [39, 81], cy: 68, head: [60, 60, 34, 27], hatY: 34, cupY: 60 },
+            blackcat: { ex: [47, 73], ey: 58, er: 4.2, eye: '#18181B', iris: GOLD, ink: GOLD, my: 67, mw: 12, ck: [39, 81], cy: 68, blush: '#F0A6B5', head: [60, 60, 34, 27], hatY: 34, cupY: 60 },
+            bunny: { ex: [48, 72], ey: 60, er: 4, my: 69, mw: 12, ck: [40, 80], cy: 69, head: [60, 62, 32, 26], hatY: 37, cupY: 62 },
+            bear: { ex: [47, 73], ey: 58, er: 3.8, my: 70, mw: 10, ck: [39, 81], cy: 67, head: [60, 61, 33, 27], hatY: 35, cupY: 61 },
+            duck: { ex: [47, 73], ey: 56, er: 4, my: 0, mw: 0, ck: [38, 82], cy: 66, blush: '#FF9E7A', head: [60, 60, 32, 28], hatY: 33, cupY: 60 },
+            frog: { ex: [41, 79], ey: 45, er: 3.6, my: 70, mw: 30, ck: [34, 86], cy: 66, head: [60, 66, 38, 23], hatY: 47, cupY: 66, glass: 7.5 },
+            panda: { ex: [48, 72], ey: 58, er: 2.6, eye: '#FFFFFF', pupil: '#2B211D', my: 70, mw: 10, ck: [37, 83], cy: 70, head: [60, 61, 33, 27], hatY: 35, cupY: 61, glass: 9 },
+            puppy: { ex: [48, 72], ey: 57, er: 3.8, my: 69, mw: 10, ck: [40, 80], cy: 68, head: [60, 61, 32, 27], hatY: 35, cupY: 58 },
+            penguin: { ex: [49, 71], ey: 59, er: 3.8, my: 0, mw: 0, ck: [41, 79], cy: 69, head: [60, 60, 33, 28], hatY: 33, cupY: 60 }
+        };
+        const gloss = (cx, cy, rot) => <ellipse cx={cx} cy={cy} rx="9" ry="4.2" fill="#FFFFFF" opacity=".32" transform={'rotate(' + (rot || -24) + ' ' + cx + ' ' + cy + ')'} />;
+        const bPaws = (fill, stroke, toes) => (
             <g className="b-paws">
-                <ellipse cx="40" cy="91" rx="11" ry="8" fill={fill} stroke={BO} strokeWidth="2.5" />
-                <ellipse cx="80" cy="91" rx="11" ry="8" fill={fill} stroke={BO} strokeWidth="2.5" />
-                {toes !== false && <g stroke={BO} strokeWidth="1.8" strokeLinecap="round"><path d="M36 93v-3M41 94v-3M76 93v-3M81 94v-3" /></g>}
+                <ellipse cx="40" cy="91" rx="11" ry="8" fill={fill} stroke={stroke || BO} strokeWidth="2.5" />
+                <ellipse cx="80" cy="91" rx="11" ry="8" fill={fill} stroke={stroke || BO} strokeWidth="2.5" />
+                {toes !== false && <g stroke={toes || stroke || BO} strokeWidth="1.8" strokeLinecap="round" opacity=".85"><path d="M36 93v-3M41 94v-3M76 93v-3M81 94v-3" /></g>}
             </g>
         );
-        const BUDDY_ART = {
-            cat: (
-                <>
-                    <path className="b-tail" d="M90 84 C112 80 116 58 104 50" fill="none" stroke={BO} strokeWidth="10" strokeLinecap="round" />
-                    <path className="b-tail" d="M90 84 C112 80 116 58 104 50" fill="none" stroke="#F6A65A" strokeWidth="5.5" strokeLinecap="round" />
-                    <g className="b-head">
-                        <path className="b-ear-l" d="M30 50 L33 20 L54 36 Z" fill="#F6A65A" stroke={BO} strokeWidth="2.5" strokeLinejoin="round" />
-                        <path className="b-ear-r" d="M90 50 L87 20 L66 36 Z" fill="#F6A65A" stroke={BO} strokeWidth="2.5" strokeLinejoin="round" />
-                        <path d="M35 44 L36 28 L47 37 Z M85 44 L84 28 L73 37 Z" fill="#FFB8C2" />
-                        <ellipse cx="60" cy="60" rx="34" ry="27" fill="#F6A65A" stroke={BO} strokeWidth="2.5" />
-                        <path d="M55 36 q5 6 10 0 M50 38 l3 6 M70 38 l-3 6" fill="none" stroke="#D9782F" strokeWidth="2.6" strokeLinecap="round" />
-                        <ellipse cx="60" cy="69" rx="18" ry="12" fill="#FFE7C7" />
-                        {bEyes(47, 73, 58, 4)}
-                        {bCheeks(39, 81, 68)}
-                        <path d="M57 64 h6 l-3 3.4 z" fill="#E86A7A" />
-                        {bSmile(67)}
-                        <g stroke={BO} strokeWidth="1.4" strokeLinecap="round" opacity=".7"><path d="M30 64 l-10 -2 M30 69 l-10 2 M90 64 l10 -2 M90 69 l10 2" /></g>
-                    </g>
-                    {bPaws('#F6A65A')}
-                </>
-            ),
+        const catBody = (fur, line, inner, muzzle, stripe, nose, whisker, tailTip) => (
+            <>
+                <path className="b-tail" d="M90 84 C112 80 116 58 104 50" fill="none" stroke={line} strokeWidth="10" strokeLinecap="round" />
+                <path className="b-tail" d="M90 84 C112 80 116 58 104 50" fill="none" stroke={fur} strokeWidth="5.5" strokeLinecap="round" />
+                {tailTip && <path className="b-tail" d="M106 55 C107 53 106 51 104 50" fill="none" stroke={tailTip} strokeWidth="5.5" strokeLinecap="round" />}
+                <g className="b-head">
+                    <path className="b-ear-l" d="M30 50 L33 20 L54 36 Z" fill={fur} stroke={line} strokeWidth="2.5" strokeLinejoin="round" />
+                    <path className="b-ear-r" d="M90 50 L87 20 L66 36 Z" fill={fur} stroke={line} strokeWidth="2.5" strokeLinejoin="round" />
+                    <path d="M35 44 L36 28 L47 37 Z M85 44 L84 28 L73 37 Z" fill={inner} />
+                    <ellipse cx="60" cy="60" rx="34" ry="27" fill={fur} stroke={line} strokeWidth="2.5" />
+                    {gloss(44, 44)}
+                    <path d="M55 37 q5 6 10 0 M50 39 l3 6 M70 39 l-3 6" fill="none" stroke={stripe} strokeWidth="2.6" strokeLinecap="round" />
+                    <ellipse cx="60" cy="69" rx="18" ry="12" fill={muzzle} />
+                    <path d="M57 63.5 h6 l-3 3.4 z" fill={nose} strokeLinejoin="round" />
+                    <g stroke={whisker} strokeWidth="1.4" strokeLinecap="round" opacity=".7"><path d="M30 64 l-10 -2 M30 69 l-10 2 M90 64 l10 -2 M90 69 l10 2" /></g>
+                </g>
+            </>
+        );
+        const PET_BASE = {
+            cat: <>{catBody('#F6A65A', BO, '#FFB8C2', '#FFE7C7', '#D9782F', '#E86A7A', BO)}{bPaws('#F6A65A')}</>,
+            blackcat: <>{catBody('#18181B', '#4A4A52', GOLD, '#27272A', '#3F3F46', GOLD, GOLD, GOLD)}{bPaws('#18181B', '#4A4A52', GOLD)}</>,
             bunny: (
                 <>
                     <g className="b-head">
                         <g className="b-ear-l"><path d="M46 44 C38 22 38 6 47 5 C56 4 57 22 55 42 Z" fill="#FFFFFF" stroke={BO} strokeWidth="2.5" /><path d="M48 38 C44 24 44 13 48 12 C52 12 52 24 51 37 Z" fill="#FFC2CF" /></g>
                         <g className="b-ear-r"><path d="M74 44 C82 22 82 6 73 5 C64 4 63 22 65 42 Z" fill="#FFFFFF" stroke={BO} strokeWidth="2.5" /><path d="M72 38 C76 24 76 13 72 12 C68 12 68 24 69 37 Z" fill="#FFC2CF" /></g>
                         <ellipse cx="60" cy="62" rx="32" ry="26" fill="#FFFFFF" stroke={BO} strokeWidth="2.5" />
-                        {bEyes(48, 72, 60, 4)}
-                        {bCheeks(40, 80, 69)}
                         <ellipse cx="60" cy="66" rx="3.4" ry="2.6" fill="#F47C93" />
-                        {bSmile(68)}
-                        <path d="M57 72 h6 v4 h-6 z" fill="#fff" stroke={BO} strokeWidth="1.5" />
                     </g>
                     {bPaws('#FFFFFF')}
                 </>
@@ -5035,11 +5178,9 @@
                         <circle className="b-ear-r" cx="86" cy="40" r="12" fill="#B07A4F" stroke={BO} strokeWidth="2.5" />
                         <circle cx="34" cy="40" r="6" fill="#E8B98F" /><circle cx="86" cy="40" r="6" fill="#E8B98F" />
                         <ellipse cx="60" cy="61" rx="33" ry="27" fill="#B07A4F" stroke={BO} strokeWidth="2.5" />
+                        {gloss(45, 45)}
                         <ellipse cx="60" cy="70" rx="14" ry="10" fill="#EBC9A3" />
-                        {bEyes(47, 73, 58, 3.8)}
-                        {bCheeks(39, 81, 67)}
                         <ellipse cx="60" cy="66" rx="5" ry="3.4" fill="#3B2F2F" />
-                        {bSmile(70)}
                     </g>
                     {bPaws('#B07A4F')}
                 </>
@@ -5049,8 +5190,7 @@
                     <g className="b-head">
                         <path className="b-ear-l" d="M58 34 C54 24 60 20 64 26 C66 20 72 24 68 32" fill="none" stroke={BO} strokeWidth="2.5" strokeLinecap="round" />
                         <ellipse cx="60" cy="60" rx="32" ry="28" fill="#FFD84D" stroke={BO} strokeWidth="2.5" />
-                        {bEyes(47, 73, 56, 4)}
-                        {bCheeks(38, 82, 66, '#FF9E7A')}
+                        {gloss(45, 44)}
                         <ellipse cx="60" cy="68" rx="13" ry="6.5" fill="#FF9F43" stroke={BO} strokeWidth="2.2" />
                         <path d="M49 68 h22" stroke={BO} strokeWidth="1.6" strokeLinecap="round" />
                     </g>
@@ -5067,9 +5207,7 @@
                         <circle cx="80" cy="44" r="13" fill="#8BD47A" stroke={BO} strokeWidth="2.5" />
                         <ellipse cx="60" cy="66" rx="38" ry="23" fill="#8BD47A" stroke={BO} strokeWidth="2.5" />
                         <circle cx="40" cy="44" r="8" fill="#fff" /><circle cx="80" cy="44" r="8" fill="#fff" />
-                        {bEyes(41, 81, 45, 4)}
-                        {bCheeks(36, 84, 68)}
-                        <path d="M44 70 q16 12 32 0" fill="none" stroke={BO} strokeWidth="2.4" strokeLinecap="round" />
+                        {gloss(36, 56, -14)}
                     </g>
                     <g className="b-paws">
                         <ellipse cx="38" cy="91" rx="12" ry="7" fill="#8BD47A" stroke={BO} strokeWidth="2.5" />
@@ -5086,12 +5224,9 @@
                         <ellipse cx="60" cy="61" rx="33" ry="27" fill="#FFFFFF" stroke={BO} strokeWidth="2.5" />
                         <ellipse cx="47" cy="59" rx="8" ry="10" fill="#2B2B2B" transform="rotate(25 47 59)" />
                         <ellipse cx="73" cy="59" rx="8" ry="10" fill="#2B2B2B" transform="rotate(-25 73 59)" />
-                        <g className="b-eyes"><circle cx="48" cy="58" r="3" fill="#fff" /><circle cx="72" cy="58" r="3" fill="#fff" /><circle cx="48.5" cy="58.5" r="1.6" fill="#2B211D" /><circle cx="72.5" cy="58.5" r="1.6" fill="#2B211D" /></g>
-                        {bCheeks(38, 82, 70)}
                         <ellipse cx="60" cy="67" rx="4.4" ry="3" fill="#2B2B2B" />
-                        {bSmile(70)}
                     </g>
-                    {bPaws('#2B2B2B', false)}
+                    {bPaws('#2B2B2B', BO, false)}
                 </>
             ),
             puppy: (
@@ -5101,11 +5236,7 @@
                         <path className="b-ear-l" d="M32 44 C18 48 18 74 30 78 C38 72 40 56 38 46 Z" fill="#B9835A" stroke={BO} strokeWidth="2.5" strokeLinejoin="round" />
                         <path className="b-ear-r" d="M88 44 C102 48 102 74 90 78 C82 72 80 56 82 46 Z" fill="#B9835A" stroke={BO} strokeWidth="2.5" strokeLinejoin="round" />
                         <ellipse cx="72" cy="55" rx="9" ry="8" fill="#E2B989" />
-                        {bEyes(48, 72, 57, 3.8)}
-                        {bCheeks(40, 80, 68)}
                         <ellipse cx="60" cy="65" rx="5" ry="3.6" fill="#3B2F2F" />
-                        {bSmile(69)}
-                        <path d="M58 72 q2 7 4 0" fill="#FF7A8A" stroke={BO} strokeWidth="1.4" />
                     </g>
                     {bPaws('#F3D9B1')}
                 </>
@@ -5115,8 +5246,7 @@
                     <g className="b-head">
                         <ellipse cx="60" cy="60" rx="33" ry="28" fill="#33416A" stroke={BO} strokeWidth="2.5" />
                         <path d="M60 46 C50 36 34 44 36 62 C38 78 52 84 60 84 C68 84 82 78 84 62 C86 44 70 36 60 46 Z" fill="#FFFFFF" />
-                        {bEyes(49, 71, 59, 3.8)}
-                        {bCheeks(41, 79, 69)}
+                        {gloss(42, 40)}
                         <path d="M55 65 h10 l-5 5 z" fill="#FFA63D" stroke={BO} strokeWidth="1.6" strokeLinejoin="round" />
                     </g>
                     <g className="b-paws">
@@ -5126,37 +5256,559 @@
                 </>
             )
         };
-        const Buddy = ({ kind }) => BUDDY_ART[kind] ? (
-            <svg className={'ck-buddy b-' + kind} viewBox="0 0 120 100" aria-hidden="true" focusable="false">{BUDDY_ART[kind]}</svg>
-        ) : null;
-        const ClockFace = ({ text, face, look, big, buddy }) => {
-            const pal = BUDDY_ART[buddy] ? ' has-buddy' : '';
+        const heartPath = (x, y, s) => 'M' + x + ' ' + (y + s * 0.9) + ' C' + (x - s * 1.6) + ' ' + (y - s * 0.1) + ' ' + (x - s * 0.9) + ' ' + (y - s * 1.3) + ' ' + x + ' ' + (y - s * 0.4)
+            + ' C' + (x + s * 0.9) + ' ' + (y - s * 1.3) + ' ' + (x + s * 1.6) + ' ' + (y - s * 0.1) + ' ' + x + ' ' + (y + s * 0.9) + ' Z';
+        /* Lớp cảm xúc: mắt, miệng, má + 1 icon nhỏ cạnh đầu. */
+        const PetMoodLayer = ({ a, mood, bare }) => {
+            const ink = a.ink || BO;
+            const eye = a.eye || '#2B211D';
+            const [lx, rx] = a.ex;
+            const y = a.ey, r = a.er;
+            const openEyes = (extra) => (
+                <g className={'b-eyes' + (extra || '')}>
+                    {[lx, rx].map((x, i) => a.iris ? (
+                        <g key={i}><ellipse cx={x} cy={y} rx={r * 1.15} ry={r * 1.3} fill={a.iris} /><ellipse cx={x} cy={y} rx={r * 0.38} ry={r * 1.05} fill={eye} /><circle cx={x + r * 0.45} cy={y - r * 0.55} r={r * 0.32} fill="#fff" /></g>
+                    ) : a.pupil ? (
+                        <g key={i}><circle cx={x} cy={y} r={r * 1.15} fill={eye} /><circle cx={x + r * 0.2} cy={y + r * 0.2} r={r * 0.62} fill={a.pupil} /></g>
+                    ) : (
+                        <g key={i}><ellipse cx={x} cy={y} rx={r} ry={r * 1.25} fill={eye} /><circle cx={x + r * 0.35} cy={y - r * 0.45} r={r * 0.38} fill="#fff" /><circle cx={x - r * 0.35} cy={y + r * 0.5} r={r * 0.16} fill="#fff" opacity=".8" /></g>
+                    ))}
+                </g>
+            );
+            const arcs = (up) => (
+                <g fill="none" stroke={a.pupil ? a.eye : (a.iris || eye)} strokeWidth="2.6" strokeLinecap="round">
+                    {[lx, rx].map((x, i) => <path key={i} d={up
+                        ? 'M' + (x - r * 1.3) + ' ' + (y + 1) + ' Q' + x + ' ' + (y - r * 1.7) + ' ' + (x + r * 1.3) + ' ' + (y + 1)
+                        : 'M' + (x - r * 1.3) + ' ' + (y - 0.5) + ' Q' + x + ' ' + (y + r * 1.3) + ' ' + (x + r * 1.3) + ' ' + (y - 0.5)} />)}
+                </g>
+            );
+            /* Lim dim tập trung: mắt nửa vầng trăng (mép trên phẳng), vẫn có đốm sáng */
+            const halfEyes = (
+                <g className="b-eyes is-slow">
+                    {[lx, rx].map((x, i) => (
+                        <g key={i}>
+                            <path d={'M' + (x - r * 1.2) + ' ' + (y + r * 0.1) + ' A' + (r * 1.2) + ' ' + (r * 0.95) + ' 0 0 0 ' + (x + r * 1.2) + ' ' + (y + r * 0.1) + ' Z'} fill={a.iris || eye} />
+                            {a.pupil && <circle cx={x} cy={y + r * 0.42} r={r * 0.42} fill={a.pupil} />}
+                            {a.iris && <path d={'M' + (x - r * 0.32) + ' ' + (y + r * 0.1) + ' A' + (r * 0.32) + ' ' + (r * 0.8) + ' 0 0 0 ' + (x + r * 0.32) + ' ' + (y + r * 0.1) + ' Z'} fill={eye} />}
+                            <circle cx={x + r * 0.4} cy={y + r * 0.42} r={r * 0.26} fill="#fff" opacity=".9" />
+                            <path d={'M' + (x - r * 1.3) + ' ' + (y + r * 0.1) + ' H' + (x + r * 1.3)} stroke={a.pupil ? '#2B2B2B' : (a.iris ? a.iris : eye)} strokeWidth="1.6" strokeLinecap="round" />
+                        </g>
+                    ))}
+                </g>
+            );
+            const brows = (
+                <g fill="none" stroke={a.pupil ? '#2B2B2B' : ink} strokeWidth="1.9" strokeLinecap="round" opacity=".85">
+                    <path d={'M' + (lx - r * 1.5) + ' ' + (y - r * 2.1) + ' L' + (lx + r * 1.1) + ' ' + (y - r * 2.9)} />
+                    <path d={'M' + (rx + r * 1.5) + ' ' + (y - r * 2.1) + ' L' + (rx - r * 1.1) + ' ' + (y - r * 2.9)} />
+                </g>
+            );
+            const m = a.mw, my = a.my, x1 = 60 - m / 2, x2 = 60 + m / 2;
+            const mouth = !m ? null
+                : mood === 'sulking' ? <path d={'M' + (60 - 4.5) + ' ' + (my + 3.5) + ' q2.2 -3.2 4.5 -0.6 q2.3 -2.6 4.5 0.6'} fill="none" stroke={ink} strokeWidth="2.1" strokeLinecap="round" strokeLinejoin="round" />
+                : mood === 'happy' ? <path d={'M' + x1 + ' ' + my + ' Q60 ' + (my + m * 0.95) + ' ' + x2 + ' ' + my + ' Z'} fill="#E86A7A" stroke={ink} strokeWidth="2" strokeLinejoin="round" />
+                    : mood === 'hungry' ? <path d={'M' + (x1 + m * 0.1) + ' ' + (my + 4) + ' q' + (m * 0.2) + ' -3.5 ' + (m * 0.4) + ' -1 q' + (m * 0.2) + ' 2.5 ' + (m * 0.4) + ' -1'} fill="none" stroke={ink} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+                        : mood === 'sleepy' ? <ellipse cx="60" cy={my + 2} rx="2.2" ry="2.6" fill={ink} opacity=".85" />
+                            : mood === 'late-night' ? <path d={'M' + (60 - m * 0.22) + ' ' + (my + 2) + ' q' + (m * 0.22) + ' 1.6 ' + (m * 0.44) + ' 0'} fill="none" stroke={ink} strokeWidth="2.1" strokeLinecap="round" />
+                                : m >= 20 ? <path d={'M' + x1 + ' ' + my + ' q' + (m / 2) + ' 10 ' + m + ' 0'} fill="none" stroke={ink} strokeWidth="2.4" strokeLinecap="round" />
+                                    : <path d={'M' + x1 + ' ' + my + ' q' + (m / 4) + ' 4 ' + (m / 2) + ' 0 q' + (m / 4) + ' 4 ' + (m / 2) + ' 0'} fill="none" stroke={ink} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />;
+            const blush = a.blush || '#FF9AA8';
+            const cheeks = (
+                <g className={mood === 'happy' ? 'pet-blush is-warm' : 'pet-blush'} opacity={mood === 'happy' ? 0.95 : mood === 'sulking' ? 0.9 : mood === 'sleepy' ? 0.45 : 0.65}>
+                    <ellipse cx={a.ck[0]} cy={a.cy} rx={mood === 'happy' ? 7 : mood === 'sulking' ? 8 : 6} ry={mood === 'happy' ? 4.2 : mood === 'sulking' ? 5.4 : 3.6} fill={blush} />
+                    <ellipse cx={a.ck[1]} cy={a.cy} rx={mood === 'happy' ? 7 : mood === 'sulking' ? 8 : 6} ry={mood === 'happy' ? 4.2 : mood === 'sulking' ? 5.4 : 3.6} fill={blush} />
+                </g>
+            );
+            /* Dỗi: liếc ngang (con ngươi dạt sang một bên), mí hạ chéo vào giữa */
+            const sideEyes = (
+                <g className="b-eyes is-slow">
+                    {[lx, rx].map((x, i) => (
+                        <g key={i}>
+                            <ellipse cx={x} cy={y + r * 0.15} rx={r * 1.1} ry={r * 1.05} fill={a.iris || (a.pupil ? eye : '#FFFFFF')} stroke={a.pupil ? 'none' : (a.iris ? '#0A0A0C' : ink)} strokeWidth="1.3" />
+                            <circle cx={x + r * 0.5} cy={y + r * 0.35} r={r * 0.55} fill={a.pupil || (a.iris ? '#18181B' : eye)} />
+                            <path d={i === 0
+                                ? 'M' + (x - r * 1.4) + ' ' + (y - r * 0.85) + ' L' + (x + r * 1.4) + ' ' + (y - r * 0.2)
+                                : 'M' + (x - r * 1.4) + ' ' + (y - r * 0.2) + ' L' + (x + r * 1.4) + ' ' + (y - r * 0.85)} stroke={a.pupil ? '#2B2B2B' : (a.iris || ink)} strokeWidth="2.1" strokeLinecap="round" />
+                        </g>
+                    ))}
+                </g>
+            );
+            const eyes = mood === 'happy' ? arcs(true) : mood === 'sulking' ? sideEyes : mood === 'sleepy' ? arcs(false) : mood === 'late-night' ? halfEyes : mood === 'hungry' ? openEyes(' is-plead') : openEyes();
+            const iconInk = '#3B2F2F';
+            const icon = mood === 'sulking' ? (
+                <g key="sulk" className="pet-icon">
+                    <g className="pet-anger" transform="translate(101 27)" fill="none" stroke="#F87171" strokeWidth="2.3" strokeLinecap="round">
+                        <path d="M-6 -2 q4 0 4 -4" /><path d="M2 -6 q0 4 4 4" /><path d="M6 2 q-4 0 -4 4" /><path d="M-2 6 q0 -4 -4 -4" />
+                    </g>
+                </g>
+            ) : mood === 'happy' ? (
+                <g key="happy" className="pet-icon">
+                    <path className="pet-heart" d={heartPath(101, 30, 5.2)} fill="#F9A8D4" stroke={iconInk} strokeWidth="1.3" strokeLinejoin="round" />
+                    <path className="pet-heart is-2" d={heartPath(111, 17, 3.8)} fill={GOLD} stroke={iconInk} strokeWidth="1.2" strokeLinejoin="round" />
+                </g>
+            ) : mood === 'late-night' ? (
+                <g key="late" className="pet-icon">
+                    <path d="M109 7 a9.5 9.5 0 1 0 7 15.5 a7.6 7.6 0 1 1 -7 -15.5 z" fill={GOLD} stroke={iconInk} strokeWidth="1.3" strokeLinejoin="round" />
+                    <circle cx="99" cy="10" r="1.2" fill={GOLD} className="pet-twinkle" />
+                    <g className="pet-steam" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round"><path d="M101 74 q-2 -3 0 -6 q2 -3 0 -6" /><path d="M106 75 q-2 -3 0 -6 q2 -3 0 -6" /></g>
+                    <path d="M97 78 h13 v6 a5.5 5.5 0 0 1 -5.5 5.5 h-2 a5.5 5.5 0 0 1 -5.5 -5.5 z" fill="#FFFFFF" stroke={iconInk} strokeWidth="1.6" strokeLinejoin="round" />
+                    <path d="M110 80 a3.2 3.2 0 0 1 0 6.4" fill="none" stroke={iconInk} strokeWidth="1.6" strokeLinecap="round" />
+                    <path d="M99 81 h9" stroke="#C08457" strokeWidth="2" strokeLinecap="round" />
+                </g>
+            ) : mood === 'hungry' ? (
+                <g key="hungry" className="pet-icon">
+                    <path className="pet-sweat" d="M95 30 q5 7 0 10.5 q-5 -3.5 0 -10.5 z" fill="#93C5FD" stroke={iconInk} strokeWidth="1.2" strokeLinejoin="round" />
+                    <ellipse cx="106" cy="85" rx="11" ry="2.6" fill="#E0E7FF" stroke={iconInk} strokeWidth="1.5" />
+                    <path d="M95 85.5 a11 8.5 0 0 0 22 0" fill="#FFFFFF" stroke={iconInk} strokeWidth="1.6" strokeLinejoin="round" />
+                    <path d="M100 89 q6 3 12 0" fill="none" stroke="#A5B4FC" strokeWidth="1.4" strokeLinecap="round" />
+                </g>
+            ) : mood === 'sleepy' ? (
+                <g key="sleepy" className="pet-icon pet-z" fontFamily="'Be Vietnam Pro', system-ui, sans-serif" fontWeight="800" fill="currentColor">
+                    <text x="95" y="32" fontSize="10">z</text>
+                    <text className="is-2" x="103" y="21" fontSize="14">Z</text>
+                </g>
+            ) : null;
+            return <g className={'pet-mood is-' + mood}>{cheeks}{eyes}{mood === 'hungry' && brows}{mouth}{bare ? null : icon}</g>;
+        };
+        /* Lớp phụ kiện theo Cấp bản sắc: cấp 2 kính tròn, cấp 3 thêm tai nghe, cấp 4+ đội mũ tốt nghiệp (giữ kính). */
+        const PetAccessoryLayer = ({ a, level, dim }) => {
+            if (!level || level < 2) return null;
+            const [lx, rx] = a.ex;
+            const gr = a.glass || a.er * 2.25;
+            const [hx, hcy, hrx] = a.head;
+            const top = a.hatY;
+            const glasses = (
+                <g className="pet-glass" fill="none" strokeWidth="1.8">
+                    <circle cx={lx} cy={a.ey} r={gr} fill="#FFFFFF" fillOpacity=".12" />
+                    <circle cx={rx} cy={a.ey} r={gr} fill="#FFFFFF" fillOpacity=".12" />
+                    <path d={'M' + (lx + gr) + ' ' + a.ey + ' Q60 ' + (a.ey - 3) + ' ' + (rx - gr) + ' ' + a.ey} strokeLinecap="round" />
+                </g>
+            );
+            const phones = level === 3 && (
+                <g className="pet-phones">
+                    <path d={'M' + (hx - hrx - 2) + ' ' + a.cupY + ' C' + (hx - hrx - 2) + ' ' + (top - 16) + ' ' + (hx + hrx + 2) + ' ' + (top - 16) + ' ' + (hx + hrx + 2) + ' ' + a.cupY} fill="none" strokeWidth="3.4" strokeLinecap="round" />
+                    <rect x={hx - hrx - 8} y={a.cupY - 9} width="11" height="18" rx="5" strokeWidth="1.6" />
+                    <rect x={hx + hrx - 3} y={a.cupY - 9} width="11" height="18" rx="5" strokeWidth="1.6" />
+                    <rect className="pet-phones-pad" x={hx - hrx - 5} y={a.cupY - 6} width="4" height="12" rx="2" />
+                    <rect className="pet-phones-pad" x={hx + hrx + 1} y={a.cupY - 6} width="4" height="12" rx="2" />
+                </g>
+            );
+            const cap = level >= 4 && (
+                <g className="pet-cap">
+                    <path d={'M' + (hx - 12) + ' ' + (top - 1) + ' v6 q12 5 24 0 v-6 z'} strokeWidth="1.6" strokeLinejoin="round" />
+                    <path d={'M' + (hx - 24) + ' ' + (top - 4) + ' L' + hx + ' ' + (top - 13) + ' L' + (hx + 24) + ' ' + (top - 4) + ' L' + hx + ' ' + (top + 5) + ' Z'} strokeWidth="1.6" strokeLinejoin="round" />
+                    <path className="pet-tassel" d={'M' + hx + ' ' + (top - 4) + ' L' + (hx + 17) + ' ' + (top - 2) + ' V' + (top + 9)} fill="none" strokeWidth="1.6" strokeLinecap="round" />
+                    <circle className="pet-tassel-end" cx={hx + 17} cy={top + 11} r="2.4" />
+                    <circle className="pet-tassel-end" cx={hx} cy={top - 4} r="1.6" />
+                </g>
+            );
+            /* Đang dỗi: phụ kiện mờ 25% kèm ổ khóa nhỏ, học 1 ca là trả lại nguyên vẹn. */
+            const lock = dim && (
+                <g className="pet-lock" transform={'translate(' + (rx + gr + 7) + ' ' + (a.ey - 9) + ')'}>
+                    <path d="M-2.6 0 v-2.4 a2.6 2.6 0 0 1 5.2 0 V0" fill="none" strokeWidth="1.5" />
+                    <rect x="-3.8" y="0" width="7.6" height="6" rx="1.4" strokeWidth="1" />
+                </g>
+            );
+            return <g className={'pet-acc' + (dim ? ' is-dim' : '')}>{phones ? <g>{phones}</g> : null}<g>{glasses}</g>{cap ? <g>{cap}</g> : null}{lock}</g>;
+        };
+        /* Thứ tự ưu tiên: happy → missing → sulking → late-night → hungry → idle. Hàm thuần, chỉ đọc dữ liệu có sẵn.
+           missedDays: số ngày trọn vẹn liền nhau gần nhất không chốt ca nào (tính tới hôm qua). Người chưa từng học: luôn 0, đủ 3 tim. */
+        const MEALS = ['bữa sáng', 'bữa trưa', 'bữa tối'];
+        const getPetState = ({ sessionsCompletedToday, schedule, now, justCompletedSession, identityLevel, missedDays, hasEverStudied, rescued }) => {
+            const d = new Date(now);
+            const nowMin = d.getHours() * 60 + d.getMinutes();
+            const slots = (schedule || []).slice().sort((x, y) => x.startMin - y.startMin);
+            const total = slots.length;
+            const done = Math.max(0, sessionsCompletedToday || 0);
+            const level = Math.max(1, identityLevel || 1);
+            const missed = hasEverStudied ? Math.max(0, Math.min(3, missedDays || 0)) : 0;
+            const hearts = 3 - missed;
+            const pack = (mood, message) => ({ mood, message, done, total, level, hearts, missedDays: missed });
+            if (justCompletedSession || (total > 0 && done >= total)) {
+                if (rescued) return pack('happy', 'Đã đón bạn nhỏ về nhà! Phụ kiện vẫn nguyên vẹn nhé.');
+                return pack('happy', total > 0 && done >= total ? 'Trọn ' + total + '/' + total + ' bữa rồi, đỉnh thật sự!' : 'No căng! Đã chốt ' + done + '/' + total + ' bữa hôm nay.');
+            }
+            if (missed >= 3) return pack('missing', 'Bỏ đói 3 ngày nên sang phòng bên xin pate rồi. Hoàn thành 1 ca học để đón về nhé.');
+            if (missed >= 1) return pack('sulking', 'Bỏ đói ' + missed + ' ngày rồi, dỗi cất phụ kiện luôn đó. Học 1 ca để làm hòa ngay nhé.');
+            if (d.getHours() >= 23 || d.getHours() < 4) return pack('late-night', 'Khuya rồi nhưng vẫn thức ôn cùng bạn đây. Xong ca này ngủ nhé.');
+            const due = slots.filter(s => s.startMin <= nowMin);
+            const owed = due.some(s => 'done' in s) ? due.filter(s => !s.done) : due.slice(done);
+            if (owed.length) {
+                const late = owed[owed.length - 1];
+                const meal = MEALS[Math.min(MEALS.length - 1, Math.max(0, slots.indexOf(late)))];
+                return pack('hungry', 'Quá giờ ' + meal + ' rồi, bụng kêu rột rột... Lật nhanh vài thẻ cho ăn đi.');
+            }
+            const next = slots.find(s => s.startMin > nowMin && !s.done);
+            return pack('idle', next ? 'Đang chờ ' + next.name + ' lúc ' + next.time + '...' : 'Ngồi đây canh giờ cùng bạn nè.');
+        };
+        const PET_MOODS = [
+            { key: 'idle', label: 'Bình thường' },
+            { key: 'hungry', label: 'Đói (lỡ ca)' },
+            { key: 'sulking', label: 'Dỗi (1–2 ngày)' },
+            { key: 'missing', label: 'Bỏ đi (3 ngày)' },
+            { key: 'happy', label: 'No' },
+            { key: 'late-night', label: 'Thức khuya' }
+        ];
+        const PET_SAMPLE_SAY = {
+            idle: 'Đang chờ Ca 2 · Chiều lúc 13:00...',
+            hungry: 'Quá giờ bữa sáng rồi, bụng kêu rột rột... Lật nhanh vài thẻ cho ăn đi.',
+            sulking: 'Bỏ đói 2 ngày rồi, dỗi cất phụ kiện luôn đó. Học 1 ca để làm hòa ngay nhé.',
+            missing: 'Bỏ đói 3 ngày nên sang phòng bên xin pate rồi. Hoàn thành 1 ca học để đón về nhé.',
+            happy: 'No căng! Đã chốt 1/3 bữa hôm nay.',
+            'late-night': 'Khuya rồi nhưng vẫn thức ôn cùng bạn đây. Xong ca này ngủ nhé.'
+        };
+        const PET_SAMPLE_HEARTS = { sulking: 1, missing: 0 };
+        const PET_NEEDS_FOOD = ['hungry', 'sulking', 'missing'];
+        const PET_ACC_NAMES = { 1: 'chưa có phụ kiện', 2: 'kính tròn gọng mảnh', 3: 'kính tròn + tai nghe', 4: 'kính tròn + mũ tốt nghiệp' };
+        /* Tạm dừng mọi chuyển động khi tab bị ẩn (treo tab cả ngày vẫn nhẹ máy). */
+        if (typeof document !== 'undefined' && !window.__petVis) {
+            window.__petVis = true;
+            const syncVis = () => document.documentElement.classList.toggle('edu-hidden', !!document.hidden);
+            document.addEventListener('visibilitychange', syncVis);
+            syncVis();
+        }
+        const PetArt = ({ kind, mood, level, still, bare }) => {
+            const a = PET_ANCHORS[kind];
+            if (!a) return null;
+            const m = mood || 'idle';
+            return (
+                <svg className={'ck-buddy b-' + kind + ' mood-' + m + (still ? ' is-static' : '')} viewBox="0 0 120 100" aria-hidden="true" focusable="false">
+                    <g className="pet-body">{PET_BASE[kind]}</g>
+                    <g className="b-face"><PetMoodLayer a={a} mood={m} bare={bare} /><PetAccessoryLayer a={a} level={level} dim={m === 'sulking'} /></g>
+                </svg>
+            );
+        };
+        /* Bỏ đi 3 ngày: chỗ bám chỉ còn chiếc bát rỗng + mảnh giấy nhắn (giữ nguyên khung để đồng hồ không nhảy). mini: chỉ bát + dấu chân. */
+        const PetGone = ({ still, mini }) => (
+            <svg className={'ck-buddy b-gone' + (still ? ' is-static' : '') + (mini ? ' is-mini' : '')} viewBox="0 0 120 100" aria-hidden="true" focusable="false">
+                <g className="gone-steps" fill="currentColor" opacity=".38">
+                    <g transform="translate(100 70) rotate(28)"><ellipse cx="0" cy="2" rx="3.2" ry="2.6" /><circle cx="-3.2" cy="-2.4" r="1.3" /><circle cx="0" cy="-3.6" r="1.3" /><circle cx="3.2" cy="-2.4" r="1.3" /></g>
+                    <g transform="translate(110 55) rotate(28)"><ellipse cx="0" cy="2" rx="2.8" ry="2.3" /><circle cx="-2.8" cy="-2.1" r="1.1" /><circle cx="0" cy="-3.2" r="1.1" /><circle cx="2.8" cy="-2.1" r="1.1" /></g>
+                </g>
+                {!mini && (
+                    <g className="gone-note" transform="rotate(-8 76 72)">
+                        <path d="M61 50 h25 l6 6 v32 h-31 z" fill="#FFF8E7" stroke={BO} strokeWidth="1.8" strokeLinejoin="round" />
+                        <path d="M86 50 v6 h6" fill="#F3E3BC" stroke={BO} strokeWidth="1.4" strokeLinejoin="round" />
+                        <path d="M66 62 h17 M66 68 h20 M66 74 h12" stroke="#B9A57A" strokeWidth="1.8" strokeLinecap="round" />
+                        <path d={heartPath(83, 80, 3)} fill="#F9A8D4" stroke={BO} strokeWidth="1" />
+                        <rect x="68" y="46" width="13" height="6" rx="1.5" fill={GOLD} opacity=".85" transform="rotate(4 74 49)" />
+                    </g>
+                )}
+                <g className="gone-bowl" transform={mini ? 'translate(22 0)' : undefined}>
+                    <ellipse cx="36" cy="84" rx="20" ry="4.6" fill="#E0E7FF" stroke={BO} strokeWidth="2" />
+                    <path d="M16 84.5 a20 13 0 0 0 40 0" fill="#FFFFFF" stroke={BO} strokeWidth="2" strokeLinejoin="round" />
+                    <path d="M25 91 q11 5 22 0" stroke="#A5B4FC" strokeWidth="1.8" fill="none" strokeLinecap="round" />
+                    <circle cx="61" cy="95" r="1.4" fill="#C08457" /><circle cx="65" cy="93" r="1" fill="#C08457" />
+                </g>
+            </svg>
+        );
+        const PetHearts = ({ n }) => (
+            <span className="pet-hearts" role="img" aria-label={n + '/3 tim'}>
+                {[0, 1, 2].map(i => (
+                    <svg key={i} viewBox="0 0 12 11" className={i < n ? 'on' : ''} aria-hidden="true"><path d="M6 10 C1 6.5 0 4.6 0 3.2 0 1.4 1.4 0 3.1 0 4.4 0 5.4 .8 6 1.8 6.6 .8 7.6 0 8.9 0 10.6 0 12 1.4 12 3.2 12 4.6 11 6.5 6 10Z" /></svg>
+                ))}
+            </span>
+        );
+        /* Con pet ngồi trên số. interactive: bấm/rê chuột để nghe pet nói (pill kính mờ, có 3 tim), tự hiện 4 giây khi đói, thức khuya, vừa no;
+           5 giây khi đã bỏ đi. Lúc bỏ đi, bấm bát/mảnh giấy là vào học 1 ca (onAction). */
+        const Pet = ({ kind, mood, level, message, interactive, autoSay, hearts, onAction, still }) => {
+            const [say, setSay] = useState(false);
+            const [hover, setHover] = useState(false);
+            const [boop, setBoop] = useState(0);
+            const [room, setRoom] = useState(240);
+            const box = useRef(null);
+            const measure = () => {
+                const el = box.current;
+                if (!el) return;
+                const card = el.closest('.cmd-card') || document.body;
+                const left = el.getBoundingClientRect().left - card.getBoundingClientRect().left - 14;
+                setRoom(Math.max(120, Math.min(250, Math.round(left))));
+            };
+            useEffect(() => {
+                if (!interactive || !autoSay || !message) return undefined;
+                const long = mood === 'missing';
+                if (!long && mood !== 'hungry' && mood !== 'late-night' && mood !== 'happy') return undefined;
+                measure();
+                setSay(true);
+                const t = setTimeout(() => setSay(false), long ? 5200 : 4200);
+                return () => clearTimeout(t);
+            }, [mood, interactive, autoSay]);
+            useEffect(() => {
+                if (!boop) return undefined;
+                const t = setTimeout(() => setBoop(0), 520);
+                return () => clearTimeout(t);
+            }, [boop]);
+            if (!PET_ANCHORS[kind]) return null;
+            const gone = mood === 'missing';
+            const art = gone ? <PetGone still={still} /> : <PetArt kind={kind} mood={mood} level={level} still={still} />;
+            if (!interactive) return <span className={'ck-pet is-still' + (gone ? ' is-gone' : '')}>{art}</span>;
+            const open = say || hover;
+            const act = gone && onAction ? onAction : null;
+            return (
+                <span ref={box} className={'ck-pet' + (gone ? ' is-gone' : '') + (boop ? ' is-boop' : '') + (open ? ' is-say' : '')}>
+                    <button type="button" className="ck-pet-btn" aria-label={(gone ? 'Bát rỗng và mảnh giấy nhắn: ' : 'Bạn nhỏ: ') + message + (typeof hearts === 'number' ? ' Còn ' + hearts + '/3 tim.' : '') + (act ? ' Bấm để bắt đầu học.' : '')}
+                        onClick={() => { measure(); setBoop(Date.now()); if (act) { act(); return; } setSay(v => !v); }}
+                        onMouseEnter={() => { measure(); setHover(true); }} onMouseLeave={() => setHover(false)}
+                        onFocus={() => { measure(); setHover(true); }} onBlur={() => { setHover(false); setSay(false); }}>
+                        {art}
+                    </button>
+                    <span className={'ck-pet-say' + (act ? ' is-action' : '')} role="status" style={{ maxWidth: room + 'px' }} onClick={act || undefined}>
+                        {open ? <>{message}{typeof hearts === 'number' && <PetHearts n={hearts} />}{act && <span className="pet-say-cta">Bấm để bắt đầu 1 ca →</span>}</> : ''}
+                    </span>
+                </span>
+            );
+        };
+        /* Cho tiêu đề chữ khi đang trong ca ("Đến giờ học rồi"): pet cũng ngồi trên chữ như trên số. */
+        const PetPerch = ({ pet, light, children }) => pet && PET_ANCHORS[pet.kind]
+            ? <span className={'ck-perch has-buddy ' + (light ? 'fg-light' : 'fg-dark')}>{children}<Pet {...pet} /></span>
+            : children;
+        /* ===== Bộ máy pet dùng chung (Tổng quan, Luyện tập, Kho đề EOS) =====
+           Lịch sử học = phiếu bản sắc (mỗi phiên/ca hoàn thành là 1 phiếu có ngày). App tính trạng thái 1 lần rồi chia qua PetCtx. */
+        const PetCtx = React.createContext(null);
+        const usePetNow = () => React.useContext(PetCtx);
+        const usePetVitals = () => {
+            const [votes, setVotes] = useState(voteHub.rows);
+            useEffect(() => {
+                voteHub.subs.add(setVotes);
+                if (voteHub.rows) setVotes(voteHub.rows); else loadVotes();
+                return () => { voteHub.subs.delete(setVotes); };
+            }, []);
+            const today = dayKey(new Date());
+            return useMemo(() => {
+                const rows = Array.isArray(votes) ? votes : [];
+                const dates = new Set(rows.map(v => v && v.date).filter(Boolean));
+                /* Chỉ tính là "đã từng học" khi có phiếu trước hôm nay: người mới (hoặc mới học buổi đầu) không bao giờ bị trừ tim. */
+                const before = Array.from(dates).some(d => d < today);
+                let gap = 0;
+                for (let i = 1; i <= 3; i += 1) { if (dates.has(shiftDay(today, -i))) break; gap += 1; }
+                const lastVoteAt = rows.reduce((m, v) => Math.max(m, (v && Number(v.createdAt)) || 0), 0);
+                const sum = summarize(rows, today);
+                return { hasEverStudied: before, gap: before ? gap : 0, votedToday: dates.has(today), lastVoteAt, level: sum && sum.rank ? sum.rank.level : 1 };
+            }, [votes, today]);
+        };
+        /* Phiên học đang mở báo tiến độ vào đây để hộp "Khoan đã" biết còn bao nhiêu thẻ. */
+        const quitHub = { open: false, answered: 0, remaining: 0 };
+        const useQuitTrack = (answered, total, finished) => {
+            useEffect(() => {
+                quitHub.open = !finished && total > 0;
+                quitHub.answered = answered;
+                quitHub.remaining = Math.max(0, total - answered);
+            }, [answered, total, finished]);
+            useEffect(() => () => { quitHub.open = false; quitHub.answered = 0; quitHub.remaining = 0; }, []);
+        };
+        const QuitPetModal = ({ kind, mood, level, remaining, onStay, onLeave }) => (
+            <Modal title="Khoan đã..." onClose={onStay}
+                footer={<><button type="button" className="btn btn-ghost text-muted" onClick={onLeave}>Vẫn thoát</button><button type="button" className="btn btn-primary" onClick={onStay} data-autofocus>Học nốt {remaining} thẻ</button></>}>
+                <div className="pet-quit">
+                    <span className="pet-quit-art">{mood === 'missing' ? <PetGone /> : <PetArt kind={kind} mood={mood} level={level} />}</span>
+                    <p>{mood === 'missing' ? 'Còn ' + remaining + ' thẻ nữa là đón bạn nhỏ về nhà rồi, nán lại chút nhé?' : 'Còn đúng ' + remaining + ' thẻ nữa là đủ bữa rồi, bỏ dở thật hả?'}</p>
+                </div>
+            </Modal>
+        );
+        const usePetEngine = ({ plan, now, tier, toast, setPlan }) => {
+            const style = useClockStyle();
+            const vit = usePetVitals();
+            const [quit, setQuit] = useState(null);
+            const active = plan ? plan.slots.filter(s => !s.nghi) : [];
+            const slotsDone = active.filter(s => s.status === 'done').length;
+            const studiedToday = vit.votedToday || slotsDone > 0;
+            const missedDays = vit.hasEverStudied && !studiedToday ? vit.gap : 0;
+            /* Giải cứu: hôm nay đã chốt ca sau khi bỏ trọn ít nhất 1 ngày → tim về 3/3, phụ kiện về đủ. */
+            const rescued = vit.hasEverStudied && studiedToday && vit.gap >= 1;
+            const lastDone = active.reduce((m, s) => Math.max(m, s.finishedAt ? (Date.parse(s.finishedAt) || 0) : 0), vit.lastVoteAt);
+            const recent = lastDone > 0 && now - lastDone >= 0 && now - lastDone < 15 * 60000;
+            const state = getPetState({
+                sessionsCompletedToday: slotsDone,
+                schedule: active.map(s => ({ id: s.id, startMin: Plan.triggerMin(s), name: 'Ca ' + s.id + ' · ' + s.anchorLabel, time: Plan.hhmmOf(Plan.triggerMin(s)), done: s.status === 'done' })),
+                now,
+                justCompletedSession: recent,
+                identityLevel: vit.level,
+                missedDays,
+                hasEverStudied: vit.hasEverStudied,
+                rescued
+            });
+            const kind = resolveBuddy(style, tier);
+            const enabled = kind !== 'none';
+            const level = style.acc ? state.level : 1;
+            useEffect(() => {
+                if (!rescued) return;
+                const today = dayKey(new Date());
+                if (Store.prefs.get('petRescuedOn', '') === today) return;
+                Store.prefs.set('petRescuedOn', today);
+                if (enabled && toast) toast('Đã đón bạn nhỏ về nhà! Phụ kiện vẫn nguyên vẹn nhé.', 'success', 3800);
+            }, [rescued]);
+            const askQuit = (go) => {
+                const need = enabled && quitHub.open && quitHub.answered >= 1 && quitHub.remaining > 0 && PET_NEEDS_FOOD.indexOf(state.mood) >= 0;
+                if (!need) { go(); return; }
+                setQuit({ go, remaining: quitHub.remaining });
+            };
+            /* Bài thi EOS nộp hợp lệ = 1 ca: ghi phiếu hôm nay và đánh dấu xong ca đang đến hạn (hoặc ca kế tiếp). */
+            const creditMeal = ({ sessionId, answered, correct }) => {
+                affirmStudy();
+                castSessionVote({ id: sessionId, voteType: 'eosMock', slotId: 'eos' }, answered, toast);
+                setPlan(p => {
+                    if (!p || p.date !== Plan.dayKeyOf(new Date())) return p;
+                    const d = new Date();
+                    const nm = d.getHours() * 60 + d.getMinutes();
+                    const open = p.slots.filter(s => !s.nghi && s.status !== 'done' && s.status !== 'phase2');
+                    if (!open.length) return p;
+                    const target = open.filter(s => Plan.triggerMin(s) <= nm)[0] || open[0];
+                    const at = d.toISOString();
+                    return Object.assign({}, p, { slots: p.slots.map(s => (s.id === target.id ? Object.assign({}, s, { status: 'done', finishedAt: at, cardsDone: (s.cardsDone || 0) + answered, remembered: (s.remembered || 0) + correct }) : s)) });
+                });
+            };
+            const quitModal = quit ? (
+                <QuitPetModal kind={kind} mood={state.mood} level={level} remaining={quit.remaining} onStay={() => setQuit(null)}
+                    onLeave={() => { const go = quit.go; setQuit(null); go(); }} />
+            ) : null;
+            return { state, kind, enabled, level, rescued, justRescued: rescued && recent, askQuit, creditMeal, quitModal };
+        };
+        /* Thanh tiến độ: pet tĩnh 28px ở đầu mũi thanh (hoặc bát rỗng nếu đang bỏ đi). cheer: mắt cười ^ ^ trong 400ms khi đúng liền 5, 10... câu. */
+        const PetRider = ({ pct, cheer }) => {
+            const pn = usePetNow();
+            if (!pn || !pn.enabled) return null;
+            const gone = pn.state.mood === 'missing';
+            return (
+                <span className="pet-rider" style={{ left: pct + '%' }} aria-hidden="true">
+                    {gone ? <PetGone still mini /> : <PetArt kind={pn.kind} mood={cheer ? 'happy' : 'idle'} level={pn.level} still bare />}
+                </span>
+            );
+        };
+        const useCheer = () => {
+            const [cheer, setCheer] = useState(false);
+            const streak = useRef(0);
+            useEffect(() => {
+                if (!cheer) return undefined;
+                const t = setTimeout(() => setCheer(false), 400);
+                return () => clearTimeout(t);
+            }, [cheer]);
+            const note = (ok) => {
+                streak.current = ok ? streak.current + 1 : 0;
+                if (ok && streak.current > 0 && streak.current % 5 === 0) setCheer(Date.now());
+            };
+            return [!!cheer, note];
+        };
+        /* Màn tổng kết phiên: pet rõ hơn ở trạng thái no, số bữa hôm nay, huy hiệu khi vừa đón pet về. */
+        const PetSummary = () => {
+            const pn = usePetNow();
+            if (!pn || !pn.enabled) return null;
+            const st = pn.state;
+            const gone = st.mood === 'missing';
+            return (
+                <div className={'pet-sum' + (gone ? ' is-gone' : '')}>
+                    <span className="pet-sum-art">{gone ? <PetGone /> : <PetArt kind={pn.kind} mood="happy" level={pn.level} />}</span>
+                    <span className="min-w-0 text-left">
+                        <b className="block text-sm text-ink">{gone ? 'Bạn nhỏ vẫn đang ở phòng bên' : 'Hôm nay đã chốt ' + st.done + '/' + st.total + ' bữa'}</b>
+                        <span className="block text-xs text-ink2">{gone ? 'Hoàn thành 1 ca học (hoặc 1 phiên đủ 5 câu) để đón về nhé.' : pn.justRescued ? 'Bạn nhỏ đã về nhà, no nê rồi.' : 'Bạn nhỏ no nê, cảm ơn chủ nhân!'}</span>
+                        {pn.justRescued && !gone && <span className="pet-badge"><PetHearts n={3} /> Đã hồi 3/3 tim · phụ kiện cấp bản sắc về đủ</span>}
+                    </span>
+                </div>
+            );
+        };
+        /* Sảnh chờ trước khi vào phòng thi EOS. Trong phòng thi không hiện gì. */
+        const PetLobby = ({ compact }) => {
+            const pn = usePetNow();
+            if (!pn || !pn.enabled) return null;
+            const gone = pn.state.mood === 'missing';
+            return (
+                <div className={'pet-lobby' + (compact ? ' is-compact' : '')}>
+                    <span className="pet-lobby-art">{gone ? <PetGone mini /> : <PetArt kind={pn.kind} mood={pn.state.mood === 'sulking' ? 'sulking' : 'idle'} level={pn.level} />}</span>
+                    <span>{gone ? 'Nộp xong đề này là đủ điều kiện đón bạn nhỏ về đấy.' : 'Ngồi ngoài cửa phòng thi chờ bạn ra nhé.'}</span>
+                </div>
+            );
+        };
+        /* Kết quả thi: đạt thì vui, chưa đạt thì bình tĩnh (không dỗi, không mỉa), kèm nút xem lại câu sai. */
+        const PetEosResult = ({ correct, total, wrongCount, valid, credited, onReviewWrong }) => {
+            const pn = usePetNow();
+            if (!pn || !pn.enabled) return null;
+            const pass = total > 0 && correct / total >= 0.5;
+            const gone = pn.state.mood === 'missing';
+            const msg = pass
+                ? (credited ? 'Chắc tay rồi đó! Đã chốt thêm 1 bữa lớn hôm nay.' : 'Chắc tay rồi đó!')
+                : 'Nháp thôi mà, xem lại ' + wrongCount + ' câu sai rồi làm lại ăn chặt.';
+            return (
+                <div className="pet-eos" role="status">
+                    <span className="pet-eos-art">{gone ? <PetGone /> : <PetArt kind={pn.kind} mood={pass ? 'happy' : 'idle'} level={pn.level} />}</span>
+                    <div className="min-w-0">
+                        <p className="pet-eos-msg">{msg}</p>
+                        {!pass && credited && <p className="pet-eos-note">Bài nộp vẫn tính 1 bữa hôm nay.</p>}
+                        {!valid && <p className="pet-eos-note">Trả lời ít nhất nửa đề thì bài nộp mới tính là 1 bữa.</p>}
+                        {credited && pn.rescued && <p className="pet-badge"><PetHearts n={3} /> Đã đón bạn nhỏ về · hồi 3/3 tim</p>}
+                        {!pass && wrongCount > 0 && <button type="button" className="eos-btn" style={{ marginTop: 6 }} onClick={onReviewWrong}>[ Xem lại {wrongCount} câu sai ]</button>}
+                    </div>
+                </div>
+            );
+        };
+        /* Nút gạt trong Cài đặt: tắt là ẩn pet khắp app, ca học vẫn tính bình thường. */
+        const PetToggle = () => {
+            const style = useClockStyle();
+            return (
+                <label className="flex items-center justify-between gap-3 min-h-[44px]">
+                    <span><span className="font-semibold text-sm block">Bạn nhỏ đồng hành</span><span className="text-xs text-ink2">Pet trên đồng hồ, thanh tiến độ và phòng thi. Tắt thì chỉ ẩn hình, ca học vẫn tính bình thường.</span></span>
+                    <input type="checkbox" className="w-5 h-5 accent-indigo-700" checked={style.buddy !== 'none'} onChange={(e) => saveClock({ buddy: e.target.checked ? 'auto' : 'none' })} />
+                </label>
+            );
+        };
+        /* 'auto' = chưa chọn: Obsidian Đen dùng Mèo đen, giao diện khác dùng Mèo cam. */
+        const resolveBuddy = (style, tier) => (style.buddy === 'auto' ? (tier === 'obsidian' ? 'blackcat' : 'cat') : style.buddy);
+        /* Ảnh nền sau lớp phủ tối: độ sáng thực tế ở vùng chữ giảm theo độ tối người dùng kéo; chọn chữ trắng/mực theo độ sáng đó
+           (ngưỡng 0.28: hơi nghiêng về chữ trắng vì lớp phủ tối làm ảnh trông tối hơn số đo trung bình). */
+        const dimPhoto = (photo, dimPct) => {
+            if (!photo) return null;
+            const base = typeof photo.lum === 'number' ? photo.lum : (photo.tone === 'light' ? 0.7 : 0.05);
+            const lum = base * (1 - Math.max(0, Math.min(75, dimPct == null ? 40 : dimPct)) / 100);
+            return Object.assign({}, photo, { lum: Math.round(lum * 1000) / 1000, tone: lum > 0.28 ? 'light' : 'dark' });
+        };
+        const ClockFace = ({ text, face, look, big, pet }) => {
+            const on = pet && PET_ANCHORS[pet.kind];
+            const pal = on ? ' has-buddy' : '';
+            const petEl = on ? <Pet {...pet} /> : null;
             return !/\d/.test(String(text))
-            ? <span className={'ck ck-word' + pal + (look.plate ? ' has-plate' : '') + (look.lightFg ? ' fg-light' : ' fg-dark')} data-face={face} style={{ '--ck': look.hex }}><Buddy kind={buddy} />{text}</span>
+            ? <span className={'ck ck-word' + pal + (look.plate ? ' has-plate' : '') + (look.lightFg ? ' fg-light' : ' fg-dark')} data-face={face} style={{ '--ck': look.hex }}>{text}{petEl}</span>
             : (
             <span className={'ck' + pal + (big ? ' is-big' : '') + (look.plate ? ' has-plate' : '') + (look.lightFg ? ' fg-light' : ' fg-dark')} data-face={face} style={{ '--ck': look.hex }}>
-                <Buddy kind={buddy} />
                 {String(text).split('').map((ch, i) => ch === ':'
                     ? <span key={i} className="ck-sep" aria-hidden="true">:</span>
                     : <span key={i} className="ck-d">{ch}</span>)}
+                {petEl}
             </span>
             );
         };
-        const ClockStudio = ({ photo, tier, busy, onPick, onRemove, onClose, sample }) => {
+        const ClockStudio = ({ photo, tier, busy, onPick, onRemove, onClose, sample, pet }) => {
             const style = useClockStyle();
-            const look = clockLook(style, tier, photo);
+            const kind = resolveBuddy(style, tier);
+            const shown = dimPhoto(photo, style.dim);
+            const look = clockLook(style, tier, shown);
+            const realLevel = pet ? pet.level : 1;
+            const [mood, setMood] = useState(pet ? pet.mood : 'idle');
+            const [lvl, setLvl] = useState(null);
+            const level = lvl != null ? lvl : (style.acc ? realLevel : 1);
             const [drag, setDrag] = useState(false);
             const input = useRef(null);
             const onDrop = (e) => { e.preventDefault(); setDrag(false); const f = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0]; if (f) onPick(f); };
+            const say = pet && mood === pet.mood ? pet.message : PET_SAMPLE_SAY[mood];
+            const demoPet = (k) => (k !== 'none' ? { kind: k, mood: 'idle', level } : null);
+            const bg = (extra) => ({ className: 'ck-face-demo' + (shown ? ' has-photo photo-' + shown.tone : '') + ' tier-' + tier + (extra || ''), style: shown ? { backgroundImage: 'url("' + shown.src + '")' } : undefined });
             return (
                 <Modal title="Tùy chỉnh đồng hồ" onClose={onClose} size="md" footer={<button type="button" className="btn btn-primary" onClick={onClose}>Xong</button>}>
-                    <div className={'cmd-card ck-mini' + (photo ? ' has-photo photo-' + photo.tone : '')} style={photo ? { backgroundImage: 'url("' + photo.src + '")' } : undefined}>
-                        {photo && <span className="cmd-photo-scrim" aria-hidden="true" />}
+                    <div style={{ '--bg-dim': style.dim / 100 }}>
+                    <div className={'cmd-card ck-mini' + (shown ? ' has-photo photo-' + shown.tone : '')} style={shown ? { backgroundImage: 'url("' + shown.src + '")' } : undefined}>
+                        {shown && <span className="cmd-photo-scrim" aria-hidden="true" />}
                         <div className="relative z-10">
                             <p className="text-xs font-semibold text-indigo-100">Xem trước</p>
-                            <ClockFace text={sample} face={style.face} look={look} big buddy={style.buddy} />
+                            <ClockFace text={sample} face={style.face} look={look} big pet={kind !== 'none' ? { kind, mood, level, message: say, interactive: true, hearts: pet && mood === pet.mood ? pet.hearts : (PET_SAMPLE_HEARTS[mood] != null ? PET_SAMPLE_HEARTS[mood] : 3) } : null} />
+                            {kind !== 'none' && <p className="mt-2 text-xs font-medium text-indigo-100">“{say}”</p>}
                         </div>
                     </div>
+                    {kind !== 'none' && (
+                        <div className="ck-moods" role="radiogroup" aria-label="Xem thử trạng thái">
+                            <span className="self-center text-xs font-semibold text-muted">Xem thử trạng thái:</span>
+                            {PET_MOODS.map(m => (
+                                <button key={m.key} type="button" role="radio" aria-checked={mood === m.key} className={'ck-mood' + (mood === m.key ? ' is-on' : '')} onClick={() => setMood(m.key)}>
+                                    {m.label}{pet && pet.mood === m.key ? ' · bây giờ' : ''}
+                                </button>
+                            ))}
+                        </div>
+                    )}
                     {look.plate && <p className="mt-2 text-xs text-ink2">Màu này gần với nền nên app tự lót tấm kính mờ sau số để vẫn đọc rõ.</p>}
 
                     <p className="ck-head">Ảnh nền</p>
@@ -5172,28 +5824,58 @@
                         <input ref={input} type="file" accept="image/*" className="sr-only" tabIndex={-1} aria-hidden="true"
                             onChange={(e) => { const f = e.target.files && e.target.files[0]; e.target.value = ''; if (f) onPick(f); }} />
                     </div>
-                    {photo && <button type="button" className="mt-2 text-sm font-medium text-muted underline-offset-2 hover:underline" onClick={onRemove}>Bỏ ảnh, dùng nền mặc định</button>}
+                    {photo && (
+                        <>
+                            <label className="ck-dim">
+                                <span className="shrink-0 font-medium">Độ tối lớp phủ</span>
+                                <input type="range" min="0" max="75" step="5" value={style.dim} onChange={(e) => saveClock({ dim: Number(e.target.value) })} aria-valuetext={style.dim + '%'} />
+                                <output>{style.dim}%</output>
+                            </label>
+                            <p className="mt-1 text-xs text-ink2">Kéo lên nếu ảnh sáng hoặc nhiều chi tiết làm số khó đọc. Màu chữ tự đổi theo độ tối.</p>
+                            <button type="button" className="mt-2 text-sm font-medium text-muted underline-offset-2 hover:underline" onClick={onRemove}>Bỏ ảnh, dùng nền mặc định</button>
+                        </>
+                    )}
+
+                    <p className="ck-head">Bạn nhỏ bám đồng hồ</p>
+                    <div className="ck-buddies" role="radiogroup" aria-label="Bạn nhỏ bám đồng hồ">
+                        {CLOCK_BUDDIES.map(b => (
+                            <button key={b.key} type="button" role="radio" aria-checked={kind === b.key} className={'ck-face-opt' + (kind === b.key ? ' is-on' : '')} onClick={() => saveClock({ buddy: b.key })}>
+                                <span {...bg()}>
+                                    <ClockFace text="12:34" face={style.face} look={look} pet={demoPet(b.key)} />
+                                </span>
+                                <small>{b.label}</small>
+                            </button>
+                        ))}
+                    </div>
+                    <p className="mt-2 text-xs text-ink2">Đổi con vật chỉ đổi ngoại hình: trạng thái no/đói và phụ kiện cấp bậc vẫn giữ nguyên.</p>
+                    {kind !== 'none' && (
+                        <>
+                            <label className="ck-switch">
+                                <span className="min-w-0">
+                                    <b className="block font-semibold">Phụ kiện theo Cấp bản sắc</b>
+                                    <span className="text-xs text-ink2">Bạn đang ở Cấp {realLevel}: {PET_ACC_NAMES[Math.min(4, realLevel)]}. Cấp 2 kính tròn, Cấp 3 tai nghe, Cấp 4 mũ tốt nghiệp.</span>
+                                </span>
+                                <input type="checkbox" checked={style.acc} onChange={(e) => { setLvl(null); saveClock({ acc: e.target.checked }); }} />
+                            </label>
+                            <div className="ck-moods" role="radiogroup" aria-label="Xem thử phụ kiện">
+                                <span className="self-center text-xs font-semibold text-muted">Xem thử phụ kiện:</span>
+                                {[1, 2, 3, 4].map(n => (
+                                    <button key={n} type="button" role="radio" aria-checked={level === n} className={'ck-mood' + (level === n ? ' is-on' : '')} onClick={() => setLvl(n)}>
+                                        Cấp {n}{n > realLevel ? ' · chưa mở' : ''}
+                                    </button>
+                                ))}
+                            </div>
+                        </>
+                    )}
 
                     <p className="ck-head">Kiểu số</p>
                     <div className="ck-faces" role="radiogroup" aria-label="Kiểu số đồng hồ">
                         {CLOCK_FACES.map(f => (
                             <button key={f.key} type="button" role="radio" aria-checked={style.face === f.key} className={'ck-face-opt' + (style.face === f.key ? ' is-on' : '')} onClick={() => saveClock({ face: f.key })}>
-                                <span className={'ck-face-demo' + (photo ? ' has-photo photo-' + photo.tone : '') + ' tier-' + tier} style={photo ? { backgroundImage: 'url("' + photo.src + '")' } : undefined}>
-                                    <ClockFace text="12:34" face={f.key} look={clockLook({ face: f.key, color: style.color }, tier, photo)} buddy={style.buddy} />
+                                <span {...bg()}>
+                                    <ClockFace text="12:34" face={f.key} look={clockLook({ face: f.key, color: style.color }, tier, shown)} pet={demoPet(kind)} />
                                 </span>
                                 <small>{f.label}</small>
-                            </button>
-                        ))}
-                    </div>
-
-                    <p className="ck-head">Bạn nhỏ bám đồng hồ</p>
-                    <div className="ck-buddies" role="radiogroup" aria-label="Bạn nhỏ bám đồng hồ">
-                        {CLOCK_BUDDIES.map(b => (
-                            <button key={b.key} type="button" role="radio" aria-checked={style.buddy === b.key} className={'ck-face-opt' + (style.buddy === b.key ? ' is-on' : '')} onClick={() => saveClock({ buddy: b.key })}>
-                                <span className={'ck-face-demo' + (photo ? ' has-photo photo-' + photo.tone : '') + ' tier-' + tier} style={photo ? { backgroundImage: 'url("' + photo.src + '")' } : undefined}>
-                                    <ClockFace text="12:34" face={style.face} look={look} buddy={b.key} />
-                                </span>
-                                <small>{b.label}</small>
                             </button>
                         ))}
                     </div>
@@ -5209,6 +5891,7 @@
                         ))}
                     </div>
                     <p className="mt-2 text-xs text-ink2">Tự động: chữ trắng trên nền tối, chữ đậm trên nền sáng.</p>
+                    </div>
                 </Modal>
             );
         };
@@ -5255,7 +5938,9 @@
             const photo = useHeroPhoto();
             const clockStyle = useClockStyle();
             const tierNow = skinOf(useFund(), useSkinPref());
-            const look = clockLook(clockStyle, tierNow, photo);
+            const shown = dimPhoto(photo, clockStyle.dim);
+            const look = clockLook(clockStyle, tierNow, shown);
+            const petNow = usePetNow();
             const [studio, setStudio] = useState(false);
             const [photoBusy, setPhotoBusy] = useState(false);
             const pickPhoto = async (file) => {
@@ -5264,7 +5949,7 @@
                 try {
                     const next = await preparePhoto(file);
                     savePhoto(next);
-                    if (toast) toast(next.tone === 'dark' ? 'Đã đặt ảnh nền · ảnh tối nên dùng chữ trắng' : 'Đã đặt ảnh nền · ảnh sáng nên dùng chữ đậm', 'success');
+                    if (toast) toast(dimPhoto(next, clockStyle.dim).tone === 'dark' ? 'Đã đặt ảnh nền · chữ trắng cho dễ đọc' : 'Đã đặt ảnh nền · chữ đậm cho dễ đọc', 'success');
                 } catch (err) {
                     if (toast) toast((err && err.message) || 'Chưa đặt được ảnh nền.', 'error');
                 } finally {
@@ -5306,10 +5991,15 @@
             const lateBy = Math.max(0, nowMin - startMin);
             const lateText = lateBy >= 60 ? Math.floor(lateBy / 60) + ' giờ' + (lateBy % 60 ? ' ' + (lateBy % 60) + ' phút' : '') : lateBy + ' phút';
             const onTimeLeft = live && !late ? Math.max(0, (startMin + 30) * 60000 - (nowD.getTime() - new Date(nowD).setHours(0, 0, 0, 0))) : 0;
+            /* Pet đồng hành: trạng thái tính chung ở App (PetCtx). Lúc pet bỏ đi, bấm bát/mảnh giấy là vào học luôn. */
+            const petState = petNow.state;
+            const petAction = () => (live ? onStart(false) : cardCount ? onStudyNow() : onAddFirst());
+            const pet = petNow.enabled ? { kind: petNow.kind, mood: petState.mood, level: petNow.level, hearts: petState.hearts, message: petState.message, interactive: true, autoSay: true, onAction: petAction } : null;
+            const lightText = shown ? shown.tone === 'dark' : tierNow !== 'ivory';
             return (
                 <>
-                <section className={'cmd-card flex flex-col p-5 text-left sm:p-7' + (photo ? ' has-photo photo-' + photo.tone : '')} aria-label="Ca học hôm nay" onPointerMove={moveSpot}
-                    style={photo ? { backgroundImage: 'url("' + photo.src + '")' } : undefined}>
+                <section className={'cmd-card flex flex-col p-5 text-left sm:p-7' + (shown ? ' has-photo photo-' + shown.tone : '')} aria-label="Ca học hôm nay" onPointerMove={moveSpot}
+                    style={shown ? { backgroundImage: 'url("' + shown.src + '")', '--bg-dim': clockStyle.dim / 100 } : undefined}>
                     <ChronoDial />
                     <FlowLines />
                     {photo && <span className="cmd-photo-scrim" aria-hidden="true" />}
@@ -5332,7 +6022,7 @@
                         </p>
                         {live ? (
                             <>
-                                <h2 className="mt-2 text-3xl font-extrabold leading-tight tracking-tight sm:text-4xl">{late ? 'Vẫn kịp gỡ ca này' : 'Đến giờ học rồi'}</h2>
+                                <h2 className="mt-2 text-3xl font-extrabold leading-tight tracking-tight sm:text-4xl"><PetPerch pet={pet} light={lightText}>{late ? 'Vẫn kịp gỡ ca này' : 'Đến giờ học rồi'}</PetPerch></h2>
                                 <p className="mt-2 text-sm leading-6 text-indigo-100">
                                     {late
                                         ? 'Ca bắt đầu lúc ' + Plan.hhmmOf(startMin) + '. Học bù bản rút gọn ' + full + ' thẻ là xong ca.'
@@ -5340,7 +6030,7 @@
                                 </p>
                             </>
                         ) : (
-                            <p className="tnum mt-1 text-5xl font-semibold tracking-tight sm:text-6xl" role="timer" aria-live="off" aria-label={big}><ClockFace text={big} face={clockStyle.face} look={look} big buddy={clockStyle.buddy} /></p>
+                            <p className="tnum mt-1 text-5xl font-semibold tracking-tight sm:text-6xl" role="timer" aria-live="off" aria-label={big}><ClockFace text={big} face={clockStyle.face} look={look} big pet={pet} /></p>
                         )}
                         {cur.kind === 'ALL_DONE' && firstSlot && <p className="mt-1 text-sm text-indigo-100">Ca đầu tiên ngày mai lúc {firstSlot.time}. Không nợ thẻ sang mai.</p>}
                         <div className="mt-6 lg:mt-auto lg:pt-6"><SlotPath slots={plan.slots} activeId={slot && slot.id} /></div>
@@ -5385,7 +6075,7 @@
                         </dl></div>
                     </div>
                 </section>
-                {studio && <ClockStudio photo={photo} tier={tierNow} busy={photoBusy} sample={big && /\d/.test(big) ? big : '12:34:56'} onPick={pickPhoto}
+                {studio && <ClockStudio photo={photo} tier={tierNow} busy={photoBusy} pet={petState} sample={big && /\d/.test(big) ? big : '12:34:56'} onPick={pickPhoto}
                     onRemove={() => { savePhoto(null); if (toast) toast('Đã bỏ ảnh nền', 'info'); }} onClose={() => setStudio(false)} />}
                 </>
             );
@@ -5525,6 +6215,7 @@
             const [editOpen, setEditOpen] = useState(() => takeGo('plan'));
             const [starterHidden, setStarterHidden] = useState(() => !!Store.prefs.get('starterHidden', false));
             const editRef = useRef(null);
+            const petT = usePetNow();
             useEffect(() => { if (editOpen && editRef.current) editRef.current.scrollIntoView({ block: 'start', behavior: 'smooth' }); }, [planReady, editOpen]);
             if (!planReady || !plan) return <p className="text-center text-muted py-16">Đang mở ngày hôm nay…</p>;
             const slot = cur.slot;
@@ -5552,7 +6243,7 @@
                 return (
                     <div className="max-w-3xl mx-auto">
                         <div className="mb-4 flex flex-wrap items-center gap-2 rounded-2xl bg-[#312E81] px-2 py-2 text-sm text-white shadow-sm sm:px-3" role="status">
-                            <button type="button" onClick={closeSession} className="inline-flex min-h-[40px] items-center gap-1.5 rounded-xl bg-white/15 px-3 font-semibold hover:bg-white/25"><Icon name="back" size={15} /> Tổng quan</button>
+                            <button type="button" onClick={() => (petT ? petT.askQuit(closeSession) : closeSession())} className="inline-flex min-h-[40px] items-center gap-1.5 rounded-xl bg-white/15 px-3 font-semibold hover:bg-white/25"><Icon name="back" size={15} /> Tổng quan</button>
                             {inSlot && <span className="ml-1 h-2.5 w-2.5 rounded-full bg-[#F87171] pulse-rec" aria-hidden="true" />}
                             <b className="min-w-0 truncate">{inSlot ? 'Ca ' + slot.id + ' · ' + slot.anchorLabel + (session.lean ? ' · Chạm đáy' : '') : session.title}</b>
                             {inSlot && <span className="ml-auto hidden items-center gap-1.5 pr-2 text-indigo-200 sm:inline-flex"><Icon name="lock" size={13} /> Lịch hôm nay đã khóa</span>}
@@ -7673,6 +8364,7 @@
                         <div className={'mx-auto w-14 h-14 rounded-2xl flex items-center justify-center mb-4 ' + (safe ? 'bg-success text-white' : 'bg-warn-soft text-warn')}><Icon name={safe ? 'shield' : 'clock'} size={28} /></div>
                         <h2 className="text-2xl font-bold text-flow">{run.kind !== 'ca' ? 'Đã nhồi sạch câu yếu' : safe ? 'Ca này an toàn — Bạn đang đúng tiến độ qua môn!' : 'Ca này xong — còn ' + status.behind + ' ca để bắt kịp tiến độ'}</h2>
                         <p className="text-ink2 mt-2 tnum">Đúng ngay lần đầu {st.firstTryCorrect}/{st.total} · {Plan.fmtCountdown(st.elapsedMs)}</p>
+                        <div className="mx-auto mt-4 max-w-sm"><PetSummary /></div>
                         {status && <p className="text-sm text-muted mt-1 tnum">Đã xong {status.done}/{status.total} ca · thi sau {fmtLeft(status.msLeft)}</p>}
                         <div className="flex flex-wrap justify-center gap-2 mt-6">
                             <button type="button" className="btn btn-primary" onClick={startCa} data-autofocus><Icon name="play" /> Làm tiếp 1 ca</button>
@@ -7690,6 +8382,7 @@
                             <h1 className="text-xl font-bold text-flow">{[pack.code, pack.name].filter(Boolean).join(' — ')}</h1>
                             {pack.desc && String(pack.desc).trim() ? <p className="text-sm text-ink2 text-flow mt-1">{pack.desc}</p> : null}
                         </div>
+                        <PetLobby compact />
                     </div>
 
                     {(!exam || replan) ? (
@@ -8074,6 +8767,7 @@
                             <span><span className="font-semibold text-sm block">Thông báo khi đến giờ</span><span className="text-xs text-ink2">{perm === 'denied' ? 'Bị chặn trong cài đặt trình duyệt' : 'Báo khi một ca học bắt đầu'}</span></span>
                             <button type="button" className="btn btn-secondary btn-sm" disabled={perm !== 'default'} onClick={() => Notification.requestPermission().then(setPerm)}><Icon name="bell" size={14} /> {permLabel}</button>
                         </div>
+                        <PetToggle />
                         {obsidianOf(settingsFund) && <SkinPicker />}
                         <button type="button" className="hub-row" onClick={() => { onClose(); openBilling('code'); }}>
                             <span className="bill-stat-ic"><Icon name="gem" size={18} /></span>
@@ -8826,6 +9520,7 @@
             }, [loaded, planReady]);
 
             const cur = plan ? Plan.currentSlot(plan.slots, new Date(now)) : { kind: 'NONE', slot: null };
+            const petNow = usePetEngine({ plan, now, tier: tierAttr, toast, setPlan });
             const live = plan && plan.date === Plan.dayKeyOf(new Date(now)) && (cur.kind === 'ON_TIME_ACTIVE' || cur.kind === 'LATE_RECOVERY');
             const liveLimit = live ? Plan.cardLimit(cur.slot, cur.kind, minimal) : 0;
 
@@ -9027,6 +9722,7 @@
             };
 
             return (
+                <PetCtx.Provider value={petNow}>
                 <div className="app-root min-h-screen flex flex-col" data-tier={tierAttr}>
                     <a href="#main" className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[70] btn btn-primary">Bỏ qua tới nội dung</a>
                     <header className={'sticky top-0 z-50 border-b ' + (darkSkin ? 'obsidian-head' : luxSkin ? 'ivory-head' : 'border-line')} style={luxSkin ? undefined : { background: '#E2E8F0' }}>
@@ -9186,8 +9882,10 @@
                     {welcome && obsidian && (
                         <ObsidianWelcome fund={fund} onSkip={() => setWelcome(false)} onExplore={() => { setWelcome(false); setMemberOpen(true); }} />
                     )}
+                    {petNow.quitModal}
                     <Toasts list={toasts} />
                 </div>
+                </PetCtx.Provider>
             );
         };
 
