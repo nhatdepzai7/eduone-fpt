@@ -1054,7 +1054,8 @@
         .ck-head { margin: 18px 0 8px; font-size: 11px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
         .ck-drop { display: flex; align-items: center; gap: 12px; padding: 12px; border-radius: 14px; border: 1.5px dashed #C7D2FE; background: #F8FAFF; color: #4F46E5; transition: border-color .15s ease, background .15s ease; }
         .ck-drop.is-drag { border-color: #4F46E5; background: #EEF2FF; }
-        @media (max-width: 479px) { .ck-drop { flex-wrap: wrap; } .ck-drop .btn { width: 100%; justify-content: center; } }
+        .ck-drop-acts { display: flex; flex-wrap: wrap; gap: 8px; flex-shrink: 0; }
+        @media (max-width: 479px) { .ck-drop { flex-wrap: wrap; } .ck-drop-acts { width: 100%; } .ck-drop-acts .btn { flex: 1 1 0; justify-content: center; } }
         .ck-faces { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
         .ck-face-opt { display: flex; flex-direction: column; gap: 4px; padding: 4px 4px 6px; border-radius: 14px; border: 1px solid var(--border); background: var(--surface); text-align: center; }
         .ck-face-opt:hover { border-color: #A5B4FC; }
@@ -5621,6 +5622,7 @@
         const Pet = ({ kind, mood, level, message, interactive, autoSay, hearts, onAction, still }) => {
             /* Lời thoại hiện sẵn; bấm pet 1 lần để tắt, 1 lần nữa để bật (nhớ lựa chọn). */
             const [say, setSay] = useState(() => {
+                if (!autoSay) return false;
                 try { return localStorage.getItem('edu.petSay') !== 'off'; } catch (e) { return true; }
             });
             const [boop, setBoop] = useState(0);
@@ -5647,7 +5649,7 @@
             }, [interactive]);
             const toggleSay = () => setSay(v => {
                 const next = !v;
-                { try { localStorage.setItem('edu.petSay', next ? 'on' : 'off'); } catch (e) { } }
+                if (autoSay) { try { localStorage.setItem('edu.petSay', next ? 'on' : 'off'); } catch (e) { } }
                 return next;
             });
             useEffect(() => {
@@ -6172,9 +6174,16 @@
                             <b className="block text-sm text-ink">{photo ? 'Đổi ảnh khác' : 'Thêm ảnh của bạn'}</b>
                             <span className="text-xs text-ink2">Chọn từ máy tính hoặc thư viện ảnh điện thoại. Trên máy tính có thể kéo thả ảnh vào đây.</span>
                         </span>
-                        <button type="button" className="btn btn-secondary btn-sm shrink-0" disabled={busy} onClick={() => input.current && input.current.click()}>
-                            {busy ? <Icon name="loader" size={14} className="animate-spin" /> : <Icon name="upload" size={14} />} Chọn ảnh
-                        </button>
+                        <span className="ck-drop-acts">
+                            <button type="button" className="btn btn-secondary btn-sm" disabled={busy} onClick={() => input.current && input.current.click()}>
+                                {busy ? <Icon name="loader" size={14} className="animate-spin" /> : <Icon name="upload" size={14} />} {photo ? 'Đổi ảnh' : 'Chọn ảnh'}
+                            </button>
+                            {photo && (
+                                <button type="button" className="btn btn-danger btn-sm" disabled={busy} onClick={onRemove} title="Xóa ảnh, về nền mặc định">
+                                    <Icon name="trash" size={14} /> Xóa ảnh
+                                </button>
+                            )}
+                        </span>
                         <input ref={input} type="file" accept="image/*" className="sr-only" tabIndex={-1} aria-hidden="true"
                             onChange={(e) => { const f = e.target.files && e.target.files[0]; e.target.value = ''; if (f) onPick(f); }} />
                     </div>
@@ -6186,7 +6195,6 @@
                                 <output>{style.dim}%</output>
                             </label>
                             <p className="mt-1 text-xs text-ink2">Kéo lên nếu ảnh sáng hoặc nhiều chi tiết làm số khó đọc. Màu chữ tự đổi theo độ tối.</p>
-                            <button type="button" className="mt-2 text-sm font-medium text-muted underline-offset-2 hover:underline" onClick={onRemove}>Bỏ ảnh, dùng nền mặc định</button>
                         </>
                     )}
 
@@ -6430,7 +6438,7 @@
                     </div>
                 </section>
                 {studio && <ClockStudio photo={photo} tier={tierNow} busy={photoBusy} pet={petState} sample={big && /\d/.test(big) ? big : '12:34:56'} onPick={pickPhoto}
-                    onRemove={() => { savePhoto(null); if (toast) toast('Đã bỏ ảnh nền', 'info'); }} onClose={() => setStudio(false)} />}
+                    onRemove={() => { savePhoto(null); if (toast) toast('Đã xóa ảnh, đồng hồ về nền mặc định', 'info'); }} onClose={() => setStudio(false)} />}
                 </>
             );
         };
