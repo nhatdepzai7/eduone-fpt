@@ -1071,8 +1071,10 @@
         .crop-zoom input { flex: 1; accent-color: #4F46E5; }
         .ck-drop.is-locked { border-style: solid; border-color: #E9DDBF; background: linear-gradient(135deg, #FFFBF0, #F8F4EA); color: #9A7B36; }
         .ck-lock-tag { display: inline-flex; align-items: center; gap: 3px; margin-left: 6px; padding: 1px 7px; border-radius: 999px; font-size: 10px; letter-spacing: .04em; color: #8A6A22; background: #F6ECD2; vertical-align: 1px; }
+        .ck-drop.has-photo { flex-wrap: wrap; }
+        .ck-drop.has-photo .ck-drop-acts { width: 100%; padding-left: 34px; }
         .ck-drop-acts { display: flex; flex-wrap: wrap; gap: 8px; flex-shrink: 0; }
-        @media (max-width: 479px) { .ck-drop { flex-wrap: wrap; } .ck-drop-acts { width: 100%; } .ck-drop-acts .btn { flex: 1 1 0; justify-content: center; } }
+        @media (max-width: 479px) { .ck-drop { flex-wrap: wrap; } .ck-drop-acts, .ck-drop.has-photo .ck-drop-acts { width: 100%; padding-left: 0; } .ck-drop-acts .btn { flex: 1 1 0; justify-content: center; } }
         .ck-faces { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
         .ck-face-opt { display: flex; flex-direction: column; gap: 4px; padding: 4px 4px 6px; border-radius: 14px; border: 1px solid var(--border); background: var(--surface); text-align: center; }
         .ck-face-opt:hover { border-color: #A5B4FC; }
@@ -6332,7 +6334,7 @@
                             </span>
                         </div>
                     ) : (
-                    <div className={'ck-drop' + (drag ? ' is-drag' : '')} onDragOver={(e) => { e.preventDefault(); setDrag(true); }} onDragLeave={() => setDrag(false)} onDrop={onDrop}>
+                    <div className={'ck-drop' + (drag ? ' is-drag' : '') + (photo ? ' has-photo' : '')} onDragOver={(e) => { e.preventDefault(); setDrag(true); }} onDragLeave={() => setDrag(false)} onDrop={onDrop}>
                         <Icon name="image" size={22} />
                         <span className="min-w-0 flex-1 text-left">
                             <b className="block text-sm text-ink">{photo ? 'Đổi ảnh khác' : 'Thêm ảnh của bạn'}</b>
