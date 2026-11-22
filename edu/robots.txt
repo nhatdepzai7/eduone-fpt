@@ -1,0 +1,22 @@
+# FPass (fpass.vn): chỉ trang chủ được index, Web App /app không index.
+User-agent: *
+Allow: /
+Disallow: /app
+Disallow: /admin
+
+User-agent: Googlebot
+Allow: /
+Disallow: /app
+Disallow: /admin
+
+User-agent: Google-Extended
+Allow: /
+Disallow: /app
+Disallow: /admin
+
+User-agent: OAI-SearchBot
+Allow: /
+Disallow: /app
+Disallow: /admin
+
+Sitemap: https://fpass.vn/sitemap.xml
